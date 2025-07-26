@@ -1,0 +1,48 @@
+<html>
+	<style>
+		#green {
+			background-color: green;
+		}
+		#red {
+			background-color: red;
+		}
+		
+		.tooltip {
+		  position: relative;
+		  display: inline-block;
+		  cursor: pointer;
+		}
+
+		.tooltip .tooltiptext {
+		  visibility: hidden;
+		  width: 140px;
+		  background-color: black;
+		  color: #fff;
+		  text-align: center;
+		  border-radius: 6px;
+		  padding: 6px;
+		  position: absolute;
+		  z-index: 1;
+		  top: 125%; /* Position above the span */
+		  left: 50%;
+		  transform: translateX(-50%);
+		  opacity: 0;
+		  transition: opacity 0.3s;
+		}
+
+		.tooltip:hover .tooltiptext {
+		  visibility: visible;
+		  opacity: 1;
+		}
+
+	</style>
+
+	<body>
+		<span id="green" class="tooltip">
+			This
+			<span class="tooltiptext">
+				Green Token
+			</span>
+		</span> <span id="red">is</span>
+	</body>
+</html>
