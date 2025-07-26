@@ -7,8 +7,8 @@
 	string			= '"', ( err_eof_before_closing_string | err_eoln_before_closing_string | '\"' | !'"')*, '"';
 	boolean			= 'true' | 'false';
 	null			= 'null';
-	block_start		= '{';
-	block_end		= '}';
+	object_start	= '{';
+	object_end		= '}';
 	kv_separator	= ':';
 	array_start		= '[';
 	array_end		= ']';

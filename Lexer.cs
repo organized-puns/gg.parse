@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace gg.parse
 {
@@ -118,18 +119,20 @@ namespace gg.parse
             }
         }
 
-        public string AnnotateTextUsingHtml(string text, List<ParseResult> tokens, List<LexerError> errors, Dictionary<string, string> colorLookup)
+        public string AnnotateTextUsingHtml(string text, List<ParseResult> tokens, List<LexerError> errors, 
+            Dictionary<string, string> styleLookup)
         {
             var builder = new StringBuilder();
 
             builder.AppendLine("<html>");
             builder.AppendLine("    <style>");
-            builder.AppendLine("        body { font-family: Arial, sans-serif; }");
+            builder.AppendLine("        body { font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', 'Cascadia Code', monospace;  font-size: 14px; line-height: 1.6; background-color: #222823 }");
+            builder.AppendLine("        .indent { white-space: pre; }");
             builder.AppendLine("        /* Tokens and their corresponding colors. */");
 
-            foreach (var kvp in colorLookup)
+            foreach (var kvp in styleLookup)
             {
-                builder.AppendLine($"        .{kvp.Key} {{ background-color: {kvp.Value}; }}");
+                builder.AppendLine($"        .{kvp.Key} {{ {kvp.Value} }}");
             }
 
             builder.AppendLine("    </style>");
@@ -148,12 +151,12 @@ namespace gg.parse
                 {
                     if (parseResult.Offset > outputIndex)
                     {
-                        AppendNTimes(builder, " ", parseResult.Offset - outputIndex);
+                        builder.Append(AddHtmlWhitespace(text.Substring(outputIndex, parseResult.Offset - outputIndex)));
                         outputIndex = parseResult.Offset;
                     }
 
                     builder.Append($"<span class=\"{parseResult.Rule.Name}\">");
-                    builder.Append(text.AsSpan(parseResult.Offset, parseResult.Length));
+                    builder.Append(AddHtmlWhitespace(text.Substring(parseResult.Offset, parseResult.Length)));
 
                     tokenIndex++;
                     outputIndex += parseResult.Length; 
@@ -162,12 +165,12 @@ namespace gg.parse
                 {
                     if (error.Offset > outputIndex)
                     {
-                        AppendNTimes(builder, " ", error.Offset - outputIndex);
+                        builder.Append(AddHtmlWhitespace(text.Substring(outputIndex, error.Offset - outputIndex)));
                         outputIndex = error.Offset;
                     }
 
                     builder.Append($"<span class=\"{ErrorTokenName}\">");
-                    builder.Append(text.AsSpan(error.Offset, error.Length));
+                    builder.Append(AddHtmlWhitespace(text.Substring(error.Offset, error.Length)));
                     errorIndex++;
                     outputIndex += error.Length;
                 }
@@ -179,6 +182,13 @@ namespace gg.parse
             builder.AppendLine("</html>");
 
             return builder.ToString();
+        }
+
+        private static string AddHtmlWhitespace(string text)
+        {
+            return "<span class=\"indent\">"
+                    + text.Replace("\n", "<br/>\n").Replace("\r", "").Replace("\t", "   ")
+                    + "</span>";
         }
 
         private object TakeNext(List<ParseResult> tokens, int tokenIndex, List<LexerError> errors, int errorIndex)

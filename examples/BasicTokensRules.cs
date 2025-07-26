@@ -40,7 +40,7 @@ namespace gg.parse.examples
             return new CountRule(name, digitRule ?? CreateDigitRule(), 1, 0);
         }
 
-        public static IRule CreateIntegerRule(string name = "Integer", IRule? digitStringRule = null, IRule? signRule = null)
+        public static IRule IntegerRule(string name = "Integer", IRule? digitStringRule = null, IRule? signRule = null)
         {
             var digitString = digitStringRule  ?? CreateDigitStringRule();
             var optionalSign = CreateZeroOrOne(signRule ?? CreateSignRule(), "OptionalSign");
@@ -56,7 +56,7 @@ namespace gg.parse.examples
         /// <param name="digitStringRule"></param>
         /// <param name="signRule"></param>
         /// <returns></returns>
-        public static IRule CreateSimpleFloatRule(string name = "SimpleFloat", IRule? digitStringRule = null, IRule? signRule = null)
+        public static IRule SimpleFloatRule(string name = "SimpleFloat", IRule? digitStringRule = null, IRule? signRule = null)
         {
             var digitString = digitStringRule ?? CreateDigitStringRule();
             var optionalSign = CreateZeroOrOne(signRule ?? CreateSignRule(), "OptionalSign");
@@ -64,7 +64,17 @@ namespace gg.parse.examples
             return new SequenceRule(name, optionalSign, digitString, decimalRule);
         }
 
-        public static IRule CreateStringRule(string name = "String")
+        public static IRule FloatRule(string name = "Float", IRule? digitStringRule = null, IRule? signRule = null)
+        {
+            var digitString = digitStringRule ?? CreateDigitStringRule();
+            var optionalSign = CreateZeroOrOne(signRule ?? CreateSignRule(), "OptionalSign");
+            var decimalRule = new SequenceRule("DecimalPoint", new LiteralRule("."), digitString);
+            var exponentCharacter = new OneOfRule("ExponentCharacter", new LiteralRule("e"), new LiteralRule("E"));
+            var exponentRule = new SequenceRule("Exponent", exponentCharacter, optionalSign, digitString);
+            return new SequenceRule(name, optionalSign, digitString, decimalRule, CreateZeroOrOne(exponentRule));
+        }
+
+        public static IRule StringRule(string name = "String")
         {
             var escapedQuote = new LiteralRule("\\\"");
             var notQuote = new NotRule(new LiteralRule("\""));
