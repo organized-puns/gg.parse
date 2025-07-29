@@ -1,5 +1,13 @@
 ﻿namespace gg.parse.tokenizer
 {
+    public enum TokenAction
+    {
+        GenerateToken,
+        IgnoreToken,
+        Error
+    }
+
+
     public abstract class TokenFunction(string name, int id, TokenAction action = TokenAction.GenerateToken)
     {
         public string Name { get; init; } = name;

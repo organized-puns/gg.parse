@@ -47,3 +47,35 @@ rules needed:
  * Eof rule, matches when index >= text.length
  * Fatal rule, throws an exception when matched
  * Error rule, reports an error, the lexer should capture this error and continue processing
+
+
+parser:
+
+```
+	character_range = "<", character, "..", character, ">";
+	character_set = "{", character+, "}";
+	any_character = "any" | "_";
+
+	basic_rules = literal | character_range | character_set | any_character | identifier;  
+	group = "(", expression, ")";
+	
+	match_not = ("!" | "not "), unary;
+
+	unary = basic_rules | group | match_not
+
+	match_sequence = unary, "," unary, ("," unary)*;
+	match_one_of = unary, "|", unary, ("|", unary)*;
+
+	match_count = unary, "[", integer, ",", integer, "]";
+	match_zero_or_more = unary, "*";
+	match_zero_or_one = unary, "?";
+	match_one_or_more= unary, "+";
+		
+	match_rules = match_sequence | match_one_of | match_count | match_zero_or_more | match_zero_or_one | match_one_or_more | match_not
+
+	expression = basic_rules | group | match_rules
+
+	action = "~";
+	rule_declaration = action*, identifier;
+	rule = rule_declaration, "=", expression, ";"
+```
