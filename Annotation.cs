@@ -17,6 +17,12 @@ namespace gg.parse
     {
         public Range Range { get; init; } = range;
         
+        public int Start => Range.Start;
+
+        public int End => Range.Start + Range.Length;
+
+        public int Length => Range.Length;
+
         public AnnotationCategory Category { get; init; } = type;
         
         public int FunctionId { get; init; } = id;

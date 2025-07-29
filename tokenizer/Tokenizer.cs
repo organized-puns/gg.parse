@@ -1,15 +1,26 @@
-﻿namespace gg.parse.tokenizer
+﻿using gg.core.util;
+
+namespace gg.parse.tokenizer
 {    
     public class Tokenizer
     {
+        public static readonly string ErrNoMatch = "Err_No_Match";
+
         private readonly List<TokenFunction> _functions = [];
+        private readonly List<TokenFunction> _errors = [];
 
-        public TokenFunction NoMatchError { get; set; } = 
-            new MarkErrorFunction("Err_No_Match", -1, "(Error): Cannot match token to text at the specified location");
-
+        public TokenFunction NoMatchError { get; init; }
+            
         public int NextFunctionId => _functions.Count;
 
         public TokenFunction this[int id] => _functions[id];
+
+        public Tokenizer()
+        {
+            NoMatchError = AddError(new MarkErrorFunction(ErrNoMatch, -1, "(Error): Cannot match token to text at the specified location"));
+        }
+
+
 
         public List<Annotation> Tokenize(string text, int start = 0)
         {
@@ -31,11 +42,11 @@
             {
                 var annotation = TryParse(text, offset);
 
-                if (annotation != null)
+                if (annotation != null && annotation.Category == AnnotationCategory.Token)
                 {
                     if (errorStart >= 0)
                     {
-                        result.Add(new Annotation(AnnotationCategory.Error, NoMatchError.Id, new Range(errorStart, offset - errorStart)));
+                        AddNoMatch(result, errorStart, offset - errorStart);
                         errorStart = -1;
                     }
 
@@ -59,28 +70,47 @@
             // are we still in an error state?
             if (errorStart >= 0)
             {
-                result.Add(new Annotation(AnnotationCategory.Error, NoMatchError.Id, new Range(errorStart, offset - errorStart)));
+                AddNoMatch(result, errorStart, offset - errorStart);
             }
 
             return result;
         }
 
+        private void AddNoMatch(List<Annotation> result, int start, int length)
+        {
+            result.Add(new Annotation(AnnotationCategory.Error, NoMatchError.Id, new Range(start, length)));
+        }
+
         public T GetFunction<T>(int id) where T : TokenFunction
         {
-            if (id < 0 || id >= _functions.Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "Invalid configuration ID.");
-            }
+            Contract.Requires(id >= 0, "Configuration ID must be non-negative.");
 
             return (T) _functions[id];
         }
 
         public TokenFunction AddFunction(TokenFunction function)
         {
-            _functions.Add(function);
+            Contract.Requires(_functions.All(f => f.Name != function.Name), 
+                                $"Function with name '{function.Name}' already exists.");
+
             function.Id = _functions.Count;
+            _functions.Add(function);
             return _functions[^1];
         }
+
+        public TokenFunction FindFunction(int id) => _functions[id];
+
+        public TokenFunction AddError(TokenFunction function)
+        {
+            Contract.Requires(_errors.All(f => f.Name != function.Name),
+                                $"Function with name '{function.Name}' already exists.");
+
+            function.Id = _errors.Count;
+            _errors.Add(function);
+            return _errors[^1];
+        }
+
+        public TokenFunction FindError(int id) => _errors[id];
 
         public Annotation? TryParse(string text, int offset)
         {

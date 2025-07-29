@@ -121,7 +121,7 @@
                 index += result.Range.Length;
             }
 
-            return new(0, index - start);
+            return new(start, index - start);
         }
     }
 }

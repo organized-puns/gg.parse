@@ -1,6 +1,6 @@
 ﻿namespace gg.parse
 {
-    public struct Range(int start, int length) 
+    public readonly struct Range(int start, int length) 
     {
         public int Start { get; init; } = start;
         
@@ -10,6 +10,5 @@
         {
             return $"Range(Start: {Start}, Length: {Length})";
         }
-
     }
 }
