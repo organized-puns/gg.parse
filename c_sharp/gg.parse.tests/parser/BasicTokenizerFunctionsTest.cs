@@ -1,4 +1,5 @@
-﻿using gg.parse.parser;
+﻿using gg.parse.basefunctions;
+using gg.parse.parser;
 
 namespace gg.parse.tests.parser
 {
@@ -123,6 +124,106 @@ namespace gg.parse.tests.parser
         {
             var func = BaseTokenizerFunctions.Integer();
             var input = "+".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Float_MatchesSimpleFloat()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "3.14".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Range.Start);
+            Assert.AreEqual(input.Length, result.Range.Length);
+        }
+
+        [TestMethod]
+        public void Float_MatchesNegativeFloat()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "-2.718".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Range.Start);
+            Assert.AreEqual(input.Length, result.Range.Length);
+        }
+
+        [TestMethod]
+        public void Float_MatchesPositiveSignFloat()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "+0.001".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Range.Start);
+            Assert.AreEqual(input.Length, result.Range.Length);
+        }
+
+        [TestMethod]
+        public void Float_MatchesFloatWithExponent()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "6.022e23".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Range.Start);
+            Assert.AreEqual(input.Length, result.Range.Length);
+        }
+
+        [TestMethod]
+        public void Float_MatchesFloatWithExponentAndSign()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "-1.6E-19".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Range.Start);
+            Assert.AreEqual(input.Length, result.Range.Length);
+        }
+
+        [TestMethod]
+        public void Float_DoesNotMatchInteger()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "12345".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Float_DoesNotMatchMissingFraction()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "3.".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Float_DoesNotMatchMissingDot()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = "314".ToCharArray();
+            var result = func.Parse(input, 0);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Float_DoesNotMatchMissingIntegerPart()
+        {
+            var func = BaseTokenizerFunctions.Float();
+            var input = ".123".ToCharArray();
             var result = func.Parse(input, 0);
 
             Assert.IsNull(result);

@@ -1,5 +1,5 @@
 ﻿
-namespace gg.parse
+namespace gg.parse.basefunctions
 {
     public enum AnnotationDataCategory
     {
@@ -8,7 +8,7 @@ namespace gg.parse
         Warning
     }
 
-    public class AnnotationBase(AnnotationDataCategory category, int functionId, Range range)
+    public class AnnotationBase(AnnotationDataCategory category, int functionId, Range range) : IComparable
     {
         public Range Range { get; init; } = range;
         
@@ -21,10 +21,20 @@ namespace gg.parse
         public AnnotationDataCategory Category { get; init; } = category;
 
         /// <summary>
-        /// Function which produced this annotation. .
+        /// Function which produced this annotation.
         /// </summary>
         public int FunctionId { get; init; } = functionId;
-        
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is AnnotationBase other)
+            {
+                return FunctionId.CompareTo(other.Range.Start);
+            }
+
+            return 0;
+        }
+
         public override string ToString()
         {
             return $"Annotation(Type: {Category}, Id: {FunctionId}, Range: {Range})";

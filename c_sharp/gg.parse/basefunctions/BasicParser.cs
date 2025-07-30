@@ -14,6 +14,11 @@ namespace gg.parse.basefunctions
 
         public int NextFunctionId => _functions.Count;
 
+        /// <summary>
+        /// Only initialized when GetTokenDictionary() is called.
+        /// </summary>
+        private Dictionary<string, int>? _tokenDictionary;
+
         public BasicParser()
         {
             NoMatchError = AddError(new MarkError<T>(ErrNoMatch, -1, "(Error): Cannot match token to text at the specified location"));
@@ -100,6 +105,8 @@ namespace gg.parse.basefunctions
 
         public ParseFunctionBase<T> FindFunctionBase(int id) => _functions[id];
 
+        public ParseFunctionBase<T> FindFunctionBase(string name) => _functions.First( f => f.Name == name);
+
         public TFunc AddError<TFunc>(TFunc function) where TFunc : ParseFunctionBase<T>
         {
             Contract.Requires(_errors.All(f => f.Name != function.Name),
@@ -123,7 +130,6 @@ namespace gg.parse.basefunctions
 
         public AnnotationBase? TryParse(T[] input, int offset)
         {
-            // _configs.FirstOherDefault(config => config.Parse(text, offset)); ?
             foreach (var config in _functions)
             {
                 var result = config.Parse(input, offset);
@@ -135,6 +141,12 @@ namespace gg.parse.basefunctions
             }
 
             return null;
+        }
+
+        public Dictionary<string, int> GetTokenDictionay()
+        {
+            _tokenDictionary ??= new(_functions.Select( f => new KeyValuePair<string, int>(f.Name, f.Id)));
+            return _tokenDictionary;
         }
     }
 }

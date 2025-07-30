@@ -20,9 +20,17 @@ namespace gg.parse.parser
                     DigitSequence()
                 ]);
 
+        public static ParseFunctionBase<char> Literal(string literal, string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
+            new MatchDataSequence<char>(name ?? $"{TokenNames.Literal}({literal})", -1, action, literal.ToCharArray());
+
         public static ParseFunctionBase<char> Sign(string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
             // {'+', '-'}
             new MatchDataSet<char>(name ?? TokenNames.Sign, -1, action, ['+', '-']);
+
+        public static ParseFunctionBase<char> Whitespace(string? name = null, ProductionEnum action = ProductionEnum.Ignore) =>
+            // {' ', '\r', '\n', '\t' }
+            new MatchDataSet<char>(name ?? TokenNames.Whitespace, -1, action, [' ', '\r', '\n', '\t']);
+
 
         public static ParseFunctionBase<char> String(
             string? name = null, ProductionEnum action = ProductionEnum.ProduceItem, char delimiter = '"')
@@ -42,7 +50,32 @@ namespace gg.parse.parser
                 ]);
         }
 
-        
+        public static ParseFunctionBase<char> Float(
+            string? name = null, ProductionEnum action = ProductionEnum.ProduceItem)
+        {
+            // sign?, digitSequence, '.', digitSequence, (('e' | 'E'), sign?, digitSequence)?
+            var digitSequence = DigitSequence();
+            var sign = ZeroOrOne(Sign());
+            var exponentPart = Sequence(InSet(['e', 'E']), sign, digitSequence );
+
+            return new MatchFunctionSequence<char>(name ?? TokenNames.Float, -1, action,
+                [
+                    sign,
+                    digitSequence,
+                    Literal("."),
+                    digitSequence,
+                    ZeroOrOne(exponentPart)
+                ]);
+        }
+
+        public static ParseFunctionBase<char> Boolean(
+            string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
+            // 'true' | 'false'
+            new MatchOneOfFunction<char>(name ?? TokenNames.Boolean, -1, action,
+                                    Literal("true"),
+                                    Literal("false"));
+
+
         public static ParseFunctionBase<char> Any(string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
             new MatchAnyData<char>(name ?? TokenNames.AnyCharacter, -1, action);
 
@@ -62,7 +95,7 @@ namespace gg.parse.parser
             new MatchFunctionCount<char>(name ?? $"{TokenNames.OneOrMore}({function.Name})", -1, action, function, 1, 0);
 
         public static ParseFunctionBase<char> InSet(params char[] set) =>
-            new MatchDataSequence<char>($"{TokenNames.Set}({string.Join(", ", set)})", -1, ProductionEnum.ProduceItem, set);
+            new MatchDataSet<char>($"{TokenNames.Set}({string.Join(", ", set)})", -1, ProductionEnum.ProduceItem, set);
 
 
         public static ParseFunctionBase<char> ZeroOrOne(ParseFunctionBase<char> function, string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>

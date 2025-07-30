@@ -4,7 +4,7 @@
         : ParseFunctionBase<T>(name, id, action)
         where T : IComparable<T>
     {
-        public ParseFunctionBase<T>[] Sequence { get; } = sequence;
+        public ParseFunctionBase<T>[] Sequence { get; set; } = sequence;
 
         public override AnnotationBase? Parse(T[] input, int start)
         {
