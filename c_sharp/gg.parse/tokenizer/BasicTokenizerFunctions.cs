@@ -87,7 +87,7 @@
 
         public static Tokenizer Sign(this Tokenizer tokenizer, string? name = null)
         {
-            AddSign(tokenizer);
+            AddSign(tokenizer, name);
             return tokenizer;
         }
 
@@ -137,15 +137,15 @@
             return tokenizer;
         }
 
-        public static TokenFunction CreateWhitespaceFunction(string? name = null, TokenAction onMatch = TokenAction.IgnoreToken) =>
+        public static TokenFunction CreateWhitespaceFunction(string? name = null, ProductionEnum onMatch = ProductionEnum.Ignore) =>
             new CharacterSetFunction(name ?? TokenNames.Whitespace, -1, " \t\r\n", onMatch);
 
-        public static TokenFunction AddWhitespace(this Tokenizer tokenizer, string? name = null, TokenAction onMatch = TokenAction.IgnoreToken) =>
-            tokenizer.AddFunction(CreateWhitespaceFunction(name));
+        public static TokenFunction AddWhitespace(this Tokenizer tokenizer, string? name = null, ProductionEnum onMatch = ProductionEnum.Ignore) =>
+            tokenizer.AddFunction(CreateWhitespaceFunction(name, onMatch));
 
-        public static Tokenizer Whitespace(this Tokenizer tokenizer, string? name = null, TokenAction onMatch = TokenAction.IgnoreToken)
+        public static Tokenizer Whitespace(this Tokenizer tokenizer, string? name = null, ProductionEnum onMatch = ProductionEnum.Ignore)
         {
-            AddWhitespace(tokenizer, name);
+            AddWhitespace(tokenizer, name, onMatch);
             return tokenizer;
         }
 

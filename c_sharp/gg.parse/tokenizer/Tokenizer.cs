@@ -50,7 +50,7 @@ namespace gg.parse.tokenizer
                         errorStart = -1;
                     }
 
-                    if (_functions[annotation.FunctionId].ActionOnMatch == TokenAction.GenerateToken)
+                    if (_functions[annotation.ReferenceId].ActionOnMatch == ProductionEnum.ProduceItem)
                     {
                         result.Add(annotation);
                     }

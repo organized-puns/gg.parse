@@ -3,13 +3,9 @@ namespace gg.parse
 {
     public enum AnnotationCategory
     {
-        /// <summary>
-        /// Annotates a token at the specified range.
-        /// </summary>
         Token,
-
+        AstNode,
         Error,
-
         Warning
     }
 
@@ -24,12 +20,15 @@ namespace gg.parse
         public int Length => Range.Length;
 
         public AnnotationCategory Category { get; init; } = type;
-        
-        public int FunctionId { get; init; } = id;
+
+        /// <summary>
+        /// Entity which produced this annotation. Eg TokenFunction or ParseRule.
+        /// </summary>
+        public int ReferenceId { get; init; } = id;
         
         public override string ToString()
         {
-            return $"Annotation(Type: {Category}, Id: {FunctionId}, Range: {Range})";
+            return $"Annotation(Type: {Category}, Id: {ReferenceId}, Range: {Range})";
         }
     }
 }

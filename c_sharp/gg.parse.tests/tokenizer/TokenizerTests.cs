@@ -21,8 +21,8 @@ namespace gg.parse.tests.tokenizer
             Assert.IsTrue(annotations[0].Length == 1);
             Assert.IsTrue(annotations[1].Start == 2);
             Assert.IsTrue(annotations[1].Length == 1);
-            Assert.IsTrue(tokenizer[annotations[0].FunctionId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
-            Assert.IsTrue(tokenizer[annotations[1].FunctionId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
+            Assert.IsTrue(tokenizer[annotations[0].ReferenceId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
+            Assert.IsTrue(tokenizer[annotations[1].ReferenceId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
         }
 
         [TestMethod]
@@ -52,11 +52,11 @@ namespace gg.parse.tests.tokenizer
             Assert.IsTrue(annotations[4].Start == 13);
             Assert.IsTrue(annotations[4].Length == 1);
 
-            Assert.IsTrue(tokenizer[annotations[0].FunctionId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
-            Assert.IsTrue(tokenizer[annotations[1].FunctionId].Name == BasicTokenizerFunctions.TokenNames.String);
-            Assert.IsTrue(tokenizer[annotations[2].FunctionId].Name == TokenizerTools.TokenNames.KeyValueSeparator);
-            Assert.IsTrue(tokenizer[annotations[3].FunctionId].Name == BasicTokenizerFunctions.TokenNames.Integer);
-            Assert.IsTrue(tokenizer[annotations[4].FunctionId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
+            Assert.IsTrue(tokenizer[annotations[0].ReferenceId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
+            Assert.IsTrue(tokenizer[annotations[1].ReferenceId].Name == BasicTokenizerFunctions.TokenNames.String);
+            Assert.IsTrue(tokenizer[annotations[2].ReferenceId].Name == TokenizerTools.TokenNames.KeyValueSeparator);
+            Assert.IsTrue(tokenizer[annotations[3].ReferenceId].Name == BasicTokenizerFunctions.TokenNames.Integer);
+            Assert.IsTrue(tokenizer[annotations[4].ReferenceId].Name == TokenizerTools.TokenNames.ObjectDelimiter);
         }
 
         [TestMethod]

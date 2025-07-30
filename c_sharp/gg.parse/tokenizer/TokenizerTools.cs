@@ -82,11 +82,11 @@ namespace gg.parse.tokenizer
 
                 if (annotation.Category == AnnotationCategory.Token)
                 {
-                    builder.Append($"<span class=\"{tokenizer[annotation.FunctionId].Name}\">");
+                    builder.Append($"<span class=\"{tokenizer[annotation.ReferenceId].Name}\">");
                 }
                 else
                 {
-                    builder.Append($"<span class=\"{tokenizer.FindError(annotation.FunctionId).Name}\">");
+                    builder.Append($"<span class=\"{tokenizer.FindError(annotation.ReferenceId).Name}\">");
                 }
 
                 builder.Append(text.Substring(annotation.Range.Start, annotation.Range.Length));

@@ -52,6 +52,13 @@ rules needed:
 parser:
 
 ```
+	character_range_start = "<";
+	character_range_end = ">";
+	elipsis = "..";
+	character_range = character_range_start, character, elipsis, character, character_range_start;
+
+	// note, replace "<" with anonymous token _character_range_1 = "<" eventually in a pre-processing step
+	// of the parser, so it's easy to write
 	character_range = "<", character, "..", character, ">";
 	character_set = "{", character+, "}";
 	any_character = "any" | "_";

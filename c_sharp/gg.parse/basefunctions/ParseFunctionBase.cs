@@ -1,7 +1,7 @@
-﻿namespace gg.parse.tokenizer
+﻿namespace gg.parse.basefunctions
 {
-
-    public abstract class TokenFunction(string name, int id, ProductionEnum action = ProductionEnum.ProduceItem)
+    public abstract class ParseFunctionBase<T>(string name, int id, ProductionEnum action = ProductionEnum.ProduceItem)
+        where T : IComparable<T>
     {
         public string Name { get; init; } = name;
 
@@ -9,7 +9,7 @@
 
         public ProductionEnum ActionOnMatch { get; init; } = action;
 
-        public abstract Annotation? Parse(string text, int start);
+        public abstract AnnotationBase? Parse(T[] input, int start);
 
         public override string ToString()
         {
