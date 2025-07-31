@@ -6,22 +6,29 @@
     {
         public ParseFunctionBase<T>[] Sequence { get; set; } = sequence;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             var index = start;
+            var children = new List<Annotation>();
 
             foreach (var function in Sequence)
             {
                 var result = function.Parse(input, index);
+                
                 if (result == null)
                 {
                     return null;
                 }
 
+                if (function.ActionOnMatch == ProductionEnum.ProduceItem)
+                {
+                    children.Add(result);
+                }
+
                 index += result.Range.Length;
             }
 
-            return new AnnotationBase(AnnotationDataCategory.Data, Id, new(start, index - start));
+            return new Annotation(AnnotationDataCategory.Data, Id, new(start, index - start), children.Count > 0 ? children : null);
         }
     }
 }

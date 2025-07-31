@@ -6,13 +6,13 @@
     {
         public ParseFunctionBase<T> Function { get; } = function;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             var result = Function.Parse(input, start);
 
             if (result == null)
             {
-                return new AnnotationBase(AnnotationDataCategory.Data, Id, new (start, 0));
+                return new Annotation(AnnotationDataCategory.Data, Id, new (start, 0));
             }
 
             return null;

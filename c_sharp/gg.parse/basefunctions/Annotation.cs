@@ -8,7 +8,7 @@ namespace gg.parse.basefunctions
         Warning
     }
 
-    public class AnnotationBase(AnnotationDataCategory category, int functionId, Range range) : IComparable
+    public class Annotation(AnnotationDataCategory category, int functionId, Range range, List<Annotation>? children = null) : IComparable
     {
         public Range Range { get; init; } = range;
         
@@ -25,9 +25,11 @@ namespace gg.parse.basefunctions
         /// </summary>
         public int FunctionId { get; init; } = functionId;
 
+        public List<Annotation>? Children { get; } = children;
+
         public int CompareTo(object? obj)
         {
-            if (obj is AnnotationBase other)
+            if (obj is Annotation other)
             {
                 return FunctionId.CompareTo(other.Range.Start);
             }

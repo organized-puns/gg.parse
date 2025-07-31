@@ -22,8 +22,25 @@ namespace gg.parse.tests.parser
 
         }
 
+
         [TestMethod]
-        public void AnnotateJsonTest()
+        public void JsonTokenizer_TestEmptyObject_ExpectTwoAnnotations()
+        {
+            var tokenizer = JsonExample.CreateJsonTokenizer();
+            var emptyObjectText = "{ }";
+
+            var annotations = tokenizer.Parse(emptyObjectText.ToCharArray(), 0);
+
+            /*Assert.IsTrue(annotations.Count == 2);
+            Assert.IsTrue(annotations[0].Category == AnnotationDataCategory.Data);
+            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindFunctionBase(TokenNames.ScopeStart).Id);
+            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindFunctionBase(TokenNames.ScopeEnd).Id);
+            Assert.IsTrue(annotations[1].Category == AnnotationDataCategory.Data);*/
+
+        }
+
+        [TestMethod]
+        public void AnnotateJsonTokensTest()
         {
             // Arrange
             var tokenizer = JsonExample.CreateTokenizer();
@@ -42,7 +59,7 @@ namespace gg.parse.tests.parser
         [TestMethod]
         public void TestAnnotationSequence_ExpectSuccess()
         {
-            var annotations = new List<AnnotationBase>
+            var annotations = new List<Annotation>
             {
                 new (AnnotationDataCategory.Data, 1, new Range(0, 5)),
                 new (AnnotationDataCategory.Data, 2, new Range(5, 3)),
@@ -57,8 +74,20 @@ namespace gg.parse.tests.parser
             Assert.IsNotNull(result.FunctionId == annotationSequence.Id);
             Assert.IsNotNull(result.Start == 0);
             Assert.IsNotNull(result.End == 3);
+        }
 
+        [TestMethod]
+        public void TestKeyValueParser()
+        {
+            var tokenizer = JsonExample.CreateTokenizer();
+            var text = "\"key\": \"value\"";
+            var tokens = tokenizer.Parse(text.ToCharArray());
+
+            var parser = JsonExample.CreateJsonParser(tokenizer);
+
+            var astTree = parser.Parse(tokens.Select(t => t.FunctionId).ToArray());
 
         }
+
     }
 }

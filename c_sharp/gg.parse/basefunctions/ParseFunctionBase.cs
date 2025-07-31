@@ -9,7 +9,7 @@
 
         public ProductionEnum ActionOnMatch { get; init; } = action;
 
-        public abstract AnnotationBase? Parse(T[] input, int start);
+        public abstract Annotation? Parse(T[] input, int start);
 
         public override string ToString()
         {

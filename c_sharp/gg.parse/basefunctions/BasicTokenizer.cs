@@ -3,13 +3,15 @@ using gg.core.util;
 
 namespace gg.parse.basefunctions
 {
-    public class BasicParser<T> where T : IComparable<T>
+    public class BasicTokenizer<T> where T : IComparable<T>
     {
         public static readonly string ErrNoMatch = "Err_No_Match";
 
         private readonly List<ParseFunctionBase<T>> _functions = [];
-        private readonly List<ParseFunctionBase<T>> _errors = [];
 
+        /// <summary>
+        /// Function which will be called when no other function matches.
+        /// </summary>
         public ParseFunctionBase<T> NoMatchError { get; init; }
 
         public int NextFunctionId => _functions.Count;
@@ -19,12 +21,12 @@ namespace gg.parse.basefunctions
         /// </summary>
         private Dictionary<string, int>? _tokenDictionary;
 
-        public BasicParser()
+        public BasicTokenizer()
         {
-            NoMatchError = AddError(new MarkError<T>(ErrNoMatch, -1, "(Error): Cannot match token to text at the specified location"));
+            NoMatchError = new MarkError<T>(ErrNoMatch, 0, "(Error): Cannot match token to text at the specified location", null);
         }
 
-        public BasicParser(params ParseFunctionBase<T>[] functions) : this()
+        public BasicTokenizer(params ParseFunctionBase<T>[] functions) : this()
         {
             foreach (var f in functions)
             {
@@ -32,12 +34,12 @@ namespace gg.parse.basefunctions
             }
         }
 
-        public List<AnnotationBase> Parse(T[] input, int start = 0)
+        public List<Annotation> Parse(T[] input, int start = 0)
         {
             Contract.RequiresNotNull(input);
             Contract.Requires(start >= 0 && start < input.Length);
 
-            var result = new List<AnnotationBase>();
+            var result = new List<Annotation>();
             var offset = 0;
             var errorStart = -1;
 
@@ -79,11 +81,10 @@ namespace gg.parse.basefunctions
             return result;
         }
 
-        private void AddNoMatch(List<AnnotationBase> result, int start, int length)
+        private void AddNoMatch(List<Annotation> result, int start, int length)
         {
-            result.Add(new AnnotationBase(AnnotationDataCategory.Error, NoMatchError.Id, new Range(start, length)));
+            result.Add(new Annotation(AnnotationDataCategory.Error, NoMatchError.Id, new Range(start, length)));
         }
-
         
 
         public TFunc AddFunction<TFunc>(TFunc function) where TFunc : ParseFunctionBase<T>
@@ -93,6 +94,10 @@ namespace gg.parse.basefunctions
 
             function.Id = _functions.Count;
             _functions.Add(function);
+
+            // update the id of the fallback
+            NoMatchError.Id = _functions.Count;
+
             return (TFunc) _functions[^1];
         }
 
@@ -103,32 +108,13 @@ namespace gg.parse.basefunctions
             return (TFunc)_functions[id];
         }
 
-        public ParseFunctionBase<T> FindFunctionBase(int id) => _functions[id];
+        public ParseFunctionBase<T> FindFunctionBase(int id) => 
+            id == NoMatchError.Id ? NoMatchError : _functions[id];
 
-        public ParseFunctionBase<T> FindFunctionBase(string name) => _functions.First( f => f.Name == name);
+        public ParseFunctionBase<T> FindFunctionBase(string name) =>
+            name == NoMatchError.Name ? NoMatchError : _functions.First( f => f.Name == name);
 
-        public TFunc AddError<TFunc>(TFunc function) where TFunc : ParseFunctionBase<T>
-        {
-            Contract.Requires(_errors.All(f => f.Name != function.Name),
-                                $"Function with name '{function.Name}' already exists.");
-
-            function.Id = _errors.Count;
-            _errors.Add(function);
-            return (TFunc) _errors[^1];
-        }
-
-        public TFunc FindError<TFunc>(int id) where TFunc : ParseFunctionBase<T> =>
-            (TFunc)FindErrorBase(id);
-        
-
-        public ParseFunctionBase<T> FindErrorBase(int id) 
-        {
-            Contract.Requires(id >= 0, $"Error ID ({id}) must be non-negative and less than the number of registered errors ({_errors.Count}().");
-
-            return _errors[id];
-        }
-
-        public AnnotationBase? TryParse(T[] input, int offset)
+        public Annotation? TryParse(T[] input, int offset)
         {
             foreach (var config in _functions)
             {
@@ -143,9 +129,13 @@ namespace gg.parse.basefunctions
             return null;
         }
 
-        public Dictionary<string, int> GetTokenDictionay()
+        public Dictionary<string, int> GetTokenDictionary()
         {
-            _tokenDictionary ??= new(_functions.Select( f => new KeyValuePair<string, int>(f.Name, f.Id)));
+            if (_tokenDictionary == null)
+            {
+                _tokenDictionary = new(_functions.Select(f => new KeyValuePair<string, int>(f.Name, f.Id)));
+                _tokenDictionary[NoMatchError.Name] = NoMatchError.Id;
+            }
             return _tokenDictionary;
         }
     }

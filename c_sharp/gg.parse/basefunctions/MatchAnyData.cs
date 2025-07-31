@@ -8,7 +8,7 @@
 
         public int MaxLength { get; } = max;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             var tokensLeft = input.Length - start;
 
@@ -18,7 +18,7 @@
                         ? tokensLeft
                         : Math.Min(tokensLeft, MaxLength);
 
-                return new AnnotationBase(AnnotationDataCategory.Data, Id, new(start, tokensRead));
+                return new Annotation(AnnotationDataCategory.Data, Id, new(start, tokensRead));
             }
 
             return null;

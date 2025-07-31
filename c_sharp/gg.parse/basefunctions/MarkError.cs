@@ -1,15 +1,26 @@
 ﻿namespace gg.parse.basefunctions
 {
-    public class MarkError<T>(string name, int id, string message)
+    public class MarkError<T>(string name, int id, string message, ParseFunctionBase<T> testFunction, int maxLength = 0)
         : ParseFunctionBase<T>(name, id, ProductionEnum.ProduceError ) 
         where T : IComparable<T>
     {
         public string Message { get; } = message;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public ParseFunctionBase<T> TestFunction { get; } = testFunction;
+        
+        public override Annotation? Parse(T[] input, int start)
         {
-            // This function is intended to mark an error in the parsing process, not to match any data.
-            throw new NotImplementedException();
+            var index = start;
+
+            do
+            {
+                index++;
+            } while (index < input.Length 
+                && (maxLength <= 0 || (index - start) < maxLength)
+                && TestFunction.Parse(input, index) == null);
+            
+
+            return new Annotation(AnnotationDataCategory.Error, Id, new Range(start, index - start));
         }
     }
 }

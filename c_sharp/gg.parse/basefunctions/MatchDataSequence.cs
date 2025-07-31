@@ -7,7 +7,7 @@
 
         public T[] DataArray { get; } = dataArray;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             var index = start;
 
@@ -20,7 +20,7 @@
                 index++;
             }
 
-            return new AnnotationBase(AnnotationDataCategory.Data, Id, new(start, index - start));
+            return new Annotation(AnnotationDataCategory.Data, Id, new(start, index - start));
         }
     }
 }

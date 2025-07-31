@@ -11,13 +11,13 @@ namespace gg.parse.parser
 
         public static ParseFunctionBase<char> DigitSequence(string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
             // {'0'..'9'}+
-            OneOrMore(Digit(), name, action);
+            OneOrMore(Digit(action: ProductionEnum.Ignore), name, action);
 
         public static ParseFunctionBase<char> Integer(string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
             new MatchFunctionSequence<char>(name ?? TokenNames.Integer, -1, action,
                 [
                     ZeroOrOne(Sign()),
-                    DigitSequence()
+                    DigitSequence(action: ProductionEnum.Ignore)
                 ]);
 
         public static ParseFunctionBase<char> Literal(string literal, string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
@@ -54,15 +54,15 @@ namespace gg.parse.parser
             string? name = null, ProductionEnum action = ProductionEnum.ProduceItem)
         {
             // sign?, digitSequence, '.', digitSequence, (('e' | 'E'), sign?, digitSequence)?
-            var digitSequence = DigitSequence();
-            var sign = ZeroOrOne(Sign());
+            var digitSequence = DigitSequence(action: ProductionEnum.Ignore);
+            var sign = ZeroOrOne(Sign(action: ProductionEnum.Ignore));
             var exponentPart = Sequence(InSet(['e', 'E']), sign, digitSequence );
 
             return new MatchFunctionSequence<char>(name ?? TokenNames.Float, -1, action,
                 [
                     sign,
                     digitSequence,
-                    Literal("."),
+                    Literal(".", action: ProductionEnum.Ignore),
                     digitSequence,
                     ZeroOrOne(exponentPart)
                 ]);
@@ -72,38 +72,42 @@ namespace gg.parse.parser
             string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
             // 'true' | 'false'
             new MatchOneOfFunction<char>(name ?? TokenNames.Boolean, -1, action,
-                                    Literal("true"),
-                                    Literal("false"));
+                                    Literal("true", action: ProductionEnum.Ignore),
+                                    Literal("false", action: ProductionEnum.Ignore));
 
 
-        public static ParseFunctionBase<char> Any(string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
+        public static ParseFunctionBase<char> Any(string? name = null, ProductionEnum action = ProductionEnum.Ignore) =>
             new MatchAnyData<char>(name ?? TokenNames.AnyCharacter, -1, action);
 
         public static ParseFunctionBase<char> Not(ParseFunctionBase<char> function) =>
-            new MatchNotFunction<char>($"{TokenNames.Not}({function.Name})", -1, ProductionEnum.ProduceItem, function);
+            new MatchNotFunction<char>($"{TokenNames.Not}({function.Name})", -1, ProductionEnum.Ignore, function);
 
         public static ParseFunctionBase<char> Sequence(params ParseFunctionBase<char>[] functions) =>
-            new MatchFunctionSequence<char>($"{TokenNames.FunctionSequence}({string.Join(", ", functions.Select(f => f.Name))})", -1, ProductionEnum.ProduceItem, functions);
+            new MatchFunctionSequence<char>($"{TokenNames.FunctionSequence}({string.Join(", ", functions.Select(f => f.Name))})", -1, ProductionEnum.Ignore, functions);
 
         public static ParseFunctionBase<char> Sequence(params char[] characters) =>
-            new MatchDataSequence<char>($"{TokenNames.DataSequence}({string.Join(", ", characters)})", -1, ProductionEnum.ProduceItem, characters);
+            new MatchDataSequence<char>($"{TokenNames.DataSequence}({string.Join(", ", characters)})", -1, ProductionEnum.Ignore, characters);
 
         public static ParseFunctionBase<char> OneOf(params ParseFunctionBase<char>[] functions) =>
-            new MatchOneOfFunction<char>($"{TokenNames.OneOf}({string.Join(", ", functions.Select(f=>f.Name))})", -1, ProductionEnum.ProduceItem, functions);
+            new MatchOneOfFunction<char>($"{TokenNames.OneOf}({string.Join(", ", functions.Select(f=>f.Name))})", -1, ProductionEnum.Ignore, functions);
+
+        public static ParseFunctionBase<char> OneOf(string name, ProductionEnum action, params ParseFunctionBase<char>[] functions) =>
+            new MatchOneOfFunction<char>(name, -1, action, functions);
 
         public static ParseFunctionBase<char> OneOrMore(ParseFunctionBase<char> function, string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
             new MatchFunctionCount<char>(name ?? $"{TokenNames.OneOrMore}({function.Name})", -1, action, function, 1, 0);
 
         public static ParseFunctionBase<char> InSet(params char[] set) =>
-            new MatchDataSet<char>($"{TokenNames.Set}({string.Join(", ", set)})", -1, ProductionEnum.ProduceItem, set);
+            new MatchDataSet<char>($"{TokenNames.Set}({string.Join(", ", set)})", -1, ProductionEnum.Ignore, set);
 
 
-        public static ParseFunctionBase<char> ZeroOrOne(ParseFunctionBase<char> function, string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
+        public static ParseFunctionBase<char> ZeroOrOne(ParseFunctionBase<char> function, string? name = null, ProductionEnum action = ProductionEnum.Ignore) =>
             new MatchFunctionCount<char>(name ?? $"{TokenNames.ZeroOrOne}({function.Name})", -1, action, function, 0, 1);
 
-        public static ParseFunctionBase<char> ZeroOrMore(ParseFunctionBase<char> function, string? name = null, ProductionEnum action = ProductionEnum.ProduceItem) =>
+        public static ParseFunctionBase<char> ZeroOrMore(string name, ProductionEnum action, ParseFunctionBase<char> function) =>
             new MatchFunctionCount<char>(name ?? $"{TokenNames.ZeroOrMore}({function.Name})", -1, action, function, 0, 0);
 
-
+        public static ParseFunctionBase<char> ZeroOrMore(ParseFunctionBase<char> function, string? name = null, ProductionEnum action = ProductionEnum.Ignore) =>
+            new MatchFunctionCount<char>(name ?? $"{TokenNames.ZeroOrMore}({function.Name})", -1, action, function, 0, 0);
     }
 }

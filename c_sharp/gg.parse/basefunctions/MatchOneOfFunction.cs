@@ -6,14 +6,18 @@
     {
         public ParseFunctionBase<T>[] Options { get; } = options;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             foreach (var option in Options)
             {
                 var result = option.Parse(input, start);
                 if (result != null && result.Category == AnnotationDataCategory.Data)
                 {
-                    return new AnnotationBase(AnnotationDataCategory.Data, Id, result.Range);
+                    var children = option.ActionOnMatch == ProductionEnum.ProduceItem
+                        ? result.Children
+                        : null;
+
+                    return new Annotation(AnnotationDataCategory.Data, Id, result.Range, children);
                 }
             }
             return null;

@@ -14,10 +14,11 @@ namespace gg.parse.basefunctions
         public int Max { get; } = max;
         
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             int count = 0;
             int index = start;
+            var children = new List<Annotation>();
 
             while (index < input.Length && (Max <= 0 || count < Max))
             {
@@ -28,11 +29,16 @@ namespace gg.parse.basefunctions
                 }
                 count++;
                 index += result.Range.Length;
+
+                if (Function.ActionOnMatch == ProductionEnum.ProduceItem)
+                {
+                    children.Add(result);
+                }
             }
 
             if (Min <= 0 || count >= Min)
             {
-                return new AnnotationBase(AnnotationDataCategory.Data, Id, new Range(start, index - start));
+                return new Annotation(AnnotationDataCategory.Data, Id, new Range(start, index - start), children.Count > 0 ? children : null);
             }
 
             return null;

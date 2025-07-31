@@ -7,13 +7,13 @@
         
         public T[] MatchingValues { get; } = matchingValues;
 
-        public override AnnotationBase? Parse(T[] input, int start)
+        public override Annotation? Parse(T[] input, int start)
         {
             if (start < input.Length)
             {
                 if (MatchingValues.Contains(input[start]))
                 {
-                    return new AnnotationBase(AnnotationDataCategory.Data, Id, new(start, 1));
+                    return new Annotation(AnnotationDataCategory.Data, Id, new(start, 1));
                 }
             }
 
