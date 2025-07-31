@@ -1,0 +1,24 @@
+﻿namespace gg.parse.rulefunctions
+{
+    public class MatchSingleData<T>(string name, T data, AnnotationProduction production = AnnotationProduction.Annotation)
+        : RuleBase<T>(name, production)
+        where T : IComparable<T>
+    {
+        public T Data { get; } = data;
+
+        public override ParseResult Parse(T[] input, int start)
+        {
+            if (start < input.Length)
+            {
+                if (input[start].CompareTo(Data) == 0)
+                {
+                    return ParseResult.Failure;
+                }
+
+                return this.BuildDataRuleResult(new Range(start, 1));
+            }
+
+            return ParseResult.Failure;
+        }
+    }
+}
