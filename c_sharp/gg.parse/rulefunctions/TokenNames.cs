@@ -3,6 +3,10 @@ namespace gg.parse.rulefunctions
 {
     public static class TokenNames
     {
+        public static readonly string NoProductPrefix = "~";
+
+        public static readonly string TransitiveProductPrefix = "#";
+
         public static readonly string AnyCharacter = "AnyCharacter";
 
         public static readonly string ArrayStart = "ArrayStart";
@@ -52,5 +56,16 @@ namespace gg.parse.rulefunctions
         public static readonly string ZeroOrMore = "ZeroOrMore";
 
         public static readonly string ZeroOrOne = "ZeroOrOne";
+
+        public static string GetPrefix(this AnnotationProduct production)
+        {
+            return production switch
+            {
+                AnnotationProduct.Annotation => string.Empty,
+                AnnotationProduct.Transitive => TransitiveProductPrefix,
+                AnnotationProduct.None => NoProductPrefix,
+                _ => throw new NotImplementedException(),
+            };
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace gg.parse.rulefunctions
 {
-    public class MatchFunctionSequence<T>(string name, AnnotationProduction production = AnnotationProduction.Annotation, params RuleBase<T>[] sequence) 
+    public class MatchFunctionSequence<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence) 
         : RuleBase<T>(name, production), IRuleComposition<T>
         where T : IComparable<T>
     {
@@ -13,7 +13,7 @@ namespace gg.parse.rulefunctions
         public override ParseResult Parse(T[] input, int start)
         {
             var index = start;
-            var children = new List<Annotation>();
+            List<Annotation>? children = null;
 
             foreach (var function in Sequence)
             {
@@ -24,12 +24,11 @@ namespace gg.parse.rulefunctions
                     return ParseResult.Failure;
                 }
 
-                if (Production == AnnotationProduction.Annotation || Production == AnnotationProduction.Transitive)
+                if (result.Annotations != null && result.Annotations.Count > 0 &&
+                   (Production == AnnotationProduct.Annotation || Production == AnnotationProduct.Transitive))
                 {
-                    if (result.Annotations != null && result.Annotations.Count > 0)
-                    {
-                        children.AddRange(result.Annotations);
-                    }
+                    children ??= [];
+                    children.AddRange(result.Annotations);
                 }
 
                 index += result.MatchedLength;

@@ -14,7 +14,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidSingleInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduction.Annotation, 1, 3);
+            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduct.Annotation, 1, 3);
 
             function.Id = 1;
             rule.Id = 2;
@@ -33,7 +33,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidMultipleInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduction.Annotation, 1, 2);
+            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduct.Annotation, 1, 2);
 
             function.Id = 1;
             rule.Id = 2;
@@ -59,7 +59,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidMultipleTransitiveInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduction.Transitive, 1, 2);
+            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduct.Transitive, 1, 2);
 
             function.Id = 1;
             rule.Id = 2;
@@ -83,7 +83,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidMultipleNoneInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduction.None, 1, 2);
+            var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduct.None, 1, 2);
 
             function.Id = 1;
             rule.Id = 2;

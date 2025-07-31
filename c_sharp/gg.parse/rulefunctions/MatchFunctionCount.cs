@@ -4,7 +4,7 @@ using gg.parse.basefunctions;
 namespace gg.parse.rulefunctions
 {
     public class MatchFunctionCount<T>(
-        string name, RuleBase<T> function, AnnotationProduction production = AnnotationProduction.Annotation, int min = 1, int max = 1)
+        string name, RuleBase<T> function, AnnotationProduct production = AnnotationProduct.Annotation, int min = 1, int max = 1)
         : RuleBase<T>(name, production), IRuleComposition<T>
         where T : IComparable<T>
     {
@@ -35,7 +35,7 @@ namespace gg.parse.rulefunctions
                 index += result.MatchedLength;
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                    (Production == AnnotationProduction.Annotation || Production == AnnotationProduction.Transitive))
+                    (Production == AnnotationProduct.Annotation || Production == AnnotationProduct.Transitive))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

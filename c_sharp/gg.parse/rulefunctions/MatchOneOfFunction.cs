@@ -10,12 +10,12 @@ namespace gg.parse.rulefunctions
         public IEnumerable<RuleBase<T>> SubRules => Options;
 
         public MatchOneOfFunction(string name, params RuleBase<T>[] options)
-            : base(name, AnnotationProduction.Annotation)
+            : base(name, AnnotationProduct.Annotation)
         {
             Options = options;
         }
 
-        public MatchOneOfFunction(string name, AnnotationProduction production, params RuleBase<T>[] options)
+        public MatchOneOfFunction(string name, AnnotationProduct production, params RuleBase<T>[] options)
             : base(name, production)
         {
             Options = options;

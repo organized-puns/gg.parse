@@ -1,6 +1,6 @@
 ﻿namespace gg.parse.rulefunctions
 {
-    public class MatchSingleData<T>(string name, T data, AnnotationProduction production = AnnotationProduction.Annotation)
+    public class MatchSingleData<T>(string name, T data, AnnotationProduct production = AnnotationProduct.Annotation)
         : RuleBase<T>(name, production)
         where T : IComparable<T>
     {

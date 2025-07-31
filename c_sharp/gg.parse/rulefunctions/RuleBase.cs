@@ -11,7 +11,7 @@
         public List<gg.parse.basefunctions.Annotation>? Annotations { get; init; } = annotations;
     }
 
-    public enum AnnotationProduction
+    public enum AnnotationProduct
     {
         /// <summary>
         /// Returns an annotation for the matched item.
@@ -30,14 +30,14 @@
     }
 
 
-    public abstract class RuleBase<T>(string name, AnnotationProduction production = AnnotationProduction.Annotation)
+    public abstract class RuleBase<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation)
         where T : IComparable<T>
     {
         public string Name { get; init; } = name;
 
         public int Id { get; set; } = -1;
 
-        public AnnotationProduction Production { get; init; } = production  ;
+        public AnnotationProduct Production { get; init; } = production  ;
 
         public abstract ParseResult Parse(T[] input, int start);
 

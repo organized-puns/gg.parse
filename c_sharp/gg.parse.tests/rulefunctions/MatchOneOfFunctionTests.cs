@@ -50,7 +50,7 @@ namespace gg.parse.tests.rulefunctions
         {
             var function1 = new MatchDataSequence<int>("TestFunction1", [1, 2]);
             var function2 = new MatchDataSequence<int>("TestFunction2", [3, 4]);
-            var rule = new MatchOneOfFunction<int>("TestRule",AnnotationProduction.Transitive, function1, function2);
+            var rule = new MatchOneOfFunction<int>("TestRule",AnnotationProduct.Transitive, function1, function2);
 
             function1.Id = 1;
             function2.Id = 2;

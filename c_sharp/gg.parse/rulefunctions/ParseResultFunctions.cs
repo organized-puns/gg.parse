@@ -8,11 +8,11 @@ namespace gg.parse.rulefunctions
         {
             return rule.Production switch
             {
-                AnnotationProduction.Annotation => new ParseResult(true, dataRange.Length,
+                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
                                         [new Annotation(AnnotationDataCategory.Data, rule.Id, dataRange)]),
-                AnnotationProduction.Transitive => 
+                AnnotationProduct.Transitive => 
                     throw new NotImplementedException("Cannot apply transitive production to a rule which has no children"),
-                AnnotationProduction.None => new ParseResult(true, dataRange.Length),
+                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
                 _ => throw new NotImplementedException($"Production rule {rule.Production} is not implemented"),
             };
         }
@@ -22,10 +22,10 @@ namespace gg.parse.rulefunctions
         {
             return rule.Production switch
             {
-                AnnotationProduction.Annotation => new ParseResult(true, dataRange.Length, 
+                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length, 
                                         [new Annotation(AnnotationDataCategory.Data, rule.Id, dataRange, children)]),
-                AnnotationProduction.Transitive => new ParseResult(true, dataRange.Length, children),
-                AnnotationProduction.None => new ParseResult(true, dataRange.Length),
+                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
+                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
                 _ => throw new NotImplementedException($"Production rule {rule.Production} is not implemented"),
             };
         }

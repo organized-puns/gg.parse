@@ -4,14 +4,14 @@
     {
         public T[] MatchingValues { get; init; }
 
-        public MatchDataSet(string name, AnnotationProduction action, T[] matchingValues)
+        public MatchDataSet(string name, AnnotationProduct action, T[] matchingValues)
             : base(name, action)
         {
             MatchingValues = matchingValues;
         }
 
         public MatchDataSet(string name, T[] matchingValues)
-            : base(name, AnnotationProduction.Annotation)
+            : base(name, AnnotationProduct.Annotation)
         {
             MatchingValues = matchingValues;
         }

@@ -1,7 +1,7 @@
 ﻿
 namespace gg.parse.rulefunctions
 {
-    public class MatchDataSequence<T>(string name, T[] dataArray, AnnotationProduction production = AnnotationProduction.Annotation)
+    public class MatchDataSequence<T>(string name, T[] dataArray, AnnotationProduct production = AnnotationProduct.Annotation)
         : RuleBase<T>(name, production)
         where T : IComparable<T>
     {
