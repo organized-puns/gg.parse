@@ -10,7 +10,7 @@
         {
             if (start < input.Length)
             {
-                if (input[start].CompareTo(Data) == 0)
+                if (input[start].CompareTo(Data) != 0)
                 {
                     return ParseResult.Failure;
                 }

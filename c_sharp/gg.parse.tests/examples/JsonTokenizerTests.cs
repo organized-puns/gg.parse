@@ -12,7 +12,7 @@ namespace gg.parse.tests.examples
             var tokenizer = new JsonTokenizer();
             var emptyObjectText = "{ }";
 
-            var (isSuccess, charactersRead, annotations) = tokenizer.Parse(emptyObjectText);
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(emptyObjectText);
 
             Assert.IsTrue(isSuccess);
             Assert.IsTrue(charactersRead == 3);
@@ -25,18 +25,14 @@ namespace gg.parse.tests.examples
         public void TestJsonFile_ExpectLotsOfAnnotations()
         {
             var tokenizer = new JsonTokenizer();
-
             var ((isSuccess, charactersRead, annotations), text) = tokenizer.ParseFile("assets/example.json");
 
             Assert.IsTrue(isSuccess);
-            //Assert.IsTrue(charactersRead == 3);
-            //Assert.IsTrue(annotations!.Count == 2);
 
             Directory.CreateDirectory("output");
 
             File.WriteAllText("output/jsontokenizer_example_annotation.html",
                 tokenizer.AnnotateTextUsingHtml(text, annotations, tokenizer.CreateTokenStyleLookup()));
-
         }
     }
 }

@@ -151,18 +151,6 @@ namespace gg.parse.rulefunctions
                  : RegisterRule(new MatchNotFunction<char>(name, product, rule));
 
 
-        public RuleBase<char> OneOf(params RuleBase<char>[] rules)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.OneOf}({string.Join(",", rules.Select(f => f.Name))})";
-            return OneOf(ruleName, product, rules);
-        }
-
-        public RuleBase<char> OneOf(string name, AnnotationProduct product, params RuleBase<char>[] rules) =>
-            TryFindRule(name, out MatchOneOfFunction<char>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchOneOfFunction<char>(name, product, rules));
-                
 
         public RuleBase<char> OneOrMore(RuleBase<char> function, string? name = null, AnnotationProduct action = AnnotationProduct.Annotation)
         {
@@ -177,17 +165,17 @@ namespace gg.parse.rulefunctions
                 new MatchFunctionCount<char>(ruleName, function, action, 1, 0));
         }
 
-        public RuleBase<char> ZeroOrMore(string name, AnnotationProduct product, RuleBase<char> function) =>
-           TryFindRule(name, out MatchFunctionCount<char>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchFunctionCount<char>(name, function, product, 0, 0));
+        //public RuleBase<char> ZeroOrMore(string name, AnnotationProduct product, RuleBase<char> function) =>
+        //   TryFindRule(name, out MatchFunctionCount<char>? existingRule)
+        //        ? existingRule!
+        //        : RegisterRule(new MatchFunctionCount<char>(name, function, product, 0, 0));
 
-        public RuleBase<char> ZeroOrMore(RuleBase<char> function)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
-            return ZeroOrOne(ruleName, product, function);
-        }
+        //public RuleBase<char> ZeroOrMore(RuleBase<char> function)
+        //{
+        //    var product = AnnotationProduct.None;
+        //    var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
+        //    return ZeroOrOne(ruleName, product, function);
+        //}
 
         public RuleBase<char> ZeroOrOne(string name, AnnotationProduct product, RuleBase<char> function) =>
            TryFindRule(name, out MatchFunctionCount<char>? existingRule)
@@ -201,32 +189,6 @@ namespace gg.parse.rulefunctions
             var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
             return ZeroOrOne(ruleName, product, function);
         }
-
-        public RuleBase<char> Sequence(params char[] data)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.DataSequence}({string.Join(", ", data)})";
-            return Sequence(ruleName, product, data);
-        }
-            
-        public RuleBase<char> Sequence(string ruleName, AnnotationProduct product, params char[] data) =>
-            TryFindRule(ruleName, out MatchDataSequence<char>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchDataSequence<char>(ruleName, data, product));
-
-        public RuleBase<char> Sequence(params RuleBase<char>[] functions)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.FunctionSequence}({string.Join(",", functions.Select(f => f.Name))})";
-
-            return Sequence(ruleName, product, functions);
-        }
-
-        public RuleBase<char> Sequence(string ruleName, AnnotationProduct product, params RuleBase<char>[] functions) =>
-        
-            TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchFunctionSequence<char>(ruleName, product, functions));
 
         public RuleBase<char> InSet(params char[] set)
         {

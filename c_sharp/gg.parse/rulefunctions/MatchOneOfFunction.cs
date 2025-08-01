@@ -5,7 +5,7 @@ namespace gg.parse.rulefunctions
 {
     public class MatchOneOfFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-        public RuleBase<T>[] Options { get; init; }
+        public RuleBase<T>[] Options { get; set; }
 
         public IEnumerable<RuleBase<T>> SubRules => Options;
 

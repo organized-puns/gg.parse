@@ -96,5 +96,57 @@ namespace gg.parse.rulefunctions
         {
             return _idRuleLookup.Values.GetEnumerator();
         }
+
+        public RuleBase<T> Sequence(params T[] data)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.DataSequence}({string.Join(", ", data)})";
+            return Sequence(ruleName, product, data);
+        }
+
+        public RuleBase<T> Sequence(string ruleName, AnnotationProduct product, params T[] data) =>
+            TryFindRule(ruleName, out MatchDataSequence<T>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchDataSequence<T>(ruleName, data, product));
+
+
+        public RuleBase<T> Sequence(params RuleBase<T>[] functions)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.FunctionSequence}({string.Join(",", functions.Select(f => f.Name))})";
+
+            return Sequence(ruleName, product, functions);
+        }
+
+        public RuleBase<T> Sequence(string ruleName, AnnotationProduct product, params RuleBase<T>[] functions) =>
+
+            TryFindRule(ruleName, out MatchFunctionSequence<T>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionSequence<T>(ruleName, product, functions));
+
+        public MatchOneOfFunction<T> OneOf(params RuleBase<T>[] rules)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.OneOf}({string.Join(",", rules.Select(f => f.Name))})";
+            return OneOf(ruleName, product, rules);
+        }
+
+        public MatchOneOfFunction<T> OneOf(string name, AnnotationProduct product, params RuleBase<T>[] rules) =>
+            TryFindRule(name, out MatchOneOfFunction<T>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchOneOfFunction<T>(name, product, rules));
+
+
+        public RuleBase<T> ZeroOrMore(string name, AnnotationProduct product, RuleBase<T> function) =>
+           TryFindRule(name, out MatchFunctionCount<T>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 0));
+
+        public RuleBase<T> ZeroOrMore(RuleBase<T> function)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
+            return ZeroOrMore(ruleName, product, function);
+        }
     }
 }

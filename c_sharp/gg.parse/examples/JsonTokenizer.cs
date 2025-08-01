@@ -16,7 +16,7 @@ namespace gg.parse.examples
                     Float(),
                     Integer(),
                     // need to override otherwise the name will hold the delimiter which
-                    // will interfere with the style lookup
+                    // will interfere with the style lookup in html
                     String(TokenNames.String, AnnotationProduct.Annotation),
                     Boolean(),
                     Literal("{", ScopeStart),
@@ -34,12 +34,12 @@ namespace gg.parse.examples
                                 OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, Whitespace(), jsonTokens, error));
         }
 
-        public ParseResult Parse(string text) => Root.Parse(text.ToCharArray(), 0);
+        public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
         public (ParseResult, string) ParseFile(string path)
         {
             var text = File.ReadAllText(path);
-            return (Parse(text), text);
+            return (Tokenize(text), text);
         }
 
         public Dictionary<string, string> CreateTokenStyleLookup()
