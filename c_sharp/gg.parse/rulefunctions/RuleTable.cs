@@ -7,8 +7,8 @@ namespace gg.parse.rulefunctions
     {
         private int _nextRuleId = 0;
 
-        private readonly Dictionary<string, RuleBase<T>> _nameRuleLookup = new();
-        private readonly Dictionary<int, RuleBase<T>> _idRuleLookup = new();
+        private readonly Dictionary<string, RuleBase<T>> _nameRuleLookup = [];
+        private readonly Dictionary<int, RuleBase<T>> _idRuleLookup = [];
 
 
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>

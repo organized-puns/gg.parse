@@ -1,7 +1,5 @@
-﻿
-using gg.parse.basefunctions;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using gg.parse.basefunctions;
+using System.Data;
 
 namespace gg.parse.rulefunctions
 {
@@ -54,7 +52,7 @@ namespace gg.parse.rulefunctions
             return (TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
                 : Sequence(ruleName, product,
-                    ZeroOrOne(Sign(product: AnnotationProduct.None), product: AnnotationProduct.None),
+                    ZeroOrOne(Sign(product: AnnotationProduct.None)),
                     DigitSequence(product: AnnotationProduct.None)));            
         }
 
@@ -71,7 +69,7 @@ namespace gg.parse.rulefunctions
         {
             // sign?, digitSequence, '.', digitSequence, (('e' | 'E'), sign?, digitSequence)?
             var digitSequence = DigitSequence(product: AnnotationProduct.None);
-            var sign = ZeroOrOne(Sign(product: AnnotationProduct.None), product: AnnotationProduct.None);
+            var sign = ZeroOrOne(Sign(product: AnnotationProduct.None));
             var exponentPart = Sequence(InSet(['e', 'E']), sign, digitSequence);
 
             return Sequence(name ?? TokenNames.Float, product,
@@ -79,10 +77,92 @@ namespace gg.parse.rulefunctions
                 digitSequence,
                 Literal(".", product: AnnotationProduct.None),
                 digitSequence,
-                ZeroOrOne(exponentPart, product: AnnotationProduct.None)
+                ZeroOrOne(exponentPart)
             );
         }
 
+        public RuleBase<char> Boolean(
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            // 'true' | 'false'
+            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.Boolean}";
+
+            return TryFindRule(ruleName, out MatchOneOfFunction<char>? existingRule)
+                ? existingRule!
+                : OneOf(ruleName, product,
+                                Literal("true", product: AnnotationProduct.None),
+                                Literal("false", product: AnnotationProduct.None));
+        }
+
+        public RuleBase<char> String(
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, char delimiter = '"')
+        {
+            // '"', ('\\"' or (not '"', any) )*, '"'
+            // '"', ('\\"' | (!'"', _) )*, '"'
+            var delimiterRule = InSet($"{TokenNames.NoProductPrefix}StringDelimiter({delimiter})", AnnotationProduct.None, delimiter);
+            var escapedQuote = Sequence($"{TokenNames.NoProductPrefix}Escaped({delimiter})", AnnotationProduct.None, '\\', delimiter);
+            var notQuoteThenAny = Sequence($"{TokenNames.NoProductPrefix}IsStringCharacter({delimiter})", AnnotationProduct.None, Not(delimiterRule), Any());
+            var stringCharacters = ZeroOrMore($"{TokenNames.NoProductPrefix}StringCharacter({delimiter})", AnnotationProduct.None, OneOf(escapedQuote, notQuoteThenAny));
+
+            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.String}({delimiter})";
+
+            return Sequence(ruleName, product, delimiterRule, stringCharacters, delimiterRule);
+        }
+
+        public RuleBase<char> Whitespace()
+            => Whitespace($"{AnnotationProduct.None.GetPrefix()}{TokenNames.Whitespace}", AnnotationProduct.None);
+
+        public RuleBase<char> Whitespace(string name, AnnotationProduct product) =>
+            // {' ', '\r', '\n', '\t' }
+            TryFindRule(name, out MatchDataSet<char>? existingRule)
+                     ? existingRule!
+                     : RegisterRule(new MatchDataSet<char>(name, product, [' ', '\r', '\n', '\t']));
+         
+
+        public MarkError<char> Error(string name, AnnotationProduct product, string description, RuleBase<char>? testFunction, int maxLength) =>
+            TryFindRule(name, out MarkError<char>? existingRule)
+                     ? existingRule!
+                     : RegisterRule(new MarkError<char>(name, product, description, testFunction, maxLength));
+        
+
+        public RuleBase<char> Any()
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.AnyCharacter}(1,1)";
+            return Any(ruleName, product, 1, 1);
+        }         
+
+        public RuleBase<char> Any(string name, AnnotationProduct product, int min, int max) =>
+            TryFindRule(name, out MatchAnyData<char>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchAnyData<char>(name, product, min, max));
+
+        public RuleBase<char> Not(RuleBase<char> rule)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.Not}({rule.Name})";
+            return Not(ruleName, product, rule);
+        }
+         
+
+        public RuleBase<char> Not(string name, AnnotationProduct product, RuleBase<char> rule) =>
+            TryFindRule(name, out MatchNotFunction<char>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchNotFunction<char>(name, product, rule));
+
+
+        public RuleBase<char> OneOf(params RuleBase<char>[] rules)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.OneOf}({string.Join(",", rules.Select(f => f.Name))})";
+            return OneOf(ruleName, product, rules);
+        }
+
+        public RuleBase<char> OneOf(string name, AnnotationProduct product, params RuleBase<char>[] rules) =>
+            TryFindRule(name, out MatchOneOfFunction<char>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchOneOfFunction<char>(name, product, rules));
+                
 
         public RuleBase<char> OneOrMore(RuleBase<char> function, string? name = null, AnnotationProduct action = AnnotationProduct.Annotation)
         {
@@ -97,18 +177,42 @@ namespace gg.parse.rulefunctions
                 new MatchFunctionCount<char>(ruleName, function, action, 1, 0));
         }
 
-        public RuleBase<char> ZeroOrOne(RuleBase<char> function, string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        public RuleBase<char> ZeroOrMore(string name, AnnotationProduct product, RuleBase<char> function) =>
+           TryFindRule(name, out MatchFunctionCount<char>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionCount<char>(name, function, product, 0, 0));
+
+        public RuleBase<char> ZeroOrMore(RuleBase<char> function)
         {
-            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
-
-            if (TryFindRule(ruleName, out MatchFunctionCount<char>? existingRule))
-            {
-                return existingRule!;
-            }
-
-            return RegisterRule(
-                new MatchFunctionCount<char>(ruleName, function, product, 0, 1));
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
+            return ZeroOrOne(ruleName, product, function);
         }
+
+        public RuleBase<char> ZeroOrOne(string name, AnnotationProduct product, RuleBase<char> function) =>
+           TryFindRule(name, out MatchFunctionCount<char>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionCount<char>(name, function, product, 0, 1));
+        
+
+        public RuleBase<char> ZeroOrOne(RuleBase<char> function)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
+            return ZeroOrOne(ruleName, product, function);
+        }
+
+        public RuleBase<char> Sequence(params char[] data)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.DataSequence}({string.Join(", ", data)})";
+            return Sequence(ruleName, product, data);
+        }
+            
+        public RuleBase<char> Sequence(string ruleName, AnnotationProduct product, params char[] data) =>
+            TryFindRule(ruleName, out MatchDataSequence<char>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchDataSequence<char>(ruleName, data, product));
 
         public RuleBase<char> Sequence(params RuleBase<char>[] functions)
         {

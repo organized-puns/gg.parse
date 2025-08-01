@@ -51,6 +51,8 @@ namespace gg.parse.rulefunctions
 
         public static readonly string String = "String";
 
+        public static readonly string UnknownToken = "UnknownToken";
+
         public static readonly string Whitespace = "Whitespace";
 
         public static readonly string ZeroOrMore = "ZeroOrMore";

@@ -186,5 +186,95 @@ namespace gg.parse.tests.rulefunctions
 
             Assert.IsFalse(fooRule.Parse(input, 1).IsSuccess);
         }
+
+        [TestMethod]
+        public void BooleanTest()
+        {
+            var table = new BasicTokensTable();
+            var booleanRule = table.Boolean();
+
+            Assert.IsNotNull(booleanRule);
+            Assert.AreEqual($"{TokenNames.Boolean}", booleanRule.Name);
+            
+            Assert.IsTrue(table.FindRule($"{TokenNames.Boolean}") == booleanRule);
+            
+            // calling digit a second time should return the same rule
+            Assert.IsTrue(table.Boolean() == booleanRule);
+
+
+            var input = "true".ToArray();
+            var result = booleanRule.Parse(input, 0);
+            Assert.IsTrue(result.IsSuccess);
+            Assert.AreEqual(4, result.MatchedLength);
+            Assert.IsTrue(result.Annotations!.Count == 1);
+            Assert.IsTrue(result.Annotations[0].FunctionId == booleanRule.Id);
+            Assert.IsTrue(result.Annotations[0].Children == null);
+
+            input = "false".ToArray();
+            result = booleanRule.Parse(input, 0);
+            Assert.IsTrue(result.IsSuccess);
+            Assert.AreEqual(5, result.MatchedLength);
+            Assert.IsTrue(result.Annotations!.Count == 1);
+            Assert.IsTrue(result.Annotations[0].FunctionId == booleanRule.Id);
+            Assert.IsTrue(result.Annotations[0].Children == null);
+
+            input = "False".ToArray();
+            result = booleanRule.Parse(input, 0);
+            Assert.IsFalse(result.IsSuccess);
+        }
+
+        [TestMethod]
+        public void StringTest()
+        {
+            var table = new BasicTokensTable();
+            var doubleQuoteStringRule = table.String(delimiter: '"');
+            var quoteStringRule = table.String(delimiter: '\'');
+
+            Assert.IsNotNull(doubleQuoteStringRule);
+            Assert.IsNotNull(quoteStringRule);
+            Assert.AreEqual($"{TokenNames.String}(\")", doubleQuoteStringRule.Name);
+            Assert.AreEqual($"{TokenNames.String}(')", quoteStringRule.Name);
+
+            Assert.IsTrue(table.String(delimiter: '"') == doubleQuoteStringRule);
+            Assert.IsTrue(table.String(delimiter: '\'') == quoteStringRule);
+
+            var input = "'true'".ToArray();
+            var result = quoteStringRule.Parse(input, 0);
+            Assert.IsTrue(result.IsSuccess);
+            Assert.AreEqual(6, result.MatchedLength);
+            Assert.IsTrue(result.Annotations!.Count == 1);
+            Assert.IsTrue(result.Annotations[0].FunctionId == quoteStringRule.Id);
+            Assert.IsTrue(result.Annotations[0].Children == null);
+
+            Assert.IsFalse(quoteStringRule.Parse(input, 1).IsSuccess);
+            Assert.IsFalse(quoteStringRule.Parse(input, 5).IsSuccess);
+            Assert.IsFalse(doubleQuoteStringRule.Parse(input, 0).IsSuccess);
+
+            input = "\"true\"".ToArray();
+            result = doubleQuoteStringRule.Parse(input, 0);
+            Assert.IsTrue(result.IsSuccess);
+            Assert.AreEqual(6, result.MatchedLength);
+            Assert.IsTrue(result.Annotations!.Count == 1);
+            Assert.IsTrue(result.Annotations[0].FunctionId == doubleQuoteStringRule.Id);
+            Assert.IsTrue(result.Annotations[0].Children == null);
+
+            Assert.IsFalse(doubleQuoteStringRule.Parse(input, 1).IsSuccess);
+            Assert.IsFalse(doubleQuoteStringRule.Parse(input, 5).IsSuccess);
+            Assert.IsFalse(quoteStringRule.Parse(input, 0).IsSuccess);
+
+
+            input = "\"\\\"quote\\\"\"".ToArray();
+            result = doubleQuoteStringRule.Parse(input, 0);
+            Assert.IsTrue(result.IsSuccess);
+            Assert.AreEqual(11, result.MatchedLength);
+            Assert.IsTrue(result.Annotations!.Count == 1);
+            Assert.IsTrue(result.Annotations[0].FunctionId == doubleQuoteStringRule.Id);
+            Assert.IsTrue(result.Annotations[0].Children == null);
+
+            Assert.IsFalse(doubleQuoteStringRule.Parse(input, 1).IsSuccess);
+            Assert.IsTrue(doubleQuoteStringRule.Parse(input, 2).IsSuccess);
+            Assert.IsFalse(doubleQuoteStringRule.Parse(input, 1).IsSuccess);
+            Assert.IsFalse(quoteStringRule.Parse(input, 0).IsSuccess);
+        }
     }
 }

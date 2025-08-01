@@ -9,6 +9,13 @@
         public int MatchedLength { get; init; } = charactersRead;
 
         public List<gg.parse.basefunctions.Annotation>? Annotations { get; init; } = annotations;
+
+        public void Deconstruct(out bool isSuccess, out int matchedLength, out List<gg.parse.basefunctions.Annotation>? annotations)
+        {
+            isSuccess = IsSuccess;
+            matchedLength = MatchedLength;
+            annotations = Annotations;
+        }
     }
 
     public enum AnnotationProduct
