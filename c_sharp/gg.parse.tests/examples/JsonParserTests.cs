@@ -1,9 +1,11 @@
-﻿using gg.parse.examples;
+﻿using gg.parse.basefunctions;
+using gg.parse.examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.tests.examples
 {
@@ -22,6 +24,7 @@ namespace gg.parse.tests.examples
             var result = parser.Parse(tokens);
 
             Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.MatchedLength == tokens.Count);
 
             var keyIntValue = "{\"key\": 123}";
             
@@ -51,6 +54,54 @@ namespace gg.parse.tests.examples
 
             Assert.IsTrue(result.IsSuccess);
 
+            var jsonArray = "[1, 2, \"a\"]";
+
+            tokens = tokenizer.Tokenize(jsonArray).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.IsSuccess);
+
+            var emptyArray = "[]";
+
+            tokens = tokenizer.Tokenize(emptyArray).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.IsSuccess);
+
+
+            var compoundArray = "[1, [{\"key\": true}, false] ]";
+
+            tokens = tokenizer.Tokenize(compoundArray).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.IsSuccess);
+        }
+
+        [TestMethod]
+        public void AnnotateSimpleJson_ExpectValidHtml()
+        {
+            var parser = new JsonParser();
+            var keyStrValue = "{\"key\": \"value\"}";
+            var (tokens, astNodes) = parser.Parse(keyStrValue);
+
+            var html = parser.AnnotateTextUsingHtml(keyStrValue, tokens, astNodes, parser.CreateAstStyleLookup());
+
+            Directory.CreateDirectory("output");
+
+            File.WriteAllText("output/ast_example_annotation.html", html);
+        }
+
+        [TestMethod]
+        public void AnnotateJsonFile_ExpectValidHtml()
+        {
+            var parser = new JsonParser();
+            var (tokens, astNodes, text) = parser.ParseFile("assets/example.json");
+
+            var html = parser.AnnotateTextUsingHtml(text, tokens, astNodes, parser.CreateAstStyleLookup());
+
+            Directory.CreateDirectory("output");
+
+            File.WriteAllText("output/astfile_example_annotation.html", html);
         }
     }
 }

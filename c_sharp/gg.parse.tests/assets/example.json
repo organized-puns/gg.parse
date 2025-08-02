@@ -80,6 +80,4 @@
     "cpuUsage": 1.23e4,
     "networkLatency": 5.67E-8
   }
-
-  this is a dileberate error to check the JSON structure
 }
