@@ -1,6 +1,4 @@
-﻿using gg.parse.basefunctions;
-
-namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions
 {
     public class MatchFunctionSequence<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence) 
         : RuleBase<T>(name, production), IRuleComposition<T>

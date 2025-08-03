@@ -1,3 +1,38 @@
+TO DO
+=====
+
+Clean up unused classes.
+Remove Category from Annotation
+Make parser a bit more human friendly to read (see the json example)  
+Figure out how to do error handling, goals
+	- don't interfere with happy path
+	- maybe exception like approach
+Figure out to do forward references in ebnf
+
+
+
+key_value_pair {
+	rule  = key key_value_separator value
+	error = key !(key_value_separator value) mark_error("failed to ...")
+	skip  = '}' | key_value_pair
+}
+
+=>
+key_value_pair  = (key key_value_separator value) 
+				| (key !(key_value_separator value)) mark_error("failed to ...") 
+				  skip_until('}' | '{' | key_value_pair) 
+
+key_value_pair  = (key key_value_separator value) 
+				// error handling
+				| (key !(key_value_separator value)) 
+				  error("failed to ...") 
+				  skip_until('}' | '{' | key_value_pair) 
+
+sequence = a b c
+	if a succeeds but b fails, skip until c, return error
+	if a & b succeed but c fails, return error
+
+
 ```
 // simple json tokenizer grammar
 

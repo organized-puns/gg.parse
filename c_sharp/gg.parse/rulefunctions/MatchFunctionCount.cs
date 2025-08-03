@@ -1,7 +1,4 @@
-﻿
-using gg.parse.basefunctions;
-
-namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions
 {
     public class MatchFunctionCount<T>(
         string name, RuleBase<T> function, AnnotationProduct production = AnnotationProduct.Annotation, int min = 1, int max = 1)

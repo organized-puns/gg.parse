@@ -1,11 +1,5 @@
-﻿using gg.parse.basefunctions;
+﻿
 using gg.parse.examples;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.tests.examples
 {

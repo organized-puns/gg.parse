@@ -1,5 +1,4 @@
-﻿
-namespace gg.parse.basefunctions
+﻿namespace gg.parse.rulefunctions
 {
     public enum AnnotationDataCategory
     {

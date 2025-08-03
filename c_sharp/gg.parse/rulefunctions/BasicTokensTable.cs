@@ -1,7 +1,4 @@
-﻿using gg.parse.basefunctions;
-using System.Data;
-
-namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions
 {
     public class BasicTokensTable : RuleTable<char>
     {
@@ -165,17 +162,6 @@ namespace gg.parse.rulefunctions
                 new MatchFunctionCount<char>(ruleName, function, action, 1, 0));
         }
 
-        //public RuleBase<char> ZeroOrMore(string name, AnnotationProduct product, RuleBase<char> function) =>
-        //   TryFindRule(name, out MatchFunctionCount<char>? existingRule)
-        //        ? existingRule!
-        //        : RegisterRule(new MatchFunctionCount<char>(name, function, product, 0, 0));
-
-        //public RuleBase<char> ZeroOrMore(RuleBase<char> function)
-        //{
-        //    var product = AnnotationProduct.None;
-        //    var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
-        //    return ZeroOrOne(ruleName, product, function);
-        //}
 
         public RuleBase<char> ZeroOrOne(string name, AnnotationProduct product, RuleBase<char> function) =>
            TryFindRule(name, out MatchFunctionCount<char>? existingRule)

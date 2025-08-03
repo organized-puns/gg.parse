@@ -1,6 +1,6 @@
 ﻿namespace gg.parse.rulefunctions
 {
-    public readonly struct ParseResult(bool isSuccess, int charactersRead, List<gg.parse.basefunctions.Annotation>? annotations = null)
+    public readonly struct ParseResult(bool isSuccess, int charactersRead, List<Annotation>? annotations = null)
     {
         public static readonly ParseResult Failure = new(false, 0, null);
 
@@ -8,9 +8,9 @@
 
         public int MatchedLength { get; init; } = charactersRead;
 
-        public List<gg.parse.basefunctions.Annotation>? Annotations { get; init; } = annotations;
+        public List<Annotation>? Annotations { get; init; } = annotations;
 
-        public void Deconstruct(out bool isSuccess, out int matchedLength, out List<gg.parse.basefunctions.Annotation>? annotations)
+        public void Deconstruct(out bool isSuccess, out int matchedLength, out List<Annotation>? annotations)
         {
             isSuccess = IsSuccess;
             matchedLength = MatchedLength;

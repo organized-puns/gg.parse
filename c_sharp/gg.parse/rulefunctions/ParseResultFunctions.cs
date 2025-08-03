@@ -1,6 +1,4 @@
-﻿using gg.parse.basefunctions;
-
-namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions
 {
     public static class ParseResultFunctions
     {

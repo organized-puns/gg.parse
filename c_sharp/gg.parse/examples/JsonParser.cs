@@ -1,11 +1,9 @@
-﻿using gg.parse.basefunctions;
-using gg.parse.rulefunctions;
+﻿using gg.parse.rulefunctions;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.examples
 {
-    public static class ParserNames
+    public static class JsonNodeNames
     {
         public static readonly string Key = "Key";
         public static readonly string String = "String";
@@ -35,14 +33,15 @@ namespace gg.parse.examples
         {
             Tokenizer = tokenizer;
 
-            var key = Token(ParserNames.Key, AnnotationProduct.Annotation, TokenId(TokenNames.String));
-            var stringValue = Token(ParserNames.String, AnnotationProduct.Annotation, TokenId(TokenNames.String));
-            var intValue = Token(ParserNames.Integer, AnnotationProduct.Annotation, TokenId(TokenNames.Integer));
-            var floatValue = Token(ParserNames.Float, AnnotationProduct.Annotation, TokenId(TokenNames.Float));
-            var boolValue = Token(ParserNames.Boolean, AnnotationProduct.Annotation, TokenId(TokenNames.Boolean));
-            var nullValue = Token(ParserNames.Null, AnnotationProduct.Annotation, TokenId(TokenNames.Null));
+            var key = Token(JsonNodeNames.Key, AnnotationProduct.Annotation, TokenId(TokenNames.String));
+            var stringValue = Token(JsonNodeNames.String, AnnotationProduct.Annotation, TokenId(TokenNames.String));
+            var intValue = Token(JsonNodeNames.Integer, AnnotationProduct.Annotation, TokenId(TokenNames.Integer));
+            var floatValue = Token(JsonNodeNames.Float, AnnotationProduct.Annotation, TokenId(TokenNames.Float));
+            var boolValue = Token(JsonNodeNames.Boolean, AnnotationProduct.Annotation, TokenId(TokenNames.Boolean));
+            var nullValue = Token(JsonNodeNames.Null, AnnotationProduct.Annotation, TokenId(TokenNames.Null));
+            var tokenError = Token(TokenNames.UnknownToken, AnnotationProduct.Annotation, TokenId(TokenNames.UnknownToken));
 
-            var value = OneOf(ParserNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
+            var value = OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
             var keyValueSeparator = Token(TokenNames.KeyValueSeparator);
             var objectStart = Token(TokenNames.ScopeStart);
             var objectEnd = Token(TokenNames.ScopeEnd);
@@ -50,21 +49,21 @@ namespace gg.parse.examples
             var arrayEnd = Token(TokenNames.ArrayEnd);
             var comma = Token(TokenNames.CollectionSeparator);
 
-            var keyValue = Sequence(ParserNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
-            var nextKeyValue = Sequence("~NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
-            var keyValueList = Sequence("~KeyValueList", AnnotationProduct.Transitive, keyValue,
-                ZeroOrMore("~KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
+            var keyValue = Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
+            var nextKeyValue = Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
+            var keyValueList = Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
+                ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
+            
+            var jsonObject = Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
+                objectStart, ZeroOrMore("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
 
-            var jsonObject = Sequence(ParserNames.Object, AnnotationProduct.Annotation,
-                objectStart, ZeroOrMore("~ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
+            var nextValue = Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
+            var valueList = Sequence("#ValueList", AnnotationProduct.Transitive, value,
+                ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
+            var jsonArray = Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
+                arrayStart, ZeroOrMore("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
 
-            var nextValue = Sequence("~NextValue", AnnotationProduct.Transitive, comma, value);
-            var valueList = Sequence("~ValueList", AnnotationProduct.Transitive, value,
-                ZeroOrMore("~ValueListRest", AnnotationProduct.Transitive, nextValue));
-            var jsonArray = Sequence(ParserNames.Array, AnnotationProduct.Annotation,
-                arrayStart, ZeroOrMore("~ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
-
-            value.Options = [.. value.Options, jsonObject, jsonArray];
+            value.Options = [.. value.Options, jsonObject, jsonArray, tokenError];
 
             // todo error(s)
 
@@ -133,20 +132,21 @@ namespace gg.parse.examples
         {
             return new Dictionary<string, string>
             {
-                { ParserNames.Float, "background-color: #D9ABEF; display: inline; margin: 2px;" },
-                { ParserNames.Integer, "background-color: #D9ABEF; display: inline; margin: 2px;" },
-                { ParserNames.Boolean, "background-color: #D9EFA8; display: inline; margin: 2px;"  },
-                { ParserNames.String, "background-color: #CFEEEE; display: inline; margin: 2px;" },
-                { ParserNames.Null, "background-color: #A1A6AA; display: inline; margin: 2px;" },
-                { ParserNames.KeyValuePair, "background-color: #8877A0; display: inline; padding: 2px;" },
-                { ParserNames.Key, "background-color: #EFEBB9; display: inline; margin: 2px;" },
-                { ParserNames.Value, "background-color: #EEABD9; display: inline; padding: 2px;" },
-                { ParserNames.Object, "background-color: #AABBC9; display: inline; padding: 3px;"},
-                { ParserNames.Array, "background-color: #AFC0CF; display: inline; padding: 3px;" },
+                { JsonNodeNames.Float, "background-color: #D9ABEF; display: inline; margin: 2px;" },
+                { JsonNodeNames.Integer, "background-color: #D9ABEF; display: inline; margin: 2px;" },
+                { JsonNodeNames.Boolean, "background-color: #D9EFA8; display: inline; margin: 2px;"  },
+                { JsonNodeNames.String, "background-color: #CFEEEE; display: inline; margin: 2px;" },
+                { JsonNodeNames.Null, "background-color: #A1A6AA; display: inline; margin: 2px;" },
+                { JsonNodeNames.KeyValuePair, "background-color: #8877A0; display: inline; padding: 2px;" },
+                { JsonNodeNames.Key, "background-color: #EFEBB9; display: inline; margin: 2px;" },
+                { JsonNodeNames.Value, "background-color: #EEABD9; display: inline; padding: 2px;" },
+                { JsonNodeNames.Object, "background-color: #AABBC9; display: inline; padding: 3px;"},
+                { JsonNodeNames.Array, "background-color: #AFC0CF; display: inline; padding: 3px;" },
+                { TokenNames.UnknownToken, "background-color: #FFE0DA; display: inline; padding: 3px;" },
             };
         }
 
-        public ParseResult Parse(List<basefunctions.Annotation> tokens)
+        public ParseResult Parse(List<Annotation> tokens)
         {
             return Root.Parse(tokens.Select(t => t.FunctionId).ToArray(), 0);
         }

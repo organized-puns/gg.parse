@@ -1,5 +1,4 @@
-﻿using gg.parse.basefunctions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace gg.parse.rulefunctions
 {
