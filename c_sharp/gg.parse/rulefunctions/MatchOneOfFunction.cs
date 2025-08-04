@@ -1,4 +1,5 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using gg.core.util;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace gg.parse.rulefunctions
 {
@@ -36,6 +37,13 @@ namespace gg.parse.rulefunctions
                 }
             }
             return ParseResult.Failure;
+        }
+
+        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
+        {
+            var index = Array.IndexOf(Options, subRule);
+            Contract.Requires(index >= 0);
+            Options[index] = replacement;
         }
     }
 }

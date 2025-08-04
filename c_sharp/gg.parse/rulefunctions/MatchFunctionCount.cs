@@ -1,4 +1,7 @@
-﻿namespace gg.parse.rulefunctions
+﻿
+using gg.core.util;
+
+namespace gg.parse.rulefunctions
 {
     public class MatchFunctionCount<T>(
         string name, RuleBase<T> function, AnnotationProduct production = AnnotationProduct.Annotation, int min = 1, int max = 1)
@@ -6,7 +9,7 @@
         where T : IComparable<T>
     {
        
-        public RuleBase<T> Function { get; } = function;
+        public RuleBase<T> Function { get; private set; } = function;
         
         public int Min { get; } = min;
         
@@ -42,6 +45,12 @@
             return (Min <= 0 || count >= Min)
                 ? this.BuildFunctionRuleResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
+        }
+
+        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
+        {
+            Contract.Requires(subRule == Function);
+            Function = replacement;
         }
     }
 }

@@ -1,0 +1,5 @@
+
+sign = '+' | '-';
+digit = { '0' .. '9' };
+float = int, '.', +digit, ?(('e' | 'E'), int);
+int = ?sign, +digit;

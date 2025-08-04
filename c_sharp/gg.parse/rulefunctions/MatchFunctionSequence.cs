@@ -1,4 +1,7 @@
-﻿namespace gg.parse.rulefunctions
+﻿using gg.core.util;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace gg.parse.rulefunctions
 {
     public class MatchFunctionSequence<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence) 
         : RuleBase<T>(name, production), IRuleComposition<T>
@@ -33,6 +36,13 @@
             }
 
             return this.BuildFunctionRuleResult(new Range(start, index - start), children);
+        }
+
+        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
+        {
+            var index = Array.IndexOf(Sequence, subRule);
+            Contract.Requires(index >= 0);
+            Sequence[index] = replacement;
         }
     }
 }

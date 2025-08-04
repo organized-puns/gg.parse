@@ -53,7 +53,7 @@
                     DigitSequence(product: AnnotationProduct.None)));            
         }
 
-        public RuleBase<char> Literal(string literal, string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        public MatchDataSequence<char> Literal(string literal, string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
         {
             var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.Literal}({literal})";
             return TryFindRule(ruleName, out MatchDataSequence<char>? existingRule)
@@ -233,7 +233,21 @@
        
             TryFindRule(ruleName, out MatchDataSet<char>? existingRule)
                 ? existingRule!
-                : new MatchDataSet<char>(ruleName, product, set);
+                : RegisterRule(new MatchDataSet<char>(ruleName, product, set));
+     
         
+        public void ResolveReferences()
+        {
+            foreach (var rule in this)
+            {
+                if (rule is IRuleComposition<char> composition)
+                {
+                    foreach (var subRule in composition.SubRules.Where( r => r is RuleReference<char>).Cast<RuleReference<char>>()) 
+                    {
+                        composition.ReplaceSubRule(subRule, FindRule(subRule.Reference));
+                    }
+                }
+            }
+        }
     }
 }

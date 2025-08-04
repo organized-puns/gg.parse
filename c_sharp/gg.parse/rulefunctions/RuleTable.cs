@@ -1,5 +1,6 @@
 ﻿using gg.core.util;
 using System.Collections;
+using System.Xml.Linq;
 
 namespace gg.parse.rulefunctions
 {
@@ -60,7 +61,13 @@ namespace gg.parse.rulefunctions
             result = default;
             return false;
         }
-        
+
+
+        public MatchSingleData<T> Single(string name, AnnotationProduct product, T tokenId) =>
+            TryFindRule(name, out MatchSingleData<T>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchSingleData<T>(name, tokenId, product));
+
 
         public RuleBase<T>? FindRule(string name)
         {
@@ -110,7 +117,7 @@ namespace gg.parse.rulefunctions
                 : RegisterRule(new MatchDataSequence<T>(ruleName, data, product));
 
 
-        public RuleBase<T> Sequence(params RuleBase<T>[] functions)
+        public MatchFunctionSequence<T> Sequence(params RuleBase<T>[] functions)
         {
             var product = AnnotationProduct.None;
             var ruleName = $"{product.GetPrefix()}{TokenNames.FunctionSequence}({string.Join(",", functions.Select(f => f.Name))})";
@@ -118,7 +125,7 @@ namespace gg.parse.rulefunctions
             return Sequence(ruleName, product, functions);
         }
 
-        public RuleBase<T> Sequence(string ruleName, AnnotationProduct product, params RuleBase<T>[] functions) =>
+        public MatchFunctionSequence<T> Sequence(string ruleName, AnnotationProduct product, params RuleBase<T>[] functions) =>
 
             TryFindRule(ruleName, out MatchFunctionSequence<T>? existingRule)
                 ? existingRule!
@@ -137,29 +144,39 @@ namespace gg.parse.rulefunctions
                  : RegisterRule(new MatchOneOfFunction<T>(name, product, rules));
 
 
-        public RuleBase<T> ZeroOrMore(string name, AnnotationProduct product, RuleBase<T> function) =>
+        public MatchFunctionCount<T> ZeroOrMore(string name, AnnotationProduct product, RuleBase<T> function) =>
            TryFindRule(name, out MatchFunctionCount<T>? existingRule)
                 ? existingRule!
                 : RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 0));
 
-        public RuleBase<T> ZeroOrMore(RuleBase<T> function)
+        public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> function)
         {
             var product = AnnotationProduct.None;
             var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
             return ZeroOrMore(ruleName, product, function);
         }
 
-        public RuleBase<T> ZeroOrOne(string name, AnnotationProduct product, RuleBase<T> function) =>
+        public MatchFunctionCount<T> ZeroOrOne(string name, AnnotationProduct product, RuleBase<T> function) =>
            TryFindRule(name, out MatchFunctionCount<T>? existingRule)
                 ? existingRule!
                 : RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 1));
 
 
-        public RuleBase<T> ZeroOrOne(RuleBase<T> function)
+        public MatchFunctionCount<T> ZeroOrOne(RuleBase<T> function)
         {
             var product = AnnotationProduct.None;
             var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
             return ZeroOrOne(ruleName, product, function);
         }
+
+        public RuleBase<T> OneOrMore(string name, AnnotationProduct product, RuleBase<T> function) =>
+            TryFindRule(name, out MatchFunctionCount<T>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionCount<T>(name, function, product, 1, 0));
+
+
+        public RuleBase<T> OneOrMore(RuleBase<T> function) =>
+            OneOrMore($"{TokenNames.OneOrMore}({function.Name})", AnnotationProduct.None, function);
+
     }
 }

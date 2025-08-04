@@ -91,22 +91,15 @@ namespace gg.parse.examples
 
         public int TokenId(string name) => Tokenizer.FindRule(name).Id;
 
-        public int[] TokenIds(params string[] names) => names.Select(n => TokenId(n)).ToArray();
-
         public RuleBase<int> Token(string tokenName) => Token(tokenName, _defaultProduct);
         
         public RuleBase<int> Token(string tokenName, AnnotationProduct product)
         {
             var rule = Tokenizer.FindRule(tokenName);
-            return Token($"{product.GetPrefix()}Token({rule.Name})", product, rule.Id);
+            return Single($"{product.GetPrefix()}Token({rule.Name})", product, rule.Id);
         }
 
-        public RuleBase<int> Token(string name, int tokenId) => Token(name, _defaultProduct, tokenId);
-
-        public RuleBase<int> Token(string name, AnnotationProduct product, int tokenId) =>
-            TryFindRule(name, out MatchSingleData<int>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchSingleData<int>(name, tokenId, product));
+        public RuleBase<int> Token(string name, int tokenId) => Single(name, _defaultProduct, tokenId);
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);
 
