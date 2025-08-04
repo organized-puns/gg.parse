@@ -23,7 +23,7 @@ namespace gg.parse.tests.rulefunctions
 
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].FunctionId == rule.Id);
@@ -33,7 +33,7 @@ namespace gg.parse.tests.rulefunctions
 
             result = rule.Parse(input, 2);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].FunctionId == rule.Id);
@@ -42,7 +42,7 @@ namespace gg.parse.tests.rulefunctions
 
             result = rule.Parse(input, 3);
 
-            Assert.IsFalse(result.IsSuccess);
+            Assert.IsFalse(result.FoundMatch);
         }
 
         [TestMethod]
@@ -58,7 +58,7 @@ namespace gg.parse.tests.rulefunctions
 
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].FunctionId == function1.Id);
@@ -66,7 +66,7 @@ namespace gg.parse.tests.rulefunctions
 
             result = rule.Parse(input, 2);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].FunctionId == function2.Id);
@@ -74,7 +74,7 @@ namespace gg.parse.tests.rulefunctions
 
             result = rule.Parse(input, 3);
 
-            Assert.IsFalse(result.IsSuccess);
+            Assert.IsFalse(result.FoundMatch);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 using gg.parse.examples;
+using Newtonsoft.Json.Linq;
 
 namespace gg.parse.tests.examples
 {
@@ -17,7 +18,7 @@ namespace gg.parse.tests.examples
             var tokens = tokenizer.Tokenize(keyStrValue).Annotations;
             var result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.MatchedLength == tokens.Count);
 
             var keyIntValue = "{\"key\": 123}";
@@ -25,42 +26,42 @@ namespace gg.parse.tests.examples
             tokens = tokenizer.Tokenize(keyIntValue).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
 
             var keyValueList = "{\"key1\": 123.12, \"key2\": null}";
 
             tokens = tokenizer.Tokenize(keyValueList).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
 
             var emptyKeyValueList = "{}";
 
             tokens = tokenizer.Tokenize(emptyKeyValueList).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
 
             var compoundList = "{\"root\": {\"key1\": 123.12, \"key2\": null}}";
 
             tokens = tokenizer.Tokenize(compoundList).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
 
             var jsonArray = "[1, 2, \"a\"]";
 
             tokens = tokenizer.Tokenize(jsonArray).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
 
             var emptyArray = "[]";
 
             tokens = tokenizer.Tokenize(emptyArray).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
 
 
             var compoundArray = "[1, [{\"key\": true}, false] ]";
@@ -68,7 +69,19 @@ namespace gg.parse.tests.examples
             tokens = tokenizer.Tokenize(compoundArray).Annotations;
             result = parser.Parse(tokens);
 
-            Assert.IsTrue(result.IsSuccess);
+            Assert.IsTrue(result.FoundMatch);
+        }
+
+        [TestMethod]
+        public void Missing_KeyValue_ExpectRecovery()
+        {
+            var tokenizer = new JsonTokenizer();
+            var parser = new JsonParser(tokenizer);
+
+            var missingValue = "{\"key\": }";
+            var tokens = tokenizer.Tokenize(missingValue).Annotations;
+            var result = parser.Parse(tokens);
+
         }
 
         [TestMethod]

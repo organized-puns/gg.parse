@@ -148,5 +148,18 @@ namespace gg.parse.rulefunctions
             var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
             return ZeroOrMore(ruleName, product, function);
         }
+
+        public RuleBase<T> ZeroOrOne(string name, AnnotationProduct product, RuleBase<T> function) =>
+           TryFindRule(name, out MatchFunctionCount<T>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 1));
+
+
+        public RuleBase<T> ZeroOrOne(RuleBase<T> function)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
+            return ZeroOrOne(ruleName, product, function);
+        }
     }
 }

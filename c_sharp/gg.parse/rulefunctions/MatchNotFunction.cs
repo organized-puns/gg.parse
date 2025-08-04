@@ -23,7 +23,7 @@ namespace gg.parse.rulefunctions
         {
             var result = Rule.Parse(input, start);
 
-            if (!result.IsSuccess)
+            if (!result.FoundMatch)
             {
                 return this.BuildFunctionRuleResult(new Range(start, 0));
             }

@@ -17,7 +17,7 @@
             {
                 var result = function.Parse(input, index);
                 
-                if (!result.IsSuccess)
+                if (!result.FoundMatch)
                 {
                     return ParseResult.Failure;
                 }

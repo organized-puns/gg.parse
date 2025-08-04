@@ -17,8 +17,6 @@
 
         public int Length => Range.Length;
 
-        public AnnotationDataCategory Category { get; init; } = category;
-
         /// <summary>
         /// Function which produced this annotation.
         /// </summary>
@@ -38,7 +36,7 @@
 
         public override string ToString()
         {
-            return $"Annotation(Type: {Category}, Id: {FunctionId}, Range: {Range})";
+            return $"Annotation(Id: {FunctionId}, Range: {Range})";
         }
     }
 }

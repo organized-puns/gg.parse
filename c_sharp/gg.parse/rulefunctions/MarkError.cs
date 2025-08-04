@@ -21,12 +21,12 @@
             {
                 var index = start;
 
-                do
+                while (index < input.Length
+                    && (maxLength <= 0 || (index - start) < maxLength)
+                    && (TestFunction == null || !TestFunction.Parse(input, index).FoundMatch))
                 {
                     index++;
-                } while (index < input.Length
-                    && (maxLength <= 0 || (index - start) < maxLength)
-                    && (TestFunction == null || !TestFunction.Parse(input, index).IsSuccess));
+                } 
 
                 return this.BuildDataRuleResult(new(start, index - start));
             }

@@ -23,7 +23,7 @@
             while (index < input.Length && (Max <= 0 || count < Max))
             {
                 var result = Function.Parse(input, index);
-                if (!result.IsSuccess)
+                if (!result.FoundMatch)
                 {
                     break;
                 }

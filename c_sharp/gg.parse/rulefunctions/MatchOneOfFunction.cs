@@ -26,7 +26,7 @@ namespace gg.parse.rulefunctions
             foreach (var option in Options)
             {
                 var result = option.Parse(input, start);
-                if (result.IsSuccess)
+                if (result.FoundMatch)
                 {
                     List<Annotation>? children = (result.Annotations == null || result.Annotations.Count == 0)
                             ? null 

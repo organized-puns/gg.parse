@@ -4,8 +4,10 @@ namespace gg.parse.rulefunctions
     public static class TokenNames
     {
         public static readonly string NoProductPrefix = "~";
+        public static readonly string NoProductSelector= "NoProductSelector";        
 
         public static readonly string TransitiveProductPrefix = "#";
+        public static readonly string TransitiveSelector= "TransitiveSelector";
 
         public static readonly string AnyCharacter = "AnyCharacter";
 
@@ -58,6 +60,29 @@ namespace gg.parse.rulefunctions
         public static readonly string ZeroOrMore = "ZeroOrMore";
 
         public static readonly string ZeroOrOne = "ZeroOrOne";
+
+        public static readonly string LowerCaseLetter = "LowerCaseLetter";
+
+        public static readonly string UpperCaseLetter = "UpperCaseLetter";
+        
+        public static readonly string Identifier = "Identifier";
+        public static readonly string DoubleQuotedString = "DoubleQuotedString";
+        public static readonly string SingleQuotedString = "SingleQuotedString";
+        public static readonly string Assignment = "Assignment";
+        public static readonly string EndStatement = "EndStatement";
+        public static readonly string Elipsis = "Elipsis";
+        public static readonly string Option = "Option";
+        public static readonly string GroupStart = "GroupStart";
+        public static readonly string GroupEnd = "GroupEnd";
+        public static readonly string ZeroOrOneOperator = "ZeroOrOneOperator";
+        public static readonly string ZeroOrMoreOperator = "ZeroOrMoreOperator";
+        public static readonly string OneOrMoreOperator = "OneOrMoreOperator";
+        public static readonly string NotOperator = "NotOperator";
+
+        public static readonly string EndOfLine = "EOL";
+
+        public static readonly string SingleLineComment = "SingleLineComment";
+        public static readonly string MultiLineComment = "MultiLineComment";
 
         public static string GetPrefix(this AnnotationProduct production)
         {

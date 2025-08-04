@@ -106,6 +106,65 @@
             return Sequence(ruleName, product, delimiterRule, stringCharacters, delimiterRule);
         }
 
+        public MatchDataRange<char> LowerCaseLetter(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.LowerCaseLetter}";
+            return TryFindRule(ruleName, out MatchDataRange<char>? existingRule)
+                     ? existingRule!
+                     : RegisterRule(new MatchDataRange<char>(ruleName, 'a', 'z', product));
+        }
+
+        public MatchDataRange<char> UpperCaseLetter(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.UpperCaseLetter}";
+            return TryFindRule(ruleName, out MatchDataRange<char>? existingRule)
+                     ? existingRule!
+                     : RegisterRule(new MatchDataRange<char>(ruleName, 'A', 'Z', product));
+        }
+
+        public RuleBase<char> Identifier(
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            var underscore = TryFindRule("#Underscore", out MatchSingleData<char> existingRule)
+                        ? existingRule!
+                        : RegisterRule(new MatchSingleData<char>("#Underscore", '_', AnnotationProduct.None));
+            var firstCharacter = OneOf("#FirstIdentifierCharacter", AnnotationProduct.None, LowerCaseLetter(), UpperCaseLetter(), underscore);
+            var nextCharacter = OneOf("#NextIdentifierCharacter", AnnotationProduct.None, firstCharacter, Digit());
+            var nextCharacterString = ZeroOrMore("#NextIdentifierCharacterString", AnnotationProduct.None, nextCharacter);
+
+            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.Identifier}";
+
+            return Sequence(ruleName, product, firstCharacter, nextCharacterString);
+        }
+
+        public RuleBase<char> EndOfLine(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            var ruleName = name ?? $"{TokenNames.EndOfLine}";
+
+            return OneOf(ruleName, product,
+                    Literal("\r\n", "CRLF", AnnotationProduct.None),
+                    Literal("\n", "LF", AnnotationProduct.None));
+        }
+
+        public RuleBase<char> SingleLineComment(
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, string startComment = "//")
+        {
+            var ruleName = name ?? $"{TokenNames.SingleLineComment}";
+            var commentCharacter = Sequence(Not(EndOfLine()), Any());
+
+            return Sequence(ruleName, product, Literal(startComment), ZeroOrMore(commentCharacter));
+        }
+
+        public RuleBase<char> MultiLineComment(
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, string startComment = "/*", string endComment = "*/")
+        {
+            var ruleName = name ?? $"{TokenNames.MultiLineComment}";
+            var commentCharacter = Sequence(Not(Literal(endComment)), Any());
+
+            return Sequence(ruleName, product, Literal(startComment), ZeroOrMore(commentCharacter), Literal(endComment));
+        }
+
+
         public RuleBase<char> Whitespace()
             => Whitespace($"{AnnotationProduct.None.GetPrefix()}{TokenNames.Whitespace}", AnnotationProduct.None);
 
@@ -162,19 +221,6 @@
                 new MatchFunctionCount<char>(ruleName, function, action, 1, 0));
         }
 
-
-        public RuleBase<char> ZeroOrOne(string name, AnnotationProduct product, RuleBase<char> function) =>
-           TryFindRule(name, out MatchFunctionCount<char>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchFunctionCount<char>(name, function, product, 0, 1));
-        
-
-        public RuleBase<char> ZeroOrOne(RuleBase<char> function)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
-            return ZeroOrOne(ruleName, product, function);
-        }
 
         public RuleBase<char> InSet(params char[] set)
         {

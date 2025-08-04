@@ -4,7 +4,7 @@
     {
         public static readonly ParseResult Failure = new(false, 0, null);
 
-        public bool IsSuccess { get; init; } = isSuccess;
+        public bool FoundMatch { get; init; } = isSuccess;
 
         public int MatchedLength { get; init; } = charactersRead;
 
@@ -12,7 +12,7 @@
 
         public void Deconstruct(out bool isSuccess, out int matchedLength, out List<Annotation>? annotations)
         {
-            isSuccess = IsSuccess;
+            isSuccess = FoundMatch;
             matchedLength = MatchedLength;
             annotations = Annotations;
         }
