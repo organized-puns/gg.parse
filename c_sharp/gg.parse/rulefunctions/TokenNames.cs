@@ -84,6 +84,8 @@ namespace gg.parse.rulefunctions
         public static readonly string SingleLineComment = "SingleLineComment";
         public static readonly string MultiLineComment = "MultiLineComment";
 
+        public static readonly string MarkError = "Error";
+
         public static string GetPrefix(this AnnotationProduct production)
         {
             return production switch

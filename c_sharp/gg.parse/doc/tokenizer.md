@@ -1,4 +1,4 @@
-TO DO
+RANDOM NOTEs
 =====
 
 Make parser a bit more human friendly to read (see the json example)  
@@ -8,15 +8,16 @@ Figure out how to do error handling, goals
 	- maybe exception like approach
 	=> recovery
 
-Figure out to do forward references in ebnf
-
-Start implementing ebnf, tokenizer and parser
+implement errors, alternatives for short hand
+see if sequence can go without ,
+see if range can go without {}
+add root
 
 digit = '0'..'9'
 sign = '+' | '-'
 int = ?sign +digit !'.'
 float = ?sign +digit '.' +digit ?('e'|'E' ?sign +digit)
-string = '"' *any '"'
+string = '"' *(not'"' any) '"'
 scope_start = '{'
 scope_end = '}'
 

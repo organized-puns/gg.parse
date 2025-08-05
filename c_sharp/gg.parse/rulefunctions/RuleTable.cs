@@ -1,6 +1,5 @@
 ﻿using gg.core.util;
 using System.Collections;
-using System.Xml.Linq;
 
 namespace gg.parse.rulefunctions
 {
@@ -11,6 +10,7 @@ namespace gg.parse.rulefunctions
         private readonly Dictionary<string, RuleBase<T>> _nameRuleLookup = [];
         private readonly Dictionary<int, RuleBase<T>> _idRuleLookup = [];
 
+        public RuleBase<T>? Root { get; set; }
 
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
@@ -177,6 +177,31 @@ namespace gg.parse.rulefunctions
 
         public RuleBase<T> OneOrMore(RuleBase<T> function) =>
             OneOrMore($"{TokenNames.OneOrMore}({function.Name})", AnnotationProduct.None, function);
+
+
+        public MatchAnyData<T> Any()
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.AnyCharacter}(1,1)";
+            return Any(ruleName, product, 1, 1);
+        }
+
+        public MatchAnyData<T> Any(string name, AnnotationProduct product, int min, int max) =>
+            TryFindRule(name, out MatchAnyData<T>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchAnyData<T>(name, product, min, max));
+
+        public MatchNotFunction<T> Not(RuleBase<T> rule)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.Not}({rule.Name})";
+            return Not(ruleName, product, rule);
+        }
+
+        public MatchNotFunction<T> Not(string name, AnnotationProduct product, RuleBase<T> rule) =>
+            TryFindRule(name, out MatchNotFunction<T>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchNotFunction<T>(name, product, rule));
 
     }
 }

@@ -5,8 +5,6 @@ namespace gg.parse.examples
 {
     public class EbnfTokenizer : BasicTokensTable
     {
-        public RuleBase<char> Root { get; private set; }
-
         public EbnfTokenizer(bool dropComments = true)
         {
             // lit_dq_rule   = "literal";
@@ -28,9 +26,13 @@ namespace gg.parse.examples
             // single_line_comment = // all the way until the end of the line
             // multi_line_comment = /* bla */ 
 
+            // error = error "message" skip_rule
 
             var ebnfTokens =
                 OneOf("#EbnfTokens", AnnotationProduct.Transitive,
+                    EndOfLine(product: AnnotationProduct.None),
+                    // make sure keywords are before the identifier
+                    Keyword(MarkError, AnnotationProduct.Annotation, "error"),
                     Identifier(),
                     Integer(),
                     String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
@@ -40,6 +42,8 @@ namespace gg.parse.examples
                     Literal("}", ScopeEnd),
                     Literal(";", EndStatement),
                     Literal("..", Elipsis),
+                    // needs to be behind elipsis, elipsis being the more specific one
+                    Literal(".", AnyCharacter),
                     Literal("|", Option),
                     Literal("(", GroupStart),
                     Literal(")", GroupEnd),
@@ -53,8 +57,8 @@ namespace gg.parse.examples
                     Literal("#", TransitiveSelector),
                     Literal("~", NoProductSelector),
                     SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
-                    MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
-                    EndOfLine()
+                    MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
+                    
                 );
 
             var error = Error(UnknownToken, AnnotationProduct.Annotation,

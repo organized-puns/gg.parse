@@ -13,6 +13,7 @@ namespace gg.parse.examples
                 
                 { TokenNames.DoubleQuotedString, "color: #b0e055;" },
                 { TokenNames.SingleQuotedString, "color: #b0e055;" },
+                { TokenNames.AnyCharacter, "color: #b0e055;" },
 
                 { TokenNames.Identifier, "color: #EEFEFF;" },
                 { TokenNames.Null, "color: #95a095; font-style: italic;" },
@@ -56,7 +57,7 @@ namespace gg.parse.examples
 
             builder.AppendLine("<html>");
             builder.AppendLine("    <style>");
-            builder.AppendLine("        body { white-space: pre; font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', 'Cascadia Code', monospace;  font-size: 14px; line-height: 1.6; background-color: #222823; color: #99a099; }");
+            builder.AppendLine("        body { white-space: pre; tab-size: 4; font-family: 'Fira Code', 'JetBrains Mono', 'Source Code Pro', 'Cascadia Code', monospace;  font-size: 14px; line-height: 1.6; background-color: #222823; color: #99a099; }");
             builder.AppendLine("        /* Tokens and their corresponding colors. */");
 
             foreach (var kvp in styleLookup)

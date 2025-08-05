@@ -28,7 +28,7 @@
 
             var digitRule = Digit(null, AnnotationProduct.None);
 
-            return OneOrMore(digitRule, ruleName, product);
+            return OneOrMore(ruleName, product, digitRule); //OneOrMore(digitRule, ruleName, product);
         }
 
         public RuleBase<char> Sign(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -51,6 +51,15 @@
                 : Sequence(ruleName, product,
                     ZeroOrOne(Sign(product: AnnotationProduct.None)),
                     DigitSequence(product: AnnotationProduct.None)));            
+        }
+
+        public MatchFunctionSequence<char> Keyword(string name, AnnotationProduct product, string keyword )
+        {
+            var ruleName = name ?? $"{product.GetPrefix()}{name}({keyword})";
+            return TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchFunctionSequence<char>(ruleName, product, 
+                                    Literal(keyword, product:AnnotationProduct.None), Whitespace()));
         }
 
         public MatchDataSequence<char> Literal(string literal, string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -180,47 +189,6 @@
                      ? existingRule!
                      : RegisterRule(new MarkError<char>(name, product, description, testFunction, maxLength));
         
-
-        public RuleBase<char> Any()
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.AnyCharacter}(1,1)";
-            return Any(ruleName, product, 1, 1);
-        }         
-
-        public RuleBase<char> Any(string name, AnnotationProduct product, int min, int max) =>
-            TryFindRule(name, out MatchAnyData<char>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchAnyData<char>(name, product, min, max));
-
-        public RuleBase<char> Not(RuleBase<char> rule)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.Not}({rule.Name})";
-            return Not(ruleName, product, rule);
-        }
-         
-
-        public RuleBase<char> Not(string name, AnnotationProduct product, RuleBase<char> rule) =>
-            TryFindRule(name, out MatchNotFunction<char>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchNotFunction<char>(name, product, rule));
-
-
-
-        public RuleBase<char> OneOrMore(RuleBase<char> function, string? name = null, AnnotationProduct action = AnnotationProduct.Annotation)
-        {
-            var ruleName = name ?? $"{action.GetPrefix()}{TokenNames.OneOrMore}({function.Name})";
-
-            if (TryFindRule(ruleName, out MatchFunctionCount<char>? existingRule))
-            {
-                return existingRule!;
-            }
-
-            return RegisterRule(
-                new MatchFunctionCount<char>(ruleName, function, action, 1, 0));
-        }
-
 
         public RuleBase<char> InSet(params char[] set)
         {

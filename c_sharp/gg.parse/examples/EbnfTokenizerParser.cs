@@ -9,29 +9,27 @@ namespace gg.parse.examples
     {
         public EbnfTokenizer Tokenizer { get; init; }
 
-        public RuleBase<int> Root { get; private set; }
-
         public EbnfTokenizerParser()
             : this(new EbnfTokenizer())
         {
         }
 
-        private MatchOneOfFunction<int> _literal;
-        private MatchSingleData<int> _transitiveSelector;
-        private MatchSingleData<int> _noProductSelector;
-        private MatchFunctionCount<int> _ruleProduction;
-        private MatchSingleData<int> _ruleName;
-        private MatchSingleData<int> _identifier;
-        private MatchFunctionSequence<int> _sequence;
-        private MatchFunctionSequence<int> _option;
-        private MatchFunctionSequence<int> _characterSet;
-        private MatchFunctionSequence<int> _characterRange;
-        private MatchFunctionSequence<int> _group;
-        private MatchFunctionSequence<int> _zeroOrMoreOperator;
-        private MatchFunctionSequence<int> _zeroOrOneOperator;
-        private MatchFunctionSequence<int> _oneOrMoreOperator;
-        private MatchFunctionSequence<int> _notOperator;
-
+        private MatchOneOfFunction<int>     _literal;
+        private MatchSingleData<int>        _anyCharacter;
+        private MatchSingleData<int>        _transitiveSelector;
+        private MatchSingleData<int>        _noProductSelector;
+        private MatchSingleData<int>        _ruleName;
+        private MatchSingleData<int>        _identifier;
+        private MatchFunctionSequence<int>  _sequence;
+        private MatchFunctionSequence<int>  _option;
+        private MatchFunctionSequence<int>  _characterSet;
+        private MatchFunctionSequence<int>  _characterRange;
+        private MatchFunctionSequence<int>  _group;
+        private MatchFunctionSequence<int>  _zeroOrMoreOperator;
+        private MatchFunctionSequence<int>  _zeroOrOneOperator;
+        private MatchFunctionSequence<int>  _oneOrMoreOperator;
+        private MatchFunctionSequence<int>  _notOperator;
+        private MatchFunctionSequence<int> _error;
 
         public EbnfTokenizerParser(EbnfTokenizer tokenizer)
         {
@@ -42,6 +40,9 @@ namespace gg.parse.examples
                     Token(TokenNames.SingleQuotedString),
                     Token(TokenNames.DoubleQuotedString)
             );
+
+            // .
+            _anyCharacter = Token("AnyCharacter", AnnotationProduct.Annotation, TokenNames.AnyCharacter);
 
             // { "abcf" }
             _characterSet = Sequence("CharacterSet", AnnotationProduct.Annotation,
@@ -62,33 +63,41 @@ namespace gg.parse.examples
             _identifier = Token("Identifier", AnnotationProduct.Annotation, TokenNames.Identifier);
             
             // literal | set
-            var unaryRuleTerms = OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, _literal, _characterSet, _characterRange, _identifier);
+            var ruleTerms = OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
+                _literal, 
+                _anyCharacter, 
+                _characterSet, 
+                _characterRange, 
+                _identifier
+            );
 
             var nextSequenceElement = Sequence("#NextSequenceElement", AnnotationProduct.Transitive,
                     Token(TokenNames.CollectionSeparator),
-                    unaryRuleTerms);
+                    ruleTerms);
 
             // a, b, c
             _sequence = Sequence("Sequence", AnnotationProduct.Annotation,
-                    unaryRuleTerms,
+                    ruleTerms,
                     Token(TokenNames.CollectionSeparator),
-                    unaryRuleTerms,
+                    ruleTerms,
                     ZeroOrMore("#SequenceRest", AnnotationProduct.Transitive, nextSequenceElement));
 
             var nextOptionElement = Sequence("#NextOptionElement", AnnotationProduct.Transitive,
                     Token(TokenNames.Option),
-                    unaryRuleTerms);
+                    ruleTerms);
 
             // a | b | c
             _option = Sequence("Option", AnnotationProduct.Annotation,
-                    unaryRuleTerms,
+                    ruleTerms,
                     Token(TokenNames.Option),
-                    unaryRuleTerms,
+                    ruleTerms,
                     ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
 
             var binaryRuleTerms = OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, _sequence, _option);
 
-            var ruleDefinition = OneOf("#RuleDefinition", AnnotationProduct.Transitive, binaryRuleTerms, unaryRuleTerms);
+            var ruleDefinition = OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
+                binaryRuleTerms, 
+                ruleTerms);
 
             // ( a, b, c )
             _group = Sequence("#Group", AnnotationProduct.Transitive,
@@ -99,24 +108,30 @@ namespace gg.parse.examples
             // *(a | b | c)
             _zeroOrMoreOperator = Sequence("ZeroOrMore", AnnotationProduct.Annotation,
                 Token(TokenNames.ZeroOrMoreOperator),
-                unaryRuleTerms);
+                ruleTerms);
 
             // ?(a | b | c)
             _zeroOrOneOperator = Sequence("ZeroOrOne", AnnotationProduct.Annotation,
                 Token(TokenNames.ZeroOrOneOperator),
-                unaryRuleTerms);
+                ruleTerms);
 
             // +(a | b | c)
             _oneOrMoreOperator = Sequence("OneOrMore", AnnotationProduct.Annotation,
                 Token(TokenNames.OneOrMoreOperator),
-                unaryRuleTerms);
+                ruleTerms);
 
             // !(a | b | c)
             _notOperator = Sequence("Not", AnnotationProduct.Annotation,
                 Token(TokenNames.NotOperator),
-                unaryRuleTerms);
+                ruleTerms);
 
-            unaryRuleTerms.Options = [.. unaryRuleTerms.Options, _group, _zeroOrMoreOperator, _zeroOrOneOperator, _oneOrMoreOperator, _notOperator];
+            _error = Sequence("Error", AnnotationProduct.Annotation,
+                    Token("ErrorKeyword", AnnotationProduct.Annotation, TokenNames.MarkError),
+                    _literal,
+                    ruleDefinition
+            );
+
+            ruleTerms.Options = [.. ruleTerms.Options, _group, _zeroOrMoreOperator, _zeroOrOneOperator, _oneOrMoreOperator, _notOperator, _error];
 
             _transitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, TokenNames.TransitiveSelector);
             _noProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, TokenNames.NoProductSelector);
@@ -143,11 +158,16 @@ namespace gg.parse.examples
         // xxx left off here
         public RuleTable<char> CompileFile(string path) =>
             Compile(File.ReadAllText(path));
-        
+
 
         public RuleTable<char> Compile(string text)
         {
             var (tokens, ruleNodes) = Parse(text);
+            return Compile(text, tokens, ruleNodes);
+        }
+
+        public RuleTable<char> Compile(string text, List<Annotation> tokens, List<Annotation> ruleNodes)
+        { 
             var tokenTable = new BasicTokensTable();
             
             foreach (var rule in ruleNodes)
@@ -169,7 +189,13 @@ namespace gg.parse.examples
                 var name = GetText(text, rule.Children[idx], tokens);
                 idx++;
 
-                CompileRuleDefinition(tokenTable, production, name, text, rule.Children[idx], tokens);
+                var compiledRule = CompileRuleDefinition(tokenTable, production, name, text, rule.Children[idx], tokens);
+
+                // First compiled rule will be assigned to the root. Seems the most intuitive
+                if (tokenTable.Root == null)
+                {
+                    tokenTable.Root = compiledRule;
+                }
             }
 
             tokenTable.ResolveReferences();
@@ -230,8 +256,34 @@ namespace gg.parse.examples
                 var function = CompileRuleDefinition(table, AnnotationProduct.None, $"{name}(function)", text, ruleDefinition.Children[0], tokens);
                 return table.ZeroOrMore(name, product, function);
             }
+            else if (ruleDefinition.FunctionId == _oneOrMoreOperator.Id)
+            {
+                var function = CompileRuleDefinition(table, AnnotationProduct.None, $"{name}(function)", text, ruleDefinition.Children[0], tokens);
+                return table.OneOrMore(name, product, function);
+            }
+            else if (ruleDefinition.FunctionId == _zeroOrOneOperator.Id)
+            {
+                var function = CompileRuleDefinition(table, AnnotationProduct.None, $"{name}(function)", text, ruleDefinition.Children[0], tokens);
+                return table.ZeroOrOne(name, product, function);
+            }
+            else if (ruleDefinition.FunctionId == _notOperator.Id)
+            {
+                var function = CompileRuleDefinition(table, AnnotationProduct.None, $"{name}(function)", text, ruleDefinition.Children[0], tokens);
+                return table.Not(name, product, function);
+            }
+            else if (ruleDefinition.FunctionId == _anyCharacter.Id)
+            {
+                return table.Any(name, product, 1, 1);
+            }
+            else if (ruleDefinition.FunctionId == _error.Id)
+            {
+                var message = GetText(text, ruleDefinition.Children[1], tokens);
+                var skipRule = CompileRuleDefinition(table, AnnotationProduct.None, $"{name}(skip)", text, ruleDefinition.Children[2], tokens);
+                return table.Error(name, product, message.Substring(1, message.Length - 2), skipRule, 0);
+            }
 
-            throw new NotImplementedException();
+            var missingRule = FindRule(ruleDefinition.FunctionId).Name;
+            throw new NotImplementedException($"Could not find implementation for rule {missingRule}(id={ruleDefinition.FunctionId})");
         }
 
         private RuleBase<char> CompileSequence(BasicTokensTable table, AnnotationProduct product, string name, string text, Annotation ruleDefinition, List<Annotation> tokens)
@@ -273,7 +325,8 @@ namespace gg.parse.examples
 
         public ParseResult Parse(List<Annotation> tokens)
         {
-            return Root.Parse(tokens.Select(t => t.FunctionId).ToArray(), 0);
+            var functionIds = tokens.Select(t => t.FunctionId).ToArray();
+            return Root.Parse(functionIds, 0);
         }
 
         public (List<Annotation> tokens, List<Annotation> astNodes) Parse(string text)
@@ -291,6 +344,10 @@ namespace gg.parse.examples
                         if (astResults.FoundMatch)
                         {
                             return (tokenResults.Annotations, astResults.Annotations);
+                        }
+                        else
+                        {
+                            return (tokenResults.Annotations, []);
                         }
                     }
                     else

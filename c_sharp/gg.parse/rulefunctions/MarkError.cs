@@ -1,20 +1,26 @@
-﻿namespace gg.parse.rulefunctions
+﻿
+using gg.core.util;
+using System.Data;
+
+namespace gg.parse.rulefunctions
 {
     public class MarkError<T>(string name, AnnotationProduct product, string? description = null, RuleBase<T>? testFunction = null, int maxLength = 0)
-        : RuleBase<T>(name, product) 
+        : RuleBase<T>(name, product), IRuleComposition<T>
         where T : IComparable<T>
     {
         /// <summary>
         /// Message describing the nature of the error
         /// </summary>
-        public string? Description { get; } = description;
+        public string? Message { get; } = description;
 
         /// <summary>
         /// Function which when matching succesfull, marks the end of this error.
         /// If no function is defined, the error will stop when the maxLength is reached
         /// </summary>
         public RuleBase<T>? TestFunction { get; set; } = testFunction;
-        
+
+        public IEnumerable<RuleBase<T>> SubRules => [TestFunction];
+
         public override ParseResult Parse(T[] input, int start)
         {
             if (start < input.Length)
@@ -32,6 +38,12 @@
             }
 
             return ParseResult.Failure;
+        }
+
+        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
+        {
+            Contract.Requires(subRule == TestFunction);
+            TestFunction = replacement;
         }
     }
 }
