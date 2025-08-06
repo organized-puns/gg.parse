@@ -1,9 +1,17 @@
 TO DO
 =====
 
-(re)implement a EbnfTokenParser to use the compiler
+Implemented an ebnf tokenizer, parser, compiler which can take a ebnf based token definition (see json_tokens.ebnf )
+next implement a parser, (we can re-use the tokenizer) which can parse a grammer (see json_grammar.ebnf )
 
-implement a EbnfParserParser 
+ - start on EbnfGrammarParser
+
+---
+
+
+verify if error reporting / fallback works
+
+implement a EbnfParserParser
 
 Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand

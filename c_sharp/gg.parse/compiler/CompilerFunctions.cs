@@ -41,7 +41,11 @@ namespace gg.parse.compiler
            RuleDeclaration declaration,
            CompileContext<char> context)
         {
-            var setText = context.GetText(ruleDefinition.Range);
+            Contract.Requires(ruleDefinition != null);
+            Contract.Requires(ruleDefinition!.Children != null);
+            Contract.Requires(ruleDefinition.Children!.Count == 1);
+
+            var setText = context.GetText(ruleDefinition.Children[0].Range);
             setText = setText.Substring(1, setText.Length - 2);
 
             return context.Output.GetOrRegisterRule(declaration.Name, () =>

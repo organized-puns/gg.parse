@@ -87,6 +87,12 @@ namespace gg.parse.compiler
             return this;
         }
 
+        public CompileContext<T> WithAstNodes(List<Annotation> nodes)
+        {
+            AstNodes = nodes;
+            return this;
+        }
+
         public bool TryGetProduct(int functionId, out AnnotationProduct product)
         {
             product = AnnotationProduct.Annotation;

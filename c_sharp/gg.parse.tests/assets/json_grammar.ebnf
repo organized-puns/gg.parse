@@ -10,7 +10,7 @@ eof				= !.;
 
 value			= string | int | float | boolean | null | object | array;
 
-key_value_pair  = string, kv_separator, value ;
+key_value_pair  = string, kv_separator, value;
 
 key_value_list  = key_value_pair, *(item_separator, key_value_pair);
 object			= scope_start, ?key_value_list , scope_end;

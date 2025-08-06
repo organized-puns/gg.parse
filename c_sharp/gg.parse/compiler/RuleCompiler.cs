@@ -2,7 +2,6 @@
 
 namespace gg.parse.compiler
 {
-    
     public delegate RuleBase<T> CompileFunction<T>(
         Annotation ruleDefinition,
         RuleDeclaration declaration, 
@@ -15,7 +14,6 @@ namespace gg.parse.compiler
 
         public RuleTable<T> Compile(CompileContext<T> context)
         {
-
             _context = context;
 
             foreach (var node in context.AstNodes)

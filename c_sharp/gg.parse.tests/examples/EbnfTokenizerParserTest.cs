@@ -1,6 +1,8 @@
-﻿using gg.parse.examples;
+﻿using gg.parse.compiler;
+using gg.parse.examples;
 using gg.parse.rulefunctions;
-using static System.Net.Mime.MediaTypeNames;
+
+using static gg.parse.examples.TokenizerCompilerFactory;
 
 namespace gg.parse.tests.examples
 {
@@ -150,36 +152,48 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(name == "Option");
         }
 
+                
         [TestMethod]
-        public void CompileRule_ExpectSuccess()
+        public void TokenizeParseCompileLitRule_ExpectSuccess()
         {
-            // try compiling a literal rule
-            var parser = new EbnfTokenizerParser();
-            var table = parser.Compile("lit_rule = 'foo';");
+            var (_, _, _, table) = SetupTokenizeParseCompile("lit_rule = 'foo';");
+
             var litRule = table.FindRule("lit_rule") as MatchDataSequence<char>;
 
             Assert.IsNotNull(litRule);
             Assert.IsTrue(litRule.Production == AnnotationProduct.Annotation);
             Assert.IsTrue(litRule.DataArray.SequenceEqual("foo".ToArray()));
+        }
 
-            // try compiling a set rule
-            table = parser.Compile("~set_rule = {'abc'};");
+        [TestMethod]
+        public void TokenizeParseCompileSetRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("~set_rule = {'abc'};");
+
             var setRule = table.FindRule("set_rule") as MatchDataSet<char>;
 
             Assert.IsNotNull(setRule);
             Assert.IsTrue(setRule.Production == AnnotationProduct.None);
             Assert.IsTrue(setRule.MatchingValues.SequenceEqual("abc".ToArray()));
+        }
 
-            // try compiling a range rule
-            table = parser.Compile("range_rule = {'a' .. 'z'};");
+        [TestMethod]
+        public void TokenizeParseCompileRangeRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("range_rule = {'a' .. 'z'};");
+
             var rangeRule = table.FindRule("range_rule") as MatchDataRange<char>;
 
             Assert.IsNotNull(rangeRule);
             Assert.IsTrue(rangeRule.MinDataValue == 'a');
             Assert.IsTrue(rangeRule.MaxDataValue == 'z');
+        }
 
-            // try compiling a transitive sequence rule
-            table = parser.Compile("#sequence_rule = 'foo', 'bar';");
+        [TestMethod]
+        public void TokenizeParseCompileSequenceRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("#sequence_rule = 'foo', 'bar';");
+
             var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
 
             Assert.IsNotNull(sequenceRule);
@@ -192,93 +206,143 @@ namespace gg.parse.tests.examples
             var barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+        }
 
-            // try compiling a option rule
-            table = parser.Compile("option_rule = 'foo' | 'bar';");
+        [TestMethod]
+        public void TokenizeParseCompileOptionRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("option_rule = 'foo' | 'bar';");
+
             var optionRule = table.FindRule("option_rule") as MatchOneOfFunction<char>;
 
             Assert.IsNotNull(optionRule);
             Assert.IsTrue(optionRule.Production == AnnotationProduct.Annotation);
 
-            fooLit = optionRule.Options[0] as MatchDataSequence<char>;
+            var fooLit = optionRule.Options[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            barLit = optionRule.Options[1] as MatchDataSequence<char>;
+            var barLit = optionRule.Options[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+        }
 
-            // try compiling a group rule
-            table = parser.Compile("group_rule = ('foo', 'bar') | 'baz';");
+        [TestMethod]
+        public void TokenizeParseCompileGroupRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("group_rule = ('foo', 'bar') | 'baz';");
+
             var groupRule = table.FindRule("group_rule") as MatchOneOfFunction<char>;
 
             Assert.IsNotNull(groupRule);
-            sequenceRule = groupRule.Options[0] as MatchFunctionSequence<char>;
-            litRule = groupRule.Options[1] as MatchDataSequence<char>;
+            var sequenceRule = groupRule.Options[0] as MatchFunctionSequence<char>;
+            var litRule = groupRule.Options[1] as MatchDataSequence<char>;
 
             Assert.IsNotNull(sequenceRule);
             Assert.IsNotNull(litRule);
             Assert.IsTrue(litRule.DataArray.SequenceEqual("baz".ToArray()));
 
-            fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+        }
 
-            // try compiling (and resolving an identifier/reference)
-            table = parser.Compile("sequence_rule = foo, bar; foo = 'foo'; bar = 'bar';");
-            sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
+        [TestMethod]
+        public void TokenizeParseCompileReferenceRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("sequence_rule = foo, bar; foo = 'foo'; bar = 'bar';");
+
+            var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
             Assert.IsNotNull(sequenceRule);
 
-            fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
             Assert.IsTrue(table.FindRule("foo") == fooLit);
 
-            barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
             Assert.IsTrue(table.FindRule("bar") == barLit);
+        }
 
-            // try compiling a zero or more rule
-            table = parser.Compile("zero_or_more_rule = *'bar';");
+        [TestMethod]
+        public void TokenizeParseCompileZeroOrMoreRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("zero_or_more_rule = *'bar';");
+
             var zeroOrMore = table.FindRule("zero_or_more_rule") as MatchFunctionCount<char>;
             Assert.IsNotNull(zeroOrMore);
             Assert.IsTrue(zeroOrMore.Min == 0);
             Assert.IsTrue(zeroOrMore.Max == 0);
-            Assert.IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(function)"));
+            Assert.IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(subFunction[0,0])"));
+        }
 
-            // try compiling an error
-            table = parser.Compile("error_rule = error 'msg' !'bar';");
+        [TestMethod]
+        public void TokenizeParseCompileOneOrMoreRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("one_or_more_rule = +'bar';");
+
+            var oneOrMore = table.FindRule("one_or_more_rule") as MatchFunctionCount<char>;
+            Assert.IsNotNull(oneOrMore);
+            Assert.IsTrue(oneOrMore.Min == 1);
+            Assert.IsTrue(oneOrMore.Max == 0);
+            Assert.IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(subFunction[1,0])"));
+        }
+
+        [TestMethod]
+        public void TokenizeParseCompileZeroOrOneRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("zero_or_one_rule = ?'bar';");
+
+            var oneOrMore = table.FindRule("zero_or_one_rule") as MatchFunctionCount<char>;
+            Assert.IsNotNull(oneOrMore);
+            Assert.IsTrue(oneOrMore.Min == 0);
+            Assert.IsTrue(oneOrMore.Max == 1);
+            Assert.IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(subFunction[0,1])"));
+        }
+
+        [TestMethod]
+        public void TokenizeParseCompileErrorRule_ExpectSuccess()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("error_rule = error 'msg' !'bar';");
+
             var error = table.FindRule("error_rule") as MarkError<char>;
             Assert.IsNotNull(error);
             Assert.IsTrue(error.Message == "msg");
-            Assert.IsTrue(error.TestFunction == table.FindRule("error_rule(skip)"));
+            Assert.IsTrue(error.TestFunction == table.FindRule("error_rule(skip_until)"));
             Assert.IsTrue(error.TestFunction is MatchNotFunction<char>);
         }
 
         [TestMethod]
-        public void CompileFile_ExpectSuccess()
+        public void TokenizeParseCompileAnyRule_ExpectSuccess()
         {
-            // try compiling a literal rule
-            var parser = new EbnfTokenizerParser();
-            var text = File.ReadAllText("assets/json_tokens.ebnf");
-            var (tokens, rule) = parser.Parse(text);
+            var (_, _, _, table) = SetupTokenizeParseCompile("any_rule = .;");
 
+            var matchAny = table.FindRule("any_rule") as MatchAnyData<char>;
+            Assert.IsNotNull(matchAny);
+            Assert.IsTrue(matchAny.MinLength == 1);
+            Assert.IsTrue(matchAny.MaxLength == 1);
+        }
+
+        [TestMethod]
+        public void TokenizeParseCompileFile_ExpectSuccess()
+        {
+            var (text,tokens,astNodes,table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
+
+            // write the tokens to insepct (debug)
             Directory.CreateDirectory("output");
+            File.WriteAllText("output/tpc_json_tokenizer_tokens.html",
+                new EbnfTokenizer().AnnotateTextUsingHtml(text, tokens, AnnotationMarkup.CreateTokenStyleLookup()));
 
-            File.WriteAllText("output/json_tokenizer_tokens.html",
-                parser.Tokenizer.AnnotateTextUsingHtml(text, tokens, AnnotationMarkup.CreateTokenStyleLookup()));
+            Assert.IsTrue(table.Root != null);
+            Assert.IsTrue(table.Root.Name == "json_tokens");
 
-            var rules = parser.Compile(text, tokens, rule);
-
-            Assert.IsTrue(rules.Root != null);
-            Assert.IsTrue(rules.Root.Name == "json_tokens");
-
-            var stringRule = rules.FindRule("string");
+            var stringRule = table.FindRule("string");
 
             Assert.IsNotNull(stringRule);
 
@@ -297,7 +361,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(result.Annotations[0].Range.Length == "\"foo\"".Length);
 
             // test parsing
-            result = rules.Root.Parse("{\"key\": 123, \"key\": null }".ToArray(), 0);
+            result = table.Root.Parse("{\"key\": 123, \"key\": null }".ToArray(), 0);
             Assert.IsTrue(result.FoundMatch);
             var expectedTokens = new[] {
                 "scope_start", "string", "kv_separator", "int", "item_separator",
@@ -307,19 +371,17 @@ namespace gg.parse.tests.examples
 
             for (var i = 0; i < expectedTokens.Length; i++)
             {
-                Assert.IsTrue(result.Annotations[i].FunctionId == rules.FindRule(expectedTokens[i]).Id);
+                Assert.IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
             }
         }
+
 
         [TestMethod]
         public void TestEbnfSpecificationError_Handling()
         {
-            var parser = new EbnfTokenizerParser();
-            var text = File.ReadAllText("assets/json_tokens.ebnf");
-            var (tokens, rule) = parser.Parse(text);
-            var rules = parser.Compile(text, tokens, rule);
+            var (text, tokens, astNodes, table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
 
-            var result = rules.Root.Parse("{\"key\": <bunch of errors> 123 }".ToArray(), 0);
+            var result = table.Root.Parse("{\"key\": <bunch of errors> 123 }".ToArray(), 0);
             Assert.IsTrue(result.FoundMatch);
             var expectedTokens = new[] {
                 "scope_start", "string", "kv_separator", "unknown_token", "int", "scope_end" };
@@ -327,8 +389,42 @@ namespace gg.parse.tests.examples
 
             for (var i = 0; i < expectedTokens.Length; i++)
             {
-                Assert.IsTrue(result.Annotations[i].FunctionId == rules.FindRule(expectedTokens[i]).Id);
+                Assert.IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
             }
+        }
+
+        /// <summary>
+        /// Demonstrates how to set up an ebnf tokenizer, parser and compiler
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        private (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleTable<char> table) SetupTokenizeParseCompile(string text)
+        {
+            var tokenizer = new EbnfTokenizer();
+            var parser = new EbnfTokenizerParser(tokenizer);
+            var compiler = new RuleCompiler<char>();
+
+            var result = tokenizer.Tokenize(text);
+
+            Assert.IsTrue(result.FoundMatch);
+            Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
+
+            var tokens = result.Annotations;
+
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.FoundMatch);
+            Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
+
+            var astNodes = result.Annotations;
+
+            var context = CreateContext(text, tokens, astNodes)
+                            .RegisterTokenizerCompilerFunctions(parser)
+                            .SetProductLookup(parser);
+
+            var table = compiler.Compile(context);
+
+            return (text, tokens, astNodes, table);
         }
     }
 }
