@@ -151,18 +151,18 @@ namespace gg.parse.tests.rulefunctions
         public void LiteralTest()
         {
             var table = new BasicTokensTable();
-            var fooRule = table.Literal("foo");
-            var barRule = table.Literal("bar");
+            var fooRule = table.Literal("foo", AnnotationProduct.Annotation, "foo".ToCharArray());
+            var barRule = table.Literal("bar", AnnotationProduct.Annotation, "bar".ToCharArray());
             
             Assert.IsNotNull(fooRule);
-            Assert.AreEqual($"{TokenNames.Literal}(foo)", fooRule.Name);
-            Assert.AreEqual($"{TokenNames.Literal}(bar)", barRule.Name);
-            Assert.IsTrue(table.FindRule($"{TokenNames.Literal}(foo)") == fooRule);
-            Assert.IsTrue(table.FindRule($"{TokenNames.Literal}(bar)") == barRule);
+            Assert.AreEqual("foo", fooRule.Name);
+            Assert.AreEqual("bar", barRule.Name);
+            Assert.IsTrue(table.FindRule("foo") == fooRule);
+            Assert.IsTrue(table.FindRule("bar") == barRule);
 
             // calling digit a second time should return the same rule
-            Assert.IsTrue(table.Literal("foo") == fooRule);
-            Assert.IsTrue(table.Literal("bar") == barRule);
+            Assert.IsTrue(table.Literal("foo", AnnotationProduct.Annotation, "foo".ToCharArray()) == fooRule);
+            Assert.IsTrue(table.Literal("bar", AnnotationProduct.Annotation, "bar".ToCharArray()) == barRule);
 
             // Check if the rule can parse a digit character
             var input = "foo".ToArray();

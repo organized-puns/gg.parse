@@ -1,10 +1,11 @@
 ﻿using gg.parse.rulefunctions;
-using Microsoft.VisualBasic.FileIO;
 using System.Data;
 
 namespace gg.parse.examples
 {
-    
+    /// <summary>
+    /// Generates a tokenizer (RuleTable<char>) based on an EBNF spec
+    /// </summary>
     public class EbnfTokenizerParser : RuleTable<int>
     {
         public EbnfTokenizer Tokenizer { get; init; }
@@ -154,8 +155,7 @@ namespace gg.parse.examples
 
             Root = ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);
         }
-
-        // xxx left off here
+        
         public RuleTable<char> CompileFile(string path) =>
             Compile(File.ReadAllText(path));
 
@@ -214,7 +214,7 @@ namespace gg.parse.examples
             if (ruleDefinition.FunctionId == _literal.Id)
             {
                 var literalText = GetText(text, ruleDefinition, tokens);
-                return table.Literal(literalText.Substring(1, literalText.Length - 2), name, product);
+                return table.Literal(name, product, literalText.Substring(1, literalText.Length - 2).ToCharArray());
             }
             else if (ruleDefinition.FunctionId == _sequence.Id)
             {

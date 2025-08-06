@@ -5,9 +5,7 @@ using static gg.parse.rulefunctions.TokenNames;
 namespace gg.parse.examples
 {
     public class JsonTokenizer : BasicTokensTable
-    {
-        public RuleBase<char> Root { get; private set; }
-
+    {     
         public JsonTokenizer()
         {
             var jsonTokens = 
@@ -33,6 +31,9 @@ namespace gg.parse.examples
                                 OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, Whitespace(), jsonTokens, error));
         }
 
+        public RuleBase<char> Literal(string token, string name) =>
+            Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
+
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
         public (ParseResult, string) ParseFile(string path)
@@ -40,7 +41,5 @@ namespace gg.parse.examples
             var text = File.ReadAllText(path);
             return (Tokenize(text), text);
         }
-
-        
     }
 }

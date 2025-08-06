@@ -7,7 +7,7 @@
             return rule.Production switch
             {
                 AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
-                                        [new Annotation(AnnotationDataCategory.Data, rule.Id, dataRange)]),
+                                        [new Annotation(rule.Id, dataRange)]),
                 AnnotationProduct.Transitive => 
                     throw new NotImplementedException("Cannot apply transitive production to a rule which has no children"),
                 AnnotationProduct.None => new ParseResult(true, dataRange.Length),
@@ -21,7 +21,7 @@
             return rule.Production switch
             {
                 AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length, 
-                                        [new Annotation(AnnotationDataCategory.Data, rule.Id, dataRange, children)]),
+                                        [new Annotation(rule.Id, dataRange, children)]),
                 AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
                 AnnotationProduct.None => new ParseResult(true, dataRange.Length),
                 _ => throw new NotImplementedException($"Production rule {rule.Production} is not implemented"),

@@ -28,7 +28,7 @@
 
             var digitRule = Digit(null, AnnotationProduct.None);
 
-            return OneOrMore(ruleName, product, digitRule); //OneOrMore(digitRule, ruleName, product);
+            return OneOrMore(ruleName, product, digitRule); 
         }
 
         public RuleBase<char> Sign(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -59,16 +59,11 @@
             return TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
                 : RegisterRule(new MatchFunctionSequence<char>(ruleName, product, 
-                                    Literal(keyword, product:AnnotationProduct.None), Whitespace()));
+                                    Literal(keyword), Whitespace()));
         }
 
-        public MatchDataSequence<char> Literal(string literal, string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
-        {
-            var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.Literal}({literal})";
-            return TryFindRule(ruleName, out MatchDataSequence<char>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchDataSequence<char>(ruleName, literal.ToCharArray(), product));
-        }
+        public MatchDataSequence<char> Literal(string literal) => 
+            Literal(literal.ToCharArray());
 
         public RuleBase<char> Float(
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -81,7 +76,7 @@
             return Sequence(name ?? TokenNames.Float, product,
                 sign,
                 digitSequence,
-                Literal(".", product: AnnotationProduct.None),
+                Literal("."),
                 digitSequence,
                 ZeroOrOne(exponentPart)
             );
@@ -96,8 +91,8 @@
             return TryFindRule(ruleName, out MatchOneOfFunction<char>? existingRule)
                 ? existingRule!
                 : OneOf(ruleName, product,
-                                Literal("true", product: AnnotationProduct.None),
-                                Literal("false", product: AnnotationProduct.None));
+                                Literal("true"),
+                                Literal("false"));
         }
 
         public RuleBase<char> String(
@@ -151,8 +146,8 @@
             var ruleName = name ?? $"{TokenNames.EndOfLine}";
 
             return OneOf(ruleName, product,
-                    Literal("\r\n", "CRLF", AnnotationProduct.None),
-                    Literal("\n", "LF", AnnotationProduct.None));
+                    Literal("CRLF", AnnotationProduct.None, "\r\n".ToCharArray()),
+                    Literal("LF", AnnotationProduct.None, "\n".ToCharArray()));
         }
 
         public RuleBase<char> SingleLineComment(
@@ -203,19 +198,6 @@
                 ? existingRule!
                 : RegisterRule(new MatchDataSet<char>(ruleName, product, set));
      
-        
-        public void ResolveReferences()
-        {
-            foreach (var rule in this)
-            {
-                if (rule is IRuleComposition<char> composition)
-                {
-                    foreach (var subRule in composition.SubRules.Where( r => r is RuleReference<char>).Cast<RuleReference<char>>()) 
-                    {
-                        composition.ReplaceSubRule(subRule, FindRule(subRule.Reference));
-                    }
-                }
-            }
-        }
+       
     }
 }

@@ -1,5 +1,6 @@
 ﻿using gg.core.util;
 using System.Collections;
+using System.Xml.Linq;
 
 namespace gg.parse.rulefunctions
 {
@@ -50,6 +51,29 @@ namespace gg.parse.rulefunctions
             return rule;
         }
 
+        public TRule GetOrRegisterRule<TRule>(string name, Func<TRule> ruleFactoryMethod) where TRule : RuleBase<T>
+        {
+            Contract.RequiresNotNull(ruleFactoryMethod);
+            Contract.RequiresNotNullOrEmpty(name);
+
+            if (_nameRuleLookup.TryGetValue(name, out var existingRule))
+            {
+                Contract.Requires(existingRule.GetType() == typeof(TRule),
+                    $"Rule with name '{name}' already exists in the rule table with a different type.");
+                return (TRule)existingRule;
+            }
+
+            var rule = ruleFactoryMethod();
+
+            _nameRuleLookup[rule.Name] = rule;
+            rule.Id = _nextRuleId++;
+            _idRuleLookup[rule.Id] = rule;
+
+            return rule;
+        }
+
+
+
         public bool TryFindRule<TRule>(string name, out TRule? result) where TRule : RuleBase<T>
         {
             if (_nameRuleLookup.TryGetValue(name, out var rule) && rule is TRule typedRule)
@@ -60,6 +84,22 @@ namespace gg.parse.rulefunctions
 
             result = default;
             return false;
+        }
+
+        public MatchDataSequence<T> Literal(T[] sequence)
+        {
+            var product = AnnotationProduct.None;
+            var ruleName = $"{product.GetPrefix()}{TokenNames.Literal}({string.Concat(sequence)})";
+            return Literal(ruleName, product, sequence);
+        }
+
+        
+
+        public MatchDataSequence<T> Literal(string name, AnnotationProduct product, T[] sequence)
+        {
+            return TryFindRule(name, out MatchDataSequence<T>? existingRule)
+                ? existingRule!
+                : RegisterRule(new MatchDataSequence<T>(name, sequence, product));
         }
 
 
@@ -203,5 +243,31 @@ namespace gg.parse.rulefunctions
                  ? existingRule!
                  : RegisterRule(new MatchNotFunction<T>(name, product, rule));
 
+
+        // xxx todo return errors of unresolved replacements
+        public void ResolveReferences()
+        {
+            foreach (var rule in this)
+            {
+                if (rule is IRuleComposition<T> composition)
+                {
+                    foreach (var subRule in composition.SubRules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                    {
+                        composition.ReplaceSubRule(subRule, FindRule(subRule.Reference));
+                    }
+                }
+                if (rule is RuleReference<T> reference)
+                {
+                    var replacement = FindRule(reference.Reference);
+                    _nameRuleLookup[rule.Name] = replacement;
+                    _idRuleLookup[rule.Id] = replacement;
+
+                    if (rule == Root)
+                    {
+                        Root = replacement;
+                    }
+                }
+            }
+        }
     }
 }

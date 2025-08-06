@@ -68,6 +68,9 @@ namespace gg.parse.examples
                                 OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, Whitespace(), error));
         }
 
+        public RuleBase<char> Literal(string token, string name) => 
+            Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
+
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
         public (ParseResult, string) ParseFile(string path)

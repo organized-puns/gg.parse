@@ -7,7 +7,7 @@
         Warning
     }
 
-    public class Annotation(AnnotationDataCategory category, int functionId, Range range, List<Annotation>? children = null) : IComparable
+    public class Annotation(int functionId, Range range, List<Annotation>? children = null) : IComparable
     {
         public Range Range { get; init; } = range;
         

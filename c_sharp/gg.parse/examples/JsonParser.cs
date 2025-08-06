@@ -21,8 +21,7 @@ namespace gg.parse.examples
     {
         
         public JsonTokenizer Tokenizer { get; init; }
-
-        public RuleBase<int> Root { get; private set; }
+     
 
         private AnnotationProduct _defaultProduct = AnnotationProduct.Annotation;
 
