@@ -1,3 +1,50 @@
+RANDOM NOTEs
+=====
+
+Make parser a bit more human friendly to read (see the json example)  
+	WONT happen it gets too complex, wait until ebnf is implemeted
+Figure out how to do error handling, goals
+	- don't interfere with happy path
+	- maybe exception like approach
+	=> recovery
+
+implement errors, alternatives for short hand
+see if sequence can go without ,
+see if range can go without {}
+add root
+
+digit = '0'..'9'
+sign = '+' | '-'
+int = ?sign +digit !'.'
+float = ?sign +digit '.' +digit ?('e'|'E' ?sign +digit)
+string = '"' *(not'"' any) '"'
+scope_start = '{'
+scope_end = '}'
+
+
+
+key_value_pair {
+	rule  = key key_value_separator value
+	error = key !(key_value_separator value) mark_error("failed to ...")
+	skip  = '}' | key_value_pair
+}
+
+=>
+key_value_pair  = (key key_value_separator value) 
+				| (key !(key_value_separator value)) mark_error("failed to ...") 
+				  skip_until('}' | '{' | key_value_pair) 
+
+key_value_pair  = (key key_value_separator value) 
+				// error handling
+				| (key !(key_value_separator value)) 
+				  error("failed to ...") 
+				  skip_until('}' | '{' | key_value_pair) 
+
+sequence = a b c
+	if a succeeds but b fails, skip until c, return error
+	if a & b succeed but c fails, return error
+
+
 ```
 // simple json tokenizer grammar
 
@@ -52,6 +99,13 @@ rules needed:
 parser:
 
 ```
+	character_range_start = "<";
+	character_range_end = ">";
+	elipsis = "..";
+	character_range = character_range_start, character, elipsis, character, character_range_start;
+
+	// note, replace "<" with anonymous token _character_range_1 = "<" eventually in a pre-processing step
+	// of the parser, so it's easy to write
 	character_range = "<", character, "..", character, ">";
 	character_set = "{", character+, "}";
 	any_character = "any" | "_";
@@ -79,3 +133,27 @@ parser:
 	rule_declaration = action*, identifier;
 	rule = rule_declaration, "=", expression, ";"
 ```
+
+recovery points
+
+example tokenizer
+
+...
+kv_separator = ":"
+tokens = ... | kv_separator 
+unknown_token = error("unknown token", tokens)
+#root = *(whitespace | tokens | unknown_token)
+
+	
+
+example parser
+
+err_missing_value		  = skip_until comma | scope_end
+err_missing_kv_separator  = skip_until value | comma | scope_end
+
+kv = key kv_separator value
+   | key kv_separator err_missing_value 
+   | key error "expecting kv_sepator" value | comma | scope_end
+
+json_object = scope_start ?kv_list scope_end
+			| scope_start error("failed to parse json object") skip_until(scope_end)
