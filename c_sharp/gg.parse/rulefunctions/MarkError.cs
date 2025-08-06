@@ -1,5 +1,6 @@
 ﻿
 using gg.core.util;
+using System;
 using System.Data;
 
 namespace gg.parse.rulefunctions
@@ -37,7 +38,7 @@ namespace gg.parse.rulefunctions
                 return this.BuildDataRuleResult(new(start, index - start));
             }
 
-            return ParseResult.Failure;
+            return this.BuildDataRuleResult(new(start, 0));
         }
 
         public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)

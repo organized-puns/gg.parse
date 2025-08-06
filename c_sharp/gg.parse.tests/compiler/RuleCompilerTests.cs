@@ -1,9 +1,8 @@
 ﻿using gg.parse.compiler;
 using gg.parse.rulefunctions;
-
 using static gg.parse.compiler.CompilerFunctions;
 
-namespace gg.parse.tests.examples
+namespace gg.parse.tests.compiler
 {
     /// <summary>
     /// Test the various compiler rules and the compiler itself as well
@@ -495,6 +494,195 @@ namespace gg.parse.tests.examples
             TestRegisterAndCompileCountFunction(CompileZeroOrOne, '?', 0, 1);
         }
 
+        /// <summary>
+        /// Tests & demonstrates how to generate a ruletable using a compiler containing 
+        /// a not rule
+        /// </summary>
+        [TestMethod]
+        public void TestNotFunction()
+        {
+            var compiler = new RuleCompiler<char>();
+
+            var literalId = 42;
+            var notId = 64;
+
+            var context = new CompileContext<char>()
+                .WithText($"rule=!'foo'")
+                .WithFunction(literalId, CompileLiteral)
+                .WithFunction(notId, CompileNot)
+                .WithTokens(new Annotation(0, new(0, 4)), // rule
+                            new Annotation(2, new(4, 1)), // operatorChar
+                            new Annotation(3, new(6, 5))); // foo
+
+            context.AstNodes = [
+                new Annotation(2, new(0, 3), [
+                    // child capturing the token(s) defining the rule name
+                    new(0, new Range(0, 1)), 
+
+                    // not function
+                    new (notId, new Range(1, 2),[
+                        // foo literal
+                        new(literalId, new Range(2, 1))
+                    ])
+                ])
+            ];
+
+            // compile a rule table which can tokenize not 'foo'
+            var table = compiler.Compile(context);
+
+            Assert.IsNotNull(table);
+            Assert.IsNotNull(table.Root);
+
+            // the ebnf declared the sequence as 'rule'
+            var notFunction = table.FindRule("rule");
+            Assert.IsNotNull(notFunction);
+
+            var validInput = new string[] { "a", "", "_", "FoO", "fOo", "FOO", "fo" };
+            var result = ParseResult.Failure;
+
+            for (var i = 0; i < validInput.Length; i++)
+            {
+                result = table.Root.Parse(validInput[i].ToCharArray(), 0);
+
+                // the result should hold a token which describes a not foo
+                Assert.IsTrue(result.FoundMatch);
+                Assert.IsTrue(result.Annotations != null);
+                Assert.IsTrue(result.Annotations.Count == 1);
+                Assert.IsTrue(result.Annotations[0].FunctionId == notFunction.Id);
+                Assert.IsTrue(result.Annotations[0].Start == 0);
+                Assert.IsTrue(result.Annotations[0].Length == 0);
+            }
+
+            var invalidInput = "foo";
+            
+            result = table.Root.Parse(invalidInput.ToCharArray(), 0);
+            Assert.IsFalse(result.FoundMatch);
+        }
+
+        /// <summary>
+        /// Tests & demonstrates how to generate a ruletable using a compiler containing 
+        /// a any rule
+        /// </summary>
+        [TestMethod]
+        public void TestAnyFunction()
+        {
+            var compiler = new RuleCompiler<char>();
+
+            var anyId = 64;
+
+            var context = new CompileContext<char>()
+                .WithText($"rule=.")
+                .WithFunction(anyId, CompileAny)
+                .WithTokens(new Annotation(0, new(0, 4)), // rule
+                            new Annotation(1, new(4, 1))); // any
+
+            context.AstNodes = [
+                new Annotation(2, new(0, 3), [
+                    // child capturing the token(s) defining the rule name
+                    new(0, new Range(0, 1)), 
+
+                    // any function
+                    new (anyId, new Range(1, 1))
+                ])
+            ];
+
+            // compile a rule table which can tokenize 'any' char
+            var table = compiler.Compile(context);
+
+            Assert.IsNotNull(table);
+            Assert.IsNotNull(table.Root);
+
+            // the ebnf declared the sequence as 'rule'
+            var anyFunction = table.FindRule("rule");
+            Assert.IsNotNull(anyFunction);
+
+            var validInput = new string[] { "a", "b", "1", "_", "~" };
+            var result = ParseResult.Failure;
+
+            for (var i = 0; i < validInput.Length; i++)
+            {
+                result = table.Root.Parse(validInput[i].ToCharArray(), 0);
+
+                // the result should hold a token which describes a not foo
+                Assert.IsTrue(result.FoundMatch);
+                Assert.IsTrue(result.Annotations != null);
+                Assert.IsTrue(result.Annotations.Count == 1);
+                Assert.IsTrue(result.Annotations[0].FunctionId == anyFunction.Id);
+                Assert.IsTrue(result.Annotations[0].Start == 0);
+                Assert.IsTrue(result.Annotations[0].Length == 1);
+            }
+
+            var invalidInput = "";
+
+            result = table.Root.Parse(invalidInput.ToCharArray(), 0);
+            Assert.IsFalse(result.FoundMatch);
+        }
+
+        /// <summary>
+        /// Tests & demonstrates how to generate a ruletable using a compiler containing 
+        /// an error rule
+        /// </summary>
+        [TestMethod]
+        public void TestErrorFunction()
+        {
+            var compiler = new RuleCompiler<char>();
+
+            var litId = 42;
+            var errorId = 64;
+
+            var context = new CompileContext<char>()
+                .WithText($"rule=error 'message' 'foo'")
+                .WithFunction(litId, CompileLiteral)
+                .WithFunction(errorId, CompileError)
+                .WithTokens(new Annotation(0, new(0, 4)),  // rule
+                            new Annotation(1, new(4, 5)),  // error declaration
+                            new Annotation(1, new(10, 8)), // message
+                            new Annotation(1, new(19, 5))  // match literal
+                ); 
+
+            context.AstNodes = [
+                new Annotation(2, new(0, 3), [
+                    // child capturing the token(s) defining the rule name
+                    new(0, new Range(0, 1)), 
+
+                    // error
+                    new (errorId, new Range(1, 3), [
+                        new (0, new Range(1, 1)),       // error decl
+                        new (1, new Range(2, 1)),       // message
+                        new (litId, new Range(3, 1)),   // skip function
+                    ])
+                ])
+            ];
+
+            // compile a rule table which can tokenize invoke an error
+            var table = compiler.Compile(context);
+
+            Assert.IsNotNull(table);
+            Assert.IsNotNull(table.Root);
+
+            // the ebnf declared the error as 'rule'
+            var errorRule = table.FindRule("rule");
+            Assert.IsNotNull(errorRule);
+
+            var validInput = new string[] { "foo", "123foo", "123", "" };
+            var result = ParseResult.Failure;
+
+            for (var i = 0; i < validInput.Length; i++)
+            {
+                result = table.Root.Parse(validInput[i].ToCharArray(), 0);
+
+                // the result should hold a token which describes a not foo
+                Assert.IsTrue(result.FoundMatch);
+                Assert.IsTrue(result.Annotations != null);
+                Assert.IsTrue(result.Annotations.Count == 1);
+                Assert.IsTrue(result.Annotations[0].FunctionId == errorRule.Id);
+                Assert.IsTrue(result.Annotations[0].Start == 0);
+                // error should have skipped until the end of the input (as all cases have 
+                // foo at their end or no foo)
+                Assert.IsTrue(result.Annotations[0].Length == validInput[i].Length);
+            }
+        }
+
         private void TestRegisterAndCompileCountFunction(CompileFunction<char> function, char operatorChar, int min, int max)
         {
             var compiler = new RuleCompiler<char>();
@@ -585,5 +773,7 @@ namespace gg.parse.tests.examples
                 Assert.IsTrue(result.Annotations[0].Length == max * 3);
             }
         }
+
+
     }
 }

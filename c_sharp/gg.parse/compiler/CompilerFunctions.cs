@@ -1,5 +1,7 @@
 ﻿using gg.parse.rulefunctions;
 using System.Diagnostics.Contracts;
+using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.compiler
 {
@@ -9,7 +11,7 @@ namespace gg.parse.compiler
     /// </summary>
     public static class CompilerFunctions
     {
-        /// -- Tokenizer specific functions ---------------------------------------------------------------------------
+        /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
         public static RuleBase<char> CompileLiteral(
            Annotation ruleDefinition,
@@ -74,9 +76,11 @@ namespace gg.parse.compiler
             }
 
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                // parameter order...
+                // xxx parameter order...
                 new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product));
         }
+
+        
 
         // -- Generic functions ---------------------------------------------------------------------------------------
 
@@ -184,7 +188,6 @@ namespace gg.parse.compiler
                             new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max));
         }
 
-        // xxx to test
         public static RuleBase<T> CompileNot<T>(
             Annotation ruleDefinition,
             RuleDeclaration declaration,
@@ -203,5 +206,39 @@ namespace gg.parse.compiler
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
                             new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction));
         }
+
+        public static RuleBase<T> CompileAny<T>(
+            Annotation ruleDefinition,
+            RuleDeclaration declaration,
+            CompileContext<T> context) where T : IComparable<T>
+        {
+            Contract.Requires(ruleDefinition != null);
+            
+            return context.Output.GetOrRegisterRule(declaration.Name, () =>
+                            new MatchAnyData<T>(declaration.Name, declaration.Product));
+        }
+
+        public static RuleBase<T> CompileError<T>(
+           Annotation ruleDefinition,
+           RuleDeclaration declaration,
+           CompileContext<T> context) where T : IComparable<T>
+        {
+            Contract.Requires(ruleDefinition != null);
+            Contract.Requires(ruleDefinition!.Children != null);
+            Contract.Requires(ruleDefinition.Children!.Count > 0);
+
+            var message = context.GetText(ruleDefinition.Children[1].Range);
+            message = message.Substring(1, message.Length - 2);
+
+            var skipAnnotation = ruleDefinition.Children[2];
+            var compilationFunction = context.Functions[skipAnnotation.FunctionId];
+            // xxx add human understandable name instead of subfunction
+            var skipDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(skip_until)");
+            var testFunction = compilationFunction(skipAnnotation, skipDeclaration, context);
+
+            return context.Output.GetOrRegisterRule(declaration.Name, () =>
+                            new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0));
+        }
+
     }
 }
