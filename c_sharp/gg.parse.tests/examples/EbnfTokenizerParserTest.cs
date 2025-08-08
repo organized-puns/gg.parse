@@ -1,8 +1,7 @@
-﻿using gg.parse.compiler;
-using gg.parse.examples;
+﻿using gg.parse.examples;
 using gg.parse.rulefunctions;
 
-using static gg.parse.examples.TokenizerCompilerFactory;
+using static gg.parse.tests.TestUtils;
 
 namespace gg.parse.tests.examples
 {
@@ -199,11 +198,11 @@ namespace gg.parse.tests.examples
             Assert.IsNotNull(sequenceRule);
             Assert.IsTrue(sequenceRule.Production == AnnotationProduct.Transitive);
 
-            var fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            var barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
@@ -218,11 +217,11 @@ namespace gg.parse.tests.examples
             Assert.IsNotNull(optionRule);
             Assert.IsTrue(optionRule.Production == AnnotationProduct.Annotation);
 
-            var fooLit = optionRule.Options[0] as MatchDataSequence<char>;
+            var fooLit = optionRule.RuleOptions[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            var barLit = optionRule.Options[1] as MatchDataSequence<char>;
+            var barLit = optionRule.RuleOptions[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
@@ -235,18 +234,18 @@ namespace gg.parse.tests.examples
             var groupRule = table.FindRule("group_rule") as MatchOneOfFunction<char>;
 
             Assert.IsNotNull(groupRule);
-            var sequenceRule = groupRule.Options[0] as MatchFunctionSequence<char>;
-            var litRule = groupRule.Options[1] as MatchDataSequence<char>;
+            var sequenceRule = groupRule.RuleOptions[0] as MatchFunctionSequence<char>;
+            var litRule = groupRule.RuleOptions[1] as MatchDataSequence<char>;
 
             Assert.IsNotNull(sequenceRule);
             Assert.IsNotNull(litRule);
             Assert.IsTrue(litRule.DataArray.SequenceEqual("baz".ToArray()));
 
-            var fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            var barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
@@ -259,12 +258,12 @@ namespace gg.parse.tests.examples
             var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
             Assert.IsNotNull(sequenceRule);
 
-            var fooLit = sequenceRule.Sequence[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
             Assert.IsTrue(table.FindRule("foo") == fooLit);
 
-            var barLit = sequenceRule.Sequence[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
             Assert.IsNotNull(barLit);
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
             Assert.IsTrue(table.FindRule("bar") == barLit);
@@ -393,39 +392,7 @@ namespace gg.parse.tests.examples
             }
         }
 
-        /// <summary>
-        /// Demonstrates how to set up an ebnf tokenizer, parser and compiler
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        private (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleTable<char> table) SetupTokenizeParseCompile(string text)
-        {
-            var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenizerParser(tokenizer);
-            var compiler = new RuleCompiler<char>();
 
-            var result = tokenizer.Tokenize(text);
-
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
-
-            var tokens = result.Annotations;
-
-            result = parser.Parse(tokens);
-
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
-
-            var astNodes = result.Annotations;
-
-            var context = CreateContext(text, tokens, astNodes)
-                            .RegisterTokenizerCompilerFunctions(parser)
-                            .SetProductLookup(parser);
-
-            var table = compiler.Compile(context);
-
-            return (text, tokens, astNodes, table);
-        }
     }
 }
 

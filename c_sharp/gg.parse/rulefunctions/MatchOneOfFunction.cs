@@ -1,30 +1,41 @@
 ﻿using gg.core.util;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace gg.parse.rulefunctions
 {
     public class MatchOneOfFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-        public RuleBase<T>[] Options { get; set; }
+        private RuleBase<T>[] _options;
 
-        public IEnumerable<RuleBase<T>> SubRules => Options;
+        public RuleBase<T>[] RuleOptions 
+        {
+            get => _options;
+            set
+            {
+                Contract.Requires(value != null);
+                Contract.Requires(value!.Any(v => v != null));
+
+                _options = value!;
+            }
+        }
+
+        public IEnumerable<RuleBase<T>> SubRules => RuleOptions;
 
         public MatchOneOfFunction(string name, params RuleBase<T>[] options)
             : base(name, AnnotationProduct.Annotation)
         {
-            Options = options;
+            RuleOptions = options;
         }
 
         public MatchOneOfFunction(string name, AnnotationProduct production, params RuleBase<T>[] options)
             : base(name, production)
         {
-            Options = options;
+            RuleOptions = options;
         }
 
 
         public override ParseResult Parse(T[] input, int start)
         {
-            foreach (var option in Options)
+            foreach (var option in RuleOptions)
             {
                 var result = option.Parse(input, start);
                 if (result.FoundMatch)
@@ -41,9 +52,13 @@ namespace gg.parse.rulefunctions
 
         public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
         {
-            var index = Array.IndexOf(Options, subRule);
+            Contract.RequiresNotNull(replacement, $"{nameof(MatchOneOfFunction<T>)} cannot have null as its options.");
+
+            var index = Array.IndexOf(RuleOptions, subRule);
+            
             Contract.Requires(index >= 0);
-            Options[index] = replacement;
+
+            RuleOptions[index] = replacement;
         }
     }
 }

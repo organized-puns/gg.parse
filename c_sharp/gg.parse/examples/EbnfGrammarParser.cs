@@ -5,13 +5,15 @@ namespace gg.parse.examples
     /// <summary>
     /// Generates a tokenizer (RuleTable<char>) based on an EBNF spec
     /// </summary>
-    public class EbnfTokenizerParser : RuleTable<int>
+    public class EbnfGrammarParser : RuleTable<int>
     {
         public EbnfTokenizer Tokenizer { get; init; }      
 
-        public MatchOneOfFunction<int>     MatchLiteral { get; private set; }
+        public MatchOneOfFunction<int>        MatchLiteral { get; private set; }
 
-        public MatchSingleData<int>        MatchAnyCharacter { get; private set; }
+        public MatchOneOfFunction<int>      MatchRuleDefinition { get; private set; }
+
+        public MatchSingleData<int>        MatchAnyToken { get; private set; }
 
         public MatchSingleData<int>        MatchTransitiveSelector { get; private set; }
 
@@ -25,9 +27,9 @@ namespace gg.parse.examples
 
         public MatchFunctionSequence<int>  MatchOption { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchCharacterSet { get; private set; }
+        //public MatchFunctionSequence<int>  MatchCharacterSet { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchCharacterRange { get; private set; }
+        //public MatchFunctionSequence<int>  MatchCharacterRange { get; private set; }
 
         public MatchFunctionSequence<int>  MatchGroup { get; private set; }
 
@@ -41,12 +43,13 @@ namespace gg.parse.examples
 
         public MatchFunctionSequence<int>  MatchError { get; private set; }
 
-        public EbnfTokenizerParser()
-            : this(new EbnfTokenizer())
-        {
-        }
-
-        public EbnfTokenizerParser(EbnfTokenizer tokenizer)
+        /// <summary>
+        /// Create a grammar parser 
+        /// </summary>
+        /// <param name="tokenizer">Tokenizer used to turn the grammar-input text into tokens.</param>
+        /// <param name="inputTokens">List of rules found in the token-input text which are used to identify tokens 
+        /// in the grammar-input text</param>
+        public EbnfGrammarParser(EbnfTokenizer tokenizer, RuleTable<char> inputTokens)
         {
             Tokenizer = tokenizer;
 
@@ -57,10 +60,10 @@ namespace gg.parse.examples
             );
 
             // .
-            MatchAnyCharacter = Token("AnyCharacter", AnnotationProduct.Annotation, TokenNames.AnyCharacter);
+            MatchAnyToken = Token("AnyToken", AnnotationProduct.Annotation, TokenNames.AnyCharacter);
 
             // { "abcf" }
-            MatchCharacterSet = Sequence("CharacterSet", AnnotationProduct.Annotation,
+            /*MatchCharacterSet = Sequence("CharacterSet", AnnotationProduct.Annotation,
                     Token(TokenNames.ScopeStart),
                     MatchLiteral,
                     Token(TokenNames.ScopeEnd)
@@ -73,16 +76,16 @@ namespace gg.parse.examples
                     Token(TokenNames.Elipsis),
                     MatchLiteral,
                     Token(TokenNames.ScopeEnd)
-            );
+            );*/
 
             MatchIdentifier = Token("Identifier", AnnotationProduct.Annotation, TokenNames.Identifier);
             
             // literal | set
             var ruleTerms = OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
                 MatchLiteral, 
-                MatchAnyCharacter, 
-                MatchCharacterSet, 
-                MatchCharacterRange, 
+                MatchAnyToken, 
+                //MatchCharacterSet, 
+                //MatchCharacterRange, 
                 MatchIdentifier
             );
 
@@ -110,14 +113,14 @@ namespace gg.parse.examples
 
             var binaryRuleTerms = OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption);
 
-            var ruleDefinition = OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
+            MatchRuleDefinition = OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
                 binaryRuleTerms, 
                 ruleTerms);
 
             // ( a, b, c )
             MatchGroup = Sequence("#Group", AnnotationProduct.Transitive,
                 Token(TokenNames.GroupStart),
-                ruleDefinition,
+                MatchRuleDefinition,
                 Token(TokenNames.GroupEnd));
 
             // *(a | b | c)
@@ -143,7 +146,7 @@ namespace gg.parse.examples
             MatchError = Sequence("Error", AnnotationProduct.Annotation,
                     Token("ErrorKeyword", AnnotationProduct.Annotation, TokenNames.MarkError),
                     MatchLiteral,
-                    ruleDefinition
+                    MatchRuleDefinition
             );
 
             ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, MatchError];
@@ -164,10 +167,20 @@ namespace gg.parse.examples
                     ruleProduction,
                     MatchRuleName,
                     Token(TokenNames.Assignment),
-                    ruleDefinition,
+                    MatchRuleDefinition,
                     Token(TokenNames.EndStatement));
 
-            Root = ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);           
+            Root = ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);        
+            
+            //foreach (var tokenFunctionName in inputTokens.FunctionNames)
+            //{
+            //    var tokenFunction = inputTokens.FindRule(tokenFunctionName);
+
+            //    if (tokenFunction.Production == AnnotationProduct.Annotation)
+            //    {
+            //        RegisterRule(new MatchSingleData<int>($"input_token({tokenFunctionName}", tokenFunction.Id));
+            //    }
+            //}
         }
 
         public ParseResult Parse(List<Annotation> tokens)

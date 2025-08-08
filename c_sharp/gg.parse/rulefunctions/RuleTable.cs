@@ -1,6 +1,5 @@
 ﻿using gg.core.util;
 using System.Collections;
-using System.Xml.Linq;
 
 namespace gg.parse.rulefunctions
 {
@@ -12,6 +11,8 @@ namespace gg.parse.rulefunctions
         private readonly Dictionary<int, RuleBase<T>> _idRuleLookup = [];
 
         public RuleBase<T>? Root { get; set; }
+
+        public IEnumerable<string> FunctionNames => _nameRuleLookup.Keys;
 
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
@@ -253,14 +254,21 @@ namespace gg.parse.rulefunctions
                 {
                     foreach (var subRule in composition.SubRules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                     {
-                        composition.ReplaceSubRule(subRule, FindRule(subRule.Reference));
+                        var replacement = FindRule(subRule.Reference);
+
+                        Contract.Requires(replacement != null, $"Cannot find reference {subRule.Reference}.");
+
+                        composition.ReplaceSubRule(subRule, replacement!);
                     }
                 }
                 if (rule is RuleReference<T> reference)
                 {
                     var replacement = FindRule(reference.Reference);
-                    _nameRuleLookup[rule.Name] = replacement;
-                    _idRuleLookup[rule.Id] = replacement;
+
+                    Contract.Requires(replacement != null, $"Cannot find reference {reference.Reference}.");
+
+                    _nameRuleLookup[rule.Name] = replacement!;
+                    _idRuleLookup[rule.Id] = replacement!;
 
                     if (rule == Root)
                     {
