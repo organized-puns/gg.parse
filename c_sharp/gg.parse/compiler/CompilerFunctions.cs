@@ -1,7 +1,5 @@
 ﻿using gg.parse.rulefunctions;
 using System.Diagnostics.Contracts;
-using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.compiler
 {
@@ -21,19 +19,33 @@ namespace gg.parse.compiler
             var literalText = context.GetText(ruleDefinition.Range);
             literalText = literalText.Substring(1, literalText.Length - 2);
 
+            if (string.IsNullOrEmpty(literalText))
+            {
+                // xxx add warnings
+                // xxx resolve rule
+                throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
+            }
+
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
                             new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product));
         }
 
-        public static RuleBase<char> CompileIdentifier(
+        public static RuleBase<T> CompileIdentifier<T>(
            Annotation ruleDefinition,
            RuleDeclaration declaration,
-           CompileContext<char> context)
+           CompileContext<T> context) where T : IComparable<T>
         {
             var referenceName = context.GetText(ruleDefinition.Range);
 
+            if (string.IsNullOrEmpty(referenceName))
+            {
+                // xxx add context errors if fatal
+                // xxx resolve rule
+                throw new CompilationException<char>("ReferenceName text is empty", ruleDefinition.Range, null);
+            }
+
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                new RuleReference<char>(declaration.Name, referenceName));
+                new RuleReference<T>(declaration.Name, referenceName));
         }
 
         public static RuleBase<char> CompileCharacterSet(
@@ -46,6 +58,14 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count == 1);
 
             var setText = context.GetText(ruleDefinition.Children[0].Range);
+
+            if (string.IsNullOrEmpty(setText) || setText.Length <= 2)
+            {
+                // xxx add context errors if fatal
+                // xxx resolve rule
+                throw new CompilationException<char>("Text defining the set text is null or empty", ruleDefinition.Range, null);
+            }
+
             setText = setText.Substring(1, setText.Length - 2);
 
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
@@ -104,6 +124,13 @@ namespace gg.parse.compiler
                     var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}[{i}]");
                     var sequenceElement = compilationFunction(elementAnnotation, elementDeclaration, context);
 
+                    if (sequenceElement == null)
+                    {
+                        // xxx add context errors if fatal
+                        // xxx resolve rule
+                        throw new CompilationException<char>("Cannot compile rule definition for sequence.", elementAnnotation.Range, null);
+                    }
+
                     sequenceElements.Add(sequenceElement);
                 }
             }
@@ -128,6 +155,13 @@ namespace gg.parse.compiler
                     var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}[{i}]");
                     var optionElement = compilationFunction(elementAnnotation, elementDeclaration, context);
 
+                    if (optionElement == null)
+                    {
+                        // xxx add context errors if fatal
+                        // xxx resolve rule
+                        throw new CompilationException<char>("Cannot compile rule definition for option.", elementAnnotation.Range, null);
+                    }
+
                     optionElements.Add(optionElement);
                 }
             }
@@ -147,6 +181,8 @@ namespace gg.parse.compiler
 
             var elementAnnotation = ruleDefinition.Children[0];
             var compilationFunction = context.Functions[elementAnnotation.FunctionId];
+
+
             return compilationFunction(elementAnnotation, declaration, context);
         }
 
@@ -188,6 +224,13 @@ namespace gg.parse.compiler
             var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(subFunction[{min},{max}])");
             var subFunction = compilationFunction(elementAnnotation, elementDeclaration, context);
 
+            if (subFunction == null)
+            {
+                // xxx add context errors if fatal
+                // xxx resolve rule
+                throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementAnnotation.Range, null);
+            }
+
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
                             new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max));
         }
@@ -206,6 +249,13 @@ namespace gg.parse.compiler
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(~subFunction)");
             var subFunction = compilationFunction(elementAnnotation, elementDeclaration, context);
+
+            if (subFunction == null)
+            {
+                // xxx add errors
+                // xxx resolve rule
+                throw new CompilationException<char>("Cannot compile subFunction definition for Not.", elementAnnotation.Range, null);
+            }
 
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
                             new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction));
@@ -232,6 +282,14 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var message = context.GetText(ruleDefinition.Children[1].Range);
+
+            if (string.IsNullOrEmpty(message) || message.Length <= 2)
+            {
+                // xxx add warnings
+                // xxx resolve rule
+                throw new CompilationException<T>("Text defining the error is null or empty", ruleDefinition.Range, null);
+            }
+
             message = message.Substring(1, message.Length - 2);
 
             var skipAnnotation = ruleDefinition.Children[2];
@@ -239,6 +297,13 @@ namespace gg.parse.compiler
             // xxx add human understandable name instead of subfunction
             var skipDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(skip_until)");
             var testFunction = compilationFunction(skipAnnotation, skipDeclaration, context);
+
+            if (testFunction == null)
+            {
+                // xxx add warnings
+                // xxx resolve rule
+                throw new CompilationException<char>("Cannot compile subFunction definition for Error.", skipAnnotation.Range, null);
+            }
 
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
                             new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0));

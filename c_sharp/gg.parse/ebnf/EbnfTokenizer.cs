@@ -1,7 +1,7 @@
 ﻿using gg.parse.rulefunctions;
 using static gg.parse.rulefunctions.TokenNames;
 
-namespace gg.parse.examples
+namespace gg.parse.ebnf
 {
     public class EbnfTokenizer : BasicTokensTable
     {

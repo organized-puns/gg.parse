@@ -81,7 +81,7 @@ namespace gg.parse.examples
             var jsonArray = Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
                 arrayStart, ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
 
-            value.Options = [.. value.Options, jsonObject, jsonArray];
+            value.RuleOptions = [.. value.RuleOptions, jsonObject, jsonArray];
 
             // todo error(s)
 

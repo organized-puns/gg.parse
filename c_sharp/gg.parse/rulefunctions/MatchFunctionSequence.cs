@@ -1,22 +1,39 @@
 ﻿using gg.core.util;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace gg.parse.rulefunctions
 {
-    public class MatchFunctionSequence<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence) 
-        : RuleBase<T>(name, production), IRuleComposition<T>
-        where T : IComparable<T>
+    public class MatchFunctionSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {
-        public RuleBase<T>[] Sequence { get; set; } = sequence;
+        private RuleBase<T>[] _sequence;
 
-        public IEnumerable<RuleBase<T>> SubRules => Sequence;
+        public RuleBase<T>[] SequenceSubfunctions
+        {
+            get => _sequence;
+            set
+            {
+                Contract.Requires(value != null);
+                Contract.Requires(value!.Any( v => v != null));
+
+                _sequence = value!;
+            }
+        }
+
+
+        public IEnumerable<RuleBase<T>> SubRules => SequenceSubfunctions;
+
+
+        public MatchFunctionSequence(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence)
+            : base(name, production) 
+        {
+            SequenceSubfunctions = sequence;
+        }
 
         public override ParseResult Parse(T[] input, int start)
         {
             var index = start;
             List<Annotation>? children = null;
 
-            foreach (var function in Sequence)
+            foreach (var function in SequenceSubfunctions)
             {
                 var result = function.Parse(input, index);
                 
@@ -40,9 +57,13 @@ namespace gg.parse.rulefunctions
 
         public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
         {
-            var index = Array.IndexOf(Sequence, subRule);
+            Contract.RequiresNotNull(replacement, "Sequence cannot have null as its subrules.");
+
+            var index = Array.IndexOf(SequenceSubfunctions, subRule);
+            
             Contract.Requires(index >= 0);
-            Sequence[index] = replacement;
+
+            SequenceSubfunctions[index] = replacement;
         }
     }
 }
