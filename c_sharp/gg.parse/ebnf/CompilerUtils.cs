@@ -3,9 +3,9 @@ using gg.parse.rulefunctions;
 
 using static gg.parse.compiler.CompilerFunctions;
 
-namespace gg.parse.examples
+namespace gg.parse.ebnf
 {
-    public static class TokenizerCompilerFactory
+    public static class CompilerUtils
     {
         public static CompileContext<T> CreateContext<T>(string text, List<Annotation> tokens, List<Annotation> astNodes) where T: IComparable<T>
         {

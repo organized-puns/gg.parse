@@ -1,8 +1,8 @@
 ﻿using gg.parse.compiler;
-using gg.parse.examples;
+using gg.parse.ebnf;
 using gg.parse.rulefunctions;
 
-using static gg.parse.examples.TokenizerCompilerFactory;
+using static gg.parse.ebnf.CompilerUtils;
 
 namespace gg.parse.tests
 {

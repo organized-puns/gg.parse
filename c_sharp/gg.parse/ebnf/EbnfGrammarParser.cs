@@ -1,6 +1,6 @@
 ﻿using gg.parse.rulefunctions;
 
-namespace gg.parse.examples
+namespace gg.parse.ebnf
 {
     /// <summary>
     /// Generates a tokenizer (RuleTable<char>) based on an EBNF spec
