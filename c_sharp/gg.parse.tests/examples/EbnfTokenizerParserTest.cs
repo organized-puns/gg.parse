@@ -259,13 +259,21 @@ namespace gg.parse.tests.examples
             var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
             Assert.IsNotNull(sequenceRule);
 
-            var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
+            var fooLitRef = sequenceRule.SequenceSubfunctions[0] as RuleReference<char>;
+            Assert.IsNotNull(fooLitRef);
+
+            var fooLit = fooLitRef.Rule as MatchDataSequence<char>;
             Assert.IsNotNull(fooLit);
+                        
             Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
             Assert.IsTrue(table.FindRule("foo") == fooLit);
 
-            var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
+            var barLitRef = sequenceRule.SequenceSubfunctions[1] as RuleReference<char>;
+            Assert.IsNotNull(barLitRef);
+
+            var barLit = barLitRef.Rule as MatchDataSequence<char>; 
             Assert.IsNotNull(barLit);
+            
             Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
             Assert.IsTrue(table.FindRule("bar") == barLit);
         }
@@ -359,6 +367,11 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations[0].Range.Start == 0);
             Assert.IsTrue(result.Annotations[0].Range.Length == "\"foo\"".Length);
+
+            // test if whitespace is there
+            var whiteSpace = table.FindRule("white_space");
+            Assert.IsNotNull(whiteSpace);
+            Assert.IsTrue(whiteSpace.Production == AnnotationProduct.None);
 
             // test parsing
             result = table.Root.Parse("{\"key\": 123, \"key\": null }".ToArray(), 0);

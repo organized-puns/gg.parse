@@ -20,6 +20,16 @@ namespace gg.parse.compiler
             {
                 var (declaration, idx) = GetRuleDeclaration(node.Children, 0);
                 var ruleDefinition = node.Children[idx];
+
+                if (!_context.Functions.ContainsKey(ruleDefinition.FunctionId))
+                {
+                    var rule = context.Parser.FindRule(ruleDefinition.FunctionId);
+                    throw new CompilationException<int>(
+                        $"Unable to match rule {rule.Name}({rule.Id}) to a compile function.", 
+                        ruleDefinition.Range,
+                        rule);
+                }
+
                 var compilationFunction = _context.Functions[ruleDefinition.FunctionId];
                 var compiledRule = compilationFunction(ruleDefinition, declaration, _context);
 

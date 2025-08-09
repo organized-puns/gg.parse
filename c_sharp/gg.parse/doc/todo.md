@@ -4,13 +4,16 @@ TO DO
 Implemented an ebnf tokenizer, parser, compiler which can take a ebnf based token definition (see json_tokens.ebnf )
 next implement a parser, (we can re-use the tokenizer) which can parse a grammer (see json_grammar.ebnf )
 
- - json_grammar_optimized.ebnf causes exception when used in ParseJsonKeyValue_IntegrationTest
-
 ---
 
-build c# from rule table
+Clean up:
+	Merge grammar parser / tokenizer parser
 
-verify if error reporting / fallback works
+Break everything:
+	verify if error reporting / fallback works
+
+build c# from rule table, so there can be a compiled version
+
 
 implement a EbnfParserParser
 
@@ -27,6 +30,8 @@ Make parser a bit more human friendly to read (see the json example)
 
 create token style annotation parser / compiler
 
+
+ 
 
 NOTES / DECISISONS
 =================

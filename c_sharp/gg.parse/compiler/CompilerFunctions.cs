@@ -1,5 +1,6 @@
 ﻿using gg.parse.rulefunctions;
 using System.Diagnostics.Contracts;
+using System.Text.RegularExpressions;
 
 namespace gg.parse.compiler
 {
@@ -17,7 +18,7 @@ namespace gg.parse.compiler
            CompileContext<char> context)
         {
             var literalText = context.GetText(ruleDefinition.Range);
-            literalText = literalText.Substring(1, literalText.Length - 2);
+            literalText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
 
             if (string.IsNullOrEmpty(literalText))
             {
@@ -35,7 +36,12 @@ namespace gg.parse.compiler
            RuleDeclaration declaration,
            CompileContext<T> context) where T : IComparable<T>
         {
-            var referenceName = context.GetText(ruleDefinition.Range);
+            var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
+            var referenceName = hasProductionOperator
+                    // ref name contains a production
+                    ? context.GetText(ruleDefinition.Children[1].Range)
+                    // no operator, use the entire span
+                    : context.GetText(ruleDefinition.Range);
 
             if (string.IsNullOrEmpty(referenceName))
             {
@@ -44,8 +50,15 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("ReferenceName text is empty", ruleDefinition.Range, null);
             }
 
+            var product = AnnotationProduct.Annotation;
+
+            if (hasProductionOperator)
+            {
+                context.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
+            }
+
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                new RuleReference<T>(declaration.Name, referenceName));
+                new RuleReference<T>(declaration.Name, referenceName, product));
         }
 
         public static RuleBase<char> CompileCharacterSet(
@@ -66,7 +79,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Text defining the set text is null or empty", ruleDefinition.Range, null);
             }
 
-            setText = setText.Substring(1, setText.Length - 2);
+            setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 
             return context.Output.GetOrRegisterRule(declaration.Name, () =>
                 new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray()));
@@ -121,7 +134,18 @@ namespace gg.parse.compiler
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
                     var compilationFunction = context.Functions[elementAnnotation.FunctionId];
-                    var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}[{i}]");
+
+                    var elementName = "";
+
+                    if (context.Parser != null)
+                    {
+                        var elementFunction = context.Parser.FindRule(elementAnnotation.FunctionId);
+                        elementName = elementFunction is RuleReference<T> refFunction
+                                    ? refFunction.Reference
+                                    : elementFunction.Name;
+                    }
+
+                    var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
                     var sequenceElement = compilationFunction(elementAnnotation, elementDeclaration, context);
 
                     if (sequenceElement == null)
@@ -182,7 +206,6 @@ namespace gg.parse.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var compilationFunction = context.Functions[elementAnnotation.FunctionId];
 
-
             return compilationFunction(elementAnnotation, declaration, context);
         }
 
@@ -221,7 +244,7 @@ namespace gg.parse.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var compilationFunction = context.Functions[elementAnnotation.FunctionId];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(subFunction[{min},{max}])");
+            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{declaration.Name}(subFunction[{min},{max}])");
             var subFunction = compilationFunction(elementAnnotation, elementDeclaration, context);
 
             if (subFunction == null)

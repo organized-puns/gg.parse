@@ -252,13 +252,15 @@ namespace gg.parse.rulefunctions
             {
                 if (rule is IRuleComposition<T> composition)
                 {
-                    foreach (var subRule in composition.SubRules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                    foreach (var referenceRule in composition.SubRules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                     {
-                        var replacement = FindRule(subRule.Reference);
+                        var replacement = FindRule(referenceRule.Reference);
 
-                        Contract.Requires(replacement != null, $"Cannot find reference {subRule.Reference}.");
+                        Contract.Requires(replacement != null, $"Cannot find reference {referenceRule.Reference}.");
 
-                        composition.ReplaceSubRule(subRule, replacement!);
+                        //composition.ReplaceSubRule(subRule, replacement!);
+                        referenceRule.Rule = replacement;
+                        referenceRule.IsPartOfComposition = true;
                     }
                 }
                 if (rule is RuleReference<T> reference)
@@ -267,13 +269,8 @@ namespace gg.parse.rulefunctions
 
                     Contract.Requires(replacement != null, $"Cannot find reference {reference.Reference}.");
 
-                    _nameRuleLookup[rule.Name] = replacement!;
-                    _idRuleLookup[rule.Id] = replacement!;
-
-                    if (rule == Root)
-                    {
-                        Root = replacement;
-                    }
+                    reference.Rule = replacement;
+                    reference.IsPartOfComposition = false;
                 }
             }
         }
