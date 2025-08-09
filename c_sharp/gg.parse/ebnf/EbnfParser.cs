@@ -2,6 +2,7 @@
 using gg.parse.compiler;
 using gg.parse.rulefunctions;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace gg.parse.ebnf
 {
@@ -9,6 +10,9 @@ namespace gg.parse.ebnf
     {
         private RuleTable<char> _ebnfTokenizer;
         private RuleTable<int> _ebnfParser;
+
+        public RuleTable<char> EbnfTokenizer => _ebnfTokenizer;
+        public RuleTable<int> EbnfGrammarParser => _ebnfParser;
 
         public EbnfParser(string tokenizerDefinition, string grammarDefinition)
         {
@@ -44,12 +48,27 @@ namespace gg.parse.ebnf
                 
         public bool TryBuildAstTree(string text, out ParseResult tokens, out ParseResult astTree)
         {
+            astTree = ParseResult.Failure;
             tokens = _ebnfTokenizer.Root.Parse(text.ToArray(), 0);
-            astTree = tokens.FoundMatch
-                    ? _ebnfParser.Root.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
-                    : ParseResult.Failure;
 
-            return astTree.FoundMatch;            
+            if (tokens.FoundMatch)
+            {
+                if (tokens.Annotations != null && tokens.Annotations.Count > 0)
+                {
+                    astTree = tokens.FoundMatch
+                            ? _ebnfParser.Root.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
+                            : ParseResult.Failure;
+                }
+                else
+                {
+                    // empty file
+                    astTree = new ParseResult(true, 0, []);
+                }
+
+                return astTree.FoundMatch;
+            }
+            
+            return false;            
         }
 
         public string Dump(string text, ParseResult tokens, ParseResult astTree, string indentStr = "   ")
@@ -57,9 +76,12 @@ namespace gg.parse.ebnf
             var builder = new StringBuilder();
             var indent = 0;
 
-            foreach (var astNode in astTree.Annotations)
+            if (astTree.Annotations != null && astTree.Annotations.Count > 0)
             {
-                Dump(builder, indent, indentStr, astNode, text, tokens.Annotations);
+                foreach (var astNode in astTree.Annotations)
+                {
+                    Dump(builder, indent, indentStr, astNode, text, tokens.Annotations);
+                }
             }
 
             return builder.ToString();
@@ -74,7 +96,7 @@ namespace gg.parse.ebnf
                 builder.Append(indentStr);
             }
 
-            var nodeText = GetText(text, node, tokens);
+            var nodeText = Regex.Escape(GetText(text, node, tokens));
 
             if (nodeText.Length > 20)
             {
@@ -147,6 +169,7 @@ namespace gg.parse.ebnf
 
             var tokenContext = CompilerUtils
                                 .CreateContext<char>(tokenizerText, tokenizerTokens, tokenizerAstTree)
+                                .SetEngines(tokenizer, tokenizerParser)
                                 .RegisterTokenizerCompilerFunctions(tokenizerParser)
                                 .SetProductLookup(tokenizerParser);
 
@@ -159,26 +182,27 @@ namespace gg.parse.ebnf
             EbnfTokenizerParser tokenizerParser,
             RuleTable<char> dataTokenizer)
         {
-            var grammarParser = new EbnfGrammarParser(tokenizer, dataTokenizer);
+            var grammarParser = new EbnfGrammarParser(tokenizer);
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
 
             var grammarcontext = CompilerUtils
                                     .CreateContext<int>(grammarText, grammarTokens, grammarAstNodes)
+                                    .SetEngines(tokenizer, grammarParser)
                                     .RegisterGrammarCompilerFunctions(grammarParser)
-                                    .SetProductLookup(tokenizerParser);
+                                    .SetProductLookup(grammarParser);
 
             var grammarCompiler = new RuleCompiler<int>();
 
-            var result = grammarcontext.Output;
+            var result = grammarcontext.Output;          
 
-            // register the tokens with the grammar compiler
+            // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             foreach (var tokenFunctionName in dataTokenizer.FunctionNames)
             {
                 var tokenFunction = dataTokenizer.FindRule(tokenFunctionName);
 
                 if (tokenFunction.Production == AnnotationProduct.Annotation)
                 {
-                    result.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id));
+                    result.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
                 }
             }
 

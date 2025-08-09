@@ -59,5 +59,25 @@ namespace gg.parse.ebnf
 
             return context;
         }
+
+        public static CompileContext<T> SetProductLookup<T>(this CompileContext<T> context, EbnfGrammarParser parser)
+            where T : IComparable<T>
+        {
+            context.ProductLookup = [
+                (parser.MatchTransitiveSelector.Id, AnnotationProduct.Transitive),
+                (parser.MatchNoProductSelector.Id, AnnotationProduct.None),
+            ];
+
+            return context;
+        }
+
+        public static CompileContext<T> SetEngines<T>(this CompileContext<T> context, RuleTable<char> tokenizer, RuleTable<int> parser)
+            where T : IComparable<T>
+        {
+            context.Tokenizer = tokenizer;
+            context.Parser = parser;
+            return context;
+        }
+
     }
 }

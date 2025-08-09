@@ -9,7 +9,7 @@
 #json_token		= float | int | boolean | null | string | scope_start | scope_end | array_start | array_end | 
 					kv_separator | item_separator;
 
-sign            = '+' | '-';
+~sign           = '+' | '-';
 digit           = { '0'..'9' };
 float           = int, '.', +digit, ?(('e' | 'E'), int);
 int             = ?sign, +digit;

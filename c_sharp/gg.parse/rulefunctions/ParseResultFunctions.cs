@@ -8,8 +8,9 @@
             {
                 AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
                                         [new Annotation(rule.Id, dataRange)]),
-                AnnotationProduct.Transitive => 
-                    throw new NotImplementedException("Cannot apply transitive production to a rule which has no children"),
+                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length,
+                                        [new Annotation(rule.Id, dataRange)]),
+                // throw new NotImplementedException("Cannot apply transitive production to a rule which has no children"),
                 AnnotationProduct.None => new ParseResult(true, dataRange.Length),
                 _ => throw new NotImplementedException($"Production rule {rule.Production} is not implemented"),
             };
