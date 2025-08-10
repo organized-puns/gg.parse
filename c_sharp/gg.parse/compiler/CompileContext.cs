@@ -11,10 +11,6 @@ namespace gg.parse.compiler
 
         public List<Annotation>? AstNodes { get; set; }
 
-        public int CurrentNode { get; set; }
-
-        public RuleTable<char>? Tokenizer { get; set; }
-
         public RuleTable<int>? Parser { get; set; }
         
         public RuleTable<T> Output { get; init; }

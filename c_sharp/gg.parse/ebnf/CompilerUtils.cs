@@ -15,10 +15,10 @@ namespace gg.parse.ebnf
                     .WithAstNodes(astNodes);
         }
 
-        public static CompileContext<char> RegisterTokenizerCompilerFunctions(this CompileContext<char> context, EbnfTokenizerParser parser)
+        public static CompileContext<char> RegisterTokenizerCompilerFunctions(this CompileContext<char> context, EbnfTokenParser parser)
         {
             return context
-                    .WithFunction(parser.MatchAnyCharacter.Id, CompileAny)
+                    .WithFunction(parser.MatchAnyToken.Id, CompileAny)
                     .WithFunction(parser.MatchCharacterRange.Id, CompileCharacterRange)
                     .WithFunction(parser.MatchCharacterSet.Id, CompileCharacterSet)
                     .WithFunction(parser.MatchError.Id, CompileError)
@@ -33,13 +33,12 @@ namespace gg.parse.ebnf
                     .WithFunction(parser.MatchZeroOrOneOperator.Id, CompileZeroOrOne);
         }
 
-        public static CompileContext<int> RegisterGrammarCompilerFunctions(this CompileContext<int> context, EbnfGrammarParser parser)
+        public static CompileContext<int> RegisterGrammarCompilerFunctions(this CompileContext<int> context, EbnfTokenParser parser)
         {
             return context
                     .WithFunction(parser.MatchAnyToken.Id, CompileAny)
                     .WithFunction(parser.MatchError.Id, CompileError)
                     .WithFunction(parser.MatchGroup.Id, CompileGroup)
-                    //.WithFunction(parser.MatchLiteral.Id, CompileLiteral)
                     .WithFunction(parser.MatchIdentifier.Id, CompileIdentifier)
                     .WithFunction(parser.MatchNotOperator.Id, CompileNot)
                     .WithFunction(parser.MatchOneOrMoreOperator.Id, CompileOneOrMore)
@@ -49,7 +48,7 @@ namespace gg.parse.ebnf
                     .WithFunction(parser.MatchZeroOrOneOperator.Id, CompileZeroOrOne);
         }
 
-        public static CompileContext<T> SetProductLookup<T>(this CompileContext<T> context, EbnfTokenizerParser parser)
+        public static CompileContext<T> SetProductLookup<T>(this CompileContext<T> context, EbnfTokenParser parser)
             where T : IComparable<T>
         {
             context.ProductLookup = [
@@ -60,21 +59,10 @@ namespace gg.parse.ebnf
             return context;
         }
 
-        public static CompileContext<T> SetProductLookup<T>(this CompileContext<T> context, EbnfGrammarParser parser)
+
+        public static CompileContext<T> SetEngines<T>(this CompileContext<T> context, RuleTable<int> parser)
             where T : IComparable<T>
         {
-            context.ProductLookup = [
-                (parser.MatchTransitiveSelector.Id, AnnotationProduct.Transitive),
-                (parser.MatchNoProductSelector.Id, AnnotationProduct.None),
-            ];
-
-            return context;
-        }
-
-        public static CompileContext<T> SetEngines<T>(this CompileContext<T> context, RuleTable<char> tokenizer, RuleTable<int> parser)
-            where T : IComparable<T>
-        {
-            context.Tokenizer = tokenizer;
             context.Parser = parser;
             return context;
         }

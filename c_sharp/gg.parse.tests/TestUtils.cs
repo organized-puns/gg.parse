@@ -18,7 +18,7 @@ namespace gg.parse.tests
 
         public RuleCompiler<char> TokenCompiler { get; set; }
 
-        public EbnfTokenizerParser TokenizerParser { get; set; }
+        public EbnfTokenParser TokenizerParser { get; set; }
 
         public EbnfTokenizer Tokenizer { get; set; }
 
@@ -34,7 +34,7 @@ namespace gg.parse.tests
         public static (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleTable<char> table) SetupTokenizeParseCompile(string text)
         {
             var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenizerParser(tokenizer);
+            var parser = new EbnfTokenParser(tokenizer);
             var compiler = new RuleCompiler<char>();
 
             var result = tokenizer.Tokenize(text);
@@ -63,7 +63,7 @@ namespace gg.parse.tests
         public static TokenTestContext SetupTokenizeTestContext(string text)
         {
             var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenizerParser(tokenizer);
+            var parser = new EbnfTokenParser(tokenizer);
             var compiler = new RuleCompiler<char>();
 
             var result = tokenizer.Tokenize(text);

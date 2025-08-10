@@ -17,9 +17,8 @@ namespace gg.parse.ebnf
         public EbnfParser(string tokenizerDefinition, string grammarDefinition)
         {
             var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenizerParser();
-            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, tokenizerParser);
-            _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, tokenizerParser, _ebnfTokenizer);
+            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer);
+            _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, _ebnfTokenizer);
         }
 
         public RuleBase<int>? FindParserRule(string name) => _ebnfParser.FindRule(name);
@@ -159,35 +158,33 @@ namespace gg.parse.ebnf
 
         public static RuleTable<char> CreateTokenizerFromEbnfFile(
             string tokenizerText,
-            EbnfTokenizer tokenizer,
-            EbnfTokenizerParser tokenizerParser)
+            EbnfTokenizer tokenizer)
         {
-            var tokenizerCompiler = new RuleCompiler<char>();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
 
-            var tokenizerTokens = tokenizer.Tokenize(tokenizerText).Annotations;
+            var tokenizerTokens  = tokenizer.Tokenize(tokenizerText).Annotations;
             var tokenizerAstTree = tokenizerParser.Parse(tokenizerTokens).Annotations;
 
             var tokenContext = CompilerUtils
                                 .CreateContext<char>(tokenizerText, tokenizerTokens, tokenizerAstTree)
-                                .SetEngines(tokenizer, tokenizerParser)
+                                .SetEngines(tokenizerParser)
                                 .RegisterTokenizerCompilerFunctions(tokenizerParser)
                                 .SetProductLookup(tokenizerParser);
 
-            return tokenizerCompiler.Compile(tokenContext);
+            return new RuleCompiler<char>().Compile(tokenContext);
         }
 
         public static RuleTable<int> CreateParserFromEbnfFile(
             string grammarText,
             EbnfTokenizer tokenizer,
-            EbnfTokenizerParser tokenizerParser,
             RuleTable<char> dataTokenizer)
         {
-            var grammarParser = new EbnfGrammarParser(tokenizer);
+            var grammarParser = new EbnfTokenParser(tokenizer);
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
 
             var grammarcontext = CompilerUtils
                                     .CreateContext<int>(grammarText, grammarTokens, grammarAstNodes)
-                                    .SetEngines(tokenizer, grammarParser)
+                                    .SetEngines(grammarParser)
                                     .RegisterGrammarCompilerFunctions(grammarParser)
                                     .SetProductLookup(grammarParser);
 

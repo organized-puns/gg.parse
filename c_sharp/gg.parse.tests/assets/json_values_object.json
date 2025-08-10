@@ -1,3 +1,11 @@
 {
-  "int": 123
- }
+  "int": 123,
+  "float":  0.123,
+  "boolean": true,
+  "string": "abc",
+  "array":  [123, 0.123, true, "abc", [ -123, "foo" ], { "key":  "value"} ],
+  "object": {
+    "key": "value"
+  },
+  "null": null
+}

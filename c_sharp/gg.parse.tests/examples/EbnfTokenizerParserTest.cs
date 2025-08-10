@@ -12,7 +12,7 @@ namespace gg.parse.tests.examples
         [TestMethod]
         public void ParseRule_ExpectSucess()
         {
-            var parser = new EbnfTokenizerParser();
+            var parser = new EbnfTokenParser();
 
             // try parsing a literal
             var (tokens, nodes) = parser.Parse("rule = 'foo';");

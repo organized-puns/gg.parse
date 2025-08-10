@@ -3,15 +3,15 @@
 namespace gg.parse.ebnf
 {
     /// <summary>
-    /// Generates a tokenizer (RuleTable<char>) based on an EBNF spec
+    /// Parses
     /// </summary>
-    public class EbnfTokenizerParser : RuleTable<int>
+    public class EbnfTokenParser : RuleTable<int>
     {
         public EbnfTokenizer Tokenizer { get; init; }      
 
         public MatchOneOfFunction<int>     MatchLiteral { get; private set; }
 
-        public MatchSingleData<int>        MatchAnyCharacter { get; private set; }
+        public MatchSingleData<int>        MatchAnyToken { get; private set; }
 
         public MatchSingleData<int>        MatchTransitiveSelector { get; private set; }
 
@@ -19,7 +19,7 @@ namespace gg.parse.ebnf
 
         public MatchSingleData<int>        MatchRuleName { get; private set; }
 
-        public MatchSingleData<int>        MatchIdentifier { get; private set; }
+        public MatchFunctionSequence<int>  MatchIdentifier { get; private set; }
 
         public MatchFunctionSequence<int>  MatchSequence { get; private set; }
 
@@ -41,12 +41,12 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int>  MatchError { get; private set; }
 
-        public EbnfTokenizerParser()
+        public EbnfTokenParser()
             : this(new EbnfTokenizer())
         {
         }
 
-        public EbnfTokenizerParser(EbnfTokenizer tokenizer)
+        public EbnfTokenParser(EbnfTokenizer tokenizer)
         {
             Tokenizer = tokenizer;
 
@@ -57,7 +57,7 @@ namespace gg.parse.ebnf
             );
 
             // .
-            MatchAnyCharacter = Token("AnyCharacter", AnnotationProduct.Annotation, TokenNames.AnyCharacter);
+            MatchAnyToken = Token("AnyToken", AnnotationProduct.Annotation, TokenNames.AnyCharacter);
 
             // { "abcf" }
             MatchCharacterSet = Sequence("CharacterSet", AnnotationProduct.Annotation,
@@ -75,12 +75,25 @@ namespace gg.parse.ebnf
                     Token(TokenNames.ScopeEnd)
             );
 
-            MatchIdentifier = Token("Identifier", AnnotationProduct.Annotation, TokenNames.Identifier);
-            
+            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, TokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, TokenNames.NoProductSelector);
+
+
+            var ruleProduction = ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
+                OneOf("ProductionSelection", AnnotationProduct.Transitive,
+                    MatchTransitiveSelector,
+                    MatchNoProductSelector
+                )
+            );
+
+            MatchIdentifier = Sequence("Identifier", AnnotationProduct.Annotation,
+                                ruleProduction,
+                                Token("IdentifierToken", AnnotationProduct.Annotation, TokenNames.Identifier));
+
             // literal | set
             var ruleTerms = OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
                 MatchLiteral, 
-                MatchAnyCharacter, 
+                MatchAnyToken, 
                 MatchCharacterSet, 
                 MatchCharacterRange, 
                 MatchIdentifier
@@ -150,13 +163,6 @@ namespace gg.parse.ebnf
 
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, TokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, TokenNames.NoProductSelector);
-
-            var ruleProduction = ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
-                OneOf("ProductionSelection", AnnotationProduct.Transitive,
-                    MatchTransitiveSelector,
-                    MatchNoProductSelector
-                )
-            );
 
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, TokenNames.Identifier);
             

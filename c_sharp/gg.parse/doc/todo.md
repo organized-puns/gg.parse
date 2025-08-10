@@ -4,10 +4,16 @@ TO DO
 Implemented an ebnf tokenizer, parser, compiler which can take a ebnf based token definition (see json_tokens.ebnf )
 next implement a parser, (we can re-use the tokenizer) which can parse a grammer (see json_grammar.ebnf )
 
----
-
 Clean up:
 	Merge grammar parser / tokenizer parser
+	Clean up tables
+	address all xxx
+	document, readme
+
+
+---
+
+infinite overflow parsing guard
 
 Break everything:
 	verify if error reporting / fallback works
@@ -22,17 +28,13 @@ Do All of the following based on ebnf assets, not in the bootstrap
 	see if sequence can go without ,
 	see if range can go without {}
 
-infinite overflow parsing guard
 
 Make parser a bit more human friendly to read (see the json example)  
 	- WONT happen it gets too complex, wait until ebnf is implemeted
 	- May happen ? EbnfTokenizerParser looks a lot cleaner
 
-create token style annotation parser / compiler
-
 
  
-
 NOTES / DECISISONS
 =================
 

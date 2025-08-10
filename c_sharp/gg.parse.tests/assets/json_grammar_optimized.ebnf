@@ -17,9 +17,3 @@ object			  = ~scope_start, ?key_value_list, ~scope_end;
 
 #array_item_list  = value, *(~item_separator, value);
 array			  = ~array_start, ?array_item_list, ~array_end;
-
-// override token production
-//kvp_separator	  = ~kv_separator;
-//obj_start		  = ~scope_start;
-//obj_end			  = ~scope_end;
-//comma			  = ~item_separator;
