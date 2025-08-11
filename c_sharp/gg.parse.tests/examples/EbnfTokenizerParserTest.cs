@@ -1,5 +1,5 @@
 ﻿using gg.parse.ebnf;
-using gg.parse.examples;
+using gg.parse.instances.json;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;

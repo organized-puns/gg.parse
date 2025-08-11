@@ -1,7 +1,8 @@
-﻿using gg.parse.rulefunctions;
-using System.Text;
+﻿using System.Text;
 
-namespace gg.parse.examples
+using gg.parse.rulefunctions;
+
+namespace gg.parse.instances.json
 {
     public static class AnnotationMarkup
     {

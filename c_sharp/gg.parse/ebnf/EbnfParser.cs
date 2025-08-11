@@ -1,9 +1,9 @@
-﻿using gg.core.util;
-using gg.parse.compiler;
-using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
+
+using gg.core.util;
+using gg.parse.compiler;
+using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {

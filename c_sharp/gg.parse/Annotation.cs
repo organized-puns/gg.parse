@@ -1,11 +1,5 @@
 ﻿namespace gg.parse
 {
-    public enum AnnotationDataCategory
-    {
-        Data,
-        Error,
-        Warning
-    }
 
     public class Annotation(int functionId, Range range, List<Annotation>? children = null) : IComparable
     {

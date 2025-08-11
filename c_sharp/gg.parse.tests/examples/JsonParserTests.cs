@@ -1,6 +1,6 @@
 ﻿
-using gg.parse.examples;
-using Newtonsoft.Json.Linq;
+using gg.parse.instances.json;
+
 
 namespace gg.parse.tests.examples
 {

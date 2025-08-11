@@ -2,7 +2,7 @@
 
 using static gg.parse.rulefunctions.CommonTokenNames;
 
-namespace gg.parse.examples
+namespace gg.parse.instances.json
 {
     public class JsonTokenizer : RuleGraph<char>
     {     

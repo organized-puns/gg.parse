@@ -3,7 +3,7 @@ using gg.parse.rulefunctions;
 
 using static gg.parse.rulefunctions.CommonRules;
 
-namespace gg.parse.examples
+namespace gg.parse.instances.json
 {
     public static class JsonNodeNames
     {
