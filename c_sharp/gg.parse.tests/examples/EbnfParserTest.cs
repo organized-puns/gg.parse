@@ -6,6 +6,76 @@ namespace gg.parse.tests.examples
     [TestClass]
     public class EbnfParserTest
     {
+
+        [TestMethod]
+        public void ValidateGeneratedTokenizer()
+        {
+            var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
+
+            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+
+            var generatedTokenizer = jsonParser.EbnfTokenizer;
+
+            Assert.IsTrue(generatedTokenizer != null);
+            Assert.IsTrue(generatedTokenizer.Root != null);
+            Assert.IsTrue(generatedTokenizer.Count() > 0);
+            Assert.IsTrue(generatedTokenizer.All(r => r.Id >= 0));
+
+            var uniqueIds = new HashSet<int>(generatedTokenizer.Select(r => r.Id));
+
+            Assert.IsTrue(uniqueIds.Count() == generatedTokenizer.Count());
+
+            var uniqueNames = new HashSet<string>(generatedTokenizer.Select(r => r.Name));
+
+            Assert.IsTrue(uniqueNames.Count() == generatedTokenizer.Count());
+
+            // spot check of some compiled rules
+            var jsonTokensRule = generatedTokenizer.FindRule("json_tokens") as MatchFunctionCount<char>;
+            Assert.IsNotNull(jsonTokensRule);
+            Assert.IsTrue(jsonTokensRule.Production == AnnotationProduct.Transitive);
+            Assert.IsTrue(jsonTokensRule.Min == 0);
+            Assert.IsTrue(jsonTokensRule.Max == 0);
+
+            var jsonTokensRuleFunction = jsonTokensRule.Function as RuleReference<char>;
+
+            Assert.IsNotNull(jsonTokensRuleFunction);
+            Assert.IsTrue(jsonTokensRuleFunction.Production == AnnotationProduct.Annotation);
+            Assert.IsTrue(jsonTokensRuleFunction.IsPartOfComposition);
+
+            var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOfFunction<char>;
+            
+            Assert.IsNotNull(validTokenRule);
+            Assert.IsTrue(jsonTokensRule.Production == AnnotationProduct.Transitive);
+            Assert.IsTrue(validTokenRule.RuleOptions.Length == 3);
+
+            Assert.IsTrue(jsonTokensRuleFunction.Rule == validTokenRule);
+
+            // test a simple token
+            var tokens = generatedTokenizer.Root.Parse("{".ToArray(), 0);
+
+            Assert.IsTrue(tokens.FoundMatch);
+            Assert.IsTrue(tokens.Annotations != null);
+            Assert.IsTrue(tokens.Annotations.Count == 1);
+            Assert.IsTrue(generatedTokenizer.FindRule("scope_start") != null);
+            Assert.IsTrue(tokens.Annotations[0].FunctionId == generatedTokenizer.FindRule("scope_start")!.Id);
+
+            // test the full set of tokens
+            var validTokens = "{ } [ ] , : \"key\" 123 123.0 true false null @";
+
+            tokens = generatedTokenizer.Root.Parse([.. validTokens], 0);
+
+            Assert.IsTrue(tokens.FoundMatch);
+            Assert.IsTrue(tokens.Annotations != null);
+            Assert.IsTrue(tokens.Annotations.Count == 13);
+            Assert.IsTrue(generatedTokenizer.FindRule("scope_start") != null);
+            Assert.IsTrue(generatedTokenizer.FindRule("scope_end") != null);
+            Assert.IsTrue(generatedTokenizer.FindRule("unknown_token") != null);
+            Assert.IsTrue(tokens.Annotations[0].FunctionId == generatedTokenizer.FindRule("scope_start")!.Id);
+            Assert.IsTrue(tokens.Annotations[1].FunctionId == generatedTokenizer.FindRule("scope_end")!.Id);
+            Assert.IsTrue(tokens.Annotations[12].FunctionId == generatedTokenizer.FindRule("unknown_token")!.Id);
+        }
+
         /// <summary>
         ///  Spot check to see if all rules are accounted for
         /// </summary>
@@ -26,6 +96,9 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(whiteSpaceRule.MatchingValues.SequenceEqual(" \t\r\n".ToArray()));
         }
 
+
+
+
         [TestMethod]
         public void ParseJsonKeyValue_IntegrationTest()
         {
@@ -40,7 +113,7 @@ namespace gg.parse.tests.examples
 
             jsonParser.TryBuildAstTree(keyStrValue, out var tokens, out var astTree);
 
-            // var dump = jsonParser.Dump(keyStrValue, tokens, astTree);    
+            var dump = jsonParser.Dump(keyStrValue, tokens, astTree);    
 
             Assert.IsTrue(astTree.FoundMatch);
             Assert.IsTrue(astTree.MatchedLength == 5);

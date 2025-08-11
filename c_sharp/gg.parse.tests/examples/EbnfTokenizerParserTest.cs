@@ -298,7 +298,7 @@ namespace gg.parse.tests.examples
             var oneOrMore = table.FindRule("one_or_more_rule") as MatchFunctionCount<char>;
             Assert.IsNotNull(oneOrMore);
             Assert.IsTrue(oneOrMore.Min == 1);
-            Assert.IsTrue(oneOrMore.Max == 0);
+            Assert.IsTrue(oneOrMore.Max == 0);          
             Assert.IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(subFunction[1,0])"));
         }
 

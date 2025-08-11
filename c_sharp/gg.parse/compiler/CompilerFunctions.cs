@@ -27,8 +27,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product));
+            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product);
         }
 
         public static RuleBase<T> CompileIdentifier<T>(
@@ -57,8 +56,7 @@ namespace gg.parse.compiler
                 context.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                new RuleReference<T>(declaration.Name, referenceName, product));
+            return new RuleReference<T>(declaration.Name, referenceName, product);
         }
 
         public static RuleBase<char> CompileCharacterSet(
@@ -81,8 +79,7 @@ namespace gg.parse.compiler
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray()));
+            return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray());
         }
 
         public static RuleBase<char> CompileCharacterRange(
@@ -112,14 +109,27 @@ namespace gg.parse.compiler
                             null);
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
+            return 
                 // xxx parameter order...
-                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product));
+                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product);
         }
 
         
 
         // -- Generic functions ---------------------------------------------------------------------------------------
+
+        private static string CreateSubruleName<T>(CompileContext<T> context, int subruleFunctionId) where T : IComparable<T>
+        {
+            if (context.Parser != null)
+            {
+                var elementFunction = context.Parser.FindRule(subruleFunctionId);
+                return elementFunction is RuleReference<T> refFunction
+                            ? refFunction.Reference
+                            : elementFunction.Name;
+            }
+
+            return "";
+        }
 
         public static RuleBase<T> CompileSequence<T>(
             Annotation ruleDefinition,
@@ -134,17 +144,8 @@ namespace gg.parse.compiler
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
                     var compilationFunction = context.Functions[elementAnnotation.FunctionId];
-
-                    var elementName = "";
-
-                    if (context.Parser != null)
-                    {
-                        var elementFunction = context.Parser.FindRule(elementAnnotation.FunctionId);
-                        elementName = elementFunction is RuleReference<T> refFunction
-                                    ? refFunction.Reference
-                                    : elementFunction.Name;
-                    }
-
+                    var elementName = CreateSubruleName(context, elementAnnotation.FunctionId);
+                    
                     var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
                     var sequenceElement = compilationFunction(elementAnnotation, elementDeclaration, context);
 
@@ -159,8 +160,7 @@ namespace gg.parse.compiler
                 }
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MatchFunctionSequence<T>(declaration.Name, declaration.Product, [.. sequenceElements]));
+            return new MatchFunctionSequence<T>(declaration.Name, declaration.Product, [.. sequenceElements]);
         }
 
         public static RuleBase<T> CompileOption<T>(
@@ -176,7 +176,8 @@ namespace gg.parse.compiler
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
                     var compilationFunction = context.Functions[elementAnnotation.FunctionId];
-                    var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}[{i}]");
+                    var elementName = CreateSubruleName(context, elementAnnotation.FunctionId);
+                    var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{elementName}:{declaration.Name}[{i}]");
                     var optionElement = compilationFunction(elementAnnotation, elementDeclaration, context);
 
                     if (optionElement == null)
@@ -190,8 +191,7 @@ namespace gg.parse.compiler
                 }
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MatchOneOfFunction<T>(declaration.Name, declaration.Product, [.. optionElements]));
+            return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, [.. optionElements]);
         }
 
         public static RuleBase<T> CompileGroup<T>(
@@ -254,8 +254,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementAnnotation.Range, null);
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max));
+            return new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max);
         }
 
         public static RuleBase<T> CompileNot<T>(
@@ -280,8 +279,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Not.", elementAnnotation.Range, null);
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction));
+            return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction);
         }
 
         public static RuleBase<T> CompileAny<T>(
@@ -291,8 +289,7 @@ namespace gg.parse.compiler
         {
             Contract.Requires(ruleDefinition != null);
             
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MatchAnyData<T>(declaration.Name, declaration.Product));
+            return new MatchAnyData<T>(declaration.Name, declaration.Product);
         }
 
         public static RuleBase<T> CompileError<T>(
@@ -328,9 +325,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Error.", skipAnnotation.Range, null);
             }
 
-            return context.Output.GetOrRegisterRule(declaration.Name, () =>
-                            new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0));
+            return new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0);
         }
-
     }
 }

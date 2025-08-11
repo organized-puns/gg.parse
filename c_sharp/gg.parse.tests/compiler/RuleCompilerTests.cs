@@ -262,12 +262,14 @@ namespace gg.parse.tests.compiler
                 ])
             ];
 
+            var table = new RuleTable<char>();
+
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar
-            context.Output.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
+            table.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
 
             // compile a rule table which can tokenize foo
-            var table = compiler.Compile(context);
+            table = compiler.Compile(context, table);
 
             Assert.IsNotNull(table);
             Assert.IsNotNull(table.Root);
@@ -336,12 +338,14 @@ namespace gg.parse.tests.compiler
 
             context.ProductLookup = [(noneProductId, AnnotationProduct.None)];
 
+            // compile a rule table which can tokenize foo
+            var table = new RuleTable<char>();
+
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar
-            context.Output.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
+            table.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
 
-            // compile a rule table which can tokenize foo
-            var table = compiler.Compile(context);
+            table = compiler.Compile(context, table);
 
             Assert.IsNotNull(table);
             Assert.IsNotNull(table.Root);

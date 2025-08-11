@@ -13,7 +13,7 @@ namespace gg.parse.compiler
 
         public RuleTable<int>? Parser { get; set; }
         
-        public RuleTable<T> Output { get; init; }
+        //public RuleTable<T> Output { get; init; }
 
         public Dictionary<int, CompileFunction<T>> Functions { get; set; } = [];
 
@@ -21,20 +21,20 @@ namespace gg.parse.compiler
 
         public CompileContext()
         {
-            Output = new RuleTable<T>();
+            //Output = new RuleTable<T>();
         }
 
         public CompileContext(
             string text, 
             List<Annotation> tokens, 
             List<Annotation> astNodes,
-            Dictionary<int, CompileFunction<T>> functions,
-            RuleTable<T>? output = null)
+            Dictionary<int, CompileFunction<T>> functions
+            /*RuleTable<T>? output = null*/)
         {
             Text = text;
             Tokens = tokens;
             AstNodes = astNodes;
-            Output = output ?? new RuleTable<T>();
+            //Output = output ?? new RuleTable<T>();
             Functions = functions; 
         }
 

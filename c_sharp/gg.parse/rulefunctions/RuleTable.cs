@@ -122,13 +122,16 @@ namespace gg.parse.rulefunctions
 
         public TRule RegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
         {
-            rule = GetOrRegisterRule(rule);
-
-            if (rule is IRuleComposition<T> ruleFunction)
+            if (FindRule(rule.Name) == null)
             {
-                foreach (var subRule in ruleFunction.SubRules)
+                rule = RegisterRule(rule);
+
+                if (rule is IRuleComposition<T> ruleFunction)
                 {
-                    RegisterRuleAndSubRules(subRule);
+                    foreach (var subRule in ruleFunction.SubRules)
+                    {
+                        RegisterRuleAndSubRules(subRule);
+                    }
                 }
             }
 
@@ -258,7 +261,6 @@ namespace gg.parse.rulefunctions
 
                         Contract.Requires(replacement != null, $"Cannot find reference {referenceRule.Reference}.");
 
-                        //composition.ReplaceSubRule(subRule, replacement!);
                         referenceRule.Rule = replacement;
                         referenceRule.IsPartOfComposition = true;
                     }
@@ -270,7 +272,7 @@ namespace gg.parse.rulefunctions
                     Contract.Requires(replacement != null, $"Cannot find reference {reference.Reference}.");
 
                     reference.Rule = replacement;
-                    reference.IsPartOfComposition = false;
+                    //reference.IsPartOfComposition = false;
                 }
             }
         }

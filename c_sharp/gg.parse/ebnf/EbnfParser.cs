@@ -9,16 +9,21 @@ namespace gg.parse.ebnf
     public class EbnfParser
     {
         private RuleTable<char> _ebnfTokenizer;
-        private RuleTable<int> _ebnfParser;
+        private RuleTable<int>? _ebnfParser;
 
         public RuleTable<char> EbnfTokenizer => _ebnfTokenizer;
-        public RuleTable<int> EbnfGrammarParser => _ebnfParser;
 
-        public EbnfParser(string tokenizerDefinition, string grammarDefinition)
+        public RuleTable<int>? EbnfGrammarParser => _ebnfParser;
+
+        public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
         {
             var tokenizer = new EbnfTokenizer();
             _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer);
-            _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, _ebnfTokenizer);
+            
+            if (!string.IsNullOrEmpty(grammarDefinition))
+            {
+                _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, _ebnfTokenizer);
+            }
         }
 
         public RuleBase<int>? FindParserRule(string name) => _ebnfParser.FindRule(name);
@@ -48,14 +53,16 @@ namespace gg.parse.ebnf
         public bool TryBuildAstTree(string text, out ParseResult tokens, out ParseResult astTree)
         {
             astTree = ParseResult.Failure;
-            tokens = _ebnfTokenizer.Root.Parse(text.ToArray(), 0);
+            tokens = _ebnfParser != null  && _ebnfParser.Root != null
+                    ? _ebnfTokenizer!.Root!.Parse(text.ToArray(), 0)
+                    : ParseResult.Failure;
 
             if (tokens.FoundMatch)
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
                 {
                     astTree = tokens.FoundMatch
-                            ? _ebnfParser.Root.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
+                            ? _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
                             : ParseResult.Failure;
                 }
                 else
@@ -177,7 +184,7 @@ namespace gg.parse.ebnf
         public static RuleTable<int> CreateParserFromEbnfFile(
             string grammarText,
             EbnfTokenizer tokenizer,
-            RuleTable<char> dataTokenizer)
+            RuleTable<char> tokenSource)
         {
             var grammarParser = new EbnfTokenParser(tokenizer);
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
@@ -188,24 +195,23 @@ namespace gg.parse.ebnf
                                     .RegisterGrammarCompilerFunctions(grammarParser)
                                     .SetProductLookup(grammarParser);
 
-            var grammarCompiler = new RuleCompiler<int>();
+            return new RuleCompiler<int>().Compile(grammarcontext, RegisterTokens(tokenSource, new RuleTable<int>()));
+        }
 
-            var result = grammarcontext.Output;          
-
+        private static RuleTable<int> RegisterTokens(RuleTable<char> tokenSource, RuleTable<int> target)
+        {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
-            foreach (var tokenFunctionName in dataTokenizer.FunctionNames)
+            foreach (var tokenFunctionName in tokenSource.FunctionNames)
             {
-                var tokenFunction = dataTokenizer.FindRule(tokenFunctionName);
+                var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 
                 if (tokenFunction.Production == AnnotationProduct.Annotation)
                 {
-                    result.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
+                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
                 }
             }
 
-            grammarCompiler.Compile(grammarcontext);
-
-            return result;
+            return target;
         }
     }
     

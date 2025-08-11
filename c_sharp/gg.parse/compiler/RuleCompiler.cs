@@ -11,8 +11,12 @@ namespace gg.parse.compiler
     {
         private CompileContext<T>? _context;
 
-
         public RuleTable<T> Compile(CompileContext<T> context)
+        {
+            return Compile(context, new RuleTable<T>());
+        }
+
+        public RuleTable<T> Compile(CompileContext<T> context, RuleTable<T> result)
         {
             _context = context;
 
@@ -31,18 +35,24 @@ namespace gg.parse.compiler
                 }
 
                 var compilationFunction = _context.Functions[ruleDefinition.FunctionId];
-                var compiledRule = compilationFunction(ruleDefinition, declaration, _context);
 
-                // First compiled rule will be assigned to the root. Seems the most intuitive
-                if (_context.Output.Root == null)
+                if (result.FindRule(declaration.Name) == null)
                 {
-                    _context.Output.Root = compiledRule;
+                    var compiledRule = compilationFunction(ruleDefinition, declaration, _context);
+                    
+                    result.RegisterRuleAndSubRules(compiledRule);
+                    
+                    // First compiled rule will be assigned to the root. Seems the most intuitive
+                    if (result.Root == null)
+                    {
+                        result.Root = compiledRule;
+                    }
                 }
             }
 
-            _context.Output.ResolveReferences();
+            result.ResolveReferences();
 
-            return _context.Output;
+            return result;
         }
 
         private (RuleDeclaration declaration, int readIndex) GetRuleDeclaration(List<Annotation> ruleNodes, int index)
