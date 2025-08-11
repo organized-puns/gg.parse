@@ -5,7 +5,6 @@ namespace gg.parse.compiler
 {
     public delegate RuleBase<T> CompileFunction<T>(
         RuleCompiler<T> compiler,
-        Annotation ruleDefinition,
         RuleDeclaration declaration, 
         CompileSession<T> context) where T : IComparable<T>;
 
@@ -30,8 +29,8 @@ namespace gg.parse.compiler
         {
             foreach (var node in session.AstNodes)
             {
-                var (declaration, idx) = GetRuleDeclaration(session, node.Children, 0);
-                var ruleDefinition = node.Children[idx];
+                var declaration = GetRuleDeclaration(session, node.Children, 0);
+                var ruleDefinition = declaration.AssociatedAnnotation;
 
                 if (!Functions.ContainsKey(ruleDefinition.FunctionId))
                 {
@@ -44,7 +43,7 @@ namespace gg.parse.compiler
 
                 if (result.FindRule(declaration.Name) == null)
                 {
-                    var compiledRule = compilationFunction(this, ruleDefinition, declaration, session);
+                    var compiledRule = compilationFunction(this, declaration, session);
                     
                     result.RegisterRuleAndSubRules(compiledRule);
                     
@@ -61,7 +60,7 @@ namespace gg.parse.compiler
             return result;
         }
 
-        private static (RuleDeclaration declaration, int readIndex) GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
+        private static RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
@@ -73,7 +72,7 @@ namespace gg.parse.compiler
             var name = context.GetText(ruleNodes[idx].Range);
             idx++;
 
-            return (new(product, name), idx);
+            return new(ruleNodes[idx], product, name);
         }
     }
 }
