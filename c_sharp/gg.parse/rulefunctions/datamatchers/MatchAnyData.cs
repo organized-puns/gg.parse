@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions.datafunctions
 {
     public class MatchAnyData<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, int min = 1, int max = 1)
         : RuleBase<T>(name, production)

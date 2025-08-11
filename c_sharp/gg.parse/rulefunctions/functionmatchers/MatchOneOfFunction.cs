@@ -1,6 +1,7 @@
 ﻿using gg.core.util;
+using gg.parse.rulefunctions;
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rulefunctions.rulefunctions
 {
     public class MatchOneOfFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
@@ -40,7 +41,7 @@ namespace gg.parse.rulefunctions
                 var result = option.Parse(input, start);
                 if (result.FoundMatch)
                 {
-                    List<Annotation>? children = (result.Annotations == null || result.Annotations.Count == 0)
+                    List<Annotation>? children = result.Annotations == null || result.Annotations.Count == 0
                             ? null 
                             : [..result.Annotations!];
 

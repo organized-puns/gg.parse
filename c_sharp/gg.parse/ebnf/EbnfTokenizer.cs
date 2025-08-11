@@ -1,12 +1,12 @@
 ﻿
 using gg.parse.rulefunctions;
 
-using static gg.parse.rulefunctions.TokenNames;
-using static gg.parse.rulefunctions.CommonRuleTableRules;
+using static gg.parse.rulefunctions.CommonTokenNames;
+using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
 {
-    public class EbnfTokenizer : BasicTokensTable
+    public class EbnfTokenizer : RuleGraph<char>
     {
         public EbnfTokenizer(bool dropComments = true)
         {
@@ -33,13 +33,13 @@ namespace gg.parse.ebnf
 
             var ebnfTokens =
                 this.OneOf("#EbnfTokens", AnnotationProduct.Transitive,
-                    EndOfLine(product: AnnotationProduct.None),
+                    this.EndOfLine(product: AnnotationProduct.None),
                     // make sure keywords are before the identifier
-                    Keyword(MarkError, AnnotationProduct.Annotation, "error"),
-                    Identifier(),
-                    Integer(),
-                    String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
-                    String(SingleQuotedString, AnnotationProduct.Annotation, '\''),
+                    this.Keyword(MarkError, AnnotationProduct.Annotation, "error"),
+                    this.Identifier(),
+                    this.Integer(),
+                    this.String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
+                    this.String(SingleQuotedString, AnnotationProduct.Annotation, '\''),
                     Literal("=", Assignment),
                     Literal("{", ScopeStart),
                     Literal("}", ScopeEnd),
@@ -59,20 +59,19 @@ namespace gg.parse.ebnf
                     Literal("!", NotOperator),
                     Literal("#", TransitiveSelector),
                     Literal("~", NoProductSelector),
-                    SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
-                    MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
-                    
+                    this.SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
+                    this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
                 );
 
-            var error = Error(UnknownToken, AnnotationProduct.Annotation,
+            var error = this.Error(UnknownToken, AnnotationProduct.Annotation,
                 "Can't match the character at the given position to a token.", ebnfTokens, 0);
 
             Root = this.ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
-                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, Whitespace(), error));
+                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, this.Whitespace(), error));
         }
 
         public RuleBase<char> Literal(string token, string name) =>
-            CommonRuleTableRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
+            CommonRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
 
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 

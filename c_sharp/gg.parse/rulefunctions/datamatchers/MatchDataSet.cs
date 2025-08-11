@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions.datafunctions
 {
     public class MatchDataSet<T> : RuleBase<T> where T : IComparable<T>
     {

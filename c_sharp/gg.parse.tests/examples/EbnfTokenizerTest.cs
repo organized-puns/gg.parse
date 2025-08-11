@@ -18,11 +18,11 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(isSuccess);
             Assert.IsTrue(charactersRead == rule.Length);
             Assert.IsTrue(annotations!.Count == 5);
-            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindRule(TokenNames.Identifier).Id);
-            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindRule(TokenNames.Assignment).Id);
-            Assert.IsTrue(annotations[2].FunctionId == tokenizer.FindRule(TokenNames.ZeroOrMoreOperator).Id);
-            Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(TokenNames.SingleQuotedString).Id);
-            Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(TokenNames.EndStatement).Id);
+            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            Assert.IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.ZeroOrMoreOperator).Id);
+            Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
         }
         
         [TestMethod]

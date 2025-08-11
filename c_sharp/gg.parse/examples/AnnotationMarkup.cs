@@ -9,41 +9,41 @@ namespace gg.parse.examples
         {
             return new Dictionary<string, string>
             {
-                { TokenNames.Integer, "color: #9075F0;" },
+                { CommonTokenNames.Integer, "color: #9075F0;" },
                 
-                { TokenNames.DoubleQuotedString, "color: #b0e055;" },
-                { TokenNames.SingleQuotedString, "color: #b0e055;" },
-                { TokenNames.AnyCharacter, "color: #b0e055;" },
+                { CommonTokenNames.DoubleQuotedString, "color: #b0e055;" },
+                { CommonTokenNames.SingleQuotedString, "color: #b0e055;" },
+                { CommonTokenNames.AnyCharacter, "color: #b0e055;" },
 
-                { TokenNames.Identifier, "color: #EEFEFF;" },
-                { TokenNames.Null, "color: #95a095; font-style: italic;" },
-                { TokenNames.Boolean, "color: #45aA30;" },
+                { CommonTokenNames.Identifier, "color: #EEFEFF;" },
+                { CommonTokenNames.Null, "color: #95a095; font-style: italic;" },
+                { CommonTokenNames.Boolean, "color: #45aA30;" },
 
-                { TokenNames.ScopeStart, "color: #f7aedc;" },
-                { TokenNames.ScopeEnd, "color: #f7aedc;" },
-                { TokenNames.GroupStart, "color: #bcaef7;" },
-                { TokenNames.GroupEnd, "color: #bcaef7;" },
+                { CommonTokenNames.ScopeStart, "color: #f7aedc;" },
+                { CommonTokenNames.ScopeEnd, "color: #f7aedc;" },
+                { CommonTokenNames.GroupStart, "color: #bcaef7;" },
+                { CommonTokenNames.GroupEnd, "color: #bcaef7;" },
 
-                { TokenNames.CollectionSeparator, "color: #f7eeec;" },
-                { TokenNames.KeyValueSeparator, "color: #f78c6c;" },
-                { TokenNames.EndStatement, "color: #f79c7e;" },
+                { CommonTokenNames.CollectionSeparator, "color: #f7eeec;" },
+                { CommonTokenNames.KeyValueSeparator, "color: #f78c6c;" },
+                { CommonTokenNames.EndStatement, "color: #f79c7e;" },
 
-                { TokenNames.Assignment, "color: #F79FFe;" },
-                { TokenNames.Elipsis, "color: #c79FFe;" },
-                { TokenNames.ZeroOrMoreOperator, "color: #c79FFe;" },
-                { TokenNames.ZeroOrOneOperator, "color: #c79FFe;" },
-                { TokenNames.OneOrMoreOperator, "color: #c79FFe;" },
-                { TokenNames.Option, "color: #c79FFe;" },
-                { TokenNames.NotOperator, "color: #c79FFe;" },
+                { CommonTokenNames.Assignment, "color: #F79FFe;" },
+                { CommonTokenNames.Elipsis, "color: #c79FFe;" },
+                { CommonTokenNames.ZeroOrMoreOperator, "color: #c79FFe;" },
+                { CommonTokenNames.ZeroOrOneOperator, "color: #c79FFe;" },
+                { CommonTokenNames.OneOrMoreOperator, "color: #c79FFe;" },
+                { CommonTokenNames.Option, "color: #c79FFe;" },
+                { CommonTokenNames.NotOperator, "color: #c79FFe;" },
 
-                { TokenNames.NoProductSelector, "color: #A0A3AA;" },
-                { TokenNames.TransitiveSelector, "color: #B0B3BA;" },
+                { CommonTokenNames.NoProductSelector, "color: #A0A3AA;" },
+                { CommonTokenNames.TransitiveSelector, "color: #B0B3BA;" },
 
-                { TokenNames.SingleLineComment, "color: #15AA20;" },
-                { TokenNames.MultiLineComment, "color: #15AA20;" },
+                { CommonTokenNames.SingleLineComment, "color: #15AA20;" },
+                { CommonTokenNames.MultiLineComment, "color: #15AA20;" },
 
-                { TokenNames.UnknownToken, "background-color: #ff7080; color: #050305;" },
-                { TokenNames.EndOfLine, $"background-color: #6606BB;}} .{TokenNames.EndOfLine}::before {{content: \"\\21A9\";" }
+                { CommonTokenNames.UnknownToken, "background-color: #ff7080; color: #050305;" },
+                { CommonTokenNames.EndOfLine, $"background-color: #6606BB;}} .{CommonTokenNames.EndOfLine}::before {{content: \"\\21A9\";" }
             };
         }
 

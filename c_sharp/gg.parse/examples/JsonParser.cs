@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using gg.parse.rulefunctions;
 
-using static gg.parse.rulefunctions.CommonRuleTableRules;
+using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.examples
 {
@@ -38,24 +38,24 @@ namespace gg.parse.examples
 
             _defaultProduct = AnnotationProduct.Annotation;
 
-            var key = Token(JsonNodeNames.Key, TokenId(TokenNames.String));
-            var stringValue = Token(JsonNodeNames.String, TokenId(TokenNames.String));
-            var intValue = Token(JsonNodeNames.Integer, TokenId(TokenNames.Integer));
-            var floatValue = Token(JsonNodeNames.Float, TokenId(TokenNames.Float));
-            var boolValue = Token(JsonNodeNames.Boolean, TokenId(TokenNames.Boolean));
-            var nullValue = Token(JsonNodeNames.Null, TokenId(TokenNames.Null));
+            var key = Token(JsonNodeNames.Key, TokenId(CommonTokenNames.String));
+            var stringValue = Token(JsonNodeNames.String, TokenId(CommonTokenNames.String));
+            var intValue = Token(JsonNodeNames.Integer, TokenId(CommonTokenNames.Integer));
+            var floatValue = Token(JsonNodeNames.Float, TokenId(CommonTokenNames.Float));
+            var boolValue = Token(JsonNodeNames.Boolean, TokenId(CommonTokenNames.Boolean));
+            var nullValue = Token(JsonNodeNames.Null, TokenId(CommonTokenNames.Null));
 
             // value = string | int | float | bool | null
             var value = this.OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
 
             _defaultProduct = AnnotationProduct.None;
             
-            var keyValueSeparator = Token(TokenNames.KeyValueSeparator);
-            var objectStart = Token(TokenNames.ScopeStart);
-            var objectEnd = Token(TokenNames.ScopeEnd);
-            var arrayStart = Token(TokenNames.ArrayStart);
-            var arrayEnd = Token(TokenNames.ArrayEnd);
-            var comma = Token(TokenNames.CollectionSeparator);
+            var keyValueSeparator = Token(CommonTokenNames.KeyValueSeparator);
+            var objectStart = Token(CommonTokenNames.ScopeStart);
+            var objectEnd = Token(CommonTokenNames.ScopeEnd);
+            var arrayStart = Token(CommonTokenNames.ArrayStart);
+            var arrayEnd = Token(CommonTokenNames.ArrayEnd);
+            var comma = Token(CommonTokenNames.CollectionSeparator);
 
             
             // kv = string kv_separator value
@@ -156,7 +156,7 @@ namespace gg.parse.examples
                 { JsonNodeNames.Value, "background-color: #EEABD9; display: inline; padding: 2px;" },
                 { JsonNodeNames.Object, "background-color: #AABBC9; display: inline; padding: 3px;"},
                 { JsonNodeNames.Array, "background-color: #AFC0CF; display: inline; padding: 3px;" },
-                { TokenNames.UnknownToken, "background-color: #FFE0DA; display: inline; padding: 3px;" },
+                { CommonTokenNames.UnknownToken, "background-color: #FFE0DA; display: inline; padding: 3px;" },
             };
         }
 

@@ -1,7 +1,8 @@
 ﻿using gg.parse.ebnf;
 using gg.parse.examples;
 using gg.parse.rulefunctions;
-
+using gg.parse.rulefunctions.datafunctions;
+using gg.parse.rulefunctions.rulefunctions;
 using static gg.parse.tests.TestUtils;
 
 namespace gg.parse.tests.examples

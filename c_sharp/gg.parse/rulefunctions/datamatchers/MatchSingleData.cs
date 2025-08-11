@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions.datafunctions
 {
     public class MatchSingleData<T>(string name, T data, AnnotationProduct production = AnnotationProduct.Annotation)
         : RuleBase<T>(name, production)

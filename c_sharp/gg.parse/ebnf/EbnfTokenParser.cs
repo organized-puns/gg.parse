@@ -1,6 +1,7 @@
 ﻿using gg.parse.rulefunctions;
-
-using static gg.parse.rulefunctions.CommonRuleTableRules;
+using gg.parse.rulefunctions.datafunctions;
+using gg.parse.rulefunctions.rulefunctions;
+using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
 {
@@ -54,31 +55,31 @@ namespace gg.parse.ebnf
 
             // "abc" or 'abc'
             MatchLiteral = this.OneOf("Literal", AnnotationProduct.Annotation,
-                    Token(TokenNames.SingleQuotedString),
-                    Token(TokenNames.DoubleQuotedString)
+                    Token(CommonTokenNames.SingleQuotedString),
+                    Token(CommonTokenNames.DoubleQuotedString)
             );
 
             // .
-            MatchAnyToken = Token("AnyToken", AnnotationProduct.Annotation, TokenNames.AnyCharacter);
+            MatchAnyToken = Token("AnyToken", AnnotationProduct.Annotation, CommonTokenNames.AnyCharacter);
 
             // { "abcf" }
             MatchCharacterSet = this.Sequence("CharacterSet", AnnotationProduct.Annotation,
-                    Token(TokenNames.ScopeStart),
+                    Token(CommonTokenNames.ScopeStart),
                     MatchLiteral,
-                    Token(TokenNames.ScopeEnd)
+                    Token(CommonTokenNames.ScopeEnd)
             );
 
             // { 'a' .. 'z' }
             MatchCharacterRange = this.Sequence("CharacterRange", AnnotationProduct.Annotation,
-                    Token(TokenNames.ScopeStart),
+                    Token(CommonTokenNames.ScopeStart),
                     MatchLiteral,
-                    Token(TokenNames.Elipsis),
+                    Token(CommonTokenNames.Elipsis),
                     MatchLiteral,
-                    Token(TokenNames.ScopeEnd)
+                    Token(CommonTokenNames.ScopeEnd)
             );
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, TokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, TokenNames.NoProductSelector);
+            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
 
             var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
@@ -90,7 +91,7 @@ namespace gg.parse.ebnf
 
             MatchIdentifier = this.Sequence("Identifier", AnnotationProduct.Annotation,
                                 ruleProduction,
-                                Token("IdentifierToken", AnnotationProduct.Annotation, TokenNames.Identifier));
+                                Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier));
 
             // literal | set
             var ruleTerms = this.OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
@@ -102,24 +103,24 @@ namespace gg.parse.ebnf
             );
 
             var nextSequenceElement = this.Sequence("#NextSequenceElement", AnnotationProduct.Transitive,
-                    Token(TokenNames.CollectionSeparator),
+                    Token(CommonTokenNames.CollectionSeparator),
                     ruleTerms);
 
             // a, b, c
             MatchSequence = this.Sequence("Sequence", AnnotationProduct.Annotation,
                     ruleTerms,
-                    Token(TokenNames.CollectionSeparator),
+                    Token(CommonTokenNames.CollectionSeparator),
                     ruleTerms,
                     this.ZeroOrMore("#SequenceRest", AnnotationProduct.Transitive, nextSequenceElement));
 
             var nextOptionElement = this.Sequence("#NextOptionElement", AnnotationProduct.Transitive,
-                    Token(TokenNames.Option),
+                    Token(CommonTokenNames.Option),
                     ruleTerms);
 
             // a | b | c
             MatchOption = this.Sequence("Option", AnnotationProduct.Annotation,
                     ruleTerms,
-                    Token(TokenNames.Option),
+                    Token(CommonTokenNames.Option),
                     ruleTerms,
                     this.ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
 
@@ -131,49 +132,49 @@ namespace gg.parse.ebnf
 
             // ( a, b, c )
             MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
-                Token(TokenNames.GroupStart),
+                Token(CommonTokenNames.GroupStart),
                 ruleDefinition,
-                Token(TokenNames.GroupEnd));
+                Token(CommonTokenNames.GroupEnd));
 
             // *(a | b | c)
             MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
-                Token(TokenNames.ZeroOrMoreOperator),
+                Token(CommonTokenNames.ZeroOrMoreOperator),
                 ruleTerms);
 
             // ?(a | b | c)
             MatchZeroOrOneOperator = this.Sequence("ZeroOrOne", AnnotationProduct.Annotation,
-                Token(TokenNames.ZeroOrOneOperator),
+                Token(CommonTokenNames.ZeroOrOneOperator),
                 ruleTerms);
 
             // +(a | b | c)
             MatchOneOrMoreOperator = this.Sequence("OneOrMore", AnnotationProduct.Annotation,
-                Token(TokenNames.OneOrMoreOperator),
+                Token(CommonTokenNames.OneOrMoreOperator),
                 ruleTerms);
 
             // !(a | b | c)
             MatchNotOperator = this.Sequence("Not", AnnotationProduct.Annotation,
-                Token(TokenNames.NotOperator),
+                Token(CommonTokenNames.NotOperator),
                 ruleTerms);
 
             MatchError = this.Sequence("Error", AnnotationProduct.Annotation,
-                    Token("ErrorKeyword", AnnotationProduct.Annotation, TokenNames.MarkError),
+                    Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
                     MatchLiteral,
                     ruleDefinition
             );
 
             ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, MatchError];
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, TokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, TokenNames.NoProductSelector);
+            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
-            MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, TokenNames.Identifier);
+            MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
             
             var rule = this.Sequence("Rule", AnnotationProduct.Annotation,
                     ruleProduction,
                     MatchRuleName,
-                    Token(TokenNames.Assignment),
+                    Token(CommonTokenNames.Assignment),
                     ruleDefinition,
-                    Token(TokenNames.EndStatement));
+                    Token(CommonTokenNames.EndStatement));
 
             Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);           
         }

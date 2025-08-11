@@ -1,6 +1,6 @@
 ﻿namespace gg.parse.rulefunctions
 {
-    public static class TokenNames
+    public static class CommonTokenNames
     {
         public static readonly string NoProductPrefix = "~";
         public static readonly string NoProductSelector= "NoProductSelector";        
