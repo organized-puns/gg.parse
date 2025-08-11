@@ -40,25 +40,25 @@ namespace gg.parse.ebnf
                     this.Integer(),
                     this.String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
                     this.String(SingleQuotedString, AnnotationProduct.Annotation, '\''),
-                    Literal("=", Assignment),
-                    Literal("{", ScopeStart),
-                    Literal("}", ScopeEnd),
-                    Literal(";", EndStatement),
-                    Literal("..", Elipsis),
+                    MapNameToToken(Assignment, "="),
+                    MapNameToToken(ScopeStart, "{"),
+                    MapNameToToken(ScopeEnd, "}"),
+                    MapNameToToken(EndStatement, ";"),
+                    MapNameToToken(Elipsis, ".."),
                     // needs to be behind elipsis, elipsis being the more specific one
-                    Literal(".", AnyCharacter),
-                    Literal("|", Option),
-                    Literal("(", GroupStart),
-                    Literal(")", GroupEnd),
-                    Literal(",", CollectionSeparator),
-                    Literal("?", ZeroOrOneOperator),
-                    Literal("*", ZeroOrMoreOperator),
-                    Literal("+", OneOrMoreOperator),
-                    Literal("[", ArrayStart),
-                    Literal("]", ArrayEnd),
-                    Literal("!", NotOperator),
-                    Literal("#", TransitiveSelector),
-                    Literal("~", NoProductSelector),
+                    MapNameToToken(AnyCharacter, "."),
+                    MapNameToToken(Option, "|"),
+                    MapNameToToken(GroupStart, "("),
+                    MapNameToToken(GroupEnd, ")"),
+                    MapNameToToken(CollectionSeparator, ","),
+                    MapNameToToken(ZeroOrOneOperator, "?"),
+                    MapNameToToken(ZeroOrMoreOperator, "*"),
+                    MapNameToToken(OneOrMoreOperator, "+"),
+                    MapNameToToken(ArrayStart, "["),
+                    MapNameToToken(ArrayEnd, "]"),
+                    MapNameToToken(NotOperator, "!"),
+                    MapNameToToken(TransitiveSelector, "#"),
+                    MapNameToToken(NoProductSelector, "~"),
                     this.SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
                     this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
                 );
@@ -69,17 +69,11 @@ namespace gg.parse.ebnf
             Root = this.ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
                                 this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, this.Whitespace(), error));
         }
-
-        public RuleBase<char> Literal(string token, string name) =>
-            CommonRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
-
+        
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
-        public (ParseResult, string) ParseFile(string path)
-        {
-            var text = File.ReadAllText(path);
-            return (Tokenize(text), text);
-        }
+        private RuleBase<char> MapNameToToken(string name, string token) =>
+            this.Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
     }
 }
 

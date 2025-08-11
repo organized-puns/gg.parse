@@ -29,7 +29,8 @@ namespace gg.parse.tests.examples
         public void TestJsonFileWithErrors_ExpectLotsOfAnnotationsAndErrors()
         {
             var tokenizer = new EbnfTokenizer(dropComments: true);
-            var ((isSuccess, charactersRead, annotations), text) = tokenizer.ParseFile("assets/ebnf_tokenizer_example.ebnf");
+            var text = File.ReadAllText("assets/ebnf_tokenizer_example.ebnf");
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(text);
 
             Assert.IsTrue(isSuccess);
 

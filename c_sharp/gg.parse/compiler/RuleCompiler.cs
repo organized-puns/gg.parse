@@ -101,6 +101,5 @@ namespace gg.parse.compiler
 
             return new(ruleNodes[idx], product, name);
         }
-
     }
 }
