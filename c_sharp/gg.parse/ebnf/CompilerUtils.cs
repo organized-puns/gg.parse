@@ -44,22 +44,17 @@ namespace gg.parse.ebnf
         }
 
 
-        public static CompileSession<T> CreateContext<T>(string text, List<Annotation> tokens, List<Annotation> astNodes) where T: IComparable<T>
+        public static CompileSession<T> CreateSession<T>(string text, List<Annotation> tokens, List<Annotation> astNodes) where T: IComparable<T>
         {
             return new CompileSession<T>()
                     .WithText(text)
                     .WithTokens(tokens)
                     .WithAstNodes(astNodes);
         }
-        public static CompileSession<T> SetAnnotationProductMapping<T>(this CompileSession<T> context, EbnfTokenParser parser)
-            where T : IComparable<T>
-        {
-            context.ProductLookup = [
+        public static (int functionId, AnnotationProduct product)[] CreateAnnotationProductMapping(this EbnfTokenParser parser) =>
+            [
                 (parser.MatchTransitiveSelector.Id, AnnotationProduct.Transitive),
                 (parser.MatchNoProductSelector.Id, AnnotationProduct.None),
             ];
-
-            return context;
-        }
     }
 }

@@ -173,10 +173,10 @@ namespace gg.parse.ebnf
             var tokenizerAstTree = tokenizerParser.Parse(tokenizerTokens).Annotations;
 
             var tokenContext = CompilerUtils
-                                .CreateContext<char>(tokenizerText, tokenizerTokens, tokenizerAstTree)
-                                .SetAnnotationProductMapping(tokenizerParser);
+                                .CreateSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
 
             return new RuleCompiler<char>()
+                    .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
                     .RegisterTokenizerCompilerFunctions(tokenizerParser)
                     .Compile(tokenContext);
         }
@@ -190,10 +190,10 @@ namespace gg.parse.ebnf
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
 
             var grammarcontext = CompilerUtils
-                                    .CreateContext<int>(grammarText, grammarTokens, grammarAstNodes)
-                                    .SetAnnotationProductMapping(grammarParser);
+                                    .CreateSession<int>(grammarText, grammarTokens, grammarAstNodes);
 
             return new RuleCompiler<int>()
+                    .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
                     .RegisterGrammarCompilerFunctions(grammarParser)
                     .Compile(grammarcontext, RegisterTokens(tokenSource, new RuleTable<int>()));
         }

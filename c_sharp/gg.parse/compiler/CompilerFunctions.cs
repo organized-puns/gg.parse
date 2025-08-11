@@ -1,6 +1,5 @@
-﻿using gg.parse.ebnf;
+﻿using gg.core.util;
 using gg.parse.rulefunctions;
-using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 
 namespace gg.parse.compiler
@@ -56,7 +55,7 @@ namespace gg.parse.compiler
 
             if (hasProductionOperator)
             {
-                session.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
+                compiler.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
             }
 
             return new RuleReference<T>(declaration.Name, referenceName, product);

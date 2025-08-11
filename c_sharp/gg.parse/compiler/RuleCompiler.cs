@@ -12,6 +12,14 @@ namespace gg.parse.compiler
     {
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
+        public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
+
+        public RuleCompiler<T> WithAnnotationProductMapping((int functionId, AnnotationProduct product)[] productMapp)
+        {
+            ProductLookup = productMapp;
+            return this;
+        }
+
         public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function, string? name = null)
         {
             Contract.Requires(function != null);
@@ -60,19 +68,40 @@ namespace gg.parse.compiler
             return result;
         }
 
-        private static RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
+        public bool TryGetProduct(int functionId, out AnnotationProduct product)
+        {
+            product = AnnotationProduct.Annotation;
+
+            if (ProductLookup != null)
+            {
+                for (var i = 0; i < ProductLookup.Length; i++)
+                {
+                    if (functionId == ProductLookup[i].functionId)
+                    {
+                        product = ProductLookup[i].product;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        private RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
-            if (context.TryGetProduct(ruleNodes[idx].FunctionId, out var product))
+            if (TryGetProduct(ruleNodes[idx].FunctionId, out var product))
             {
                 idx++;
             }
-            
+
             var name = context.GetText(ruleNodes[idx].Range);
             idx++;
 
             return new(ruleNodes[idx], product, name);
         }
+
     }
 }

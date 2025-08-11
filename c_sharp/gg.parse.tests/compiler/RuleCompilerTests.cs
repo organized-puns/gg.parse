@@ -1,4 +1,5 @@
 ﻿using gg.parse.compiler;
+using gg.parse.ebnf;
 using gg.parse.rulefunctions;
 
 using static gg.parse.compiler.CompilerFunctions;
@@ -340,8 +341,6 @@ namespace gg.parse.tests.compiler
                 ])
             ];
 
-            context.ProductLookup = [(noneProductId, AnnotationProduct.None)];
-
             // compile a rule table which can tokenize foo
             var table = new RuleTable<char>();
 
@@ -349,7 +348,9 @@ namespace gg.parse.tests.compiler
             // this foo parses a literal bar
             table.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
 
-            table = compiler.Compile(context, table);
+            table = compiler
+                    .WithAnnotationProductMapping([(noneProductId, AnnotationProduct.None)])
+                    .Compile(context, table);
 
             Assert.IsNotNull(table);
             Assert.IsNotNull(table.Root);

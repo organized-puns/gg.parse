@@ -11,7 +11,6 @@ namespace gg.parse.compiler
 
         public List<Annotation>? AstNodes { get; set; }      
         
-        public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
 
         public CompileSession()
         {
@@ -71,24 +70,7 @@ namespace gg.parse.compiler
             return this;
         }
 
-        public bool TryGetProduct(int functionId, out AnnotationProduct product)
-        {
-            product = AnnotationProduct.Annotation;
-
-            if (ProductLookup != null)
-            {
-                for (var i = 0; i < ProductLookup.Length; i++)
-                {
-                    if (functionId == ProductLookup[i].functionId)
-                    {
-                        product = ProductLookup[i].product;
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
+        
 
     }
 }
