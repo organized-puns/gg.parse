@@ -10,7 +10,7 @@ namespace gg.parse.compiler
         public List<Annotation>? Tokens { get; set; } 
 
         public List<Annotation>? AstNodes { get; set; }      
-        
+       
 
         public CompileSession()
         {
@@ -48,6 +48,7 @@ namespace gg.parse.compiler
             
             return Text.Substring(range.Start, range.Length);
         }
+
         public CompileSession<T> WithText(string text)
         {
             Text = text;
@@ -69,8 +70,5 @@ namespace gg.parse.compiler
             AstNodes = nodes;
             return this;
         }
-
-        
-
     }
 }

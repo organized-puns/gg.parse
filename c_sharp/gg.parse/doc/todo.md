@@ -5,7 +5,6 @@ Implemented an ebnf tokenizer, parser, compiler which can take a ebnf based toke
 next implement a parser, (we can re-use the tokenizer) which can parse a grammer (see json_grammar.ebnf )
 
 Clean up:
-	move Compilersession.ProductLookup -> Compiler
 	Clean up tables
 	Move examples to its own project
 	address all xxx

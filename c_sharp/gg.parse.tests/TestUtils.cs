@@ -51,12 +51,10 @@ namespace gg.parse.tests
 
             var astNodes = result.Annotations;
 
-            var context = CreateSession<char>(text, tokens, astNodes);
-
             var table = compiler
                         .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                         .RegisterTokenizerCompilerFunctions(parser)
-                        .Compile(context);
+                        .Compile(new CompileSession<char>(text, tokens, astNodes));
 
             return (text, tokens, astNodes, table);
         }
@@ -81,7 +79,7 @@ namespace gg.parse.tests
 
             var astNodes = result.Annotations;
 
-            var session = CreateSession<char>(text, tokens, astNodes);
+            var session = new CompileSession<char>(text, tokens, astNodes);
 
             var table = compiler
                         .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
