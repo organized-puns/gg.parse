@@ -1,9 +1,12 @@
-﻿using gg.parse.rulefunctions;
-using static gg.parse.rulefunctions.TokenNames;
+﻿
+using gg.parse.rulefunctions;
+
+using static gg.parse.rulefunctions.CommonTokenNames;
+using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
 {
-    public class EbnfTokenizer : BasicTokensTable
+    public class EbnfTokenizer : RuleGraph<char>
     {
         public EbnfTokenizer(bool dropComments = true)
         {
@@ -29,55 +32,48 @@ namespace gg.parse.ebnf
             // error = error "message" skip_rule
 
             var ebnfTokens =
-                OneOf("#EbnfTokens", AnnotationProduct.Transitive,
-                    EndOfLine(product: AnnotationProduct.None),
+                this.OneOf("#EbnfTokens", AnnotationProduct.Transitive,
+                    this.EndOfLine(product: AnnotationProduct.None),
                     // make sure keywords are before the identifier
-                    Keyword(MarkError, AnnotationProduct.Annotation, "error"),
-                    Identifier(),
-                    Integer(),
-                    String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
-                    String(SingleQuotedString, AnnotationProduct.Annotation, '\''),
-                    Literal("=", Assignment),
-                    Literal("{", ScopeStart),
-                    Literal("}", ScopeEnd),
-                    Literal(";", EndStatement),
-                    Literal("..", Elipsis),
+                    this.Keyword(MarkError, AnnotationProduct.Annotation, "error"),
+                    this.Identifier(),
+                    this.Integer(),
+                    this.String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
+                    this.String(SingleQuotedString, AnnotationProduct.Annotation, '\''),
+                    MapNameToToken(Assignment, "="),
+                    MapNameToToken(ScopeStart, "{"),
+                    MapNameToToken(ScopeEnd, "}"),
+                    MapNameToToken(EndStatement, ";"),
+                    MapNameToToken(Elipsis, ".."),
                     // needs to be behind elipsis, elipsis being the more specific one
-                    Literal(".", AnyCharacter),
-                    Literal("|", Option),
-                    Literal("(", GroupStart),
-                    Literal(")", GroupEnd),
-                    Literal(",", CollectionSeparator),
-                    Literal("?", ZeroOrOneOperator),
-                    Literal("*", ZeroOrMoreOperator),
-                    Literal("+", OneOrMoreOperator),
-                    Literal("[", ArrayStart),
-                    Literal("]", ArrayEnd),
-                    Literal("!", NotOperator),
-                    Literal("#", TransitiveSelector),
-                    Literal("~", NoProductSelector),
-                    SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
-                    MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
-                    
+                    MapNameToToken(AnyCharacter, "."),
+                    MapNameToToken(Option, "|"),
+                    MapNameToToken(GroupStart, "("),
+                    MapNameToToken(GroupEnd, ")"),
+                    MapNameToToken(CollectionSeparator, ","),
+                    MapNameToToken(ZeroOrOneOperator, "?"),
+                    MapNameToToken(ZeroOrMoreOperator, "*"),
+                    MapNameToToken(OneOrMoreOperator, "+"),
+                    MapNameToToken(ArrayStart, "["),
+                    MapNameToToken(ArrayEnd, "]"),
+                    MapNameToToken(NotOperator, "!"),
+                    MapNameToToken(TransitiveSelector, "#"),
+                    MapNameToToken(NoProductSelector, "~"),
+                    this.SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
+                    this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
                 );
 
-            var error = Error(UnknownToken, AnnotationProduct.Annotation,
+            var error = this.Error(UnknownToken, AnnotationProduct.Annotation,
                 "Can't match the character at the given position to a token.", ebnfTokens, 0);
 
-            Root = ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
-                                OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, Whitespace(), error));
+            Root = this.ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
+                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, this.Whitespace(), error));
         }
-
-        public RuleBase<char> Literal(string token, string name) => 
-            Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
-
+        
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
-        public (ParseResult, string) ParseFile(string path)
-        {
-            var text = File.ReadAllText(path);
-            return (Tokenize(text), text);
-        }
+        private RuleBase<char> MapNameToToken(string name, string token) =>
+            this.Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
     }
 }
 

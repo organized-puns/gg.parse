@@ -1,21 +1,21 @@
 ﻿using gg.parse.rulefunctions;
-using System.Text;
-using static gg.parse.rulefunctions.TokenNames;
 
-namespace gg.parse.examples
+using static gg.parse.rulefunctions.CommonTokenNames;
+
+namespace gg.parse.instances.json
 {
-    public class JsonTokenizer : BasicTokensTable
+    public class JsonTokenizer : RuleGraph<char>
     {     
         public JsonTokenizer()
         {
-            var jsonTokens = 
-                OneOf("#JsonTokens", AnnotationProduct.Transitive,
-                    Float(),
-                    Integer(),
+            var jsonTokens =
+                this.OneOf("#JsonTokens", AnnotationProduct.Transitive,
+                    this.Float(),
+                    this.Integer(),
                     // need to override otherwise the name will hold the delimiter which
                     // will interfere with the style lookup in html
-                    String(TokenNames.String, AnnotationProduct.Annotation),
-                    Boolean(),
+                    this.String(CommonTokenNames.String, AnnotationProduct.Annotation),
+                    this.Boolean(),
                     Literal("{", ScopeStart),
                     Literal("}", ScopeEnd),
                     Literal("[", ArrayStart),
@@ -24,15 +24,15 @@ namespace gg.parse.examples
                     Literal(",", CollectionSeparator),
                     Literal(":", KeyValueSeparator));
 
-            var error = Error(UnknownToken, AnnotationProduct.Annotation,
+            var error = this.Error(UnknownToken, AnnotationProduct.Annotation,
                 "Can't match the character at the given position to a token.", jsonTokens, 0);
 
-            Root = ZeroOrMore("#JsonTokenizer", AnnotationProduct.Transitive,
-                                OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, Whitespace(), jsonTokens, error));
+            Root = this.ZeroOrMore("#JsonTokenizer", AnnotationProduct.Transitive,
+                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, this.Whitespace(), jsonTokens, error));
         }
 
         public RuleBase<char> Literal(string token, string name) =>
-            Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
+            CommonRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
 
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 

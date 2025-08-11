@@ -1,7 +1,6 @@
-﻿
-using gg.core.util;
+﻿using gg.core.util;
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rulefunctions.rulefunctions
 {
     public class MatchFunctionCount<T>(
         string name, RuleBase<T> function, AnnotationProduct production = AnnotationProduct.Annotation, int min = 1, int max = 1)
@@ -42,7 +41,7 @@ namespace gg.parse.rulefunctions
                 }
             }
 
-            return (Min <= 0 || count >= Min)
+            return Min <= 0 || count >= Min
                 ? this.BuildFunctionRuleResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
         }

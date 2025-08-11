@@ -1,7 +1,9 @@
-﻿using gg.parse.rulefunctions;
-using System.Text;
+﻿using System.Text;
+using gg.parse.rulefunctions;
 
-namespace gg.parse.examples
+using static gg.parse.rulefunctions.CommonRules;
+
+namespace gg.parse.instances.json
 {
     public static class JsonNodeNames
     {
@@ -17,7 +19,7 @@ namespace gg.parse.examples
         internal static readonly string Array = "Array";
     }
 
-    public class JsonParser : RuleTable<int>
+    public class JsonParser : RuleGraph<int>
     {
         
         public JsonTokenizer Tokenizer { get; init; }
@@ -36,56 +38,56 @@ namespace gg.parse.examples
 
             _defaultProduct = AnnotationProduct.Annotation;
 
-            var key = Token(JsonNodeNames.Key, TokenId(TokenNames.String));
-            var stringValue = Token(JsonNodeNames.String, TokenId(TokenNames.String));
-            var intValue = Token(JsonNodeNames.Integer, TokenId(TokenNames.Integer));
-            var floatValue = Token(JsonNodeNames.Float, TokenId(TokenNames.Float));
-            var boolValue = Token(JsonNodeNames.Boolean, TokenId(TokenNames.Boolean));
-            var nullValue = Token(JsonNodeNames.Null, TokenId(TokenNames.Null));
+            var key = Token(JsonNodeNames.Key, TokenId(CommonTokenNames.String));
+            var stringValue = Token(JsonNodeNames.String, TokenId(CommonTokenNames.String));
+            var intValue = Token(JsonNodeNames.Integer, TokenId(CommonTokenNames.Integer));
+            var floatValue = Token(JsonNodeNames.Float, TokenId(CommonTokenNames.Float));
+            var boolValue = Token(JsonNodeNames.Boolean, TokenId(CommonTokenNames.Boolean));
+            var nullValue = Token(JsonNodeNames.Null, TokenId(CommonTokenNames.Null));
 
             // value = string | int | float | bool | null
-            var value = OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
+            var value = this.OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
 
             _defaultProduct = AnnotationProduct.None;
             
-            var keyValueSeparator = Token(TokenNames.KeyValueSeparator);
-            var objectStart = Token(TokenNames.ScopeStart);
-            var objectEnd = Token(TokenNames.ScopeEnd);
-            var arrayStart = Token(TokenNames.ArrayStart);
-            var arrayEnd = Token(TokenNames.ArrayEnd);
-            var comma = Token(TokenNames.CollectionSeparator);
+            var keyValueSeparator = Token(CommonTokenNames.KeyValueSeparator);
+            var objectStart = Token(CommonTokenNames.ScopeStart);
+            var objectEnd = Token(CommonTokenNames.ScopeEnd);
+            var arrayStart = Token(CommonTokenNames.ArrayStart);
+            var arrayEnd = Token(CommonTokenNames.ArrayEnd);
+            var comma = Token(CommonTokenNames.CollectionSeparator);
 
             
             // kv = string kv_separator value
             // kv_list = kv *(collection_separator kv)
             // example of recovery
-            var keyValueMatch = Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
-            var objRecovery = OneOf(value, comma, objectEnd);
+            var keyValueMatch = this.Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
+            var objRecovery = this.OneOf(value, comma, objectEnd);
             var errorValueMissing = RegisterRule(new MarkError<int>("err_missing_value", AnnotationProduct.Annotation, testFunction: objRecovery));
-            var valueMissingMatch = Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
-            var separatorMissingMatch = Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
-            var keyValue = OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);
+            var valueMissingMatch = this.Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
+            var separatorMissingMatch = this.Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
+            var keyValue = this.OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);
 
-            var nextKeyValue = Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
-            var keyValueList = Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
-                ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
+            var nextKeyValue = this.Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
+            var keyValueList = this.Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
+                this.ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
             
             // jsonObj = scope_start ?(kv_list) scope_end
-            var jsonObject = Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
-                objectStart, ZeroOrOne("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
+            var jsonObject = this.Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
+                objectStart, this.ZeroOrOne("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
 
             // jsonArray = array_start ?(value *(collection_separator value)) array_end
-            var nextValue = Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
-            var valueList = Sequence("#ValueList", AnnotationProduct.Transitive, value,
-                ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
-            var jsonArray = Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
-                arrayStart, ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
+            var nextValue = this.Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
+            var valueList = this.Sequence("#ValueList", AnnotationProduct.Transitive, value,
+                this.ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
+            var jsonArray = this.Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
+                arrayStart, this.ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
 
             value.RuleOptions = [.. value.RuleOptions, jsonObject, jsonArray];
 
             // todo error(s)
 
-            Root = OneOf("~JsonRoot", AnnotationProduct.Transitive, jsonObject, jsonArray);
+            Root = this.OneOf("~JsonRoot", AnnotationProduct.Transitive, jsonObject, jsonArray);
         }
 
         public int TokenId(string name) => Tokenizer.FindRule(name).Id;
@@ -95,10 +97,10 @@ namespace gg.parse.examples
         public RuleBase<int> Token(string tokenName, AnnotationProduct product)
         {
             var rule = Tokenizer.FindRule(tokenName);
-            return Single($"{product.GetPrefix()}Token({rule.Name})", product, rule.Id);
+            return this.Single($"{product.GetPrefix()}Token({rule.Name})", product, rule.Id);
         }
 
-        public RuleBase<int> Token(string name, int tokenId) => Single(name, _defaultProduct, tokenId);
+        public RuleBase<int> Token(string name, int tokenId) => this.Single(name, _defaultProduct, tokenId);
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);
 
@@ -108,7 +110,6 @@ namespace gg.parse.examples
             var (tokens, astNodes) = Parse(text);
             return (tokens, astNodes, text);
         }
-            
 
         public (List<Annotation> tokens, List<Annotation> astNodes) Parse(string text)
         {
@@ -155,7 +156,7 @@ namespace gg.parse.examples
                 { JsonNodeNames.Value, "background-color: #EEABD9; display: inline; padding: 2px;" },
                 { JsonNodeNames.Object, "background-color: #AABBC9; display: inline; padding: 3px;"},
                 { JsonNodeNames.Array, "background-color: #AFC0CF; display: inline; padding: 3px;" },
-                { TokenNames.UnknownToken, "background-color: #FFE0DA; display: inline; padding: 3px;" },
+                { CommonTokenNames.UnknownToken, "background-color: #FFE0DA; display: inline; padding: 3px;" },
             };
         }
 

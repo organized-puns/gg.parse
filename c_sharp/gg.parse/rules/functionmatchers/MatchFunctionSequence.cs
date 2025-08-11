@@ -1,6 +1,7 @@
 ﻿using gg.core.util;
+using gg.parse.rulefunctions;
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rulefunctions.rulefunctions
 {
     public class MatchFunctionSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {

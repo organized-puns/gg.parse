@@ -1,6 +1,5 @@
 ﻿using gg.parse.compiler;
 using gg.parse.ebnf;
-using gg.parse.rulefunctions;
 
 using static gg.parse.ebnf.CompilerUtils;
 
@@ -14,11 +13,11 @@ namespace gg.parse.tests
 
         public List<Annotation> AstNodes { get; set; }
 
-        public RuleTable<char>  TokenRules { get; set; }
+        public RuleGraph<char>  TokenRules { get; set; }
 
         public RuleCompiler<char> TokenCompiler { get; set; }
 
-        public EbnfTokenizerParser TokenizerParser { get; set; }
+        public EbnfTokenParser TokenizerParser { get; set; }
 
         public EbnfTokenizer Tokenizer { get; set; }
 
@@ -31,10 +30,10 @@ namespace gg.parse.tests
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleTable<char> table) SetupTokenizeParseCompile(string text)
+        public static (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleGraph<char> table) SetupTokenizeParseCompile(string text)
         {
             var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenizerParser(tokenizer);
+            var parser = new EbnfTokenParser(tokenizer);
             var compiler = new RuleCompiler<char>();
 
             var result = tokenizer.Tokenize(text);
@@ -51,11 +50,10 @@ namespace gg.parse.tests
 
             var astNodes = result.Annotations;
 
-            var context = CreateContext<char>(text, tokens, astNodes)
-                            .RegisterTokenizerCompilerFunctions(parser)
-                            .SetProductLookup(parser);
-
-            var table = compiler.Compile(context);
+            var table = compiler
+                        .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
+                        .RegisterTokenizerCompilerFunctions(parser)
+                        .Compile(new CompileSession<char>(text, tokens, astNodes));
 
             return (text, tokens, astNodes, table);
         }
@@ -63,7 +61,7 @@ namespace gg.parse.tests
         public static TokenTestContext SetupTokenizeTestContext(string text)
         {
             var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenizerParser(tokenizer);
+            var parser = new EbnfTokenParser(tokenizer);
             var compiler = new RuleCompiler<char>();
 
             var result = tokenizer.Tokenize(text);
@@ -80,11 +78,12 @@ namespace gg.parse.tests
 
             var astNodes = result.Annotations;
 
-            var context = CreateContext<char>(text, tokens, astNodes)
-                            .RegisterTokenizerCompilerFunctions(parser)
-                            .SetProductLookup(parser);
+            var session = new CompileSession<char>(text, tokens, astNodes);
 
-            var table = compiler.Compile(context);
+            var table = compiler
+                        .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
+                        .RegisterTokenizerCompilerFunctions(parser)
+                        .Compile(session);
 
             return new TokenTestContext()
             {

@@ -1,5 +1,4 @@
-﻿
-namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions.datafunctions
 {
     public class MatchDataSequence<T>(string name, T[] dataArray, AnnotationProduct production = AnnotationProduct.Annotation)
         : RuleBase<T>(name, production)

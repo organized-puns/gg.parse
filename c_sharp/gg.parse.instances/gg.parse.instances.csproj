@@ -1,37 +1,27 @@
-﻿<Project Sdk="MSTest.Sdk/3.6.4">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UseVSTest>true</UseVSTest>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="assets\json_values_object.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="assets\ebnf_tokenizer_example.ebnf">
+    <Content Include="assets\example.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="assets\example_with_errors.json">
+    <Content Include="assets\json_grammar.ebnf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\json_grammar_optimized.ebnf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\json_values_object.json">
+    <Content Include="assets\json_tokens.ebnf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\gg.parse.instances\gg.parse.instances.csproj" />
     <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
   </ItemGroup>
 

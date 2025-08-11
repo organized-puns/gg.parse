@@ -1,8 +1,7 @@
-﻿
-using gg.core.util;
+﻿using gg.core.util;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rulefunctions.rulefunctions
 {
     public class MatchNotFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {

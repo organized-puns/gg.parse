@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions
+﻿namespace gg.parse
 {
     public interface IRuleComposition<T> where T : IComparable<T>
     {

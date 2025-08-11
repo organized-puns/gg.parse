@@ -13,12 +13,12 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void DigitRuleTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var digitRule = table.Digit();
             
             Assert.IsNotNull(digitRule);
-            Assert.AreEqual(TokenNames.Digit, digitRule.Name);
-            Assert.IsTrue(table.FindRule(TokenNames.Digit) == digitRule);
+            Assert.AreEqual(CommonTokenNames.Digit, digitRule.Name);
+            Assert.IsTrue(table.FindRule(CommonTokenNames.Digit) == digitRule);
 
             // calling digit a second time should return the same rule
             Assert.IsTrue(table.Digit() == digitRule);
@@ -37,12 +37,12 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void DigitSequenceTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var digitSequenceRule = table.DigitSequence();
 
             Assert.IsNotNull(digitSequenceRule);
-            Assert.AreEqual(TokenNames.DigitSequence, digitSequenceRule.Name);
-            Assert.IsTrue(table.FindRule(TokenNames.DigitSequence) == digitSequenceRule);
+            Assert.AreEqual(CommonTokenNames.DigitSequence, digitSequenceRule.Name);
+            Assert.IsTrue(table.FindRule(CommonTokenNames.DigitSequence) == digitSequenceRule);
 
             // calling digit a second time should return the same rule
             Assert.IsTrue(table.DigitSequence() == digitSequenceRule);
@@ -65,12 +65,12 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void IntegerTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var intRule = table.Integer();
 
             Assert.IsNotNull(intRule);
-            Assert.AreEqual(TokenNames.Integer, intRule.Name);
-            Assert.IsTrue(table.FindRule(TokenNames.Integer) == intRule);
+            Assert.AreEqual(CommonTokenNames.Integer, intRule.Name);
+            Assert.IsTrue(table.FindRule(CommonTokenNames.Integer) == intRule);
 
             // calling digit a second time should return the same rule
             Assert.IsTrue(table.Integer() == intRule);
@@ -109,12 +109,12 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void FloatTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var floatRule = table.Float();
 
             Assert.IsNotNull(floatRule);
-            Assert.AreEqual(TokenNames.Float, floatRule.Name);
-            Assert.IsTrue(table.FindRule(TokenNames.Float) == floatRule);
+            Assert.AreEqual(CommonTokenNames.Float, floatRule.Name);
+            Assert.IsTrue(table.FindRule(CommonTokenNames.Float) == floatRule);
 
             Assert.IsTrue(table.Float() == floatRule);
 
@@ -150,7 +150,7 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void LiteralTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var fooRule = table.Literal("foo", AnnotationProduct.Annotation, "foo".ToCharArray());
             var barRule = table.Literal("bar", AnnotationProduct.Annotation, "bar".ToCharArray());
             
@@ -190,13 +190,13 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void BooleanTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var booleanRule = table.Boolean();
 
             Assert.IsNotNull(booleanRule);
-            Assert.AreEqual($"{TokenNames.Boolean}", booleanRule.Name);
+            Assert.AreEqual($"{CommonTokenNames.Boolean}", booleanRule.Name);
             
-            Assert.IsTrue(table.FindRule($"{TokenNames.Boolean}") == booleanRule);
+            Assert.IsTrue(table.FindRule($"{CommonTokenNames.Boolean}") == booleanRule);
             
             // calling digit a second time should return the same rule
             Assert.IsTrue(table.Boolean() == booleanRule);
@@ -226,14 +226,14 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void StringTest()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var doubleQuoteStringRule = table.String(delimiter: '"');
             var quoteStringRule = table.String(delimiter: '\'');
 
             Assert.IsNotNull(doubleQuoteStringRule);
             Assert.IsNotNull(quoteStringRule);
-            Assert.AreEqual($"{TokenNames.String}(\")", doubleQuoteStringRule.Name);
-            Assert.AreEqual($"{TokenNames.String}(')", quoteStringRule.Name);
+            Assert.AreEqual($"{CommonTokenNames.String}(\")", doubleQuoteStringRule.Name);
+            Assert.AreEqual($"{CommonTokenNames.String}(')", quoteStringRule.Name);
 
             Assert.IsTrue(table.String(delimiter: '"') == doubleQuoteStringRule);
             Assert.IsTrue(table.String(delimiter: '\'') == quoteStringRule);
@@ -280,11 +280,11 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void IdentifierTests()
         {
-            var table = new BasicTokensTable();
+            var table = new RuleGraph<char>();
             var identifier = table.Identifier();
 
             Assert.IsNotNull(identifier);
-            Assert.AreEqual($"{TokenNames.Identifier}", identifier.Name);
+            Assert.AreEqual($"{CommonTokenNames.Identifier}", identifier.Name);
 
             Assert.IsTrue(table.Identifier() == identifier);
 

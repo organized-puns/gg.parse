@@ -1,25 +1,30 @@
-﻿using gg.core.util;
-using gg.parse.compiler;
-using gg.parse.rulefunctions;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
+
+using gg.core.util;
+using gg.parse.compiler;
+using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {
     public class EbnfParser
     {
-        private RuleTable<char> _ebnfTokenizer;
-        private RuleTable<int> _ebnfParser;
+        private RuleGraph<char> _ebnfTokenizer;
+        private RuleGraph<int>? _ebnfParser;
 
-        public RuleTable<char> EbnfTokenizer => _ebnfTokenizer;
-        public RuleTable<int> EbnfGrammarParser => _ebnfParser;
+        public RuleGraph<char> EbnfTokenizer => _ebnfTokenizer;
 
-        public EbnfParser(string tokenizerDefinition, string grammarDefinition)
+        public RuleGraph<int>? EbnfGrammarParser => _ebnfParser;
+
+        public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
         {
             var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenizerParser();
-            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, tokenizerParser);
-            _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, tokenizerParser, _ebnfTokenizer);
+            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer);
+            
+            if (!string.IsNullOrEmpty(grammarDefinition))
+            {
+                _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, _ebnfTokenizer);
+            }
         }
 
         public RuleBase<int>? FindParserRule(string name) => _ebnfParser.FindRule(name);
@@ -49,14 +54,16 @@ namespace gg.parse.ebnf
         public bool TryBuildAstTree(string text, out ParseResult tokens, out ParseResult astTree)
         {
             astTree = ParseResult.Failure;
-            tokens = _ebnfTokenizer.Root.Parse(text.ToArray(), 0);
+            tokens = _ebnfParser != null  && _ebnfParser.Root != null
+                    ? _ebnfTokenizer!.Root!.Parse(text.ToArray(), 0)
+                    : ParseResult.Failure;
 
             if (tokens.FoundMatch)
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
                 {
                     astTree = tokens.FoundMatch
-                            ? _ebnfParser.Root.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
+                            ? _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
                             : ParseResult.Failure;
                 }
                 else
@@ -157,58 +164,53 @@ namespace gg.parse.ebnf
         }
 
 
-        public static RuleTable<char> CreateTokenizerFromEbnfFile(
+        public static RuleGraph<char> CreateTokenizerFromEbnfFile(
             string tokenizerText,
-            EbnfTokenizer tokenizer,
-            EbnfTokenizerParser tokenizerParser)
+            EbnfTokenizer tokenizer)
         {
-            var tokenizerCompiler = new RuleCompiler<char>();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
 
-            var tokenizerTokens = tokenizer.Tokenize(tokenizerText).Annotations;
+            var tokenizerTokens  = tokenizer.Tokenize(tokenizerText).Annotations;
             var tokenizerAstTree = tokenizerParser.Parse(tokenizerTokens).Annotations;
 
-            var tokenContext = CompilerUtils
-                                .CreateContext<char>(tokenizerText, tokenizerTokens, tokenizerAstTree)
-                                .SetEngines(tokenizer, tokenizerParser)
-                                .RegisterTokenizerCompilerFunctions(tokenizerParser)
-                                .SetProductLookup(tokenizerParser);
+            var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
 
-            return tokenizerCompiler.Compile(tokenContext);
+            return new RuleCompiler<char>()
+                    .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
+                    .RegisterTokenizerCompilerFunctions(tokenizerParser)
+                    .Compile(tokenContext);
         }
 
-        public static RuleTable<int> CreateParserFromEbnfFile(
+        public static RuleGraph<int> CreateParserFromEbnfFile(
             string grammarText,
             EbnfTokenizer tokenizer,
-            EbnfTokenizerParser tokenizerParser,
-            RuleTable<char> dataTokenizer)
+            RuleGraph<char> tokenSource)
         {
-            var grammarParser = new EbnfGrammarParser(tokenizer);
+            var grammarParser = new EbnfTokenParser(tokenizer);
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
 
-            var grammarcontext = CompilerUtils
-                                    .CreateContext<int>(grammarText, grammarTokens, grammarAstNodes)
-                                    .SetEngines(tokenizer, grammarParser)
-                                    .RegisterGrammarCompilerFunctions(grammarParser)
-                                    .SetProductLookup(grammarParser);
+            var grammarcontext = new CompileSession<int>(grammarText, grammarTokens, grammarAstNodes);
 
-            var grammarCompiler = new RuleCompiler<int>();
+            return new RuleCompiler<int>()
+                    .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
+                    .RegisterGrammarCompilerFunctions(grammarParser)
+                    .Compile(grammarcontext, RegisterTokens(tokenSource, new RuleGraph<int>()));
+        }
 
-            var result = grammarcontext.Output;          
-
+        private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)
+        {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
-            foreach (var tokenFunctionName in dataTokenizer.FunctionNames)
+            foreach (var tokenFunctionName in tokenSource.FunctionNames)
             {
-                var tokenFunction = dataTokenizer.FindRule(tokenFunctionName);
+                var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 
                 if (tokenFunction.Production == AnnotationProduct.Annotation)
                 {
-                    result.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
+                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
                 }
             }
 
-            grammarCompiler.Compile(grammarcontext);
-
-            return result;
+            return target;
         }
     }
     
