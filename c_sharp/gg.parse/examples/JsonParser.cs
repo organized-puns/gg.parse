@@ -1,5 +1,8 @@
-﻿using gg.parse.rulefunctions;
-using System.Text;
+﻿using System.Text;
+
+using gg.parse.rulefunctions;
+
+using static gg.parse.rulefunctions.CommonRuleTableRules;
 
 namespace gg.parse.examples
 {
@@ -59,26 +62,26 @@ namespace gg.parse.examples
             // kv = string kv_separator value
             // kv_list = kv *(collection_separator kv)
             // example of recovery
-            var keyValueMatch = Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
+            var keyValueMatch = this.Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
             var objRecovery = OneOf(value, comma, objectEnd);
             var errorValueMissing = RegisterRule(new MarkError<int>("err_missing_value", AnnotationProduct.Annotation, testFunction: objRecovery));
-            var valueMissingMatch = Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
-            var separatorMissingMatch = Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
+            var valueMissingMatch = this.Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
+            var separatorMissingMatch = this.Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
             var keyValue = OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);
 
-            var nextKeyValue = Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
-            var keyValueList = Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
+            var nextKeyValue = this.Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
+            var keyValueList = this.Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
                 ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
             
             // jsonObj = scope_start ?(kv_list) scope_end
-            var jsonObject = Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
+            var jsonObject = this.Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
                 objectStart, ZeroOrOne("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
 
             // jsonArray = array_start ?(value *(collection_separator value)) array_end
-            var nextValue = Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
-            var valueList = Sequence("#ValueList", AnnotationProduct.Transitive, value,
+            var nextValue = this.Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
+            var valueList = this.Sequence("#ValueList", AnnotationProduct.Transitive, value,
                 ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
-            var jsonArray = Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
+            var jsonArray = this.Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
                 arrayStart, ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
 
             value.RuleOptions = [.. value.RuleOptions, jsonObject, jsonArray];
@@ -108,7 +111,6 @@ namespace gg.parse.examples
             var (tokens, astNodes) = Parse(text);
             return (tokens, astNodes, text);
         }
-            
 
         public (List<Annotation> tokens, List<Annotation> astNodes) Parse(string text)
         {

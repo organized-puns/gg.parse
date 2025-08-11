@@ -1,4 +1,7 @@
-﻿namespace gg.parse.rulefunctions
+﻿
+using static gg.parse.rulefunctions.CommonRuleTableRules;
+
+namespace gg.parse.rulefunctions
 {
     public class BasicTokensTable : RuleTable<char>
     {
@@ -48,7 +51,7 @@
 
             return (TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
-                : Sequence(ruleName, product,
+                : this.Sequence(ruleName, product,
                     ZeroOrOne(Sign(product: AnnotationProduct.None)),
                     DigitSequence(product: AnnotationProduct.None)));            
         }
@@ -58,12 +61,10 @@
             var ruleName = name ?? $"{product.GetPrefix()}{name}({keyword})";
             return TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
-                : RegisterRule(new MatchFunctionSequence<char>(ruleName, product, 
-                                    Literal(keyword), Whitespace()));
+                : RegisterRule(new MatchFunctionSequence<char>(ruleName, product,
+                                    CommonRuleTableRules.Literal(this, keyword), Whitespace()));
         }
 
-        public MatchDataSequence<char> Literal(string literal) => 
-            Literal(literal.ToCharArray());
 
         public RuleBase<char> Float(
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -71,12 +72,12 @@
             // sign?, digitSequence, '.', digitSequence, (('e' | 'E'), sign?, digitSequence)?
             var digitSequence = DigitSequence(product: AnnotationProduct.None);
             var sign = ZeroOrOne(Sign(product: AnnotationProduct.None));
-            var exponentPart = Sequence(InSet(['e', 'E']), sign, digitSequence);
+            var exponentPart = this.Sequence(InSet(['e', 'E']), sign, digitSequence);
 
-            return Sequence(name ?? TokenNames.Float, product,
+            return this.Sequence(name ?? TokenNames.Float, product,
                 sign,
                 digitSequence,
-                Literal("."),
+                CommonRuleTableRules.Literal(this, "."),
                 digitSequence,
                 ZeroOrOne(exponentPart)
             );
@@ -91,8 +92,8 @@
             return TryFindRule(ruleName, out MatchOneOfFunction<char>? existingRule)
                 ? existingRule!
                 : OneOf(ruleName, product,
-                                Literal("true"),
-                                Literal("false"));
+                                CommonRuleTableRules.Literal(this, "true"),
+                                CommonRuleTableRules.Literal(this, "false"));
         }
 
         public RuleBase<char> String(
@@ -101,13 +102,13 @@
             // '"', ('\\"' or (not '"', any) )*, '"'
             // '"', ('\\"' | (!'"', _) )*, '"'
             var delimiterRule = InSet($"{TokenNames.NoProductPrefix}StringDelimiter({delimiter})", AnnotationProduct.None, delimiter);
-            var escapedQuote = Sequence($"{TokenNames.NoProductPrefix}Escaped({delimiter})", AnnotationProduct.None, '\\', delimiter);
-            var notQuoteThenAny = Sequence($"{TokenNames.NoProductPrefix}IsStringCharacter({delimiter})", AnnotationProduct.None, Not(delimiterRule), Any());
+            var escapedQuote = this.Sequence($"{TokenNames.NoProductPrefix}Escaped({delimiter})", AnnotationProduct.None, '\\', delimiter);
+            var notQuoteThenAny = this.Sequence($"{TokenNames.NoProductPrefix}IsStringCharacter({delimiter})", AnnotationProduct.None, Not(delimiterRule), Any());
             var stringCharacters = ZeroOrMore($"{TokenNames.NoProductPrefix}StringCharacter({delimiter})", AnnotationProduct.None, OneOf(escapedQuote, notQuoteThenAny));
 
             var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.String}({delimiter})";
 
-            return Sequence(ruleName, product, delimiterRule, stringCharacters, delimiterRule);
+            return this.Sequence(ruleName, product, delimiterRule, stringCharacters, delimiterRule);
         }
 
         public MatchDataRange<char> LowerCaseLetter(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -138,7 +139,7 @@
 
             var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.Identifier}";
 
-            return Sequence(ruleName, product, firstCharacter, nextCharacterString);
+            return this.Sequence(ruleName, product, firstCharacter, nextCharacterString);
         }
 
         public RuleBase<char> EndOfLine(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -146,26 +147,27 @@
             var ruleName = name ?? $"{TokenNames.EndOfLine}";
 
             return OneOf(ruleName, product,
-                    Literal("CRLF", AnnotationProduct.None, "\r\n".ToCharArray()),
-                    Literal("LF", AnnotationProduct.None, "\n".ToCharArray()));
+                    CommonRuleTableRules.Literal(this, "CRLF", AnnotationProduct.None, "\r\n".ToCharArray()),
+                    CommonRuleTableRules.Literal(this, "LF", AnnotationProduct.None, "\n".ToCharArray()));
         }
 
         public RuleBase<char> SingleLineComment(
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, string startComment = "//")
         {
             var ruleName = name ?? $"{TokenNames.SingleLineComment}";
-            var commentCharacter = Sequence(Not(EndOfLine()), Any());
+            var commentCharacter = this.Sequence(Not(EndOfLine()), Any());
 
-            return Sequence(ruleName, product, Literal(startComment), ZeroOrMore(commentCharacter));
+            return this.Sequence(ruleName, product, CommonRuleTableRules.Literal(this, startComment), ZeroOrMore(commentCharacter));
         }
 
         public RuleBase<char> MultiLineComment(
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, string startComment = "/*", string endComment = "*/")
         {
             var ruleName = name ?? $"{TokenNames.MultiLineComment}";
-            var commentCharacter = Sequence(Not(Literal(endComment)), Any());
+            var commentCharacter =  this.Sequence(Not(CommonRuleTableRules.Literal(this, endComment)), Any());
 
-            return Sequence(ruleName, product, Literal(startComment), ZeroOrMore(commentCharacter), Literal(endComment));
+            return this.Sequence(ruleName, product, CommonRuleTableRules.Literal(this, startComment), 
+                ZeroOrMore(commentCharacter), CommonRuleTableRules.Literal(this, endComment));
         }
 
 
@@ -198,6 +200,5 @@
                 ? existingRule!
                 : RegisterRule(new MatchDataSet<char>(ruleName, product, set));
      
-       
     }
 }

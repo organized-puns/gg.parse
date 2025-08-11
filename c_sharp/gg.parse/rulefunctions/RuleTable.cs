@@ -87,22 +87,6 @@ namespace gg.parse.rulefunctions
             return false;
         }
 
-        public MatchDataSequence<T> Literal(T[] sequence)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.Literal}({string.Concat(sequence)})";
-            return Literal(ruleName, product, sequence);
-        }
-
-        
-
-        public MatchDataSequence<T> Literal(string name, AnnotationProduct product, T[] sequence)
-        {
-            return TryFindRule(name, out MatchDataSequence<T>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchDataSequence<T>(name, sequence, product));
-        }
-
 
         public MatchSingleData<T> Single(string name, AnnotationProduct product, T tokenId) =>
             TryFindRule(name, out MatchSingleData<T>? existingRule)
@@ -148,32 +132,6 @@ namespace gg.parse.rulefunctions
             return _idRuleLookup.Values.GetEnumerator();
         }
 
-        public RuleBase<T> Sequence(params T[] data)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.DataSequence}({string.Join(", ", data)})";
-            return Sequence(ruleName, product, data);
-        }
-
-        public RuleBase<T> Sequence(string ruleName, AnnotationProduct product, params T[] data) =>
-            TryFindRule(ruleName, out MatchDataSequence<T>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchDataSequence<T>(ruleName, data, product));
-
-
-        public MatchFunctionSequence<T> Sequence(params RuleBase<T>[] functions)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.FunctionSequence}({string.Join(",", functions.Select(f => f.Name))})";
-
-            return Sequence(ruleName, product, functions);
-        }
-
-        public MatchFunctionSequence<T> Sequence(string ruleName, AnnotationProduct product, params RuleBase<T>[] functions) =>
-
-            TryFindRule(ruleName, out MatchFunctionSequence<T>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchFunctionSequence<T>(ruleName, product, functions));
 
         public MatchOneOfFunction<T> OneOf(params RuleBase<T>[] rules)
         {
@@ -261,7 +219,7 @@ namespace gg.parse.rulefunctions
 
                         Contract.Requires(replacement != null, $"Cannot find reference {referenceRule.Reference}.");
 
-                        referenceRule.Rule = replacement;
+                        referenceRule.Rule = replacement!;
                         referenceRule.IsPartOfComposition = true;
                     }
                 }

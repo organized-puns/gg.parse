@@ -32,7 +32,7 @@ namespace gg.parse.examples
         }
 
         public RuleBase<char> Literal(string token, string name) =>
-            Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
+            CommonRuleTableRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
 
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 

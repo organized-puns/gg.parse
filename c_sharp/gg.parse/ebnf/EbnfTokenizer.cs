@@ -1,5 +1,8 @@
-﻿using gg.parse.rulefunctions;
+﻿
+using gg.parse.rulefunctions;
+
 using static gg.parse.rulefunctions.TokenNames;
+using static gg.parse.rulefunctions.CommonRuleTableRules;
 
 namespace gg.parse.ebnf
 {
@@ -68,8 +71,8 @@ namespace gg.parse.ebnf
                                 OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, Whitespace(), error));
         }
 
-        public RuleBase<char> Literal(string token, string name) => 
-            Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
+        public RuleBase<char> Literal(string token, string name) =>
+            CommonRuleTableRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
 
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
