@@ -7,83 +7,51 @@ namespace gg.parse.ebnf
 {
     public static class CompilerUtils
     {
+        private static RuleCompiler<T> RegisterFunction<T>(this RuleCompiler<T> compiler, RuleBase<int> rule, CompileFunction<T> function) where T : IComparable<T> =>
+            compiler.RegisterFunction(rule.Id, function, rule.Name);
+
         public static RuleCompiler<char> RegisterTokenizerCompilerFunctions(this RuleCompiler<char> compiler, EbnfTokenParser parser)
         {
             return compiler
-                    .RegisterFunction(parser.MatchAnyToken.Id, CompileAny)
-                    .RegisterFunction(parser.MatchCharacterRange.Id, CompileCharacterRange)
-                    .RegisterFunction(parser.MatchCharacterSet.Id, CompileCharacterSet)
-                    .RegisterFunction(parser.MatchError.Id, CompileError)
-                    .RegisterFunction(parser.MatchGroup.Id, CompileGroup)
-                    .RegisterFunction(parser.MatchIdentifier.Id, CompileIdentifier)
-                    .RegisterFunction(parser.MatchLiteral.Id, CompileLiteral)
-                    .RegisterFunction(parser.MatchNotOperator.Id, CompileNot)
-                    .RegisterFunction(parser.MatchOneOrMoreOperator.Id, CompileOneOrMore)
-                    .RegisterFunction(parser.MatchOption.Id, CompileOption)
-                    .RegisterFunction(parser.MatchSequence.Id, CompileSequence)
-                    .RegisterFunction(parser.MatchZeroOrMoreOperator.Id, CompileZeroOrMore)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator.Id, CompileZeroOrOne);
+                    .RegisterFunction(parser.MatchAnyToken, CompileAny)
+                    .RegisterFunction(parser.MatchCharacterRange, CompileCharacterRange)
+                    .RegisterFunction(parser.MatchCharacterSet, CompileCharacterSet)
+                    .RegisterFunction(parser.MatchError, CompileError)
+                    .RegisterFunction(parser.MatchGroup, CompileGroup)
+                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier)
+                    .RegisterFunction(parser.MatchLiteral, CompileLiteral)
+                    .RegisterFunction(parser.MatchNotOperator, CompileNot)
+                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore)
+                    .RegisterFunction(parser.MatchOption, CompileOption)
+                    .RegisterFunction(parser.MatchSequence, CompileSequence)
+                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
+                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne);
         }
 
         public static RuleCompiler<int> RegisterGrammarCompilerFunctions(this RuleCompiler<int> compiler, EbnfTokenParser parser)
         {
             return compiler
-                    .RegisterFunction(parser.MatchAnyToken.Id, CompileAny)
-                    .RegisterFunction(parser.MatchError.Id, CompileError)
-                    .RegisterFunction(parser.MatchGroup.Id, CompileGroup)
-                    .RegisterFunction(parser.MatchIdentifier.Id, CompileIdentifier)
-                    .RegisterFunction(parser.MatchNotOperator.Id, CompileNot)
-                    .RegisterFunction(parser.MatchOneOrMoreOperator.Id, CompileOneOrMore)
-                    .RegisterFunction(parser.MatchOption.Id, CompileOption)
-                    .RegisterFunction(parser.MatchSequence.Id, CompileSequence)
-                    .RegisterFunction(parser.MatchZeroOrMoreOperator.Id, CompileZeroOrMore)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator.Id, CompileZeroOrOne);
+                    .RegisterFunction(parser.MatchAnyToken, CompileAny)
+                    .RegisterFunction(parser.MatchError, CompileError)
+                    .RegisterFunction(parser.MatchGroup, CompileGroup)
+                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier)
+                    .RegisterFunction(parser.MatchNotOperator, CompileNot)
+                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore)
+                    .RegisterFunction(parser.MatchOption, CompileOption)
+                    .RegisterFunction(parser.MatchSequence, CompileSequence)
+                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
+                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne);
         }
 
 
-        public static CompileContext<T> CreateContext<T>(string text, List<Annotation> tokens, List<Annotation> astNodes) where T: IComparable<T>
+        public static CompileSession<T> CreateContext<T>(string text, List<Annotation> tokens, List<Annotation> astNodes) where T: IComparable<T>
         {
-            return new CompileContext<T>()
+            return new CompileSession<T>()
                     .WithText(text)
                     .WithTokens(tokens)
                     .WithAstNodes(astNodes);
         }
-
-        /*public static CompileContext<char> RegisterTokenizerCompilerFunctions(this CompileContext<char> context, EbnfTokenParser parser)
-        {
-            return context
-                    .WithFunction(parser.MatchAnyToken.Id, CompileAny)
-                    .WithFunction(parser.MatchCharacterRange.Id, CompileCharacterRange)
-                    .WithFunction(parser.MatchCharacterSet.Id, CompileCharacterSet)
-                    .WithFunction(parser.MatchError.Id, CompileError)
-                    .WithFunction(parser.MatchGroup.Id, CompileGroup)
-                    .WithFunction(parser.MatchIdentifier.Id, CompileIdentifier)
-                    .WithFunction(parser.MatchLiteral.Id, CompileLiteral)
-                    .WithFunction(parser.MatchNotOperator.Id, CompileNot)
-                    .WithFunction(parser.MatchOneOrMoreOperator.Id, CompileOneOrMore)
-                    .WithFunction(parser.MatchOption.Id, CompileOption)
-                    .WithFunction(parser.MatchSequence.Id, CompileSequence)
-                    .WithFunction(parser.MatchZeroOrMoreOperator.Id, CompileZeroOrMore)
-                    .WithFunction(parser.MatchZeroOrOneOperator.Id, CompileZeroOrOne);
-        }*/
-
-        /*
-        public static CompileContext<int> RegisterGrammarCompilerFunctions(this CompileContext<int> context, EbnfTokenParser parser)
-        {
-            return context
-                    .WithFunction(parser.MatchAnyToken.Id, CompileAny)
-                    .WithFunction(parser.MatchError.Id, CompileError)
-                    .WithFunction(parser.MatchGroup.Id, CompileGroup)
-                    .WithFunction(parser.MatchIdentifier.Id, CompileIdentifier)
-                    .WithFunction(parser.MatchNotOperator.Id, CompileNot)
-                    .WithFunction(parser.MatchOneOrMoreOperator.Id, CompileOneOrMore)
-                    .WithFunction(parser.MatchOption.Id, CompileOption)
-                    .WithFunction(parser.MatchSequence.Id, CompileSequence)
-                    .WithFunction(parser.MatchZeroOrMoreOperator.Id, CompileZeroOrMore)
-                    .WithFunction(parser.MatchZeroOrOneOperator.Id, CompileZeroOrOne);
-        }*/
-
-        public static CompileContext<T> SetAnnotationProductMapping<T>(this CompileContext<T> context, EbnfTokenParser parser)
+        public static CompileSession<T> SetAnnotationProductMapping<T>(this CompileSession<T> context, EbnfTokenParser parser)
             where T : IComparable<T>
         {
             context.ProductLookup = [
@@ -93,14 +61,5 @@ namespace gg.parse.ebnf
 
             return context;
         }
-
-
-        public static CompileContext<T> SetEngines<T>(this CompileContext<T> context, RuleTable<int> parser)
-            where T : IComparable<T>
-        {
-            context.Parser = parser;
-            return context;
-        }
-
     }
 }

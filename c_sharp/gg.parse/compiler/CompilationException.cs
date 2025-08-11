@@ -6,9 +6,10 @@ namespace gg.parse.compiler
     {
         public Range Range { get; init; }
 
-        public RuleBase<T> Rule { get; init; }
+        public RuleBase<T>? Rule { get; init; }
 
-        public CompilationException(string message, Range range, RuleBase<T> rule)
+
+        public CompilationException(string message, Range range, RuleBase<T>? rule = null)
             : base(message) 
         { 
             Range = range;

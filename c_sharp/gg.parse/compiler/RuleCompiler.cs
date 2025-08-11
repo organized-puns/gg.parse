@@ -1,4 +1,5 @@
 ﻿using gg.parse.rulefunctions;
+using System.Diagnostics.Contracts;
 
 namespace gg.parse.compiler
 {
@@ -6,24 +7,26 @@ namespace gg.parse.compiler
         RuleCompiler<T> compiler,
         Annotation ruleDefinition,
         RuleDeclaration declaration, 
-        CompileContext<T> context) where T : IComparable<T>;
+        CompileSession<T> context) where T : IComparable<T>;
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
-        public Dictionary<int, CompileFunction<T>> Functions { get; private set; } = [];
+        public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
-        public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function)
+        public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function, string? name = null)
         {
-            Functions.Add(parseFunctionId, function);
+            Contract.Requires(function != null);
+
+            Functions.Add(parseFunctionId, (function!, name ?? $"function_id:{parseFunctionId}"));
             return this;
         }
 
-        public RuleTable<T> Compile(CompileContext<T> context)
+        public RuleTable<T> Compile(CompileSession<T> context)
         {
             return Compile(context, new RuleTable<T>());
         }
 
-        public RuleTable<T> Compile(CompileContext<T> session, RuleTable<T> result)
+        public RuleTable<T> Compile(CompileSession<T> session, RuleTable<T> result)
         {
             foreach (var node in session.AstNodes)
             {
@@ -32,14 +35,12 @@ namespace gg.parse.compiler
 
                 if (!Functions.ContainsKey(ruleDefinition.FunctionId))
                 {
-                    var rule = session.Parser.FindRule(ruleDefinition.FunctionId);
                     throw new CompilationException<int>(
-                        $"Unable to match rule {rule.Name}({rule.Id}) to a compile function.", 
-                        ruleDefinition.Range,
-                        rule);
+                        $"Unable to match rule {ruleDefinition.FunctionId} to a compile function.", 
+                        ruleDefinition.Range);
                 }
 
-                var compilationFunction = Functions[ruleDefinition.FunctionId];
+                var compilationFunction = Functions[ruleDefinition.FunctionId].function;
 
                 if (result.FindRule(declaration.Name) == null)
                 {
@@ -60,7 +61,7 @@ namespace gg.parse.compiler
             return result;
         }
 
-        private static (RuleDeclaration declaration, int readIndex) GetRuleDeclaration(CompileContext<T> context, List<Annotation> ruleNodes, int index)
+        private static (RuleDeclaration declaration, int readIndex) GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 

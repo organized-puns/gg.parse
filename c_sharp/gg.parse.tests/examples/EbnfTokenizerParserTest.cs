@@ -287,7 +287,7 @@ namespace gg.parse.tests.examples
             Assert.IsNotNull(zeroOrMore);
             Assert.IsTrue(zeroOrMore.Min == 0);
             Assert.IsTrue(zeroOrMore.Max == 0);
-            Assert.IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(subFunction[0,0])"));
+            Assert.IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(Literal)"));
         }
 
         [TestMethod]
@@ -299,7 +299,7 @@ namespace gg.parse.tests.examples
             Assert.IsNotNull(oneOrMore);
             Assert.IsTrue(oneOrMore.Min == 1);
             Assert.IsTrue(oneOrMore.Max == 0);          
-            Assert.IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(subFunction[1,0])"));
+            Assert.IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(Literal)"));
         }
 
         [TestMethod]
@@ -311,7 +311,7 @@ namespace gg.parse.tests.examples
             Assert.IsNotNull(oneOrMore);
             Assert.IsTrue(oneOrMore.Min == 0);
             Assert.IsTrue(oneOrMore.Max == 1);
-            Assert.IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(subFunction[0,1])"));
+            Assert.IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(Literal)"));
         }
 
         [TestMethod]
@@ -322,8 +322,11 @@ namespace gg.parse.tests.examples
             var error = table.FindRule("error_rule") as MarkError<char>;
             Assert.IsNotNull(error);
             Assert.IsTrue(error.Message == "msg");
-            Assert.IsTrue(error.TestFunction == table.FindRule("error_rule(skip_until)"));
-            Assert.IsTrue(error.TestFunction is MatchNotFunction<char>);
+            Assert.IsTrue(error.TestFunction == table.FindRule("error_rule skip_until Not"));
+            var matchFunction = error.TestFunction as MatchNotFunction<char>;
+            Assert.IsNotNull(matchFunction);
+            Assert.IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not(not Literal)"));
+            Assert.IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 
         [TestMethod]

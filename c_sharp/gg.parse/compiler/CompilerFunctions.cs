@@ -1,4 +1,5 @@
-﻿using gg.parse.rulefunctions;
+﻿using gg.parse.ebnf;
+using gg.parse.rulefunctions;
 using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 
@@ -16,7 +17,7 @@ namespace gg.parse.compiler
            RuleCompiler<char> compiler,
            Annotation ruleDefinition,
            RuleDeclaration declaration,
-           CompileContext<char> context)
+           CompileSession<char> context)
         {
             var literalText = context.GetText(ruleDefinition.Range);
             literalText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
@@ -35,7 +36,7 @@ namespace gg.parse.compiler
            RuleCompiler<T> compiler,
            Annotation ruleDefinition,
            RuleDeclaration declaration,
-           CompileContext<T> context) where T : IComparable<T>
+           CompileSession<T> context) where T : IComparable<T>
         {
             var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
             var referenceName = hasProductionOperator
@@ -65,7 +66,7 @@ namespace gg.parse.compiler
             RuleCompiler<char> compiler,
            Annotation ruleDefinition,
            RuleDeclaration declaration,
-           CompileContext<char> context)
+           CompileSession<char> context)
         {
             Contract.Requires(ruleDefinition != null);
             Contract.Requires(ruleDefinition!.Children != null);
@@ -89,7 +90,7 @@ namespace gg.parse.compiler
             RuleCompiler<char> compiler,
            Annotation ruleDefinition,
            RuleDeclaration declaration,
-           CompileContext<char> context)
+           CompileSession<char> context)
         {
             var lowerRange = ruleDefinition.Children[0].Range;
             var minText = context.GetText(lowerRange);
@@ -122,24 +123,12 @@ namespace gg.parse.compiler
 
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-        private static string CreateSubruleName<T>(CompileContext<T> context, int subruleFunctionId) where T : IComparable<T>
-        {
-            if (context.Parser != null)
-            {
-                var elementFunction = context.Parser.FindRule(subruleFunctionId);
-                return elementFunction is RuleReference<T> refFunction
-                            ? refFunction.Reference
-                            : elementFunction.Name;
-            }
-
-            return "";
-        }
 
         public static RuleBase<T> CompileSequence<T>(
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context) where T: IComparable<T>
+            CompileSession<T> session) where T: IComparable<T>
         {
             var sequenceElements = new List<RuleBase<T>>();
 
@@ -148,11 +137,10 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var compilationFunction = compiler.Functions[elementAnnotation.FunctionId];
-                    var elementName = CreateSubruleName(context, elementAnnotation.FunctionId);
-                    
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+
                     var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
-                    var sequenceElement = compilationFunction(compiler, elementAnnotation, elementDeclaration, context);
+                    var sequenceElement = compilationFunction(compiler, elementAnnotation, elementDeclaration, session);
 
                     if (sequenceElement == null)
                     {
@@ -172,7 +160,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context) where T : IComparable<T>
+            CompileSession<T> context) where T : IComparable<T>
         {
             var optionElements = new List<RuleBase<T>>();
 
@@ -181,8 +169,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var compilationFunction = compiler.Functions[elementAnnotation.FunctionId];
-                    var elementName = CreateSubruleName(context, elementAnnotation.FunctionId);
+                    var (compilationFunction, elementName) =  compiler.Functions[elementAnnotation.FunctionId];
                     var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{elementName}:{declaration.Name}[{i}]");
                     var optionElement = compilationFunction(compiler, elementAnnotation, elementDeclaration, context);
 
@@ -204,14 +191,14 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context) where T : IComparable<T>
+            CompileSession<T> context) where T : IComparable<T>
         {
             Contract.Requires(ruleDefinition != null);
             Contract.Requires(ruleDefinition!.Children != null);
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var compilationFunction = compiler.Functions[elementAnnotation.FunctionId];
+            var (compilationFunction,_) = compiler.Functions[elementAnnotation.FunctionId];
 
             return compilationFunction(compiler, elementAnnotation, declaration, context);
         }
@@ -220,7 +207,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context) where T : IComparable<T> =>
+            CompileSession<T> context) where T : IComparable<T> =>
             
             CompileCount(compiler, ruleDefinition, declaration, context, 0, 0);
 
@@ -229,7 +216,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context) where T : IComparable<T> =>
+            CompileSession<T> context) where T : IComparable<T> =>
 
             CompileCount(compiler, ruleDefinition, declaration, context, 1, 0);
 
@@ -237,7 +224,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context) where T : IComparable<T> =>
+            CompileSession<T> context) where T : IComparable<T> =>
 
             CompileCount(compiler, ruleDefinition, declaration, context, 0, 1);
 
@@ -245,7 +232,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> context,
+            CompileSession<T> context,
             int min, int max) where T : IComparable<T>
         {
             Contract.Requires(ruleDefinition != null);
@@ -253,9 +240,8 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var compilationFunction = compiler.Functions[elementAnnotation.FunctionId];
-            // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{declaration.Name}(subFunction[{min},{max}])");
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{declaration.Name}({elementName})");
             var subFunction = compilationFunction(compiler, elementAnnotation, elementDeclaration, context);
 
             if (subFunction == null)
@@ -272,16 +258,16 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> session) where T : IComparable<T>
+            CompileSession<T> session) where T : IComparable<T>
         {
             Contract.Requires(ruleDefinition != null);
             Contract.Requires(ruleDefinition!.Children != null);
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var compilationFunction = compiler.Functions[elementAnnotation.FunctionId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(~subFunction)");
+            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(not {elementName})");
             var subFunction = compilationFunction(compiler, elementAnnotation, elementDeclaration, session);
 
             if (subFunction == null)
@@ -298,7 +284,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> _,
             Annotation ruleDefinition,
             RuleDeclaration declaration,
-            CompileContext<T> __) where T : IComparable<T>
+            CompileSession<T> __) where T : IComparable<T>
         {
             Contract.Requires(ruleDefinition != null);
             
@@ -309,7 +295,7 @@ namespace gg.parse.compiler
             RuleCompiler<T> compiler,
            Annotation ruleDefinition,
            RuleDeclaration declaration,
-           CompileContext<T> context) where T : IComparable<T>
+           CompileSession<T> context) where T : IComparable<T>
         {
             Contract.Requires(ruleDefinition != null);
             Contract.Requires(ruleDefinition!.Children != null);
@@ -327,9 +313,8 @@ namespace gg.parse.compiler
             message = message.Substring(1, message.Length - 2);
 
             var skipAnnotation = ruleDefinition.Children[2];
-            var compilationFunction = compiler.Functions[skipAnnotation.FunctionId];
-            // xxx add human understandable name instead of subfunction
-            var skipDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}(skip_until)");
+            var (compilationFunction, elementName) = compiler.Functions[skipAnnotation.FunctionId];
+            var skipDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name} skip_until {elementName}");
             var testFunction = compilationFunction(compiler, skipAnnotation, skipDeclaration, context);
 
             if (testFunction == null)

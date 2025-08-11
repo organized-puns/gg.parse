@@ -174,8 +174,6 @@ namespace gg.parse.ebnf
 
             var tokenContext = CompilerUtils
                                 .CreateContext<char>(tokenizerText, tokenizerTokens, tokenizerAstTree)
-                                .SetEngines(tokenizerParser)
-                                //.RegisterTokenizerCompilerFunctions(tokenizerParser)
                                 .SetAnnotationProductMapping(tokenizerParser);
 
             return new RuleCompiler<char>()
@@ -193,8 +191,6 @@ namespace gg.parse.ebnf
 
             var grammarcontext = CompilerUtils
                                     .CreateContext<int>(grammarText, grammarTokens, grammarAstNodes)
-                                    .SetEngines(grammarParser)
-                                    //.RegisterGrammarCompilerFunctions(grammarParser)
                                     .SetAnnotationProductMapping(grammarParser);
 
             return new RuleCompiler<int>()
