@@ -90,12 +90,55 @@ namespace gg.parse.rulefunctions
                                 function);
         
 
-            public static MatchFunctionCount<T> ZeroOrOne<T>(this RuleGraph<T> table, string name, AnnotationProduct product, RuleBase<T> function)
+            public static MatchFunctionCount<T> ZeroOrOne<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, RuleBase<T> function)
                 where T : IComparable<T> =>
-               table.TryFindRule(name, out MatchFunctionCount<T>? existingRule)
+               graph.TryFindRule(name, out MatchFunctionCount<T>? existingRule)
                     ? existingRule!
-                    : table.RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 1));
+                    : graph.RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 1));
+
+        public static MatchSingleData<T> Single<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, T tokenId)
+            where T : IComparable<T> =>
+            graph.TryFindRule(name, out MatchSingleData<T>? existingRule)
+                 ? existingRule!
+                 : graph.RegisterRule(new MatchSingleData<T>(name, tokenId, product));
 
 
+        public static RuleBase<T> OneOrMore<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, RuleBase<T> function)
+            where T : IComparable<T> =>
+            
+            graph.TryFindRule(name, out MatchFunctionCount<T>? existingRule)
+                ? existingRule!
+                : graph.RegisterRule(new MatchFunctionCount<T>(name, function, product, 1, 0));
+
+        public static RuleBase<T> OneOrMore<T>(this RuleGraph<T> graph, RuleBase<T> function)
+            where T : IComparable<T> =>
+            
+            graph.OneOrMore($"{TokenNames.OneOrMore}({function.Name})", AnnotationProduct.None, function);
+
+        public static MatchAnyData<T> Any<T>(this RuleGraph<T> graph)
+            where T : IComparable<T> =>
+        
+            graph.Any($"{AnnotationProduct.None.GetPrefix()}{TokenNames.AnyCharacter}(1,1)", AnnotationProduct.None, 1, 1);
+        
+
+        public static MatchAnyData<T> Any<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, int min, int max)
+            where T : IComparable<T> =>
+
+            graph.TryFindRule(name, out MatchAnyData<T>? existingRule)
+                 ? existingRule!
+                 : graph.RegisterRule(new MatchAnyData<T>(name, product, min, max));
+
+        public static MatchNotFunction<T> Not<T>(this RuleGraph<T> graph, RuleBase<T> rule)
+            where T : IComparable<T> =>
+        
+            graph.Not($"{AnnotationProduct.None.GetPrefix()}{TokenNames.Not}({rule.Name})", AnnotationProduct.None, rule);
+        
+
+        public static MatchNotFunction<T> Not<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, RuleBase<T> rule)
+            where T : IComparable<T> =>
+
+            graph.TryFindRule(name, out MatchNotFunction<T>? existingRule)
+                 ? existingRule!
+                 : graph.RegisterRule(new MatchNotFunction<T>(name, product, rule));
     }
 }

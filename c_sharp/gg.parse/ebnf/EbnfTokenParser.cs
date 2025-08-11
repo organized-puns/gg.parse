@@ -222,13 +222,13 @@ namespace gg.parse.ebnf
         private MatchSingleData<int> Token(string tokenName)
         {
             var rule = Tokenizer.FindRule(tokenName);
-            return Single($"{AnnotationProduct.None.GetPrefix()}Token({tokenName})", AnnotationProduct.None, rule.Id);
+            return this.Single($"{AnnotationProduct.None.GetPrefix()}Token({tokenName})", AnnotationProduct.None, rule.Id);
         }
 
         private MatchSingleData<int> Token(string ruleName, AnnotationProduct product, string tokenName)
         {
             var rule = Tokenizer.FindRule(tokenName);
-            return Single(ruleName, product, rule.Id);
+            return this.Single(ruleName, product, rule.Id);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace gg.parse.rulefunctions
 
             var digitRule = Digit(null, AnnotationProduct.None);
 
-            return OneOrMore(ruleName, product, digitRule); 
+            return this.OneOrMore(ruleName, product, digitRule); 
         }
 
         public RuleBase<char> Sign(string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
@@ -102,7 +102,7 @@ namespace gg.parse.rulefunctions
             // '"', ('\\"' | (!'"', _) )*, '"'
             var delimiterRule = InSet($"{TokenNames.NoProductPrefix}StringDelimiter({delimiter})", AnnotationProduct.None, delimiter);
             var escapedQuote = this.Sequence($"{TokenNames.NoProductPrefix}Escaped({delimiter})", AnnotationProduct.None, '\\', delimiter);
-            var notQuoteThenAny = this.Sequence($"{TokenNames.NoProductPrefix}IsStringCharacter({delimiter})", AnnotationProduct.None, Not(delimiterRule), Any());
+            var notQuoteThenAny = this.Sequence($"{TokenNames.NoProductPrefix}IsStringCharacter({delimiter})", AnnotationProduct.None, this.Not(delimiterRule), this.Any());
             var stringCharacters = this.ZeroOrMore($"{TokenNames.NoProductPrefix}StringCharacter({delimiter})", AnnotationProduct.None, this.OneOf(escapedQuote, notQuoteThenAny));
 
             var ruleName = name ?? $"{product.GetPrefix()}{TokenNames.String}({delimiter})";
@@ -154,7 +154,7 @@ namespace gg.parse.rulefunctions
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, string startComment = "//")
         {
             var ruleName = name ?? $"{TokenNames.SingleLineComment}";
-            var commentCharacter = this.Sequence(Not(EndOfLine()), Any());
+            var commentCharacter = this.Sequence(this.Not(EndOfLine()), this.Any());
 
             return this.Sequence(ruleName, product, CommonRuleTableRules.Literal(this, startComment), this.ZeroOrMore(commentCharacter));
         }
@@ -163,7 +163,7 @@ namespace gg.parse.rulefunctions
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation, string startComment = "/*", string endComment = "*/")
         {
             var ruleName = name ?? $"{TokenNames.MultiLineComment}";
-            var commentCharacter =  this.Sequence(Not(CommonRuleTableRules.Literal(this, endComment)), Any());
+            var commentCharacter =  this.Sequence(this.Not(CommonRuleTableRules.Literal(this, endComment)), this.Any());
 
             return this.Sequence(ruleName, product, CommonRuleTableRules.Literal(this, startComment),
                 this.ZeroOrMore(commentCharacter), CommonRuleTableRules.Literal(this, endComment));
