@@ -52,10 +52,12 @@ namespace gg.parse.tests
             var astNodes = result.Annotations;
 
             var context = CreateContext<char>(text, tokens, astNodes)
-                            .RegisterTokenizerCompilerFunctions(parser)
-                            .SetProductLookup(parser);
+                            //.RegisterTokenizerCompilerFunctions(parser)
+                            .SetAnnotationProductMapping(parser);
 
-            var table = compiler.Compile(context);
+            var table = compiler
+                        .RegisterTokenizerCompilerFunctions(parser)
+                        .Compile(context);
 
             return (text, tokens, astNodes, table);
         }
@@ -80,11 +82,9 @@ namespace gg.parse.tests
 
             var astNodes = result.Annotations;
 
-            var context = CreateContext<char>(text, tokens, astNodes)
-                            .RegisterTokenizerCompilerFunctions(parser)
-                            .SetProductLookup(parser);
+            var session = CreateContext<char>(text, tokens, astNodes).SetAnnotationProductMapping(parser);
 
-            var table = compiler.Compile(context);
+            var table = compiler.RegisterTokenizerCompilerFunctions(parser).Compile(session);
 
             return new TokenTestContext()
             {

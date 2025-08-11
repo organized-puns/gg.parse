@@ -13,29 +13,27 @@ namespace gg.parse.compiler
 
         public RuleTable<int>? Parser { get; set; }
         
-        //public RuleTable<T> Output { get; init; }
-
-        public Dictionary<int, CompileFunction<T>> Functions { get; set; } = [];
+        
+        //public Dictionary<int, CompileFunction<T>> Functions { get; set; } = [];
 
         public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
 
         public CompileContext()
         {
-            //Output = new RuleTable<T>();
         }
 
         public CompileContext(
             string text, 
             List<Annotation> tokens, 
-            List<Annotation> astNodes,
-            Dictionary<int, CompileFunction<T>> functions
-            /*RuleTable<T>? output = null*/)
+            List<Annotation> astNodes
+            /*Dictionary<int, CompileFunction<T>> functions*/)
+
         {
             Text = text;
             Tokens = tokens;
             AstNodes = astNodes;
             //Output = output ?? new RuleTable<T>();
-            Functions = functions; 
+            //Functions = functions; 
         }
 
         public Range GetTextRange(Range tokenRange)
@@ -61,11 +59,11 @@ namespace gg.parse.compiler
         }
 
 
-        public CompileContext<T> WithFunction(int id, CompileFunction<T> function)
+        /*public CompileContext<T> WithFunction(int id, CompileFunction<T> function)
         {
             Functions.Add(id, function);
             return this;
-        }
+        }*/
 
         public CompileContext<T> WithText(string text)
         {

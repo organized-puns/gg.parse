@@ -3,39 +3,47 @@
 namespace gg.parse.compiler
 {
     public delegate RuleBase<T> CompileFunction<T>(
+        RuleCompiler<T> compiler,
         Annotation ruleDefinition,
         RuleDeclaration declaration, 
         CompileContext<T> context) where T : IComparable<T>;
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
+        public Dictionary<int, CompileFunction<T>> Functions { get; private set; } = [];
+
+        public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function)
+        {
+            Functions.Add(parseFunctionId, function);
+            return this;
+        }
 
         public RuleTable<T> Compile(CompileContext<T> context)
         {
             return Compile(context, new RuleTable<T>());
         }
 
-        public RuleTable<T> Compile(CompileContext<T> context, RuleTable<T> result)
+        public RuleTable<T> Compile(CompileContext<T> session, RuleTable<T> result)
         {
-            foreach (var node in context.AstNodes)
+            foreach (var node in session.AstNodes)
             {
-                var (declaration, idx) = GetRuleDeclaration(context, node.Children, 0);
+                var (declaration, idx) = GetRuleDeclaration(session, node.Children, 0);
                 var ruleDefinition = node.Children[idx];
 
-                if (!context.Functions.ContainsKey(ruleDefinition.FunctionId))
+                if (!Functions.ContainsKey(ruleDefinition.FunctionId))
                 {
-                    var rule = context.Parser.FindRule(ruleDefinition.FunctionId);
+                    var rule = session.Parser.FindRule(ruleDefinition.FunctionId);
                     throw new CompilationException<int>(
                         $"Unable to match rule {rule.Name}({rule.Id}) to a compile function.", 
                         ruleDefinition.Range,
                         rule);
                 }
 
-                var compilationFunction = context.Functions[ruleDefinition.FunctionId];
+                var compilationFunction = Functions[ruleDefinition.FunctionId];
 
                 if (result.FindRule(declaration.Name) == null)
                 {
-                    var compiledRule = compilationFunction(ruleDefinition, declaration, context);
+                    var compiledRule = compilationFunction(this, ruleDefinition, declaration, session);
                     
                     result.RegisterRuleAndSubRules(compiledRule);
                     

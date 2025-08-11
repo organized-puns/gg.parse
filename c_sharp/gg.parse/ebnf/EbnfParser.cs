@@ -175,10 +175,12 @@ namespace gg.parse.ebnf
             var tokenContext = CompilerUtils
                                 .CreateContext<char>(tokenizerText, tokenizerTokens, tokenizerAstTree)
                                 .SetEngines(tokenizerParser)
-                                .RegisterTokenizerCompilerFunctions(tokenizerParser)
-                                .SetProductLookup(tokenizerParser);
+                                //.RegisterTokenizerCompilerFunctions(tokenizerParser)
+                                .SetAnnotationProductMapping(tokenizerParser);
 
-            return new RuleCompiler<char>().Compile(tokenContext);
+            return new RuleCompiler<char>()
+                    .RegisterTokenizerCompilerFunctions(tokenizerParser)
+                    .Compile(tokenContext);
         }
 
         public static RuleTable<int> CreateParserFromEbnfFile(
@@ -192,10 +194,12 @@ namespace gg.parse.ebnf
             var grammarcontext = CompilerUtils
                                     .CreateContext<int>(grammarText, grammarTokens, grammarAstNodes)
                                     .SetEngines(grammarParser)
-                                    .RegisterGrammarCompilerFunctions(grammarParser)
-                                    .SetProductLookup(grammarParser);
+                                    //.RegisterGrammarCompilerFunctions(grammarParser)
+                                    .SetAnnotationProductMapping(grammarParser);
 
-            return new RuleCompiler<int>().Compile(grammarcontext, RegisterTokens(tokenSource, new RuleTable<int>()));
+            return new RuleCompiler<int>()
+                    .RegisterGrammarCompilerFunctions(grammarParser)
+                    .Compile(grammarcontext, RegisterTokens(tokenSource, new RuleTable<int>()));
         }
 
         private static RuleTable<int> RegisterTokens(RuleTable<char> tokenSource, RuleTable<int> target)
