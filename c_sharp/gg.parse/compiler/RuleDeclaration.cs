@@ -1,6 +1,4 @@
-﻿using gg.parse.rulefunctions;
-
-namespace gg.parse.compiler
+﻿namespace gg.parse.compiler
 {
     /// <summary>
     /// Name + Production of a rule 

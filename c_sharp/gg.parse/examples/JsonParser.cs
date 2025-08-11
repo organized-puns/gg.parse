@@ -1,5 +1,4 @@
 ﻿using System.Text;
-
 using gg.parse.rulefunctions;
 
 using static gg.parse.rulefunctions.CommonRuleTableRules;
@@ -20,7 +19,7 @@ namespace gg.parse.examples
         internal static readonly string Array = "Array";
     }
 
-    public class JsonParser : RuleTable<int>
+    public class JsonParser : RuleGraph<int>
     {
         
         public JsonTokenizer Tokenizer { get; init; }
@@ -47,7 +46,7 @@ namespace gg.parse.examples
             var nullValue = Token(JsonNodeNames.Null, TokenId(TokenNames.Null));
 
             // value = string | int | float | bool | null
-            var value = OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
+            var value = this.OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
 
             _defaultProduct = AnnotationProduct.None;
             
@@ -63,32 +62,32 @@ namespace gg.parse.examples
             // kv_list = kv *(collection_separator kv)
             // example of recovery
             var keyValueMatch = this.Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
-            var objRecovery = OneOf(value, comma, objectEnd);
+            var objRecovery = this.OneOf(value, comma, objectEnd);
             var errorValueMissing = RegisterRule(new MarkError<int>("err_missing_value", AnnotationProduct.Annotation, testFunction: objRecovery));
             var valueMissingMatch = this.Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
             var separatorMissingMatch = this.Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
-            var keyValue = OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);
+            var keyValue = this.OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);
 
             var nextKeyValue = this.Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
             var keyValueList = this.Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
-                ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
+                this.ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
             
             // jsonObj = scope_start ?(kv_list) scope_end
             var jsonObject = this.Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
-                objectStart, ZeroOrOne("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
+                objectStart, this.ZeroOrOne("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
 
             // jsonArray = array_start ?(value *(collection_separator value)) array_end
             var nextValue = this.Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
             var valueList = this.Sequence("#ValueList", AnnotationProduct.Transitive, value,
-                ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
+                this.ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
             var jsonArray = this.Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
-                arrayStart, ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
+                arrayStart, this.ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
 
             value.RuleOptions = [.. value.RuleOptions, jsonObject, jsonArray];
 
             // todo error(s)
 
-            Root = OneOf("~JsonRoot", AnnotationProduct.Transitive, jsonObject, jsonArray);
+            Root = this.OneOf("~JsonRoot", AnnotationProduct.Transitive, jsonObject, jsonArray);
         }
 
         public int TokenId(string name) => Tokenizer.FindRule(name).Id;

@@ -7,7 +7,7 @@ namespace gg.parse.ebnf
     /// <summary>
     /// Parses
     /// </summary>
-    public class EbnfTokenParser : RuleTable<int>
+    public class EbnfTokenParser : RuleGraph<int>
     {
         public EbnfTokenizer Tokenizer { get; init; }      
 
@@ -53,7 +53,7 @@ namespace gg.parse.ebnf
             Tokenizer = tokenizer;
 
             // "abc" or 'abc'
-            MatchLiteral = OneOf("Literal", AnnotationProduct.Annotation,
+            MatchLiteral = this.OneOf("Literal", AnnotationProduct.Annotation,
                     Token(TokenNames.SingleQuotedString),
                     Token(TokenNames.DoubleQuotedString)
             );
@@ -81,8 +81,8 @@ namespace gg.parse.ebnf
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, TokenNames.NoProductSelector);
 
 
-            var ruleProduction = ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
-                OneOf("ProductionSelection", AnnotationProduct.Transitive,
+            var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
+                this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
                     MatchTransitiveSelector,
                     MatchNoProductSelector
                 )
@@ -93,7 +93,7 @@ namespace gg.parse.ebnf
                                 Token("IdentifierToken", AnnotationProduct.Annotation, TokenNames.Identifier));
 
             // literal | set
-            var ruleTerms = OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
+            var ruleTerms = this.OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
                 MatchLiteral, 
                 MatchAnyToken, 
                 MatchCharacterSet, 
@@ -110,7 +110,7 @@ namespace gg.parse.ebnf
                     ruleTerms,
                     Token(TokenNames.CollectionSeparator),
                     ruleTerms,
-                    ZeroOrMore("#SequenceRest", AnnotationProduct.Transitive, nextSequenceElement));
+                    this.ZeroOrMore("#SequenceRest", AnnotationProduct.Transitive, nextSequenceElement));
 
             var nextOptionElement = this.Sequence("#NextOptionElement", AnnotationProduct.Transitive,
                     Token(TokenNames.Option),
@@ -121,11 +121,11 @@ namespace gg.parse.ebnf
                     ruleTerms,
                     Token(TokenNames.Option),
                     ruleTerms,
-                    ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
+                    this.ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
 
-            var binaryRuleTerms = OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption);
+            var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption);
 
-            var ruleDefinition = OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
+            var ruleDefinition = this.OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
                 binaryRuleTerms, 
                 ruleTerms);
 
@@ -175,7 +175,7 @@ namespace gg.parse.ebnf
                     ruleDefinition,
                     Token(TokenNames.EndStatement));
 
-            Root = ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);           
+            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);           
         }
 
         public ParseResult Parse(List<Annotation> tokens)

@@ -1,5 +1,4 @@
-﻿
-namespace gg.parse.rulefunctions
+﻿namespace gg.parse.rulefunctions
 {
     public static class TokenNames
     {

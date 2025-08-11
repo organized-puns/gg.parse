@@ -1,9 +1,10 @@
 ﻿using gg.core.util;
+using gg.parse.rulefunctions;
 using System.Collections;
 
-namespace gg.parse.rulefunctions
+namespace gg.parse
 {
-    public class RuleTable<T> : IEnumerable<RuleBase<T>> where T : IComparable<T>
+    public class RuleGraph<T> : IEnumerable<RuleBase<T>> where T : IComparable<T>
     {
         private int _nextRuleId = 0;
 
@@ -133,44 +134,6 @@ namespace gg.parse.rulefunctions
         }
 
 
-        public MatchOneOfFunction<T> OneOf(params RuleBase<T>[] rules)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.OneOf}({string.Join(",", rules.Select(f => f.Name))})";
-            return OneOf(ruleName, product, rules);
-        }
-
-        public MatchOneOfFunction<T> OneOf(string name, AnnotationProduct product, params RuleBase<T>[] rules) =>
-            TryFindRule(name, out MatchOneOfFunction<T>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchOneOfFunction<T>(name, product, rules));
-
-
-        public MatchFunctionCount<T> ZeroOrMore(string name, AnnotationProduct product, RuleBase<T> function) =>
-           TryFindRule(name, out MatchFunctionCount<T>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 0));
-
-        public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> function)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrMore}({function.Name})";
-            return ZeroOrMore(ruleName, product, function);
-        }
-
-        public MatchFunctionCount<T> ZeroOrOne(string name, AnnotationProduct product, RuleBase<T> function) =>
-           TryFindRule(name, out MatchFunctionCount<T>? existingRule)
-                ? existingRule!
-                : RegisterRule(new MatchFunctionCount<T>(name, function, product, 0, 1));
-
-
-        public MatchFunctionCount<T> ZeroOrOne(RuleBase<T> function)
-        {
-            var product = AnnotationProduct.None;
-            var ruleName = $"{product.GetPrefix()}{TokenNames.ZeroOrOne}({function.Name})";
-            return ZeroOrOne(ruleName, product, function);
-        }
-
         public RuleBase<T> OneOrMore(string name, AnnotationProduct product, RuleBase<T> function) =>
             TryFindRule(name, out MatchFunctionCount<T>? existingRule)
                 ? existingRule!
@@ -230,6 +193,8 @@ namespace gg.parse.rulefunctions
                     Contract.Requires(replacement != null, $"Cannot find reference {reference.Reference}.");
 
                     reference.Rule = replacement;
+                    // do not overwrite this property, if this rule is lower than its composition in the table
+                    // this will be reset
                     //reference.IsPartOfComposition = false;
                 }
             }

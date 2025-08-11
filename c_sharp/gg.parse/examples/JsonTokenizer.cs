@@ -8,8 +8,8 @@ namespace gg.parse.examples
     {     
         public JsonTokenizer()
         {
-            var jsonTokens = 
-                OneOf("#JsonTokens", AnnotationProduct.Transitive,
+            var jsonTokens =
+                this.OneOf("#JsonTokens", AnnotationProduct.Transitive,
                     Float(),
                     Integer(),
                     // need to override otherwise the name will hold the delimiter which
@@ -27,8 +27,8 @@ namespace gg.parse.examples
             var error = Error(UnknownToken, AnnotationProduct.Annotation,
                 "Can't match the character at the given position to a token.", jsonTokens, 0);
 
-            Root = ZeroOrMore("#JsonTokenizer", AnnotationProduct.Transitive,
-                                OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, Whitespace(), jsonTokens, error));
+            Root = this.ZeroOrMore("#JsonTokenizer", AnnotationProduct.Transitive,
+                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, Whitespace(), jsonTokens, error));
         }
 
         public RuleBase<char> Literal(string token, string name) =>

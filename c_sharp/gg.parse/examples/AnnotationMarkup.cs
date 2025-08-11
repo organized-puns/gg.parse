@@ -48,7 +48,7 @@ namespace gg.parse.examples
         }
 
         public static string AnnotateTextUsingHtml(
-            this RuleTable<char> ruleTable,
+            this RuleGraph<char> ruleTable,
             string sourceText,
             List<Annotation> tokens,
             Dictionary<string, string> styleLookup) 

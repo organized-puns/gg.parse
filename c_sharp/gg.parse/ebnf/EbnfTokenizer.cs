@@ -32,7 +32,7 @@ namespace gg.parse.ebnf
             // error = error "message" skip_rule
 
             var ebnfTokens =
-                OneOf("#EbnfTokens", AnnotationProduct.Transitive,
+                this.OneOf("#EbnfTokens", AnnotationProduct.Transitive,
                     EndOfLine(product: AnnotationProduct.None),
                     // make sure keywords are before the identifier
                     Keyword(MarkError, AnnotationProduct.Annotation, "error"),
@@ -67,8 +67,8 @@ namespace gg.parse.ebnf
             var error = Error(UnknownToken, AnnotationProduct.Annotation,
                 "Can't match the character at the given position to a token.", ebnfTokens, 0);
 
-            Root = ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
-                                OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, Whitespace(), error));
+            Root = this.ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
+                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, Whitespace(), error));
         }
 
         public RuleBase<char> Literal(string token, string name) =>

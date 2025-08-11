@@ -1,5 +1,4 @@
-﻿using gg.parse.rulefunctions;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 
 namespace gg.parse.compiler
 {
@@ -28,12 +27,12 @@ namespace gg.parse.compiler
             return this;
         }
 
-        public RuleTable<T> Compile(CompileSession<T> context)
+        public RuleGraph<T> Compile(CompileSession<T> context)
         {
-            return Compile(context, new RuleTable<T>());
+            return Compile(context, new RuleGraph<T>());
         }
 
-        public RuleTable<T> Compile(CompileSession<T> session, RuleTable<T> result)
+        public RuleGraph<T> Compile(CompileSession<T> session, RuleGraph<T> result)
         {
             foreach (var node in session.AstNodes)
             {

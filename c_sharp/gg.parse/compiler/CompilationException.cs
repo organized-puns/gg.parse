@@ -1,6 +1,4 @@
-﻿using gg.parse.rulefunctions;
-
-namespace gg.parse.compiler
+﻿namespace gg.parse.compiler
 {
     public class CompilationException<T> : Exception where T : IComparable<T>
     {

@@ -1,6 +1,5 @@
 ﻿using gg.parse.compiler;
 using gg.parse.ebnf;
-using gg.parse.rulefunctions;
 
 using static gg.parse.ebnf.CompilerUtils;
 
@@ -14,7 +13,7 @@ namespace gg.parse.tests
 
         public List<Annotation> AstNodes { get; set; }
 
-        public RuleTable<char>  TokenRules { get; set; }
+        public RuleGraph<char>  TokenRules { get; set; }
 
         public RuleCompiler<char> TokenCompiler { get; set; }
 
@@ -31,7 +30,7 @@ namespace gg.parse.tests
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleTable<char> table) SetupTokenizeParseCompile(string text)
+        public static (string text, List<Annotation> tokens, List<Annotation> astNodes, RuleGraph<char> table) SetupTokenizeParseCompile(string text)
         {
             var tokenizer = new EbnfTokenizer();
             var parser = new EbnfTokenParser(tokenizer);

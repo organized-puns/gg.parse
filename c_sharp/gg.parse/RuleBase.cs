@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions
+﻿namespace gg.parse
 {
     public readonly struct ParseResult(bool isSuccess, int charactersRead, List<Annotation>? annotations = null)
     {

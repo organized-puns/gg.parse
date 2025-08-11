@@ -267,7 +267,7 @@ namespace gg.parse.tests.compiler
                 ])
             ];
 
-            var table = new RuleTable<char>();
+            var table = new RuleGraph<char>();
 
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar
@@ -342,7 +342,7 @@ namespace gg.parse.tests.compiler
             ];
 
             // compile a rule table which can tokenize foo
-            var table = new RuleTable<char>();
+            var table = new RuleGraph<char>();
 
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar

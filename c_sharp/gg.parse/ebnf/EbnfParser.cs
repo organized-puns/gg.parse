@@ -8,12 +8,12 @@ namespace gg.parse.ebnf
 {
     public class EbnfParser
     {
-        private RuleTable<char> _ebnfTokenizer;
-        private RuleTable<int>? _ebnfParser;
+        private RuleGraph<char> _ebnfTokenizer;
+        private RuleGraph<int>? _ebnfParser;
 
-        public RuleTable<char> EbnfTokenizer => _ebnfTokenizer;
+        public RuleGraph<char> EbnfTokenizer => _ebnfTokenizer;
 
-        public RuleTable<int>? EbnfGrammarParser => _ebnfParser;
+        public RuleGraph<int>? EbnfGrammarParser => _ebnfParser;
 
         public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
         {
@@ -163,7 +163,7 @@ namespace gg.parse.ebnf
         }
 
 
-        public static RuleTable<char> CreateTokenizerFromEbnfFile(
+        public static RuleGraph<char> CreateTokenizerFromEbnfFile(
             string tokenizerText,
             EbnfTokenizer tokenizer)
         {
@@ -180,10 +180,10 @@ namespace gg.parse.ebnf
                     .Compile(tokenContext);
         }
 
-        public static RuleTable<int> CreateParserFromEbnfFile(
+        public static RuleGraph<int> CreateParserFromEbnfFile(
             string grammarText,
             EbnfTokenizer tokenizer,
-            RuleTable<char> tokenSource)
+            RuleGraph<char> tokenSource)
         {
             var grammarParser = new EbnfTokenParser(tokenizer);
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
@@ -193,10 +193,10 @@ namespace gg.parse.ebnf
             return new RuleCompiler<int>()
                     .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
                     .RegisterGrammarCompilerFunctions(grammarParser)
-                    .Compile(grammarcontext, RegisterTokens(tokenSource, new RuleTable<int>()));
+                    .Compile(grammarcontext, RegisterTokens(tokenSource, new RuleGraph<int>()));
         }
 
-        private static RuleTable<int> RegisterTokens(RuleTable<char> tokenSource, RuleTable<int> target)
+        private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             foreach (var tokenFunctionName in tokenSource.FunctionNames)
