@@ -49,5 +49,31 @@
         public abstract ParseResult Parse(T[] input, int start);
 
         public override string ToString() => Name;
+
+        public ParseResult BuildDataRuleResult(Range dataRange) 
+        {
+            return Production switch
+            {
+                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
+                                        [new Annotation(Id, dataRange)]),
+                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length,
+                                        [new Annotation(Id, dataRange)]),
+                // throw new NotImplementedException("Cannot apply transitive production to a rule which has no children"),
+                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
+                _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
+            };
+        }
+
+        public ParseResult BuildFunctionRuleResult(Range dataRange, List<Annotation>? children = null)
+        {
+            return Production switch
+            {
+                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
+                                        [new Annotation(Id, dataRange, children)]),
+                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
+                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
+                _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
+            };
+        }
     }
 }
