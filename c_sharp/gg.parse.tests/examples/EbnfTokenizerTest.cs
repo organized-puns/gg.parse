@@ -24,7 +24,43 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
             Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
         }
-        
+
+        [TestMethod]
+        public void DefineTryMatchRule_Tokenize_ExpectValidMatchAnyTokens()
+        {
+            var tokenizer = new EbnfTokenizer();
+            // try shorthand first
+            var rule = "rule_name = >'literal';";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            Assert.IsTrue(isSuccess);
+            Assert.IsTrue(charactersRead == rule.Length);
+            Assert.IsTrue(annotations!.Count == 5);
+            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            Assert.IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.TryMatchOperatorShortHand).Id);
+            Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+
+            // try full operator
+            rule = "rule_name = try 'literal';";
+
+            (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            Assert.IsTrue(isSuccess);
+            Assert.IsTrue(charactersRead == rule.Length);
+            Assert.IsTrue(annotations!.Count == 5);
+            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            Assert.IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.TryMatchOperator).Id);
+            Assert.IsTrue(annotations[2].Start == 12);
+            Assert.IsTrue(annotations[2].Length == 4);
+            Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+        }
+
+
         [TestMethod]
         public void TestJsonFileWithErrors_ExpectLotsOfAnnotationsAndErrors()
         {

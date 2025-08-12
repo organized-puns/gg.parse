@@ -77,6 +77,8 @@
         public static readonly string ZeroOrMoreOperator = "ZeroOrMoreOperator";
         public static readonly string OneOrMoreOperator = "OneOrMoreOperator";
         public static readonly string NotOperator = "NotOperator";
+        public static readonly string TryMatchOperatorShortHand = "TryMatchOperator(ShortHand)";
+        public static readonly string TryMatchOperator = "TryMatchOperator";
 
         public static readonly string EndOfLine = "EOL";
 

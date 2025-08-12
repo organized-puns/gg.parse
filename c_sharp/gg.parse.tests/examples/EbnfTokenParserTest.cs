@@ -3,12 +3,14 @@ using gg.parse.instances.json;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
+
 using static gg.parse.tests.TestUtils;
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.examples
 {
     [TestClass]
-    public class EbnfTokenizerParserTest
+    public class EbnfTokenParserTest
     {
         [TestMethod]
         public void ParseRule_ExpectSucess()
@@ -18,68 +20,68 @@ namespace gg.parse.tests.examples
             // try parsing a literal
             var (tokens, nodes) = parser.Parse("rule = 'foo';");
 
-            Assert.IsTrue(tokens != null && tokens.Count > 0);
-            Assert.IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
             var name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
-            Assert.IsTrue(name == "RuleName");
+            IsTrue(name == "RuleName");
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "Literal");
+            IsTrue(name == "Literal");
 
             // try parsing a set
             (tokens, nodes) = parser.Parse("rule = { \"abc\" };");
 
-            Assert.IsTrue(tokens != null && tokens.Count > 0);
-            Assert.IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
             // try parsing a character range
             (tokens, nodes) = parser.Parse("rule = { 'a' .. 'z' };");
 
-            Assert.IsTrue(tokens != null && tokens.Count > 0);
-            Assert.IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "CharacterRange");
+            IsTrue(name == "CharacterRange");
 
             // try parsing a sequence
             (tokens, nodes) = parser.Parse("rule = \"abc\", 'def', { '123' };");
 
-            Assert.IsTrue(tokens != null && tokens.Count > 0);
-            Assert.IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "Sequence");
+            IsTrue(name == "Sequence");
 
             // try parsing an option
             (tokens, nodes) = parser.Parse("rule = \"abc\"|'def' | { '123' };");
 
-            Assert.IsTrue(tokens != null && tokens.Count > 0);
-            Assert.IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "Option");
+            IsTrue(name == "Option");
 
             // try parsing a group  
             (tokens, nodes) = parser.Parse("rule = ('123', {'foo'});");
 
-            Assert.IsTrue(tokens != null && tokens.Count > 0);
-            Assert.IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "Sequence");
+            IsTrue(name == "Sequence");
 
             name = parser.FindRule(nodes[0].Children[1].Children[0].FunctionId).Name;
-            Assert.IsTrue(name == "Literal");
+            IsTrue(name == "Literal");
 
             name = parser.FindRule(nodes[0].Children[1].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "CharacterSet");
+            IsTrue(name == "CharacterSet");
 
             // try parsing zero or more
             (tokens, nodes) = parser.Parse("rule = *('123'|{'foo'});");
 
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "ZeroOrMore");
+            IsTrue(name == "ZeroOrMore");
 
             name = parser.FindRule(nodes[0].Children[1].Children[0].FunctionId).Name;
-            Assert.IsTrue(name == "Option");
+            IsTrue(name == "Option");
 
             // try parsing a transitive rule
             (tokens, nodes) = parser.Parse("#rule = !('123',{'foo'});");
@@ -87,72 +89,97 @@ namespace gg.parse.tests.examples
             name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
 
             name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
-            Assert.IsTrue(name == "TransitiveSelector");
+            IsTrue(name == "TransitiveSelector");
 
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "RuleName");
+            IsTrue(name == "RuleName");
 
             name = parser.FindRule(nodes[0].Children[2].FunctionId).Name;
-            Assert.IsTrue(name == "Not");
+            IsTrue(name == "Not");
 
             // try parsing a no production rule
             (tokens, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
 
             name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
-            Assert.IsTrue(name == "NoProductSelector");
+            IsTrue(name == "NoProductSelector");
 
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
-            Assert.IsTrue(name == "RuleName");
+            IsTrue(name == "RuleName");
 
             name = parser.FindRule(nodes[0].Children[2].FunctionId).Name;
-            Assert.IsTrue(name == "ZeroOrOne");
+            IsTrue(name == "ZeroOrOne");
 
             // try parsing an identifier
             (tokens, nodes) = parser.Parse("rule = +(one, two, three);");
 
             var node = nodes[0].Children[1];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "OneOrMore");
+            IsTrue(name == "OneOrMore");
 
             node = node.Children[0];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "Sequence");
+            IsTrue(name == "Sequence");
 
             node = node.Children[0];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "Identifier");
+            IsTrue(name == "Identifier");
 
             // try parsing a simple error
             (tokens, nodes) = parser.Parse("rule = error \"message\" skip_until;");
 
             node = nodes[0].Children[0];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "RuleName");
+            IsTrue(name == "RuleName");
 
             node = nodes[0].Children[1];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "Error");
+            IsTrue(name == "Error");
 
             node = nodes[0].Children[1].Children[0];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "ErrorKeyword");
+            IsTrue(name == "ErrorKeyword");
 
             node = nodes[0].Children[1].Children[1];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "Literal");
+            IsTrue(name == "Literal");
 
             node = nodes[0].Children[1].Children[2];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "Identifier");
+            IsTrue(name == "Identifier");
 
             // try parsing an error with a complex skip rule
             (tokens, nodes) = parser.Parse("rule = error \"message\" ( foo | \"lit\");");
 
             node = nodes[0].Children[1].Children[2];
             name = parser.FindRule(node.FunctionId).Name;
-            Assert.IsTrue(name == "Option");
-        }
+            IsTrue(name == "Option");
 
+            // try parsing a try match 
+            (tokens, nodes) = parser.Parse("rule = try \"lit\";");
+
+            IsTrue(nodes != null);
+            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            IsTrue(name == "TryMatch");
+
+            // try parsing a try match with eoln
+            (tokens, nodes) = parser.Parse("rule = try\n\"lit\";");
+
+            IsTrue(nodes != null);
+            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            IsTrue(name == "TryMatch");
+
+            // try parsing a try match with out space, should fail
+            (tokens, nodes) = parser.Parse("rule = try\"lit\";");
+
+            IsTrue(nodes == null);           
+
+            // try parsing a try match shorthand
+            (tokens, nodes) = parser.Parse("rule = >\"lit\";");
+
+            IsTrue(nodes != null);
+            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            IsTrue(name == "TryMatch");
+        }
                 
         [TestMethod]
         public void TokenizeParseCompileLitRule_ExpectSuccess()
@@ -161,9 +188,9 @@ namespace gg.parse.tests.examples
 
             var litRule = table.FindRule("lit_rule") as MatchDataSequence<char>;
 
-            Assert.IsNotNull(litRule);
-            Assert.IsTrue(litRule.Production == AnnotationProduct.Annotation);
-            Assert.IsTrue(litRule.DataArray.SequenceEqual("foo".ToArray()));
+            IsNotNull(litRule);
+            IsTrue(litRule.Production == AnnotationProduct.Annotation);
+            IsTrue(litRule.DataArray.SequenceEqual("foo".ToArray()));
         }
 
         [TestMethod]
@@ -173,9 +200,9 @@ namespace gg.parse.tests.examples
 
             var setRule = table.FindRule("set_rule") as MatchDataSet<char>;
 
-            Assert.IsNotNull(setRule);
-            Assert.IsTrue(setRule.Production == AnnotationProduct.None);
-            Assert.IsTrue(setRule.MatchingValues.SequenceEqual("abc".ToArray()));
+            IsNotNull(setRule);
+            IsTrue(setRule.Production == AnnotationProduct.None);
+            IsTrue(setRule.MatchingValues.SequenceEqual("abc".ToArray()));
         }
 
         [TestMethod]
@@ -185,9 +212,9 @@ namespace gg.parse.tests.examples
 
             var rangeRule = table.FindRule("range_rule") as MatchDataRange<char>;
 
-            Assert.IsNotNull(rangeRule);
-            Assert.IsTrue(rangeRule.MinDataValue == 'a');
-            Assert.IsTrue(rangeRule.MaxDataValue == 'z');
+            IsNotNull(rangeRule);
+            IsTrue(rangeRule.MinDataValue == 'a');
+            IsTrue(rangeRule.MaxDataValue == 'z');
         }
 
         [TestMethod]
@@ -197,16 +224,16 @@ namespace gg.parse.tests.examples
 
             var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
 
-            Assert.IsNotNull(sequenceRule);
-            Assert.IsTrue(sequenceRule.Production == AnnotationProduct.Transitive);
+            IsNotNull(sequenceRule);
+            IsTrue(sequenceRule.Production == AnnotationProduct.Transitive);
 
             var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
-            Assert.IsNotNull(fooLit);
-            Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsNotNull(fooLit);
+            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
             var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
-            Assert.IsNotNull(barLit);
-            Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsNotNull(barLit);
+            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
 
         [TestMethod]
@@ -216,16 +243,16 @@ namespace gg.parse.tests.examples
 
             var optionRule = table.FindRule("option_rule") as MatchOneOfFunction<char>;
 
-            Assert.IsNotNull(optionRule);
-            Assert.IsTrue(optionRule.Production == AnnotationProduct.Annotation);
+            IsNotNull(optionRule);
+            IsTrue(optionRule.Production == AnnotationProduct.Annotation);
 
             var fooLit = optionRule.RuleOptions[0] as MatchDataSequence<char>;
-            Assert.IsNotNull(fooLit);
-            Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsNotNull(fooLit);
+            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
             var barLit = optionRule.RuleOptions[1] as MatchDataSequence<char>;
-            Assert.IsNotNull(barLit);
-            Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsNotNull(barLit);
+            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
 
         [TestMethod]
@@ -235,21 +262,21 @@ namespace gg.parse.tests.examples
 
             var groupRule = table.FindRule("group_rule") as MatchOneOfFunction<char>;
 
-            Assert.IsNotNull(groupRule);
+            IsNotNull(groupRule);
             var sequenceRule = groupRule.RuleOptions[0] as MatchFunctionSequence<char>;
             var litRule = groupRule.RuleOptions[1] as MatchDataSequence<char>;
 
-            Assert.IsNotNull(sequenceRule);
-            Assert.IsNotNull(litRule);
-            Assert.IsTrue(litRule.DataArray.SequenceEqual("baz".ToArray()));
+            IsNotNull(sequenceRule);
+            IsNotNull(litRule);
+            IsTrue(litRule.DataArray.SequenceEqual("baz".ToArray()));
 
             var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
-            Assert.IsNotNull(fooLit);
-            Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsNotNull(fooLit);
+            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
             var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
-            Assert.IsNotNull(barLit);
-            Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsNotNull(barLit);
+            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
 
         [TestMethod]
@@ -258,25 +285,25 @@ namespace gg.parse.tests.examples
             var (_, _, _, table) = SetupTokenizeParseCompile("sequence_rule = foo, bar; foo = 'foo'; bar = 'bar';");
 
             var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
-            Assert.IsNotNull(sequenceRule);
+            IsNotNull(sequenceRule);
 
             var fooLitRef = sequenceRule.SequenceSubfunctions[0] as RuleReference<char>;
-            Assert.IsNotNull(fooLitRef);
+            IsNotNull(fooLitRef);
 
             var fooLit = fooLitRef.Rule as MatchDataSequence<char>;
-            Assert.IsNotNull(fooLit);
+            IsNotNull(fooLit);
                         
-            Assert.IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
-            Assert.IsTrue(table.FindRule("foo") == fooLit);
+            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsTrue(table.FindRule("foo") == fooLit);
 
             var barLitRef = sequenceRule.SequenceSubfunctions[1] as RuleReference<char>;
-            Assert.IsNotNull(barLitRef);
+            IsNotNull(barLitRef);
 
             var barLit = barLitRef.Rule as MatchDataSequence<char>; 
-            Assert.IsNotNull(barLit);
+            IsNotNull(barLit);
             
-            Assert.IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
-            Assert.IsTrue(table.FindRule("bar") == barLit);
+            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsTrue(table.FindRule("bar") == barLit);
         }
 
         [TestMethod]
@@ -285,10 +312,10 @@ namespace gg.parse.tests.examples
             var (_, _, _, table) = SetupTokenizeParseCompile("zero_or_more_rule = *'bar';");
 
             var zeroOrMore = table.FindRule("zero_or_more_rule") as MatchFunctionCount<char>;
-            Assert.IsNotNull(zeroOrMore);
-            Assert.IsTrue(zeroOrMore.Min == 0);
-            Assert.IsTrue(zeroOrMore.Max == 0);
-            Assert.IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(Literal)"));
+            IsNotNull(zeroOrMore);
+            IsTrue(zeroOrMore.Min == 0);
+            IsTrue(zeroOrMore.Max == 0);
+            IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(Literal)"));
         }
 
         [TestMethod]
@@ -297,10 +324,10 @@ namespace gg.parse.tests.examples
             var (_, _, _, table) = SetupTokenizeParseCompile("one_or_more_rule = +'bar';");
 
             var oneOrMore = table.FindRule("one_or_more_rule") as MatchFunctionCount<char>;
-            Assert.IsNotNull(oneOrMore);
-            Assert.IsTrue(oneOrMore.Min == 1);
-            Assert.IsTrue(oneOrMore.Max == 0);          
-            Assert.IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(Literal)"));
+            IsNotNull(oneOrMore);
+            IsTrue(oneOrMore.Min == 1);
+            IsTrue(oneOrMore.Max == 0);          
+            IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(Literal)"));
         }
 
         [TestMethod]
@@ -309,10 +336,10 @@ namespace gg.parse.tests.examples
             var (_, _, _, table) = SetupTokenizeParseCompile("zero_or_one_rule = ?'bar';");
 
             var oneOrMore = table.FindRule("zero_or_one_rule") as MatchFunctionCount<char>;
-            Assert.IsNotNull(oneOrMore);
-            Assert.IsTrue(oneOrMore.Min == 0);
-            Assert.IsTrue(oneOrMore.Max == 1);
-            Assert.IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(Literal)"));
+            IsNotNull(oneOrMore);
+            IsTrue(oneOrMore.Min == 0);
+            IsTrue(oneOrMore.Max == 1);
+            IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(Literal)"));
         }
 
         [TestMethod]
@@ -321,13 +348,13 @@ namespace gg.parse.tests.examples
             var (_, _, _, table) = SetupTokenizeParseCompile("error_rule = error 'msg' !'bar';");
 
             var error = table.FindRule("error_rule") as MarkError<char>;
-            Assert.IsNotNull(error);
-            Assert.IsTrue(error.Message == "msg");
-            Assert.IsTrue(error.TestFunction == table.FindRule("error_rule skip_until Not"));
+            IsNotNull(error);
+            IsTrue(error.Message == "msg");
+            IsTrue(error.TestFunction == table.FindRule("error_rule skip_until Not"));
             var matchFunction = error.TestFunction as MatchNotFunction<char>;
-            Assert.IsNotNull(matchFunction);
-            Assert.IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not(not Literal)"));
-            Assert.IsTrue(matchFunction.Rule is MatchDataSequence<char>);
+            IsNotNull(matchFunction);
+            IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not(not Literal)"));
+            IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 
         [TestMethod]
@@ -336,9 +363,9 @@ namespace gg.parse.tests.examples
             var (_, _, _, table) = SetupTokenizeParseCompile("any_rule = .;");
 
             var matchAny = table.FindRule("any_rule") as MatchAnyData<char>;
-            Assert.IsNotNull(matchAny);
-            Assert.IsTrue(matchAny.MinLength == 1);
-            Assert.IsTrue(matchAny.MaxLength == 1);
+            IsNotNull(matchAny);
+            IsTrue(matchAny.MinLength == 1);
+            IsTrue(matchAny.MaxLength == 1);
         }
 
         [TestMethod]
@@ -351,44 +378,44 @@ namespace gg.parse.tests.examples
             File.WriteAllText("output/tpc_json_tokenizer_tokens.html",
                 new EbnfTokenizer().AnnotateTextUsingHtml(text, tokens, AnnotationMarkup.CreateTokenStyleLookup()));
 
-            Assert.IsTrue(table.Root != null);
-            Assert.IsTrue(table.Root.Name == "json_tokens");
+            IsTrue(table.Root != null);
+            IsTrue(table.Root.Name == "json_tokens");
 
             var stringRule = table.FindRule("string");
 
-            Assert.IsNotNull(stringRule);
+            IsNotNull(stringRule);
 
             // test single quote
             var result = stringRule.Parse("'foo'".ToArray(), 0);
 
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations[0].Range.Start == 0);
-            Assert.IsTrue(result.Annotations[0].Range.Length == "'foo'".Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations[0].Range.Start == 0);
+            IsTrue(result.Annotations[0].Range.Length == "'foo'".Length);
 
             // test double quote
             result = stringRule.Parse("\"foo\"".ToArray(), 0);
 
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations[0].Range.Start == 0);
-            Assert.IsTrue(result.Annotations[0].Range.Length == "\"foo\"".Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations[0].Range.Start == 0);
+            IsTrue(result.Annotations[0].Range.Length == "\"foo\"".Length);
 
             // test if whitespace is there
             var whiteSpace = table.FindRule("white_space");
-            Assert.IsNotNull(whiteSpace);
-            Assert.IsTrue(whiteSpace.Production == AnnotationProduct.None);
+            IsNotNull(whiteSpace);
+            IsTrue(whiteSpace.Production == AnnotationProduct.None);
 
             // test parsing
             result = table.Root.Parse("{\"key\": 123, \"key\": null }".ToArray(), 0);
-            Assert.IsTrue(result.FoundMatch);
+            IsTrue(result.FoundMatch);
             var expectedTokens = new[] {
                 "scope_start", "string", "kv_separator", "int", "item_separator",
                 "string", "kv_separator", "null", "scope_end" };
 
-            Assert.IsTrue(result.Annotations.Count == expectedTokens.Length);
+            IsTrue(result.Annotations.Count == expectedTokens.Length);
 
             for (var i = 0; i < expectedTokens.Length; i++)
             {
-                Assert.IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
+                IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
             }
         }
 
@@ -399,14 +426,14 @@ namespace gg.parse.tests.examples
             var (text, tokens, astNodes, table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
 
             var result = table.Root.Parse("{\"key\": <bunch of errors> 123 }".ToArray(), 0);
-            Assert.IsTrue(result.FoundMatch);
+            IsTrue(result.FoundMatch);
             var expectedTokens = new[] {
                 "scope_start", "string", "kv_separator", "unknown_token", "int", "scope_end" };
-            Assert.IsTrue(result.Annotations.Count == expectedTokens.Length);
+            IsTrue(result.Annotations.Count == expectedTokens.Length);
 
             for (var i = 0; i < expectedTokens.Length; i++)
             {
-                Assert.IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
+                IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
             }
         }
 
