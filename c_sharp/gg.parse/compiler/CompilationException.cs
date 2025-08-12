@@ -6,12 +6,14 @@
 
         public RuleBase<T>? Rule { get; init; }
 
+        public Annotation? Annotation { get; init; }
 
-        public CompilationException(string message, Range range, RuleBase<T>? rule = null)
+        public CompilationException(string message, Range range, RuleBase<T>? rule = null, Annotation? annotation = null)
             : base(message) 
         { 
             Range = range;
             Rule = rule;
+            Annotation = annotation;    
         }
     }
 }

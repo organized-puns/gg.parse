@@ -1,11 +1,5 @@
-﻿using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
+﻿using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace gg.parse.tests.rulefunctions
 {
