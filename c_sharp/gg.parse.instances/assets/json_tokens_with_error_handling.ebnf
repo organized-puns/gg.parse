@@ -17,16 +17,15 @@ int             = ?sign, +digit;
 boolean         = 'true' | 'false';
 null			= 'null';
 
-// allow for both single - and double quoted strings
-// this is not allowed in pure json 
-~sq_string_char = !'"', .;
-~sq_string      = '"', *sq_string_char, '"';
 
-~dq_string_char = !"'", .;
-~dq_string      = "'", *dq_string_char, "'"
-				| ("'", EOF, error "string opened with \" but not properly closed" .);
 
-string			= sq_string | dq_string;
+// 
+EOLN		    = ("\r\n" | "\n");	
+string_char		= !'"', !EOLN, !EOF, .;
+string			= '"', *string_char, '"'
+				| '"', *string_char, EOLN, error "string opened with \" but not properly closed before the EOLN." EOLN)
+				| ('"', *string_char, EOF, error "string opened with \" but not properly closed before EOF." .);
+
 
 scope_start		= '{';
 scope_end		= '}';
