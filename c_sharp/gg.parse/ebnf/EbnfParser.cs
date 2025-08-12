@@ -175,10 +175,43 @@ namespace gg.parse.ebnf
 
             var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
 
+            var includedSources = AddTokenIncludes(tokenizerText, tokenizer, tokenizerParser.Include.Id, tokenizerTokens, tokenizerAstTree); 
+
             return new RuleCompiler<char>()
                     .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
                     .RegisterTokenizerCompilerFunctions(tokenizerParser)
-                    .Compile(tokenContext);
+                    .Compile(tokenContext, includedSources);
+        }
+
+        private static RuleGraph<char> AddTokenIncludes(
+            string inputText, 
+            EbnfTokenizer tokenizer,
+            int includeId,
+            List<Annotation> tokens,
+            List<Annotation> astTree)
+        {
+            var result = new RuleGraph<char>();
+
+            for (var i = 0; i < astTree.Count; )
+            {
+                var statement = astTree[i];
+
+                if (statement.FunctionId == includeId)
+                {
+                    var fileName = GetText(inputText, statement.Children[0], tokens);
+                    fileName = fileName.Substring(1, fileName.Length - 2);
+
+                    result.Merge(CreateTokenizerFromEbnfFile(File.ReadAllText(fileName), tokenizer));
+
+                    astTree.RemoveAt(i);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            return result;
         }
 
         public static RuleGraph<int> CreateParserFromEbnfFile(

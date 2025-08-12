@@ -39,6 +39,15 @@ Todo (for v1.0)
 ---------------
 
 - allow including other ebnf (ie include "some_ebnf.ebnf";)
+	- add pre-processor step, create process queue
+		- parse a, which includes b and c
+		- b includes c
+		- so parse c, pass rulegraph to b, parse, and then a. Collect errors as we go..
+
+		- Tokenizer include done, 
+		- Add caching
+		- Add Parser include
+		- Do more granular testing
 
 - Clean up:
   - address all xxx

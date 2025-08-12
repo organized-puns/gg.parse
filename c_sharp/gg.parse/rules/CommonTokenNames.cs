@@ -80,6 +80,8 @@
         public static readonly string TryMatchOperatorShortHand = "TryMatchOperator(ShortHand)";
         public static readonly string TryMatchOperator = "TryMatchOperator";
 
+        public static readonly string Include = "include";
+
         public static readonly string EndOfLine = "EOL";
 
         public static readonly string SingleLineComment = "SingleLineComment";

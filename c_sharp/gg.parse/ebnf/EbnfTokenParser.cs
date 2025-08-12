@@ -47,6 +47,8 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int>  MatchError { get; private set; }
 
+        public MatchFunctionSequence<int> Include { get; private set; }
+
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
         {
@@ -170,6 +172,10 @@ namespace gg.parse.ebnf
                     ruleDefinition
             );
 
+            Include = this.Sequence("Include", AnnotationProduct.Annotation,
+                Token(CommonTokenNames.Include), 
+                MatchLiteral);
+
             ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
                                     MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError];
 
@@ -185,7 +191,7 @@ namespace gg.parse.ebnf
                     ruleDefinition,
                     Token(CommonTokenNames.EndStatement));
 
-            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, rule);           
+            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, this.OneOf("#Statement", AnnotationProduct.Transitive, Include, rule));           
         }
 
         public ParseResult Parse(List<Annotation> tokens)

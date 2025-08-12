@@ -45,7 +45,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(jsonTokensRuleFunction.IsPartOfComposition);
 
             var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOfFunction<char>;
-            
+
             Assert.IsNotNull(validTokenRule);
             Assert.IsTrue(jsonTokensRule.Production == AnnotationProduct.Transitive);
             Assert.IsTrue(validTokenRule.RuleOptions.Length == 3);
@@ -90,7 +90,7 @@ namespace gg.parse.tests.examples
 
             var tokenizer = jsonParser.EbnfTokenizer;
             var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
-            
+
             Assert.IsTrue(whiteSpaceRule != null);
             Assert.IsTrue(whiteSpaceRule.Production == AnnotationProduct.None);
             Assert.IsTrue(whiteSpaceRule.MatchingValues.Length == 4);
@@ -114,7 +114,7 @@ namespace gg.parse.tests.examples
 
             jsonParser.TryBuildAstTree(keyStrValue, out var tokens, out var astTree);
 
-            var dump = jsonParser.Dump(keyStrValue, tokens, astTree);    
+            var dump = jsonParser.Dump(keyStrValue, tokens, astTree);
 
             Assert.IsTrue(astTree.FoundMatch);
             Assert.IsTrue(astTree.MatchedLength == 5);
@@ -182,7 +182,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(keyValuePairListRestNode.Children == null);*/
         }
 
-        
+
         [TestMethod]
         public void ReadOptimizedEbnfGrammar_IntegrationTest()
         {
@@ -227,7 +227,7 @@ namespace gg.parse.tests.examples
 
             // read a full json file covering all cases
             var jsonFile = File.ReadAllText("assets/example.json");
-            
+
             Assert.IsTrue(jsonParser.TryBuildAstTree(jsonFile, out tokens, out astTree));
 
             dump = jsonParser.Dump(jsonFile, tokens, astTree);
@@ -240,6 +240,15 @@ namespace gg.parse.tests.examples
 
             Assert.IsTrue(jsonParser.TryMatch("*"));
 
+        }
+
+        [TestMethod]
+        public void ReadIncludeTest_()
+        {
+            var tokenizerSpec = File.ReadAllText("assets/include_test.ebnf");
+            var jsonParser = new EbnfParser(tokenizerSpec, null);
+
+            Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
         }
     }
 }

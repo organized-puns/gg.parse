@@ -25,6 +25,12 @@ namespace gg.parse.ebnf
                         this.Whitespace()
                     ),
 
+                    // include
+                    this.Sequence(Include, AnnotationProduct.Annotation,
+                        this.Literal("IncludeKeyword", AnnotationProduct.Transitive, "include".ToArray()),
+                        this.Whitespace()
+                    ),
+
                     this.Identifier(),
                     this.Integer(),
                     this.String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
