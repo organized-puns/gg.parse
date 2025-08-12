@@ -310,9 +310,9 @@ namespace gg.parse.compiler
 
             if (string.IsNullOrEmpty(message) || message.Length <= 2)
             {
-                // xxx add warnings
-                // xxx resolve rule
-                throw new CompilationException<T>("Text defining the error is null or empty", ruleDefinition.Range, null);
+                throw new CompilationException<T>("Text defining the error is null or empty", 
+                    ruleDefinition.Range, 
+                    annotation: declaration.AssociatedAnnotation);
             }
 
             message = message.Substring(1, message.Length - 2);

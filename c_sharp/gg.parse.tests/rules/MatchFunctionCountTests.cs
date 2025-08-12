@@ -1,11 +1,5 @@
-﻿using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
+﻿using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace gg.parse.tests.rulefunctions
 {
@@ -15,7 +9,7 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void MatchFunctionCount_ValidSingleInput_ReturnsSuccess()
         {
-            var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
+            var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
             var rule = new MatchFunctionCount<int>("TestRule", function, AnnotationProduct.Annotation, 1, 3);
 
             function.Id = 1;
