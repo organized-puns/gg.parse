@@ -651,6 +651,67 @@ namespace gg.parse.tests.compiler
 
         /// <summary>
         /// Tests & demonstrates how to generate a ruletable using a compiler containing 
+        /// a not rule
+        /// </summary>
+        [TestMethod]
+        public void TestTryMatchFunction()
+        {
+            var compiler = new RuleCompiler<char>();
+
+            var literalId = 42;
+            var tryMatchId = 64;
+
+            var context = new CompileSession<char>()
+                .WithText($"rule=try 'foo'")
+                .WithTokens(new Annotation(0, new(0, 4)), // rule
+                            new Annotation(2, new(5, 4)), // try match operator character
+                            new Annotation(3, new(9, 5))); // foo
+
+            context.AstNodes = [
+                new Annotation(2, new(0, 3), [
+                    // child capturing the token(s) defining the rule name
+                    new(0, new Range(0, 1)), 
+
+                    // try match function
+                    new (tryMatchId, new Range(1, 2),[
+                        // foo literal
+                        new(literalId, new Range(2, 1))
+                    ])
+                ])
+            ];
+
+            // compile a rule table which can tokenize try match 'foo'
+            var table = compiler
+                        .RegisterFunction(literalId, CompileLiteral)
+                        .RegisterFunction(tryMatchId, CompileTryMatch)
+                        .Compile(context);
+
+            Assert.IsNotNull(table);
+            Assert.IsNotNull(table.Root);
+
+            // the ebnf declared the sequence as 'rule'
+            var tryMatch = table.FindRule("rule");
+            Assert.IsNotNull(tryMatch);
+
+            var validInput = "foo";
+            var result = table.Root.Parse(validInput.ToCharArray(), 0);
+
+            // the result should hold a token which describes a not foo
+            Assert.IsTrue(result.FoundMatch);
+            Assert.IsTrue(result.Annotations != null);
+            Assert.IsTrue(result.Annotations.Count == 1);
+            Assert.IsTrue(result.Annotations[0].FunctionId == tryMatch.Id);
+            Assert.IsTrue(result.Annotations[0].Start == 0);
+            Assert.IsTrue(result.Annotations[0].Length == 0);
+
+            var invalidInput = "bar";
+
+            result = table.Root.Parse(invalidInput.ToCharArray(), 0);
+            Assert.IsFalse(result.FoundMatch);
+        }
+
+        /// <summary>
+        /// Tests & demonstrates how to generate a ruletable using a compiler containing 
         /// a any rule
         /// </summary>
         [TestMethod]

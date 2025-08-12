@@ -43,6 +43,8 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int>  MatchNotOperator { get; private set; }
 
+        public MatchFunctionSequence<int>  TryMatchOperator { get; private set; }
+
         public MatchFunctionSequence<int>  MatchError { get; private set; }
 
         public EbnfTokenParser()
@@ -157,13 +159,19 @@ namespace gg.parse.ebnf
                 Token(CommonTokenNames.NotOperator),
                 ruleTerms);
 
+            // >(a | b | c) / try ( a | b | c)
+            TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
+                this.OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
+                ruleTerms);
+
             MatchError = this.Sequence("Error", AnnotationProduct.Annotation,
                     Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
                     MatchLiteral,
                     ruleDefinition
             );
 
-            ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, MatchError];
+            ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
+                                    MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError];
 
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);

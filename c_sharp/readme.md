@@ -15,10 +15,28 @@ Core concepts:
 *Examples:*
 	- Full ebnf parser see EbnfParserTest
 
+Extending the EBNF Parser
+-------------------------
+
+- Create a new rule class
+- Optionally create a tokenname for the rule in `CommonTokenNames.cs`
+- Optionally create a shorthand for the rule in `CommonRules.cs`
+- Add the rule to the `EbnfTokenizer.cs` constructor
+- Add the new tokens to the `EbnfTokenParser.cs` and create a matching function property
+- Don't forget to add the matching function to `ruleTerms.RuleOptions` in the `EbnfTokenParser.cs` constructor
+- Create a corresponding Compile rule in `CompilerFunctions.cs`
+- Register this compile rule to the `RegisterTokenizerCompilerFunctions` / `RegisterGrammarCompilerFunctions`
+ 
+Adding tests:
+
+- Add a new `MyNewFunctionTest.cs` to the testproject `/rules` and perform the appropriate tests
+- Add a new test method to `EbnfTokenizerTests.cs` to test token parsing.
+- Add a new test method to `EbnfTokenParserTests.cs` to test token parsing or add it to `ParseRule_ExpectSucess`.
+- Add a compiler test in `RuleCompilerTests.cs`
+- Add an integration test, add the rule in an .ebnf, parse/compile and test.
+
 Todo (for v1.0)
 ---------------
-
-- include peek operator, ">func" which succeeds when func passes, but passes with length 0
 
 - allow including other ebnf (ie include "some_ebnf.ebnf";)
 

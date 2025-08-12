@@ -285,6 +285,33 @@ namespace gg.parse.compiler
             return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction);
         }
 
+        public static RuleBase<T> CompileTryMatch<T>(
+            RuleCompiler<T> compiler,
+            RuleDeclaration declaration,
+            CompileSession<T> session) where T : IComparable<T>
+        {
+            var ruleDefinition = declaration.AssociatedAnnotation;
+
+            Contract.Requires(ruleDefinition != null);
+            Contract.Requires(ruleDefinition!.Children != null);
+            Contract.Requires(ruleDefinition.Children!.Count > 0);
+
+            var elementAnnotation = ruleDefinition.Children[0];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+            // xxx add human understandable name instead of subfunction
+            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}(try {elementName})");
+            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+
+            if (subFunction == null)
+            {
+                // xxx add errors
+                // xxx resolve rule
+                throw new CompilationException<char>("Cannot compile subFunction definition for Try match.", elementAnnotation.Range, null);
+            }
+
+            return new TryMatchFunction<T>(declaration.Name, declaration.Product, subFunction);
+        }
+
         public static RuleBase<T> CompileAny<T>(
             RuleCompiler<T> _,
             RuleDeclaration declaration,

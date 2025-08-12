@@ -85,11 +85,11 @@ namespace gg.parse.tests.ebnf
 
             var testConfigurations = new (string input, int expectedPosition, int expectedLength) []
             {
-                ("\"foo\n\"", 5, 1),
+                ("\"foo\n\"", 4, 2),
                 // 
-                ("\"bar\r\n\"", 6, 1),
-                // expected length = 0 because there is a valid string right there
-                ("\"foo\n\"\"bar\"", 5, 0)
+                ("\"bar\r\n\"", 4, 3),
+                // expected length = 1 because there is a valid string ("", before bar) right there
+                ("\"foo\n\"\"bar\"", 4, 1)
             };
 
             foreach (var testConfig in testConfigurations)
@@ -115,6 +115,7 @@ namespace gg.parse.tests.ebnf
             var tokenizer = Setup_BuildStringTokenizerFromEbnfFile();
             var stringRule = tokenizer.FindRule("string");
             var errEOLN = tokenizer.FindRule("err_string_eoln");
+            var errEOF = tokenizer.FindRule("err_string_eof");
 
             // modify the root to expect one or more strings
             tokenizer.Root = tokenizer.RegisterRule(new MatchFunctionCount<char>("#string_list", tokenizer.Root, production: AnnotationProduct.Transitive, min: 1, max: 0));
@@ -123,7 +124,7 @@ namespace gg.parse.tests.ebnf
             {
                 ("\"foo\"", [stringRule.Id]),
                 ("\"foo\n\"", [errEOLN.Id]),
-                ("\"foo\n\"\"bar\"", [errEOLN.Id, stringRule.Id]),
+                ("\"foo\n\"\"\"bar", [errEOLN.Id, stringRule.Id, errEOF.Id]),
             };
 
             foreach (var testConfig in testConfigurations)
