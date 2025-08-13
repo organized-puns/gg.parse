@@ -60,6 +60,19 @@ namespace gg.parse.compiler
                         result.Root = compiledRule;
                     }
                 }
+                else
+                {
+                    // xxx add to the compilation errors, don't throw
+                    throw new InvalidOperationException($"Trying to register a rule with the same name ({declaration.Name}).");
+                }
+                
+            }
+
+            // no root defined, this can happen when the input is empty or only contains include statements
+            if (result.Root == null)
+            {
+                // xxx needs to be a warning
+                throw new ArgumentException("Input text contains no root function. Make sure the main input always contains at least one rule.");
             }
 
             result.ResolveReferences();

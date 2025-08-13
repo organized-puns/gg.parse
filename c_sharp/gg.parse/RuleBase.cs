@@ -52,16 +52,35 @@
 
         public ParseResult BuildDataRuleResult(Range dataRange) 
         {
+#if DEBUG
             return Production switch
             {
-                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
-                                        [new Annotation(Id, dataRange)]),
-                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length,
-                                        [new Annotation(Id, dataRange)]),
-                // throw new NotImplementedException("Cannot apply transitive production to a rule which has no children"),
-                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
+                AnnotationProduct.Annotation =>
+                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) {  DebugName = Name }]),
+
+                AnnotationProduct.Transitive =>
+                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) { DebugName = Name }]),
+
+                AnnotationProduct.None =>
+                    new ParseResult(true, dataRange.Length),
+
                 _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
             };
+#else
+            return Production switch
+            {
+                AnnotationProduct.Annotation => 
+                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange)]),
+
+                AnnotationProduct.Transitive => 
+                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange)]),
+
+                AnnotationProduct.None => 
+                    new ParseResult(true, dataRange.Length),
+  
+                _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
+            };
+#endif
         }
 
         public ParseResult BuildFunctionRuleResult(Range dataRange, List<Annotation>? children = null)

@@ -55,8 +55,11 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("ReferenceName text is empty", ruleDefinition.Range, null);
             }
 
-            var product = AnnotationProduct.Annotation;
+            var product = declaration.Product;
 
+            // xxx shouldn't raise a warning if product is anything else than annotation eg
+            // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
+            // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasProductionOperator)
             {
                 compiler.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);

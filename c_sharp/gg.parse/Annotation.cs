@@ -18,6 +18,10 @@
 
         public List<Annotation>? Children { get; } = children;
 
+#if DEBUG
+        public string DebugName { get; set; } = nameof(Annotation);
+#endif
+
         public int CompareTo(object? obj)
         {
             if (obj is Annotation other)
@@ -28,9 +32,12 @@
             return 0;
         }
 
-        public override string ToString()
-        {
-            return $"Annotation(Id: {FunctionId}, Range: {Range})";
-        }
+        public override string ToString() =>
+        
+#if DEBUG
+            $"{DebugName}({FunctionId}, {Range})";
+#else
+            $"Annotation(Id: {FunctionId}, Range: {Range})";
+#endif
     }
 }

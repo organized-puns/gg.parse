@@ -1,7 +1,7 @@
-﻿using System.Collections;
-
-using gg.core.util;
+﻿using gg.core.util;
 using gg.parse.rulefunctions.rulefunctions;
+using System.Collections;
+using System.Data;
 
 namespace gg.parse
 {
@@ -15,6 +15,24 @@ namespace gg.parse
         public RuleBase<T>? Root { get; set; }
 
         public IEnumerable<string> FunctionNames => _nameRuleLookup.Keys;
+
+        public RuleGraph<T> Merge(RuleGraph<T> other)
+        {
+            Contract.RequiresNotNull(other);
+            Contract.Requires(other != this);
+
+            foreach (var rule in other)
+            {
+                if (!_nameRuleLookup.ContainsKey(rule.Name))
+                {
+                    // xxx needs to be a clone
+                    rule.Id = -1;
+                    RegisterRule(rule);
+                }
+            }
+
+            return this;
+        }
 
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
