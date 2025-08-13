@@ -1,2 +1,5 @@
 
-include "assets/string_tokenization.ebnf";
+include "string_tokenization.ebnf";
+
+// dummy root
+token_root = .;

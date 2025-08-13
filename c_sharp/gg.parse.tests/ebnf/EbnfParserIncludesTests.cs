@@ -62,6 +62,20 @@ namespace gg.parse.tests.ebnf
         }
 
         /// <summary>
+        /// Include in a tokenizer which includes a file in the same directory. The path should be correctly 
+        /// resolved
+        /// </summary>
+        [TestMethod]
+        public void CreateEbnfParserUsingAFileContainingAnInclude_FindRule_ExpectIncludedRulesToExist()
+        {
+            var includeCommand = "include 'assets/include_test.ebnf'; /*dummy main rule */ grammar_root=.;";
+            var jsonParser = new EbnfParser(includeCommand, null);
+
+            // should have loaded the string rule from the included file
+            Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
+        }
+
+        /// <summary>
         /// See if the included token can actually be used
         /// </summary>
         [TestMethod]

@@ -11,7 +11,7 @@ namespace gg.parse.tests.compiler
     /// as the rule functions.
     /// </summary>
     [TestClass]
-    public class RuleCompilerTests
+    public class CompilerFunctionsTests
     {
         /// <summary>
         /// Tests & demonstrates how to generate a ruletable using a compiler containing a literal 
@@ -927,7 +927,5 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.Annotations[0].Length == max * 3);
             }
         }
-
-
     }
 }

@@ -13,8 +13,22 @@ Core concepts:
 - A compiler which takes a list of tokens and an ast tree and builds a RuleGraph based on said input
 - A facade-like class, `EbnfParser.cs` which combines all of the above in a convenient package
 
-*Examples:*
-	- Full ebnf parser see EbnfParserTest
+*Example:*
+
+Read an ebnf(like) file defining json tokens and a json grammar and build an AST:
+
+```csharp
+
+var jsonParser = new EbnfParser(	
+					File.ReadAllText("assets/json_tokens.ebnf"), 
+					File.ReadAllText("assets/json_grammar_optimized.ebnf"));
+
+if (jsonParser.TryBuildAstTree(File.ReadAllText("assets/example.json"), out tokens, out astTree))) 
+{
+	Console.Write(jsonParser.Dump(jsonFile, tokens, astTree));
+}
+```
+
 
 Extending the EBNF Parser
 -------------------------
@@ -39,30 +53,24 @@ Adding tests:
 Todo (for v1.0)
 ---------------
 
-- allow including other ebnf (ie include "some_ebnf.ebnf";)
-	- add pre-processor step, create process queue
-		- parse a, which includes b and c
-		- b includes c
-		- so parse c, pass rulegraph to b, parse, and then a. Collect errors as we go..
-
-		- Add Parser include
-		- cache full path not just the filename as filenames can be the same
-		- Allow include from same directory and project root
-
 - Token parser have an unknown ast node rule fallback		
-- EbnfParser if error tokens or nodes are reported, set match to fail
+- EbnfParser if error tokens or nodes are reported in the result, set match to fail
+- Add a test to see the compiler fail if rules with the same name are registered
 
-- Clean up:
-  - address all xxx
+- Clean up:  
+  - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
+  - address all xxx
 
 - (Bug) add guard against infinite loop with zero or more (and other cases)
+
+- add optional namespaces to avoid grammar / token name clash 
 
 - build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
 - implement a Ebnf based EbnfParser and Tokenizer
 
-- Clean up unit tests and build proper examples
+
 
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand
