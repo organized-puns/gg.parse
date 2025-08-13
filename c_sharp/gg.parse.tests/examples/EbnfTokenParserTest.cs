@@ -168,10 +168,10 @@ namespace gg.parse.tests.examples
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
             IsTrue(name == "TryMatch");
 
-            // try parsing a try match with out space, should fail
-            (tokens, nodes) = parser.Parse("rule = try\"lit\";");
+            // try parsing a try match with out space, should result in an unknown error
+            (tokens, nodes) = parser.Parse("rule = tryy \"lit\";");
 
-            IsTrue(nodes == null);           
+            IsTrue(nodes[0].FunctionId == parser.UnknownInputError.Id);           
 
             // try parsing a try match shorthand
             (tokens, nodes) = parser.Parse("rule = >\"lit\";");

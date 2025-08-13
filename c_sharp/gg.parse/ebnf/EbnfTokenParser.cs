@@ -51,6 +51,8 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int> Include { get; private set; }
 
+        public MarkError<int> UnknownInputError { get; private set; }
+
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
         {
@@ -194,7 +196,19 @@ namespace gg.parse.ebnf
                     ruleDefinition,
                     Token(CommonTokenNames.EndStatement));
 
-            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, this.OneOf("#Statement", AnnotationProduct.Transitive, Include, MatchRule));           
+            var validStatement = this.OneOf("#ValidStatement", AnnotationProduct.Transitive, Include, MatchRule);
+
+            // fallback in case nothing matches
+            UnknownInputError = this.Error(
+                "UnknownInput", 
+                AnnotationProduct.Annotation,
+                "Can't match the token at the given position to a astNode.", 
+                validStatement, 
+                0
+            );
+
+            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive,
+                this.OneOf("#Statement", AnnotationProduct.Transitive, validStatement, UnknownInputError));           
         }
 
         public ParseResult Parse(List<Annotation> tokens)

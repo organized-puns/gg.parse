@@ -53,7 +53,6 @@ Adding tests:
 Todo (for v1.0)
 ---------------
 
-- Token parser have an unknown ast node rule fallback		
 - EbnfParser if error tokens or nodes are reported in the result, set match to fail
 - Add a test to see the compiler fail if rules with the same name are registered
 
@@ -62,6 +61,12 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
+- rename json_grammar_optimized to json_grammar and json_grammar to json_grammar_basic
+- add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
+- add full/short names versions for "or /|"
+- add alternative for "= / :"
+- replace any with _, disallow identifier to start with '_'
+- keywords should end with whitespace | non_keyword_char
 - (Bug) add guard against infinite loop with zero or more (and other cases)
 
 - add optional namespaces to avoid grammar / token name clash 

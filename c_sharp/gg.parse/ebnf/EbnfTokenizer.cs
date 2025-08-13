@@ -11,6 +11,12 @@ namespace gg.parse.ebnf
     {
         public EbnfTokenizer(bool dropComments = true)
         {
+            var endOfKeyword = this.OneOf(
+                this.Whitespace(),
+                this.Not(this.IdentifierCharacter()),
+                this.Not(this.Any())
+            );
+
             var ebnfTokens =
                 this.OneOf("#EbnfTokens", AnnotationProduct.Transitive,
                     this.EndOfLine(product: AnnotationProduct.None),
@@ -22,13 +28,13 @@ namespace gg.parse.ebnf
                     MapNameToToken(TryMatchOperatorShortHand, ">"),
                     this.Sequence(TryMatchOperator, AnnotationProduct.Annotation,
                         this.Literal("TryMatchKeyword", AnnotationProduct.Transitive, "try".ToArray()),
-                        this.Whitespace()
+                        endOfKeyword
                     ),
 
                     // include
                     this.Sequence(Include, AnnotationProduct.Annotation,
                         this.Literal("IncludeKeyword", AnnotationProduct.Transitive, "include".ToArray()),
-                        this.Whitespace()
+                        endOfKeyword
                     ),
 
                     this.Identifier(),

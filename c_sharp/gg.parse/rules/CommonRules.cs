@@ -160,14 +160,43 @@ namespace gg.parse.rulefunctions
             return graph.OneOrMore(ruleName, product, graph.Digit(null, AnnotationProduct.None));
         }
 
+        public static RuleBase<char> IdentifierStartingCharacter(this RuleGraph<char> graph,
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            var underscore = 
+                graph.TryFindRule("#Underscore", out MatchSingleData<char> existingRule)
+                    ? existingRule!
+                    : graph.RegisterRule(new MatchSingleData<char>("#Underscore", '_', AnnotationProduct.None));
+
+            var ruleName = name ?? $"{product.GetPrefix()}FirstIdentifierCharacter";
+
+            return graph.OneOf(
+                ruleName, 
+                product, 
+                graph.LowerCaseLetter(), 
+                graph.UpperCaseLetter(), 
+                underscore
+            );
+        }
+
+        public static RuleBase<char> IdentifierCharacter(this RuleGraph<char> graph,
+            string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
+        {
+            var ruleName = name ?? $"{product.GetPrefix()}NextIdentifierCharacter";
+
+            return graph.OneOf(
+                ruleName, 
+                AnnotationProduct.None,
+                graph.IdentifierStartingCharacter(product: AnnotationProduct.None), 
+                graph.Digit()
+            );
+        }
+
         public static RuleBase<char> Identifier(this RuleGraph<char> graph,
             string? name = null, AnnotationProduct product = AnnotationProduct.Annotation)
         {
-            var underscore = graph.TryFindRule("#Underscore", out MatchSingleData<char> existingRule)
-                        ? existingRule!
-                        : graph.RegisterRule(new MatchSingleData<char>("#Underscore", '_', AnnotationProduct.None));
-            var firstCharacter = graph.OneOf("#FirstIdentifierCharacter", AnnotationProduct.None, graph.LowerCaseLetter(), graph.UpperCaseLetter(), underscore);
-            var nextCharacter = graph.OneOf("#NextIdentifierCharacter", AnnotationProduct.None, firstCharacter, graph.Digit());
+            var firstCharacter = graph.IdentifierStartingCharacter(product: AnnotationProduct.None);
+            var nextCharacter = graph.IdentifierCharacter(product: AnnotationProduct.None);
             var nextCharacterString = graph.ZeroOrMore("#NextIdentifierCharacterString", AnnotationProduct.None, nextCharacter);
 
             var ruleName = name ?? $"{product.GetPrefix()}{CommonTokenNames.Identifier}";
@@ -315,11 +344,12 @@ namespace gg.parse.rulefunctions
                      : graph.RegisterRule(new MatchDataSet<char>(name, product, [' ', '\r', '\n', '\t']));
 
 
-        public static MarkError<char> Error(this RuleGraph<char> graph, 
-            string name, AnnotationProduct product, string description, RuleBase<char>? testFunction, int maxLength) =>
-            graph.TryFindRule(name, out MarkError<char>? existingRule)
+        public static MarkError<T> Error<T>(this RuleGraph<T> graph, 
+            string name, AnnotationProduct product, string description, RuleBase<T>? testFunction, int maxLength)
+            where T: IComparable<T> =>
+            graph.TryFindRule(name, out MarkError<T>? existingRule)
                      ? existingRule!
-                     : graph.RegisterRule(new MarkError<char>(name, product, description, testFunction, maxLength));
+                     : graph.RegisterRule(new MarkError<T>(name, product, description, testFunction, maxLength));
 
 
         public static RuleBase<char> InSet(this RuleGraph<char> graph, params char[] set)
