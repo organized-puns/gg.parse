@@ -41,7 +41,7 @@ namespace gg.parse.tests.examples
             var jsonTokensRuleFunction = jsonTokensRule.Function as RuleReference<char>;
 
             Assert.IsNotNull(jsonTokensRuleFunction);
-            Assert.IsTrue(jsonTokensRuleFunction.Production == AnnotationProduct.Annotation);
+            Assert.IsTrue(jsonTokensRuleFunction.Production == AnnotationProduct.Transitive);
             Assert.IsTrue(jsonTokensRuleFunction.IsPartOfComposition);
 
             var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOfFunction<char>;

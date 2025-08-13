@@ -62,6 +62,12 @@ namespace gg.parse.compiler
                 }
             }
 
+            // no root defined, this can happen when the input is empty or only contains include statements
+            if (result.Root == null)
+            {
+                throw new ArgumentException("Input text contains no root function. Make sure the main input always contains at least one rule.");
+            }
+
             result.ResolveReferences();
 
             return result;

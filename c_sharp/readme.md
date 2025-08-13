@@ -45,11 +45,8 @@ Todo (for v1.0)
 		- b includes c
 		- so parse c, pass rulegraph to b, parse, and then a. Collect errors as we go..
 
-		- Tokenizer include done, 
-		- Add caching
 		- Add Parser include
-		- Do more granular testing
-		- cache filename not full path
+		- cache full path not just the filename as filenames can be the same
 		- Allow include from same directory and project root
 
 - Token parser have an unknown ast node rule fallback		

@@ -37,7 +37,7 @@ namespace gg.parse.rulefunctions.rulefunctions
         public override ParseResult Parse(T[] input, int start)
         {
             foreach (var option in RuleOptions)
-            {
+            {   
                 var result = option.Parse(input, start);
                 if (result.FoundMatch)
                 {

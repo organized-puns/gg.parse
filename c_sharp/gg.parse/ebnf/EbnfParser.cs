@@ -54,7 +54,7 @@ namespace gg.parse.ebnf
         public bool TryBuildAstTree(string text, out ParseResult tokens, out ParseResult astTree)
         {
             astTree = ParseResult.Failure;
-            tokens = _ebnfParser != null  && _ebnfParser.Root != null
+            tokens = _ebnfTokenizer != null && _ebnfTokenizer.Root != null && _ebnfParser != null  && _ebnfParser.Root != null
                     ? _ebnfTokenizer!.Root!.Parse(text.ToArray(), 0)
                     : ParseResult.Failure;
 
@@ -62,9 +62,7 @@ namespace gg.parse.ebnf
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
                 {
-                    astTree = tokens.FoundMatch
-                            ? _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0)
-                            : ParseResult.Failure;
+                    astTree = _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0);
                 }
                 else
                 {
@@ -131,7 +129,6 @@ namespace gg.parse.ebnf
         public static string GetText(string text, Annotation grammarAnnotation, ParseResult tokens)
             => GetText(text, grammarAnnotation, tokens.Annotations);
         
-
         public static ReadOnlySpan<char> GetSpan(string text, Annotation grammarAnnotation, ParseResult tokens)
         {
             var range = GetTextRange(grammarAnnotation, tokens);
@@ -175,7 +172,14 @@ namespace gg.parse.ebnf
 
             var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
 
-            var includedSources = ProcessIncludedFiles(tokenizerText, tokenizer, tokenizerParser.Include.Id, tokenizerTokens, tokenizerAstTree, cache); 
+            var includedSources = ProcessIncludedFiles(
+                                    tokenizerText, 
+                                    tokenizer, 
+                                    tokenizerParser.Include.Id, 
+                                    tokenizerTokens, 
+                                    tokenizerAstTree, 
+                                    cache,
+                                    (text) => CreateTokenizerFromEbnfFile(text, tokenizer, cache)); 
 
             return new RuleCompiler<char>()
                     .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
@@ -183,9 +187,57 @@ namespace gg.parse.ebnf
                     .Compile(tokenContext, includedSources);
         }
 
+        public static RuleGraph<int> CreateParserFromEbnfFile(
+            string grammarText,
+            EbnfTokenizer tokenizer,
+            RuleGraph<char> tokenSource) =>
+
+            CreateParserFromEbnfFile(grammarText, tokenizer, RegisterTokens(tokenSource, new RuleGraph<int>()), []);
+
+        private static RuleGraph<int> CreateParserFromEbnfFile(
+            string grammarText,
+            EbnfTokenizer tokenizer,
+            RuleGraph<int> target,
+            Dictionary<string, RuleGraph<int>> cache)
+        {
+            var grammarParser = new EbnfTokenParser(tokenizer);
+            var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
+
+            target.Merge(ProcessIncludedFiles(
+                                    grammarText,
+                                    tokenizer,
+                                    grammarParser.Include.Id,
+                                    grammarTokens,
+                                    grammarAstNodes,
+                                    cache,
+                                    (text) => CreateParserFromEbnfFile(text, tokenizer, target, cache)));
+
+            var grammarcontext = new CompileSession<int>(grammarText, grammarTokens, grammarAstNodes);
+
+            return new RuleCompiler<int>()
+                    .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
+                    .RegisterGrammarCompilerFunctions(grammarParser)
+                    .Compile(grammarcontext, target);
+        }
+
+        private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)
+        {
+            // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
+            foreach (var tokenFunctionName in tokenSource.FunctionNames)
+            {
+                var tokenFunction = tokenSource.FindRule(tokenFunctionName);
+
+                if (tokenFunction.Production == AnnotationProduct.Annotation)
+                {
+                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
+                }
+            }
+
+            return target;
+        }
 
         /// <summary>
-        /// Run pre-processor step
+        /// Run pre-processor step and include other files
         /// </summary>
         /// <param name="inputText"></param>
         /// <param name="tokenizer"></param>
@@ -193,17 +245,18 @@ namespace gg.parse.ebnf
         /// <param name="tokens"></param>
         /// <param name="astTree"></param>
         /// <returns></returns>
-        private static RuleGraph<char> ProcessIncludedFiles(
-            string inputText, 
+        private static RuleGraph<T> ProcessIncludedFiles<T>(
+            string inputText,
             EbnfTokenizer tokenizer,
             int includeId,
             List<Annotation> tokens,
             List<Annotation> astTree,
-            Dictionary<string, RuleGraph<char>> cache)
+            Dictionary<string, RuleGraph<T>> cache,
+            Func<string, RuleGraph<T>> buildIncludedGraph) where T : IComparable<T>
         {
-            var result = new RuleGraph<char>();
+            var result = new RuleGraph<T>();
 
-            for (var i = 0; i < astTree.Count; )
+            for (var i = 0; i < astTree.Count;)
             {
                 var statement = astTree[i];
 
@@ -226,7 +279,7 @@ namespace gg.parse.ebnf
                         // make sure the cache contains an entry in order to detect circular dependencies
                         cache[fileName] = null;
 
-                        var includeGraphed = CreateTokenizerFromEbnfFile(File.ReadAllText(fileName), tokenizer, cache);
+                        var includeGraphed = buildIncludedGraph(File.ReadAllText(fileName));
 
                         cache[fileName] = includeGraphed;
 
@@ -242,38 +295,6 @@ namespace gg.parse.ebnf
             }
 
             return result;
-        }
-
-        public static RuleGraph<int> CreateParserFromEbnfFile(
-            string grammarText,
-            EbnfTokenizer tokenizer,
-            RuleGraph<char> tokenSource)
-        {
-            var grammarParser = new EbnfTokenParser(tokenizer);
-            var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
-
-            var grammarcontext = new CompileSession<int>(grammarText, grammarTokens, grammarAstNodes);
-
-            return new RuleCompiler<int>()
-                    .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
-                    .RegisterGrammarCompilerFunctions(grammarParser)
-                    .Compile(grammarcontext, RegisterTokens(tokenSource, new RuleGraph<int>()));
-        }
-
-        private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)
-        {
-            // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
-            foreach (var tokenFunctionName in tokenSource.FunctionNames)
-            {
-                var tokenFunction = tokenSource.FindRule(tokenFunctionName);
-
-                if (tokenFunction.Production == AnnotationProduct.Annotation)
-                {
-                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
-                }
-            }
-
-            return target;
         }
     }
     
