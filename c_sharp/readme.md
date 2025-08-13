@@ -54,6 +54,8 @@ Todo (for v1.0)
 ---------------
 
 - EbnfParser if error tokens or nodes are reported in the result, set match to fail
+	- CreateTokenizerFromEbnfFile is done
+	- CreateParserFromEbnfFile needs to be done
 - Add a test to see the compiler fail if rules with the same name are registered
 
 - Clean up:  

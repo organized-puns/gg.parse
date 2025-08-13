@@ -3,10 +3,43 @@ using System.Text.RegularExpressions;
 
 using gg.core.util;
 using gg.parse.compiler;
+using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {
+    public class TokenizeException : Exception
+    {
+        public IEnumerable<Annotation>? Errors { get; init; }
+
+        public TokenizeException(string message)
+            : base(message)
+        {
+        }
+
+        public TokenizeException(string message, IEnumerable<Annotation> errors)
+            : base(message)
+        {
+            Errors = errors;
+        }
+    }
+
+    public class ParseException : Exception
+    {
+        public IEnumerable<Annotation>? Errors { get; init; }
+
+        public ParseException(string message)
+            : base(message)
+        {
+        }
+
+        public ParseException(string message, IEnumerable<Annotation> errors)
+            : base(message)
+        {
+            Errors = errors;
+        }
+    }
+
     public class EbnfParser
     {
         private RuleGraph<char> _ebnfTokenizer;
@@ -19,6 +52,7 @@ namespace gg.parse.ebnf
         public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
         {
             var tokenizer = new EbnfTokenizer();
+
             _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, []);
             
             if (!string.IsNullOrEmpty(grammarDefinition))
@@ -58,6 +92,9 @@ namespace gg.parse.ebnf
                     ? _ebnfTokenizer!.Root!.Parse(text.ToArray(), 0)
                     : ParseResult.Failure;
 
+            // found match implies all tokens were accounted for. since invalid
+            // tokens are matched against 'errors', we will need to check there are no 
+            // error tokens in the matches
             if (tokens.FoundMatch)
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
@@ -160,6 +197,26 @@ namespace gg.parse.ebnf
         }
 
 
+        private static List<Annotation> CollectErrors(List<Annotation> annotationList, int errorId, List<Annotation>? collectedErrors = null)
+        {
+            var result = collectedErrors ?? new List<Annotation>();
+
+            foreach (var annotation in annotationList)
+            {
+                if (annotation.FunctionId == errorId)
+                {
+                    result.Add(annotation);
+                }
+
+                if (annotation.Children != null && annotation.Children.Count > 0)
+                {
+                    CollectErrors(annotation.Children, errorId, result);
+                }
+            }
+
+            return result;
+        }
+
         public static RuleGraph<char> CreateTokenizerFromEbnfFile(
             string tokenizerText,
             EbnfTokenizer tokenizer,
@@ -169,7 +226,32 @@ namespace gg.parse.ebnf
             var tokenizerParser = new EbnfTokenParser(tokenizer);
 
             var tokenizerTokens  = tokenizer.Tokenize(tokenizerText).Annotations;
+
+            if (tokenizerTokens == null)
+            {
+                throw new TokenizeException("input contains no valid tokens.");
+            }
+
+            var tokenizerErrors = CollectErrors(tokenizerTokens, tokenizer.FindRule(CommonTokenNames.UnknownToken).Id);
+
+            if (tokenizerErrors.Count > 0)
+            {
+                throw new TokenizeException("input contains characters which could not be mapped to a token.", tokenizerErrors);
+            }
+
             var tokenizerAstTree = tokenizerParser.Parse(tokenizerTokens).Annotations;
+
+            if (tokenizerAstTree == null)
+            {
+                throw new ParseException("input contains no valid grammar.");
+            }
+
+            var grammarErrors = CollectErrors(tokenizerAstTree, tokenizerParser.UnknownInputError.Id);
+
+            if (grammarErrors.Count > 0)
+            {
+                throw new ParseException("input contains tokens which could not be mapped to grammar.", grammarErrors);
+            }
 
             var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
 
@@ -214,6 +296,7 @@ namespace gg.parse.ebnf
             string[]? paths = null)
         {
             var grammarParser = new EbnfTokenParser(tokenizer);
+            // xxx to do capture exceptions in Parse
             var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
 
             target.Merge(ProcessIncludedFiles(
