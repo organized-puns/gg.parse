@@ -19,7 +19,7 @@ namespace gg.parse.ebnf
         public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
         {
             var tokenizer = new EbnfTokenizer();
-            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer);
+            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, []);
             
             if (!string.IsNullOrEmpty(grammarDefinition))
             {
@@ -122,7 +122,6 @@ namespace gg.parse.ebnf
         }
 
 
-
         public static string GetText(string text, Annotation grammarAnnotation, List<Annotation> tokens)
         {
             var range = GetTextRange(grammarAnnotation, tokens);
@@ -166,7 +165,8 @@ namespace gg.parse.ebnf
 
         public static RuleGraph<char> CreateTokenizerFromEbnfFile(
             string tokenizerText,
-            EbnfTokenizer tokenizer)
+            EbnfTokenizer tokenizer,
+            Dictionary<string, RuleGraph<char>> cache)
         {
             var tokenizerParser = new EbnfTokenParser(tokenizer);
 
@@ -175,7 +175,7 @@ namespace gg.parse.ebnf
 
             var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
 
-            var includedSources = AddTokenIncludes(tokenizerText, tokenizer, tokenizerParser.Include.Id, tokenizerTokens, tokenizerAstTree); 
+            var includedSources = ProcessIncludedFiles(tokenizerText, tokenizer, tokenizerParser.Include.Id, tokenizerTokens, tokenizerAstTree, cache); 
 
             return new RuleCompiler<char>()
                     .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
@@ -183,12 +183,23 @@ namespace gg.parse.ebnf
                     .Compile(tokenContext, includedSources);
         }
 
-        private static RuleGraph<char> AddTokenIncludes(
+
+        /// <summary>
+        /// Run pre-processor step
+        /// </summary>
+        /// <param name="inputText"></param>
+        /// <param name="tokenizer"></param>
+        /// <param name="includeId"></param>
+        /// <param name="tokens"></param>
+        /// <param name="astTree"></param>
+        /// <returns></returns>
+        private static RuleGraph<char> ProcessIncludedFiles(
             string inputText, 
             EbnfTokenizer tokenizer,
             int includeId,
             List<Annotation> tokens,
-            List<Annotation> astTree)
+            List<Annotation> astTree,
+            Dictionary<string, RuleGraph<char>> cache)
         {
             var result = new RuleGraph<char>();
 
@@ -201,7 +212,26 @@ namespace gg.parse.ebnf
                     var fileName = GetText(inputText, statement.Children[0], tokens);
                     fileName = fileName.Substring(1, fileName.Length - 2);
 
-                    result.Merge(CreateTokenizerFromEbnfFile(File.ReadAllText(fileName), tokenizer));
+                    if (cache.ContainsKey(fileName))
+                    {
+                        if (cache[fileName] == null)
+                        {
+                            // xxx do this more insightful, doesn't tell where the error occured 
+                            throw new InvalidProgramException($"Circular file include detected: {fileName}.");
+                        }
+                        // cache should already be merged with the result
+                    }
+                    else
+                    {
+                        // make sure the cache contains an entry in order to detect circular dependencies
+                        cache[fileName] = null;
+
+                        var includeGraphed = CreateTokenizerFromEbnfFile(File.ReadAllText(fileName), tokenizer, cache);
+
+                        cache[fileName] = includeGraphed;
+
+                        result.Merge(includeGraphed);
+                    }
 
                     astTree.RemoveAt(i);
                 }

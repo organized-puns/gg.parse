@@ -21,6 +21,8 @@ namespace gg.parse.ebnf
 
         public MatchSingleData<int>        MatchNoProductSelector { get; private set; }
 
+        public MatchFunctionSequence<int>  MatchRule { get; private set; }
+
         public MatchSingleData<int>        MatchRuleName { get; private set; }
 
         public MatchFunctionSequence<int>  MatchIdentifier { get; private set; }
@@ -174,7 +176,8 @@ namespace gg.parse.ebnf
 
             Include = this.Sequence("Include", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.Include), 
-                MatchLiteral);
+                MatchLiteral,
+                Token(CommonTokenNames.EndStatement));
 
             ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
                                     MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError];
@@ -183,15 +186,15 @@ namespace gg.parse.ebnf
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
-            
-            var rule = this.Sequence("Rule", AnnotationProduct.Annotation,
+
+            MatchRule = this.Sequence("Rule", AnnotationProduct.Annotation,
                     ruleProduction,
                     MatchRuleName,
                     Token(CommonTokenNames.Assignment),
                     ruleDefinition,
                     Token(CommonTokenNames.EndStatement));
 
-            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, this.OneOf("#Statement", AnnotationProduct.Transitive, Include, rule));           
+            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive, this.OneOf("#Statement", AnnotationProduct.Transitive, Include, MatchRule));           
         }
 
         public ParseResult Parse(List<Annotation> tokens)

@@ -9,8 +9,9 @@ Core concepts:
 - Annotation, a description of some input and the rule which applies to that input
 - Rule Graph, a collection of rules and one root rule to parse input
 - A set of common rules (literal, sequence, not...)
-- A bootstrap ebnf tokenizer which generates tokens and parser which generates an ast-tree
+- A ebnf tokenizer which generates tokens and parser which generates an ast-tree
 - A compiler which takes a list of tokens and an ast tree and builds a RuleGraph based on said input
+- A facade-like class, `EbnfParser.cs` which combines all of the above in a convenient package
 
 *Examples:*
 	- Full ebnf parser see EbnfParserTest
@@ -48,6 +49,11 @@ Todo (for v1.0)
 		- Add caching
 		- Add Parser include
 		- Do more granular testing
+		- cache filename not full path
+		- Allow include from same directory and project root
+
+- Token parser have an unknown ast node rule fallback		
+- EbnfParser if error tokens or nodes are reported, set match to fail
 
 - Clean up:
   - address all xxx
@@ -55,7 +61,7 @@ Todo (for v1.0)
 
 - (Bug) add guard against infinite loop with zero or more (and other cases)
 
-- build c# from rule table output, so there can be a compiled version
+- build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
 - implement a Ebnf based EbnfParser and Tokenizer
 

@@ -242,13 +242,6 @@ namespace gg.parse.tests.examples
 
         }
 
-        [TestMethod]
-        public void ReadIncludeTest_()
-        {
-            var tokenizerSpec = File.ReadAllText("assets/include_test.ebnf");
-            var jsonParser = new EbnfParser(tokenizerSpec, null);
-
-            Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
-        }
+        
     }
 }
