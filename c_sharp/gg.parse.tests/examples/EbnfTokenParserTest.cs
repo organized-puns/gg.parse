@@ -169,9 +169,14 @@ namespace gg.parse.tests.examples
             IsTrue(name == "TryMatch");
 
             // try parsing a try match with out space, should result in an unknown error
-            (tokens, nodes) = parser.Parse("rule = tryy \"lit\";");
-
-            IsTrue(nodes[0].FunctionId == parser.UnknownInputError.Id);           
+            try
+            {
+                (tokens, nodes) = parser.Parse("rule = tryy \"lit\";");
+                Fail();
+            }
+            catch (ParseException)
+            {
+            }
 
             // try parsing a try match shorthand
             (tokens, nodes) = parser.Parse("rule = >\"lit\";");

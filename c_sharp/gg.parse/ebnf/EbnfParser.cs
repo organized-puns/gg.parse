@@ -7,6 +7,8 @@ using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {
+
+
     public class EbnfParser
     {
         private RuleGraph<char> _ebnfTokenizer;
@@ -19,6 +21,7 @@ namespace gg.parse.ebnf
         public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
         {
             var tokenizer = new EbnfTokenizer();
+
             _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, []);
             
             if (!string.IsNullOrEmpty(grammarDefinition))
@@ -58,6 +61,9 @@ namespace gg.parse.ebnf
                     ? _ebnfTokenizer!.Root!.Parse(text.ToArray(), 0)
                     : ParseResult.Failure;
 
+            // found match implies all tokens were accounted for. since invalid
+            // tokens are matched against 'errors', we will need to check there are no 
+            // error tokens in the matches
             if (tokens.FoundMatch)
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
@@ -166,19 +172,29 @@ namespace gg.parse.ebnf
             Dictionary<string, RuleGraph<char>> cache,
             string[]? paths = null)
         {
+            List<Annotation> tokenizerTokens = null;
+            List<Annotation> tokenizerAstNodes = null;
+
             var tokenizerParser = new EbnfTokenParser(tokenizer);
+            
+            try
+            {
+                (tokenizerTokens, tokenizerAstNodes) = tokenizerParser.Parse(tokenizerText);
+            }
+            catch (Exception e) when (e is ParseException || e is TokenizeException)
+            {
+                // add information where this went wrong
+                throw new EbnfException("Failed to build tokenizer. See inner exception for details.", e);
+            }
 
-            var tokenizerTokens  = tokenizer.Tokenize(tokenizerText).Annotations;
-            var tokenizerAstTree = tokenizerParser.Parse(tokenizerTokens).Annotations;
-
-            var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstTree);
+            var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstNodes);
 
             var includedSources = ProcessIncludedFiles(
                                     tokenizerText, 
                                     tokenizer, 
                                     tokenizerParser.Include.Id, 
                                     tokenizerTokens, 
-                                    tokenizerAstTree, 
+                                    tokenizerAstNodes, 
                                     cache,
                                     paths,
                                     (text, includePaths) => CreateTokenizerFromEbnfFile(text, tokenizer, cache, includePaths)); 
@@ -213,8 +229,20 @@ namespace gg.parse.ebnf
             Dictionary<string, RuleGraph<int>> cache,
             string[]? paths = null)
         {
+            List<Annotation> grammarTokens = null;
+            List<Annotation> grammarAstNodes = null;
+
             var grammarParser = new EbnfTokenParser(tokenizer);
-            var (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
+
+            try
+            {
+                (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
+            }
+            catch (Exception e) when (e is ParseException || e is TokenizeException)
+            {
+                // add information where this went wrong
+                throw new EbnfException("Failed to build grammar parser. See inner exception for details.", e);
+            }
 
             target.Merge(ProcessIncludedFiles(
                                     grammarText,

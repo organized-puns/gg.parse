@@ -44,7 +44,7 @@ namespace gg.parse.ebnf
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne);
         }
 
-
+        // xxx needs to move out of compiler utils
         public static (int functionId, AnnotationProduct product)[] CreateAnnotationProductMapping(this EbnfTokenParser parser) =>
             [
                 (parser.MatchTransitiveSelector.Id, AnnotationProduct.Transitive),

@@ -13,7 +13,7 @@ Core concepts:
 - A compiler which takes a list of tokens and an ast tree and builds a RuleGraph based on said input
 - A facade-like class, `EbnfParser.cs` which combines all of the above in a convenient package
 
-*Example:*
+## Example
 
 Read an ebnf(like) file defining json tokens and a json grammar and build an AST:
 
@@ -29,9 +29,69 @@ if (jsonParser.TryBuildAstTree(File.ReadAllText("assets/example.json"), out toke
 }
 ```
 
+## Error handling
 
-Extending the EBNF Parser
--------------------------
+Since the EbnfParser builds both a tokenizer and parser, there are two types of exceptions (in the current implementation) which are thrown as the inner-exception of an `EbnfException.cs`. 
+The latter identifies where an exception took place. a `TokenizeException.cs` exception is used when tokenization fails. A `ParseException.cs` is used when parsing fails.
+
+Note that the errors in this example are the "fall-back" error. This fall back error implies the EbnfParser either encounters a token for which it has no rules or it cannot find a mapping to a grammar rule. In both cases it throws its hands up in the air and reports "I don't know what to do with this". It's up to the ebnf specification to provide more detailed error (more on that later).
+
+Eg: tokenization in the input text of the tokenizer is invalid:
+
+```csharp
+
+    try
+    {
+        // & and ^ are no valid tokens, so this should raise an exception
+        var parser = new EbnfParser("& foo ^", null);
+    }
+    catch (EbnfException ebnfException)
+    {
+        // The message ebnfException will indicate where it went wrong 
+        // (in building the tokenizer)
+        var errors = (ebnfException.InnerException as TokenizeException).Errors;
+
+        Console.WriteLine(ebnfException.Message);
+
+        // write the two errors to Console, note that this is currently not very
+        // informative as the errors are Annotations with minimal information.
+        foreach (var error in errors)
+        {
+            Console.WriteLine(error);
+        }
+    }
+```
+
+Eg: forgetting a ; after a rule in the grammar can be handled with
+
+
+```csharp
+    try
+    {
+        var parser = new EbnfParser("foo='bar';", 
+                                // first rule, is_bar, has no ;
+                                "is_bar=foo is_not_bar = !bar;");
+    }
+    catch (EbnfException ebnfException)
+    {
+        // The message ebnfException will indicate where it went wrong 
+        // (in building the parser)
+        var errors = (ebnfException.InnerException as ParseException).Errors;
+
+        Console.WriteLine(ebnfException.Message);
+
+        // write the two errors to Console, note that this is currently not very
+        // informative as the errors are Annotations with minimal information.
+        foreach (var error in errors)
+        {
+            Console.WriteLine(error);
+        }
+    }
+```
+
+
+
+## Extending the EBNF Parser
 
 - Create a new rule class
 - Optionally create a tokenname for the rule in `CommonTokenNames.cs`
@@ -53,7 +113,6 @@ Adding tests:
 Todo (for v1.0)
 ---------------
 
-- EbnfParser if error tokens or nodes are reported in the result, set match to fail
 - Add a test to see the compiler fail if rules with the same name are registered
 
 - Clean up:  
@@ -73,14 +132,22 @@ Todo (for v1.0)
 
 - build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
+- add BuildMatcher() class (add function to EbnfParser?) which takes a tokenizer rule term and will match a string and has
+     all common tokens defined
+	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
+	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
+
+
+
 - implement a Ebnf based EbnfParser and Tokenizer
 
 
 
 - Do All of the following based on ebnf assets, not in the bootstrap
-	implement alternatives for short hand
+	implement alternatives for short hand (see json_grammar_test.ebnf)
 	see if sequence can go without ,
 	see if range can go without {}
+
 
 - Implement a calculator
 
