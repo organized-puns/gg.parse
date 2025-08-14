@@ -11,7 +11,7 @@ Core concepts:
 - A set of common rules (literal, sequence, not...)
 - A ebnf tokenizer which generates tokens and parser which generates an ast-tree
 - A compiler which takes a list of tokens and an ast tree and builds a RuleGraph based on said input
-- A facade-like class, `EbnfParser.cs` which combines all of the above in a convenient package
+- A facade-like class, `EbnfParser.cs` which combines all of the above in a single convenient class
 
 ## Example
 
@@ -150,5 +150,6 @@ Todo (for v1.0)
 
 
 - Implement a calculator
+    (Pratt parser)
 
 - Implement a function console
