@@ -55,6 +55,7 @@ namespace gg.parse.compiler
                     result.RegisterRuleAndSubRules(compiledRule);
                     
                     // First compiled rule will be assigned to the root. Seems the most intuitive
+                    // xxx replace with name root or smth
                     if (result.Root == null)
                     {
                         result.Root = compiledRule;
