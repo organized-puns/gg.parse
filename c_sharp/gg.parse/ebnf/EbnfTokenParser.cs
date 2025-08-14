@@ -6,6 +6,8 @@ using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
 {
+
+
     /// <summary>
     /// Parses
     /// </summary>
@@ -221,21 +223,49 @@ namespace gg.parse.ebnf
         {
             if (!string.IsNullOrEmpty(text))
             {
-                var tokenResults = Tokenizer.Tokenize(text);
+                var tokenizationResult = Tokenizer.Tokenize(text);
 
-                if (tokenResults.FoundMatch)
+                if (tokenizationResult.FoundMatch)
                 {
-                    if (tokenResults.Annotations != null)
-                    {
-                        var astResults = Parse(tokenResults.Annotations);
+                    var tokenizerTokens = tokenizationResult.Annotations;
 
-                        if (astResults.FoundMatch)
+                    if (tokenizerTokens == null)
+                    {
+                        throw new TokenizeException("input contains no valid tokens.");
+                    }
+
+                    if (tokenizationResult.Annotations != null)
+                    {
+                        var tokenizerErrors = CollectErrors(tokenizerTokens, Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id);
+
+                        if (tokenizerErrors.Count > 0)
                         {
-                            return (tokenResults.Annotations, astResults.Annotations);
+                            throw new TokenizeException("input contains characters which could not be mapped to a token.", tokenizerErrors);
                         }
+
+                        var astResult = Parse(tokenizationResult.Annotations);
+
+                        if (astResult.FoundMatch)
+                        {
+                            var astNodes = astResult.Annotations;
+
+                            if (astNodes == null)
+                            {
+                                throw new ParseException("input contains no valid grammar.");
+                            }
+
+                            var grammarErrors = CollectErrors(astNodes, UnknownInputError.Id);
+
+                            if (grammarErrors.Count > 0)
+                            {
+                                throw new ParseException("input contains tokens which could not be mapped to grammar.", grammarErrors);
+                            }
+
+                            return (tokenizationResult.Annotations, astResult.Annotations);
+                        }   
                         else
                         {
-                            return (tokenResults.Annotations, []);
+                            return (tokenizationResult.Annotations, []);
                         }
                     }
                     else
@@ -262,6 +292,26 @@ namespace gg.parse.ebnf
         {
             var rule = Tokenizer.FindRule(tokenName);
             return this.Single(ruleName, product, rule.Id);
+        }
+
+        private static List<Annotation> CollectErrors(List<Annotation> annotationList, int errorId, List<Annotation>? collectedErrors = null)
+        {
+            var result = collectedErrors ?? new List<Annotation>();
+
+            foreach (var annotation in annotationList)
+            {
+                if (annotation.FunctionId == errorId)
+                {
+                    result.Add(annotation);
+                }
+
+                if (annotation.Children != null && annotation.Children.Count > 0)
+                {
+                    CollectErrors(annotation.Children, errorId, result);
+                }
+            }
+
+            return result;
         }
     }
 }
