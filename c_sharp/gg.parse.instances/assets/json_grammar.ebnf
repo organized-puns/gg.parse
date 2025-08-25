@@ -2,16 +2,18 @@
  * Simple EBNF notation for the grammar of json
  */
 
-json			= object | array | eof;
+json			  = object | array | eof;
 
-eof				= !.;
+eof				  = !.;
 
-value			= string | int | float | boolean | null | object | array;
+key				  = string;
+value			  = string | int | float | boolean | null | object | array;
 
-key_value_pair  = string, kv_separator, value;
+key_value_pair    = key, ~kv_separator, value;
 
-key_value_list  = key_value_pair, *(item_separator, key_value_pair);
-object			= scope_start, ?key_value_list , scope_end;
+#key_value_list	  = key_value_pair, *(~item_separator, key_value_pair);
 
-array_item_list	= value, *(item_separator, value);
-array			= array_start, ?array_item_list, array_end;
+object			  = ~scope_start, ?key_value_list, ~scope_end;
+
+#array_item_list  = value, *(~item_separator, value);
+array			  = ~array_start, ?array_item_list, ~array_end;

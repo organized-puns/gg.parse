@@ -139,7 +139,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParserIncludeJsonGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
             var jsonParser = new EbnfParser(File.ReadAllText("assets/json_tokens.ebnf"), 
-                                            "include 'assets/json_grammar_optimized.ebnf';#main=json;");
+                                            "include 'assets/json_grammar.ebnf';#main=json;");
 
             Assert.IsTrue(jsonParser.EbnfTokenizer != null);
             Assert.IsTrue(jsonParser.EbnfTokenizer.Root != null);
@@ -164,7 +164,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParserIncludeJsonTokensAndGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
             var jsonParser = new EbnfParser("include 'assets/json_tokens.ebnf';#token_main = json_tokens;",
-                                            "include 'assets/json_grammar_optimized.ebnf'; # main = json;");
+                                            "include 'assets/json_grammar.ebnf'; # main = json;");
 
             Assert.IsTrue(jsonParser.EbnfTokenizer != null);
             Assert.IsTrue(jsonParser.EbnfTokenizer.Root != null);

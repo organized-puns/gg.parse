@@ -1,6 +1,5 @@
 ﻿using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
-using System.Linq;
 
 namespace gg.parse.rulefunctions
 {

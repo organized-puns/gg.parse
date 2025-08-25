@@ -1,7 +1,6 @@
 ﻿using gg.parse.compiler;
-using gg.parse.ebnf;
-using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
+
 using static gg.parse.compiler.CompilerFunctions;
 
 namespace gg.parse.tests.compiler

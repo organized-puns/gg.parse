@@ -1,7 +1,10 @@
 gg.parse v(0.0.1)
 ======================
 
-Simple tokenizer, parser and optionally compiler library for c#.
+Quickstart
+----------------------
+
+Simple tokenizer, parser and optionally compiler library for c# based on ebnf-like grammar definitions.
 
 Core concepts:
 
@@ -21,7 +24,7 @@ Read an ebnf(like) file defining json tokens and a json grammar and build an AST
 
 var jsonParser = new EbnfParser(	
 					File.ReadAllText("assets/json_tokens.ebnf"), 
-					File.ReadAllText("assets/json_grammar_optimized.ebnf"));
+					File.ReadAllText("assets/json_grammar.ebnf"));
 
 if (jsonParser.TryBuildAstTree(File.ReadAllText("assets/example.json"), out tokens, out astTree))) 
 {
@@ -113,19 +116,17 @@ Adding tests:
 Todo (for v1.0)
 ---------------
 
-- Add a test to see the compiler fail if rules with the same name are registered
-
 - Clean up:  
   - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
   - address all xxx
 
-- rename json_grammar_optimized to json_grammar and json_grammar to json_grammar_basic
+
+- keywords should end with whitespace | non_keyword_char
 - add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
 - add full/short names versions for "or /|"
 - add alternative for "= / :"
-- replace any with _, disallow identifier to start with '_'
-- keywords should end with whitespace | non_keyword_char
+- replace any with _, disallow identifier to start with '_' ?
 - (Bug) add guard against infinite loop with zero or more (and other cases)
 
 - add optional namespaces to avoid grammar / token name clash 
@@ -137,11 +138,7 @@ Todo (for v1.0)
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
 
-
-
 - implement a Ebnf based EbnfParser and Tokenizer
-
-
 
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)

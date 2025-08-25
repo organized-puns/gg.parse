@@ -9,20 +9,24 @@ namespace gg.parse.tests.examples
     {
 
         [TestMethod]
-        public void ValidateGeneratedTokenizer()
+        public void CreateParser_ValidateGeneratedTokenizer_ExpectUniqueRules()
         {
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
-            var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
             var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.EbnfTokenizer;
 
+            // basic checks
             Assert.IsTrue(generatedTokenizer != null);
             Assert.IsTrue(generatedTokenizer.Root != null);
-            Assert.IsTrue(generatedTokenizer.Count() > 0);
-            Assert.IsTrue(generatedTokenizer.All(r => r.Id >= 0));
 
+            // at least one rule created ?
+            Assert.IsTrue(generatedTokenizer.Count() > 0);
+
+            // check if all created rules have a unique id and name
+            Assert.IsTrue(generatedTokenizer.All(r => r.Id >= 0));
             var uniqueIds = new HashSet<int>(generatedTokenizer.Select(r => r.Id));
 
             Assert.IsTrue(uniqueIds.Count() == generatedTokenizer.Count());
@@ -30,8 +34,21 @@ namespace gg.parse.tests.examples
             var uniqueNames = new HashSet<string>(generatedTokenizer.Select(r => r.Name));
 
             Assert.IsTrue(uniqueNames.Count() == generatedTokenizer.Count());
+        }
+
+        [TestMethod]
+        public void CreateParser_FindSpecificRules_RulesToMatchExpectations()
+        {
+            var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
+
+            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+
+            var generatedTokenizer = jsonParser.EbnfTokenizer;
 
             // spot check of some compiled rules
+
+            // check json tokens as defined in the tokenizer spec (ie #json_tokens	= *valid_token;)
             var jsonTokensRule = generatedTokenizer.FindRule("json_tokens") as MatchFunctionCount<char>;
             Assert.IsNotNull(jsonTokensRule);
             Assert.IsTrue(jsonTokensRule.Production == AnnotationProduct.Transitive);
@@ -44,6 +61,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(jsonTokensRuleFunction.Production == AnnotationProduct.Transitive);
             Assert.IsTrue(jsonTokensRuleFunction.IsPartOfComposition);
 
+            // check valid_token rule, ie #valid_token	= json_token | white_space | unknown_token;
             var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOfFunction<char>;
 
             Assert.IsNotNull(validTokenRule);
@@ -51,20 +69,22 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(validTokenRule.RuleOptions.Length == 3);
 
             Assert.IsTrue(jsonTokensRuleFunction.Rule == validTokenRule);
+        }
 
-            // test a simple token
-            var tokens = generatedTokenizer.Root.Parse("{".ToArray(), 0);
+        [TestMethod]
+        public void CreateParser_TestTokenization_ExpectAllInputToHaveTokens()
+        {
+            var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            Assert.IsTrue(tokens.FoundMatch);
-            Assert.IsTrue(tokens.Annotations != null);
-            Assert.IsTrue(tokens.Annotations.Count == 1);
-            Assert.IsTrue(generatedTokenizer.FindRule("scope_start") != null);
-            Assert.IsTrue(tokens.Annotations[0].FunctionId == generatedTokenizer.FindRule("scope_start")!.Id);
+            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
 
+            var generatedTokenizer = jsonParser.EbnfTokenizer;
+         
             // test the full set of tokens
             var validTokens = "{ } [ ] , : \"key\" 123 123.0 true false null @";
 
-            tokens = generatedTokenizer.Root.Parse([.. validTokens], 0);
+            var tokens = generatedTokenizer.Root.Parse([.. validTokens], 0);
 
             Assert.IsTrue(tokens.FoundMatch);
             Assert.IsTrue(tokens.Annotations != null);
@@ -77,14 +97,12 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(tokens.Annotations[12].FunctionId == generatedTokenizer.FindRule("unknown_token")!.Id);
         }
 
-        /// <summary>
-        ///  Spot check to see if all rules are accounted for
-        /// </summary>
+        
         [TestMethod]
-        public void TokenizerRulesTest()
+        public void CreateParser_TestWhiteSpaceRule_ExpectToMatchWhiteSpaceChars()
         {
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
-            var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
             var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
 
@@ -98,13 +116,11 @@ namespace gg.parse.tests.examples
         }
 
 
-
-
         [TestMethod]
         public void ParseJsonKeyValue_IntegrationTest()
         {
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
-            var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
             var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
 
@@ -187,7 +203,7 @@ namespace gg.parse.tests.examples
         public void ReadOptimizedEbnfGrammar_IntegrationTest()
         {
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
-            var grammarSpec = File.ReadAllText("assets/json_grammar_optimized.ebnf");
+            var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
             var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
 
             // try parsing an object with two kvp
@@ -224,7 +240,6 @@ namespace gg.parse.tests.examples
 
             dump = jsonParser.Dump(jsonValuesObject, tokens, astTree);
 
-
             // read a full json file covering all cases
             var jsonFile = File.ReadAllText("assets/example.json");
 
@@ -239,9 +254,6 @@ namespace gg.parse.tests.examples
             var jsonParser = new EbnfParser("asterix='*';", "#rule=asterix;");
 
             Assert.IsTrue(jsonParser.TryMatch("*"));
-
         }
-
-        
     }
 }
