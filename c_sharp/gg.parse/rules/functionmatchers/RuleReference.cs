@@ -4,15 +4,15 @@
     {
         public string Reference { get; init; }
 
-        public RuleBase<T> Rule { get; set; }
+        public RuleBase<T>? Rule { get; set; }
 
         /// <summary>
         /// Should be set during resolve
         /// </summary>
         public bool IsPartOfComposition { get; set; } = false;
 
-        public RuleReference(string name, string reference, AnnotationProduct product = AnnotationProduct.Annotation)
-            : base(name, product) 
+        public RuleReference(string name, string reference, AnnotationProduct product = AnnotationProduct.Annotation, int precedence = 0)
+            : base(name, product, precedence) 
         {
             Reference = reference;
         }

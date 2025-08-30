@@ -9,8 +9,8 @@ namespace gg.parse.rulefunctions.rulefunctions
 
         public IEnumerable<RuleBase<T>> SubRules => [Rule];
 
-        public MatchNotFunction(string name, AnnotationProduct production, RuleBase<T> rule)
-            : base(name, production)
+        public MatchNotFunction(string name, AnnotationProduct production, RuleBase<T> rule, int precedence = 0)
+            : base(name, production, precedence)
         {
             Rule = rule;
         }

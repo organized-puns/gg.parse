@@ -1,8 +1,13 @@
 ﻿namespace gg.parse.rulefunctions.datafunctions
 {
-    public class MatchDataRange<T>(string name, T minDataValue, T maxDataValue, AnnotationProduct production = AnnotationProduct.Annotation)
-        : RuleBase<T>(name, production)
-        where T : IComparable<T>
+    public class MatchDataRange<T>(
+        string name, 
+        T minDataValue, 
+        T maxDataValue, 
+        AnnotationProduct production = AnnotationProduct.Annotation,
+        int precedence = 0
+    )
+        : RuleBase<T>(name, production, precedence) where T : IComparable<T>
     {
         public T MinDataValue { get; } = minDataValue;
 

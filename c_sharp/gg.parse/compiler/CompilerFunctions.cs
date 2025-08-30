@@ -32,7 +32,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
             }
 
-            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product);
+            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileIdentifier<T>(
@@ -65,7 +65,7 @@ namespace gg.parse.compiler
                 compiler.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
             }
 
-            return new RuleReference<T>(declaration.Name, referenceName, product);
+            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterSet(
@@ -90,7 +90,7 @@ namespace gg.parse.compiler
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 
-            return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray());
+            return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray(), declaration.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterRange(
@@ -123,7 +123,7 @@ namespace gg.parse.compiler
 
             return 
                 // xxx parameter order...
-                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product);
+                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product, declaration.Precedence);
         }
 
         
@@ -160,7 +160,7 @@ namespace gg.parse.compiler
                 }
             }
 
-            return new MatchFunctionSequence<T>(declaration.Name, declaration.Product, [.. sequenceElements]);
+            return new MatchFunctionSequence<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. sequenceElements]);
         }
 
         public static RuleBase<T> CompileOption<T>(
@@ -191,7 +191,7 @@ namespace gg.parse.compiler
                 }
             }
 
-            return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, [.. optionElements]);
+            return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
         }
 
         public static RuleBase<T> CompileGroup<T>(
@@ -258,7 +258,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementAnnotation.Range, null);
             }
 
-            return new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max);
+            return new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileNot<T>(
@@ -285,7 +285,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Not.", elementAnnotation.Range, null);
             }
 
-            return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction);
+            return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileTryMatch<T>(
@@ -312,7 +312,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Try match.", elementAnnotation.Range, null);
             }
 
-            return new TryMatchFunction<T>(declaration.Name, declaration.Product, subFunction);
+            return new TryMatchFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileAny<T>(
@@ -322,7 +322,7 @@ namespace gg.parse.compiler
         {
             Contract.Requires(declaration != null);
 
-            return new MatchAnyData<T>(declaration.Name, declaration.Product);
+            return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
         }
 
         public static RuleBase<T> CompileError<T>(

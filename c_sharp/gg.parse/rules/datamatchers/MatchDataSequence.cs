@@ -1,7 +1,12 @@
 ﻿namespace gg.parse.rulefunctions.datafunctions
 {
-    public class MatchDataSequence<T>(string name, T[] dataArray, AnnotationProduct production = AnnotationProduct.Annotation)
-        : RuleBase<T>(name, production)
+    public class MatchDataSequence<T>(
+        string name, 
+        T[] dataArray, 
+        AnnotationProduct production = AnnotationProduct.Annotation,
+        int precedence = 0
+    )
+        : RuleBase<T>(name, production, precedence)
         where T : IComparable<T>
     {
         public T[] DataArray { get; } = dataArray;

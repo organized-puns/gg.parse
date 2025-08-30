@@ -22,9 +22,12 @@ namespace gg.parse.rulefunctions.rulefunctions
 
         public IEnumerable<RuleBase<T>> SubRules => SequenceSubfunctions;
 
-
-        public MatchFunctionSequence(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence)
-            : base(name, production) 
+        public MatchFunctionSequence(
+            string name, 
+            AnnotationProduct production = AnnotationProduct.Annotation, 
+            int precedence = 0,
+            params RuleBase<T>[] sequence
+        ) : base(name, production, precedence) 
         {
             SequenceSubfunctions = sequence;
         }

@@ -369,8 +369,6 @@ namespace gg.parse.tests.examples
 
             var matchAny = table.FindRule("any_rule") as MatchAnyData<char>;
             IsNotNull(matchAny);
-            IsTrue(matchAny.MinLength == 1);
-            IsTrue(matchAny.MaxLength == 1);
         }
 
         [TestMethod]

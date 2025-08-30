@@ -50,7 +50,7 @@ namespace gg.parse.rulefunctions
             
             table.TryFindRule(ruleName, out MatchFunctionSequence<T>? existingRule)
                 ? existingRule!
-                : table.RegisterRule(new MatchFunctionSequence<T>(ruleName, product, functions));
+                : table.RegisterRule(new MatchFunctionSequence<T>(ruleName, product, 0, functions));
 
         public static MatchOneOfFunction<T> OneOf<T>(this RuleGraph<T> table, params RuleBase<T>[] rules)
              where T : IComparable<T> =>
@@ -63,7 +63,7 @@ namespace gg.parse.rulefunctions
              where T : IComparable<T> =>
                 table.TryFindRule(name, out MatchOneOfFunction<T>? existingRule)
                      ? existingRule!
-                     : table.RegisterRule(new MatchOneOfFunction<T>(name, product, rules));
+                     : table.RegisterRule(new MatchOneOfFunction<T>(name, product, 0, rules));
 
         public static MatchFunctionCount<T> ZeroOrMore<T>(this RuleGraph<T> table, string name, AnnotationProduct product, RuleBase<T> function)
              where T : IComparable<T> =>
@@ -111,14 +111,14 @@ namespace gg.parse.rulefunctions
         public static MatchAnyData<T> Any<T>(this RuleGraph<T> graph)
             where T : IComparable<T> =>
         
-            graph.Any($"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.AnyCharacter}(1,1)", AnnotationProduct.None, 1, 1);
+            graph.Any($"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.AnyCharacter}(1,1)", AnnotationProduct.None);
         
-        public static MatchAnyData<T> Any<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, int min, int max)
+        public static MatchAnyData<T> Any<T>(this RuleGraph<T> graph, string name, AnnotationProduct product)
             where T : IComparable<T> =>
 
             graph.TryFindRule(name, out MatchAnyData<T>? existingRule)
                  ? existingRule!
-                 : graph.RegisterRule(new MatchAnyData<T>(name, product, min, max));
+                 : graph.RegisterRule(new MatchAnyData<T>(name, product));
 
         public static MatchNotFunction<T> Not<T>(this RuleGraph<T> graph, RuleBase<T> rule)
             where T : IComparable<T> =>
@@ -230,7 +230,7 @@ namespace gg.parse.rulefunctions
             var ruleName = name ?? $"{product.GetPrefix()}{name}({keyword})";
             return graph.TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
-                : graph.RegisterRule(new MatchFunctionSequence<char>(ruleName, product,
+                : graph.RegisterRule(new MatchFunctionSequence<char>(ruleName, product, 0, 
                                     graph.Literal(keyword), graph.Whitespace()));
         }
 

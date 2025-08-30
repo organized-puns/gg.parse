@@ -27,12 +27,11 @@ namespace gg.parse.rulefunctions.rulefunctions
             RuleOptions = options;
         }
 
-        public MatchOneOfFunction(string name, AnnotationProduct production, params RuleBase<T>[] options)
-            : base(name, production)
+        public MatchOneOfFunction(string name, AnnotationProduct production, int precedence = 0, params RuleBase<T>[] options)
+            : base(name, production, precedence)
         {
             RuleOptions = options;
         }
-
 
         public override ParseResult Parse(T[] input, int start)
         {

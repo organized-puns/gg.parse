@@ -37,14 +37,14 @@
     }
 
 
-    public abstract class RuleBase<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation)
+    public abstract class RuleBase<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, int precedence = 0)
         where T : IComparable<T>
     {
         public string Name { get; init; } = name;
 
         public int Id { get; set; } = -1;
 
-        public int Precedence { get; set; } = 0;
+        public int Precedence { get; init; } = precedence;
 
         public AnnotationProduct Production { get; init; } = production;
 

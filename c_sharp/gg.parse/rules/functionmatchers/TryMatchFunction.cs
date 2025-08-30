@@ -8,8 +8,12 @@ namespace gg.parse.rulefunctions.rulefunctions
 
         public IEnumerable<RuleBase<T>> SubRules => [Rule];
 
-        public TryMatchFunction(string name, AnnotationProduct production, RuleBase<T> rule)
-            : base(name, production)
+        public TryMatchFunction(
+            string name, 
+            AnnotationProduct production, 
+            RuleBase<T> rule, 
+            int precedence = 0
+        ) : base(name, production, precedence)
         {
             Rule = rule;
         }

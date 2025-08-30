@@ -124,12 +124,13 @@ Todo (for v1.0)
   - address all xxx
 
 - Implement a calculator
-    - Implement precendence rule (eval)
-        - add test to check for left precedence
-    - Add precedence to rule declaration
+    - Implement precendence rule (eval) (done)
+        - add test to check for left precedence (done)
+    - Add eval/precedence rule to rule declaration (done)
+    - Add eval/precedence to ebnf tokenizer/grammar
     - Create basic calculator example
     
-- 
+
 - keywords should end with whitespace | non_keyword_char
 - add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
 - add full/short names versions for "or /|"
