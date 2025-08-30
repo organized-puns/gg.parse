@@ -32,6 +32,8 @@ if (jsonParser.TryBuildAstTree(File.ReadAllText("assets/example.json"), out toke
 }
 ```
 
+
+
 ## Error handling
 
 Since the EbnfParser builds both a tokenizer and parser, there are two types of exceptions (in the current implementation) which are thrown as the inner-exception of an `EbnfException.cs`. 
@@ -121,7 +123,13 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-
+- Implement a calculator
+    - Implement precendence rule (eval)
+        - add test to check for left precedence
+    - Add precedence to rule declaration
+    - Create basic calculator example
+    
+- 
 - keywords should end with whitespace | non_keyword_char
 - add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
 - add full/short names versions for "or /|"
@@ -146,7 +154,6 @@ Todo (for v1.0)
 	see if range can go without {}
 
 
-- Implement a calculator
-    (Pratt parser)
+
 
 - Implement a function console

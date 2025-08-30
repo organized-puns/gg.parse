@@ -6,10 +6,8 @@ using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
 {
-
-
     /// <summary>
-    /// Parses
+    /// Turns a list of tokens into an abstract syntax tree according to EBNF(like) grammar.
     /// </summary>
     public class EbnfTokenParser : RuleGraph<int>
     {

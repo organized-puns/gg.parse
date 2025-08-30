@@ -1,7 +1,8 @@
-﻿using gg.core.util;
-using gg.parse.rulefunctions.rulefunctions;
-using System.Collections;
+﻿using System.Collections;
 using System.Data;
+
+using gg.core.util;
+using gg.parse.rulefunctions.rulefunctions;
 
 namespace gg.parse
 {

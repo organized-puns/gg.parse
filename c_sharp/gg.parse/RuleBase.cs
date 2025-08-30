@@ -44,7 +44,9 @@
 
         public int Id { get; set; } = -1;
 
-        public AnnotationProduct Production { get; init; } = production  ;
+        public int Precedence { get; set; } = 0;
+
+        public AnnotationProduct Production { get; init; } = production;
 
         public abstract ParseResult Parse(T[] input, int start);
 

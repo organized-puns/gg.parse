@@ -7,8 +7,6 @@ using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {
-
-
     public class EbnfParser
     {
         private RuleGraph<char> _ebnfTokenizer;
