@@ -29,6 +29,8 @@ object					   : (drop) scope_start, (drop) key_value_list, (drop) scope_end.
 transtive array_item_list  : value, zero_or_more( (drop) item_separator, value).
 array					   : (drop) array_start, (drop) array_item_list, (drop) array_end.
 
+precedence_example (100)   : number, operator, number.
+
 
 VALID EXAMPLES
 ---------------------------------------------------------------------------------------------------
@@ -42,7 +44,7 @@ array:
 	"[]",
 	"[ \"foo\" ]",
 	"[ 1, 2, 3 ]",
-	"[ [ "abc", 1, 2 ]]". 
+	"[ [ \"abc\", 1, 2 ]]". 
 
 INVALID EXAMPLES
 ---------------------------------------------------------------------------------------------------

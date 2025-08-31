@@ -25,6 +25,8 @@ namespace gg.parse.ebnf
 
         public MatchSingleData<int>        MatchRuleName { get; private set; }
 
+        public MatchSingleData<int>        MatchPrecedence { get; private set; }
+
         public MatchFunctionSequence<int>  MatchIdentifier { get; private set; }
 
         public MatchFunctionSequence<int>  MatchSequence { get; private set; }
@@ -89,7 +91,6 @@ namespace gg.parse.ebnf
 
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
-
 
             var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
                 this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
@@ -184,14 +185,14 @@ namespace gg.parse.ebnf
             ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
                                     MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError];
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
-
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
+
+            MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
 
             MatchRule = this.Sequence("Rule", AnnotationProduct.Annotation,
                     ruleProduction,
                     MatchRuleName,
+                    this.ZeroOrOne("#RulePrecedence",AnnotationProduct.Transitive, MatchPrecedence),
                     Token(CommonTokenNames.Assignment),
                     ruleDefinition,
                     Token(CommonTokenNames.EndStatement));

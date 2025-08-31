@@ -185,7 +185,8 @@ namespace gg.parse.tests.examples
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
             IsTrue(name == "TryMatch");
         }
-                
+
+
         [TestMethod]
         public void TokenizeParseCompileLitRule_ExpectSuccess()
         {
@@ -371,6 +372,29 @@ namespace gg.parse.tests.examples
             IsNotNull(matchAny);
         }
 
+
+        [TestMethod]
+        public void SetupTokenizeParseCompileWithPrecedence_TestPrecedence_ExpectPredenceToMatchInput()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; ~ rule_three -1 = .;");
+
+            var rule1 = table.FindRule("rule1") as MatchAnyData<char>;
+            IsNotNull(rule1);
+            IsTrue(rule1.Precedence == 100);
+            IsTrue(rule1.Production == AnnotationProduct.Annotation);
+
+            var rule2 = table.FindRule("rule2") as MatchAnyData<char>;
+            IsNotNull(rule2);
+            IsTrue(rule2.Precedence == 200);
+            IsTrue(rule2.Production == AnnotationProduct.Transitive);
+
+            var ruleThree = table.FindRule("rule_three") as MatchAnyData<char>;
+            IsNotNull(ruleThree);
+            IsTrue(ruleThree.Precedence == -1);
+            IsTrue(ruleThree.Production == AnnotationProduct.None);
+
+        }
+
         [TestMethod]
         public void TokenizeParseCompileFile_ExpectSuccess()
         {
@@ -439,8 +463,6 @@ namespace gg.parse.tests.examples
                 IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
             }
         }
-
-
     }
 }
 

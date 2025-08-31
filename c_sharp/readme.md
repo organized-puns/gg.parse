@@ -123,13 +123,16 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-- Implement a calculator
+- Implement a calculator (in progress)
     - Implement precendence rule (eval) (done)
         - add test to check for left precedence (done)
     - Add eval/precedence rule to rule declaration (done)
-    - Add eval/precedence to ebnf tokenizer/grammar
+    - Add precedence to ebnf tokenizer/grammar (done)
+    - Add eval rule to ebnf tokenizer/grammar 
     - Create basic calculator example
     
+- Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
+  or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
 
 - keywords should end with whitespace | non_keyword_char
 - add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
