@@ -3,7 +3,7 @@
 
     public class Annotation(int functionId, Range range, List<Annotation>? children = null) : IComparable
     {
-        public Range Range { get; init; } = range;
+        public Range Range { get; set; } = range;
         
         public int Start => Range.Start;
 
@@ -17,6 +17,11 @@
         public int FunctionId { get; init; } = functionId;
 
         public List<Annotation>? Children { get; } = children;
+
+        public Annotation? Parent { get; set; } = null;
+
+        public Annotation? this[int index] => Children == null ? null : Children![index];
+
 
 #if DEBUG
         public string DebugName { get; set; } = nameof(Annotation);
