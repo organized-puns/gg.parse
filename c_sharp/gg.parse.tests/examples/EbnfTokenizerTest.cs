@@ -28,6 +28,27 @@ namespace gg.parse.tests.examples
         }
 
         [TestMethod]
+        public void CreateEvalRule_Tokenize_ExpectOptionWithPrecedenceTokens()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var rule = "rule_name = 'foo' / 'bar' / 'baz';";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 8);
+            IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence).Id);
+            IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[5].FunctionId == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence).Id);
+            IsTrue(annotations[6].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[7].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+        }
+
+        [TestMethod]
         public void DefineTryMatchRule_Tokenize_ExpectValidMatchAnyTokens()
         {
             var tokenizer = new EbnfTokenizer();

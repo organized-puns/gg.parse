@@ -33,6 +33,8 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int>  MatchOption { get; private set; }
 
+        public MatchFunctionSequence<int>  MatchEval { get; private set; }
+
         public MatchFunctionSequence<int>  MatchCharacterSet { get; private set; }
 
         public MatchFunctionSequence<int>  MatchCharacterRange { get; private set; }
@@ -134,7 +136,20 @@ namespace gg.parse.ebnf
                     ruleTerms,
                     this.ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
 
-            var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption);
+            // xxx this is the same pattern as sequence and option, create a function for it
+            var nextEvalElement = this.Sequence("#NextEvalElement", AnnotationProduct.Transitive,
+                    Token(CommonTokenNames.OptionWithPrecedence),
+                    ruleTerms);
+
+
+            // a / b / c
+            MatchEval = this.Sequence("Evaluation", AnnotationProduct.Annotation,
+                    ruleTerms,
+                    Token(CommonTokenNames.OptionWithPrecedence),
+                    ruleTerms,
+                    this.ZeroOrMore("#EvaluationRest", AnnotationProduct.Transitive, nextEvalElement));
+
+            var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval);
 
             var ruleDefinition = this.OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
                 binaryRuleTerms, 

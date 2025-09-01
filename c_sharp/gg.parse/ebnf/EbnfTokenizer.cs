@@ -64,7 +64,10 @@ namespace gg.parse.ebnf
                     MapNameToToken(NoProductSelector, "~"),
                     
                     this.SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
-                    this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation)
+                    this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
+
+                    // should be below comments
+                    MapNameToToken(OptionWithPrecedence, "/")
                 );
 
             var error = this.Error(UnknownToken, AnnotationProduct.Annotation,

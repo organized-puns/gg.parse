@@ -36,5 +36,40 @@ namespace gg.parse.tests.ebnf
             IsTrue(root.Children[0].FunctionId == tokenizerParser.MatchRuleName.Id);
             IsTrue(root.Children[1].FunctionId == tokenizerParser.MatchPrecedence.Id);
         }
+
+        [TestMethod]
+        public void CreateEvalRule_ParseRule_ExpectEvalRuleAnnotations()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = 'foo' / 'bar' / 'baz';");
+
+            IsNotNull(tokenizeResult);
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+            IsTrue(tokenizeResult.Annotations.Count == 8);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsNotNull(parseResult);
+            IsTrue(parseResult.FoundMatch);
+            IsNotNull(parseResult.Annotations);
+            IsTrue(parseResult.Annotations.Count == 1);
+
+            var root = parseResult.Annotations[0];
+
+            IsTrue(root.FunctionId == tokenizerParser.MatchRule.Id);
+            IsTrue(root.Children != null && root.Children.Count == 2);
+
+            // declaration should have name and an eval
+            IsTrue(root.Children[0].FunctionId == tokenizerParser.MatchRuleName.Id);
+            IsTrue(root.Children[1].FunctionId == tokenizerParser.MatchEval.Id);
+
+            var eval = root.Children[1];
+
+            IsTrue(eval.Children != null && eval.Children.Count == 3);
+
+            IsTrue(eval.Children.All(child => child.FunctionId == tokenizerParser.MatchLiteral.Id));
+        }
     }
 }

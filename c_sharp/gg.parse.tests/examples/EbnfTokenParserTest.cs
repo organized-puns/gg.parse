@@ -392,7 +392,6 @@ namespace gg.parse.tests.examples
             IsNotNull(ruleThree);
             IsTrue(ruleThree.Precedence == -1);
             IsTrue(ruleThree.Production == AnnotationProduct.None);
-
         }
 
         [TestMethod]
