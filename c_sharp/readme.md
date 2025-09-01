@@ -128,7 +128,9 @@ Todo (for v1.0)
         - add test to check for left precedence (done)
     - Add eval/precedence rule to rule declaration (done)
     - Add precedence to ebnf tokenizer/grammar (done)
-    - Add eval rule to ebnf tokenizer/grammar 
+    - Add eval rule to ebnf tokenizer/grammar (done)
+    - test if a triple operator works where each op is higher than the previous one
+        eg a op1 b op2 c op3 d where op3 > op2 > op1
     - Create basic calculator example
     
 - Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear

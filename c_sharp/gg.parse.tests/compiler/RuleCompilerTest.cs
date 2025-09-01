@@ -1,6 +1,6 @@
 ﻿using gg.parse.compiler;
 
-
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using static gg.parse.compiler.CompilerFunctions;
 
 namespace gg.parse.tests.compiler
@@ -102,15 +102,14 @@ namespace gg.parse.tests.compiler
             // should result in no problems
             var table = compiler.Compile(session);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the literal as 'rule'
             var literalFunction = table.FindRule("rule");
 
-            Assert.IsNotNull(literalFunction);
-            Assert.IsTrue(literalFunction.Precedence == rulePrecedence);
+            IsNotNull(literalFunction);
+            IsTrue(literalFunction.Precedence == rulePrecedence);
         }
-
     }
 }

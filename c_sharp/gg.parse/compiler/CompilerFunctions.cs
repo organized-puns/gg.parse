@@ -125,12 +125,10 @@ namespace gg.parse.compiler
                 // xxx parameter order...
                 new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product, declaration.Precedence);
         }
-
-        
-
+       
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-
+        // xxx check the overlap with option and eval (and club together)
         public static RuleBase<T> CompileSequence<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
@@ -192,6 +190,33 @@ namespace gg.parse.compiler
             }
 
             return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
+        }
+
+        public static RuleBase<T> CompileEvaluation<T>(
+            RuleCompiler<T> compiler,
+            RuleDeclaration declaration,
+            CompileSession<T> session) where T : IComparable<T>
+        {
+            var evaluationElements = new List<RuleBase<T>>();
+            var ruleDefinition = declaration.AssociatedAnnotation;
+
+            if (ruleDefinition.Children != null)
+            {
+                for (var i = 0; i < ruleDefinition.Children.Count; i++)
+                {
+                    var elementAnnotation = ruleDefinition.Children[i];
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
+                    var elementFunction = 
+                        compilationFunction(compiler, elementDeclaration, session) 
+                        ?? throw new CompilationException<char>($"Compiling evaluation, can't find function for element at {elementAnnotation.Range}.", elementAnnotation.Range, null);
+
+                    evaluationElements.Add(elementFunction);
+                }
+            }
+
+            return new MatchEvaluation<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. evaluationElements]);
         }
 
         public static RuleBase<T> CompileGroup<T>(
