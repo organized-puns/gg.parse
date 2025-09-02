@@ -88,8 +88,13 @@ namespace gg.parse.rulefunctions.rulefunctions
                         
                         if (parent != null)
                         {
-                            // remember the node with the higher precedence
-                            // this erases the left side of the new match 
+                            // remember the node with the higher precedence, if we find a node with a lower precedence
+                            // we will use this node as the left side of the new match
+
+                            // note: this erases the left side of the next match - which is correct
+                            // since the left side was the end of the previous match which had a higher precedence
+                            // (and therefore owns that)
+
                             nextMatch.Children![0] = parent.Children![2];
                         }
                     }
@@ -109,9 +114,9 @@ namespace gg.parse.rulefunctions.rulefunctions
                         nextMatch.Children[0] = root;
                         root = nextMatch;
                     }
-
+                    
+                    tokenIndex = nextMatch.Children[2].Start;
                     parent = nextMatch;
-                    tokenIndex = parent.Children[2].Start;
                 }
                 
                 return BuildFunctionRuleResult(UpdateRanges(root), [root]);
@@ -126,7 +131,6 @@ namespace gg.parse.rulefunctions.rulefunctions
                 ? node.Range
                 : node.Range = Range.Union(node.Children!.Select(c => UpdateRanges(c)));
         }
-
 
         private Annotation? FindMatch(T[] input, int start)
         {

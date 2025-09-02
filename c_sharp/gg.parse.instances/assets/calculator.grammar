@@ -1,0 +1,14 @@
+/* 
+ * Simple EBNF-like notation for the grammar of a simple calculator
+ */
+
+#expression		   = (multiplication / division / addition / subtraction) | number | group;
+
+multiplication 100 = number, mult,  number;
+division       75  = number, div,   number;
+addition       50  = number, plus,  number;
+subtraction    25  = number, minus, number;
+
+#group             = group_start, expression, group_end;
+
+number			   = float | int;

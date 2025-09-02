@@ -1,6 +1,7 @@
-﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-
+﻿
 using gg.parse.ebnf;
+
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.ebnf
 {

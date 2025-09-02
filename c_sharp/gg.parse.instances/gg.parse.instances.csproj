@@ -7,6 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="assets\calculator.grammar" />
+    <None Remove="assets\calculator.tokens" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="assets\calculator.grammar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\calculator.tokens">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="assets\example.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -29,6 +43,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="calculator\" />
   </ItemGroup>
 
 </Project>
