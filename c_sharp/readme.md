@@ -133,6 +133,8 @@ Todo (for v1.0)
         eg a op1 b op2 c op3 d where op3 > op2 > op1
     - Create basic calculator example
     
+- bug? Seems rule = #(a | b) is not parsing ? transitive operator issue ?
+
 - Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
   or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
 

@@ -2,13 +2,20 @@
  * Simple EBNF-like notation for the grammar of a simple calculator
  */
 
-#expression		   = (multiplication / division / addition / subtraction) | number | group;
+#expression		   = valid_expression | unknown_expression;
 
-multiplication 100 = number, mult,  number;
-division       75  = number, div,   number;
-addition       50  = number, plus,  number;
-subtraction    25  = number, minus, number;
+#valid_expression  = operation | value;
 
-#group             = group_start, expression, group_end;
+#value             = number | group;
 
-number			   = float | int;
+#number			   = float | int;
+group             = ~group_start, expression, ~group_end;
+
+#operation         = multiplication / division / addition / subtraction;
+
+multiplication 100 = value, mult,  value;
+division       75  = value, div,   value;
+addition       50  = value, plus,  value;
+subtraction    25  = value, minus, value;
+
+unknown_expression = error "unknown expression found." valid_expression;

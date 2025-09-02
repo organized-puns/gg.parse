@@ -31,8 +31,10 @@ namespace gg.parse.rulefunctions.rulefunctions
             Contract.Requires(options!.Any(v => v != null));
 
             RuleOptions = options!;
-            FindRule = i => _options.FirstOrDefault(r => r.Id == i);
+            FindRule = DefaultFindRule;
         }
+
+        
 
         public MatchEvaluation(string name, AnnotationProduct production, int precedence, params RuleBase<T>[] options)
             : base(name, production, precedence)
@@ -41,7 +43,7 @@ namespace gg.parse.rulefunctions.rulefunctions
             Contract.Requires(options!.Any(v => v != null));
 
             RuleOptions = options!;
-            FindRule = i => _options.FirstOrDefault(r => r.Id == i);
+            FindRule = DefaultFindRule;
         }
 
         /// <summary>
@@ -164,6 +166,26 @@ namespace gg.parse.rulefunctions.rulefunctions
             Contract.Requires(index >= 0);
 
             RuleOptions[index] = replacement;
+        }
+
+        private RuleBase<T>? DefaultFindRule(int id)
+        {
+            foreach (var option in _options!)
+            {
+                if (option is RuleReference<T> ruleReference)
+                {
+                    if (ruleReference.Rule!.Id == id)
+                    {
+                        return ruleReference.Rule;
+                    }
+                }
+                else if (option.Id == id)
+                {
+                    return option;
+                }
+            }
+
+            throw new ArgumentException($"Cant find rule with id {id } in the options ({string.Join(",", _options.Select(o => o.Id))}).");
         }
     }
 }
