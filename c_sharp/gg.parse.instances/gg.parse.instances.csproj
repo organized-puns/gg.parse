@@ -45,8 +45,4 @@
     <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="calculator\" />
-  </ItemGroup>
-
 </Project>

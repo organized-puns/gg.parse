@@ -1,6 +1,5 @@
 ﻿namespace gg.parse
 {
-
     public class Annotation(int functionId, Range range, List<Annotation>? children = null) : IComparable
     {
         public Range Range { get; set; } = range;

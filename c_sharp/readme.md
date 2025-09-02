@@ -129,9 +129,10 @@ Todo (for v1.0)
     - Add eval/precedence rule to rule declaration (done)
     - Add precedence to ebnf tokenizer/grammar (done)
     - Add eval rule to ebnf tokenizer/grammar (done)
-    - test if a triple operator works where each op is higher than the previous one
-        eg a op1 b op2 c op3 d where op3 > op2 > op1
-    - Create basic calculator example
+    - test if a triple operator works where each op is higher than the previous one (done)
+        eg a op1 b op2 c op3 d where op3 > op2 > op1 (done)
+    - Create basic calculator example (done)
+    - Fix the issue in the CalculatorTests see xxx
     
 - bug? Seems rule = #(a | b) is not parsing ? transitive operator issue ?
 

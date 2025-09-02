@@ -2,10 +2,10 @@
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.instances.tests.ebnf
+namespace gg.parse.instances.tests.calculator
 {
     [TestClass]
-    public class CalculatorTests
+    public class CalculatorSpecsTests
     {
         private static readonly string _tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
         private static readonly string _grammarSpec = File.ReadAllText("assets/calculator.grammar");
@@ -256,6 +256,34 @@ namespace gg.parse.instances.tests.ebnf
             IsTrue(calculatorParser.FindParserRule(group[0][0].FunctionId).Name == "int");
             IsTrue(calculatorParser.FindParserRule(group[0][1].FunctionId).Name == "plus");
             IsTrue(calculatorParser.FindParserRule(group[0][2].FunctionId).Name == "int");
+        }
+
+        [TestMethod]
+        public void CreateTokenizerAndGrammar_ParseSomeWhatComplexOperationWithGroup_ExpectCorrectRightToLeftPrecedence()
+        {
+            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
+            var testText = "1 - (2 + 3) * 4";
+            var astTree = calculatorParser.Parse(testText);
+
+            IsTrue(astTree.FoundMatch);
+
+            // root
+            IsTrue(calculatorParser.FindParserRule(astTree[0].FunctionId).Name == "subtraction");
+
+            // left
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "int");
+
+            // op
+            IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "minus");
+
+            // right
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2].FunctionId).Name == "multiplication");
+
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0].FunctionId).Name == "group");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][1].FunctionId).Name == "mult");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][2].FunctionId).Name == "int");
+
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0].FunctionId).Name == "addition");
         }
     }
 }

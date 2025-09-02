@@ -5,16 +5,25 @@
 #calculator_tokens = *(valid_token | white_space | unknown_token);
 
 // note: this implicitely defines the order of token matching
-#valid_token    =  float | int | plus | minus | mult | div | sign | group_start | group_end | digit;
+#valid_token    =  operation | number | operator | group_start | group_end | digit;
 
 plus            = '+';
 minus           = '-';
 mult            = '*';
 div             = '/';
 
-float           = int, '.', +digit, ?(('e' | 'E'), int);
-int             = ?sign, +digit;
+#operator	    = plus | minus | mult | div;
 
+#number         = float | int;
+
+// need to let the tokenizer know the form of an operation, so an operation
+// takes precedence over a signed number. IE without this rule, "3-3" is tokenized as
+// int(3), int(-3) rather than int(3), minus, int(3)
+#operation      = number, *white_space, operator, *white_space, number; 
+
+float           = int, '.', +digit, ?(('e' | 'E'), ?sign, +digit);
+int             = ?sign, +digit;
+				
 ~sign           = plus | minus;
 
 digit           = { '0'..'9' };
@@ -23,5 +32,7 @@ group_start    = '(';
 group_end      = ')';
 
 ~white_space	= { ' \t\r\n' };
+
+EOF			    = !.;		
 
 unknown_token	= error "unknown token found." valid_token;

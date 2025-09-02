@@ -9,6 +9,9 @@
 #value             = number | group;
 
 #number			   = float | int;
+
+// group needs to produce an annotation, if it's transitive the precedence parsing will happily move the expression
+// up the ast tree, removing the effect of a group
 group             = ~group_start, expression, ~group_end;
 
 #operation         = multiplication / division / addition / subtraction;
