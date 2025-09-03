@@ -7,17 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="assets\calculator.grammar" />
-    <None Remove="assets\calculator.tokens" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="assets\calculator_1.grammar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\calculator_1.tokens">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="assets\calculator.grammar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

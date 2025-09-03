@@ -5,40 +5,20 @@
 #calculator_tokens = *(valid_token | white_space | unknown_token);
 
 // note: this implicitely defines the order of token matching
-#valid_token    =  operation | number | operator | group_start | group_end | digit;
+#valid_token    = mult | div | plus | minus | number | group_start | group_end;
 
-plus            = '+';
-minus           = '-';
 mult            = '*';
 div             = '/';
+plus            = '+';
+minus           = '-';
 
-#operator	    = plus | minus | mult | div;
-
-#number         = float | int;
-
-// need to let the tokenizer know the form of an operation, so an operation
-// takes precedence over a signed number. IE without this rule, "3-3" is tokenized as
-// int(3), int(-3) rather than int(3), minus, int(3)
-//     and *(operator, number)
-
-#operation      = (number|group_end), *white_space, operator, *white_space, (number|group_start); 
-
-float           = int, '.', +digit, ?(('e' | 'E'), ?sign, +digit);
-
-// sign must be followed by at least one digit, even though c# accepts - 3 as -3,
-// it's value interpreter does not (ie int.parse("- 3") fails)) so we enforce that here
-
-int             = ?sign, +digit;
-				
-~sign           = plus | minus;
+number			= +digit, ?('.', +digit, ?(('e' | 'E'), ?('+'|'-'), +digit));
 
 digit           = { '0'..'9' };
 
-group_start    = '(';
-group_end      = ')';
+group_start     = '(';
+group_end       = ')';
 
 ~white_space	= { ' \t\r\n' };
-
-EOF			    = !.;		
 
 unknown_token	= error "unknown token found." valid_token;

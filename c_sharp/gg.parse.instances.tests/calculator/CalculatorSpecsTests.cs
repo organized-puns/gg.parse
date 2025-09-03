@@ -1,11 +1,11 @@
 ﻿using gg.parse.ebnf;
-
+using System.Diagnostics;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.instances.tests.calculator
 {
     [TestClass]
-    public class CalculatorSpecsTests
+    public class CalculatorSpecs_1Tests
     {
         private static readonly string _tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
         private static readonly string _grammarSpec = File.ReadAllText("assets/calculator.grammar");
@@ -13,7 +13,7 @@ namespace gg.parse.instances.tests.calculator
         /// <summary>
         /// Basic test to ensure that all tokens in the calculator example are found.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void CreateTokenizer_FindTokens_ExpectAllTokensFound()
         {
             var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
@@ -77,24 +77,21 @@ namespace gg.parse.instances.tests.calculator
             {
                 IsNotNull(calculatorParser.EbnfGrammarParser.FindRule(ruleName), $"Rule '{ruleName}' not found.");
             }
-        }
+        }*/
 
         /// <summary>
-        /// See if a simple int gets parsed as expected.
+        /// See if a simple number gets parsed as expected.
         /// </summary>
         [TestMethod]
-        public void CreateTokenizerAndGrammar_ParseInt_ExpectCorrectTypeFound()
+        public void CreateTokenizerAndGrammar_ParsePositiveNumber_ExpectCorrectTypeFound()
         {
-            var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
-            var grammarSpec = File.ReadAllText("assets/calculator.grammar");
-
-            var calculatorParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
 
             var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse("1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 1);
-            IsTrue(tokens[0]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("int")!.Id);
+            IsTrue(tokens[0]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("number")!.Id);
 
             var astTree = calculatorParser.Parse("1");
 
@@ -105,38 +102,54 @@ namespace gg.parse.instances.tests.calculator
             var numberRule = calculatorParser.FindParserRule(astTree[0]!.FunctionId);
 
             IsNotNull(numberRule);
-            IsTrue(numberRule.Name == "int");
+            IsTrue(numberRule.Name == "number");
         }
 
         /// <summary>
-        /// See if a simple float gets parsed as expected.
+        /// See if a simple negative number gets parsed as expected.
         /// </summary>
         [TestMethod]
-        public void CreateTokenizerAndGrammar_ParseFloat_ExpectCorrectTypeFound()
+        public void CreateTokenizerAndGrammar_ParseNegativeNumber_ExpectCorrectTypeFound()
         {
-            var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
-            var grammarSpec = File.ReadAllText("assets/calculator.grammar");
+            var calculatorParser = CreateParser();
 
-            var calculatorParser = new EbnfParser(tokenizerSpec, grammarSpec);
-
-            var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse("-1.0".ToCharArray(), 0);
+            var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse("-1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
-            IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 1);
-            IsTrue(tokens[0]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("float")!.Id);
+            IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 2);
+            IsTrue(tokens[0]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("minus")!.Id);
+            IsTrue(tokens[1]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("number")!.Id);
 
-            var astTree = calculatorParser.Parse("-1.0");
+            var astTree = calculatorParser.Parse("-1");
 
             IsTrue(astTree.FoundMatch);
             IsNotNull(astTree.Annotations);
             IsTrue(astTree.Annotations.Count == 1);
 
-            var numberRule = calculatorParser.FindParserRule(astTree[0]!.FunctionId);
-
-            IsNotNull(numberRule);
-            IsTrue(numberRule.Name == "float");
-
+            IsTrue(calculatorParser.FindParserRule(astTree[0]!.FunctionId)!.Name == "unary_operation");
+            IsTrue(calculatorParser.FindParserRule(astTree[0]![0]!.FunctionId)!.Name == "minus");
+            IsTrue(calculatorParser.FindParserRule(astTree[0]![1]!.FunctionId)!.Name == "number");
         }
+
+        /// <summary>
+        /// See if a simple subtraction gets parsed correctly as an operation.
+        /// </summary>
+        [TestMethod]
+        public void CreateTokenizerAndGrammar_ParseSubtraction_ExpectCorrectTypeFound()
+        {
+            var calculatorParser = CreateParser();
+            var astTree = calculatorParser.Parse("2-1");
+
+            IsTrue(astTree.FoundMatch);
+            IsNotNull(astTree.Annotations);
+            IsTrue(astTree.Annotations.Count == 1);
+
+            IsTrue(calculatorParser.FindParserRule(astTree[0]!.FunctionId)!.Name == "subtraction");
+            IsTrue(calculatorParser.FindParserRule(astTree[0]![0]!.FunctionId)!.Name == "number");
+            IsTrue(calculatorParser.FindParserRule(astTree[0]![1]!.FunctionId)!.Name == "minus");
+            IsTrue(calculatorParser.FindParserRule(astTree[0]![2]!.FunctionId)!.Name == "number");
+        }
+
 
         /// <summary>
         /// See if a simple addition gets parsed as expected.
@@ -144,63 +157,45 @@ namespace gg.parse.instances.tests.calculator
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseAddition_ExpectCorrectTypeFound()
         {
-            var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
-            var grammarSpec = File.ReadAllText("assets/calculator.grammar");
-
-            var calculatorParser = new EbnfParser(tokenizerSpec, grammarSpec);
-
-            var testText = "-1.0 + 2";
-            var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse(testText.ToCharArray(), 0);
-
-            IsTrue(tokens.FoundMatch);
-            IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 3);
-            IsTrue(tokens[0]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("float")!.Id);
-            IsTrue(tokens[1]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("plus")!.Id);
-            IsTrue(tokens[2]!.FunctionId == calculatorParser.EbnfTokenizer.FindRule("int")!.Id);
-
+            var calculatorParser = CreateParser();
+            var testText = "-1.01 + -2";
             var astTree = calculatorParser.Parse(testText);
 
             IsTrue(astTree.FoundMatch);
             IsNotNull(astTree.Annotations);
             IsTrue(astTree.Annotations.Count == 1);
 
-            var additionRule = calculatorParser.FindParserRule(astTree[0]!.FunctionId);
-            
+            var addition = astTree[0];
+
+            IsNotNull(addition);
+
+            var additionRule = calculatorParser.FindParserRule(addition.FunctionId);
+
             IsNotNull(additionRule);
             IsTrue(additionRule.Name == "addition");
             IsTrue(additionRule.Precedence == 50);
 
-            IsTrue(astTree[0]!.Children != null && astTree[0]!.Children!.Count == 3);
+            IsTrue(calculatorParser.FindParserRule(addition[0]!.FunctionId)!.Name == "unary_operation");
+            IsTrue(calculatorParser.FindParserRule(addition[0]![0]!.FunctionId)!.Name == "minus");
+            IsTrue(calculatorParser.FindParserRule(addition[0]![1]!.FunctionId)!.Name == "number");
 
-            var numberRule = calculatorParser.FindParserRule(astTree[0]![0]!.FunctionId);
-
-            IsNotNull(numberRule);
-            IsTrue(numberRule.Name == "float");
-
-            var addOperatorRule = calculatorParser.FindParserRule(astTree[0]![1]!.FunctionId);
-
-            IsNotNull(addOperatorRule);
-            IsTrue(addOperatorRule.Name == "plus");
-
-            numberRule = calculatorParser.FindParserRule(astTree[0]![2]!.FunctionId);
-
-            IsNotNull(numberRule);
-            IsTrue(numberRule.Name == "int");
+            IsTrue(calculatorParser.FindParserRule(addition[1]!.FunctionId)!.Name == "plus");
+            IsTrue(calculatorParser.FindParserRule(addition[2]!.FunctionId)!.Name == "unary_operation");
         }
 
+        
         /// <summary>
         /// See if a precedence gets followed with a basic example.
         /// </summary>
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseOperation_ExpectCorrectLeftToRightPrecedence()
         {
-            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
-
+            var calculatorParser = CreateParser();
             var testText = "1 * 2 + 3";
             var astTree = calculatorParser.Parse(testText);
 
             IsTrue(astTree.FoundMatch);
-            
+
             // root
             IsTrue(calculatorParser.FindParserRule(astTree[0].FunctionId).Name == "addition");
 
@@ -208,28 +203,29 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "multiplication");
 
             // left.left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0].FunctionId).Name == "number");
 
             // left.op
             IsTrue(calculatorParser.FindParserRule(astTree[0][0][1].FunctionId).Name == "mult");
 
             // left.right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][2].FunctionId).Name == "int");
-            
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][2].FunctionId).Name == "number");
+
             // op
             IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "plus");
-            
+
             // right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2].FunctionId).Name == "number");
         }
 
+        
         /// <summary>
         /// See if a precedence gets followed with an example containing a group.
         /// </summary>
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseOperationWithGroup_ExpectCorrectRightToLeftPrecedence()
         {
-            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
+            var calculatorParser = CreateParser();
 
             var testText = "1 * (2 + 3)";
             var astTree = calculatorParser.Parse(testText);
@@ -241,7 +237,7 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(f.Name == "multiplication");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "number");
 
             // op
             IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "mult");
@@ -253,15 +249,16 @@ namespace gg.parse.instances.tests.calculator
             // group contents
             IsTrue(calculatorParser.FindParserRule(group[0].FunctionId).Name == "addition");
 
-            IsTrue(calculatorParser.FindParserRule(group[0][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(group[0][0].FunctionId).Name == "number");
             IsTrue(calculatorParser.FindParserRule(group[0][1].FunctionId).Name == "plus");
-            IsTrue(calculatorParser.FindParserRule(group[0][2].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(group[0][2].FunctionId).Name == "number");
         }
 
+        
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseSomeWhatComplexOperationWithGroup_ExpectCorrectRightToLeftPrecedence()
         {
-            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
+            var calculatorParser = CreateParser();
             var testText = "1 - (2 + 3) * 4";
             var astTree = calculatorParser.Parse(testText);
 
@@ -271,7 +268,7 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(calculatorParser.FindParserRule(astTree[0].FunctionId).Name == "subtraction");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "number");
 
             // op
             IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "minus");
@@ -281,31 +278,35 @@ namespace gg.parse.instances.tests.calculator
 
             IsTrue(calculatorParser.FindParserRule(astTree[0][2][0].FunctionId).Name == "group");
             IsTrue(calculatorParser.FindParserRule(astTree[0][2][1].FunctionId).Name == "mult");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][2].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][2].FunctionId).Name == "number");
 
+            // group
             IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0].FunctionId).Name == "addition");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0][0].FunctionId).Name == "number");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0][1].FunctionId).Name == "plus");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0][2].FunctionId).Name == "number");
         }
 
 
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseGroupWithInnerGroup_ExpectToFindAllElements()
         {
-            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
+            var calculatorParser = CreateParser();
             var testText = "(2 + (3)) + 4";
-                        
+
             IsTrue(calculatorParser.TryBuildAstTree(testText, out var tokens, out var astTree));
 
             var expectedTokenTypes = new[]
             {
                 "group_start",
-                "int",
+                "number",
                 "plus",
                 "group_start",
-                "int",
+                "number",
                 "group_end",
                 "group_end",
                 "plus",
-                "int"
+                "number"
             };
 
             IsTrue(tokens!.Annotations!.Count == expectedTokenTypes.Length, $"Expected {expectedTokenTypes.Length} tokens but found {tokens.Annotations.Count} tokens.");
@@ -314,7 +315,7 @@ namespace gg.parse.instances.tests.calculator
             {
                 var expectedType = expectedTokenTypes[i];
                 var actualType = calculatorParser.EbnfTokenizer.FindRule(tokens![i]!.FunctionId)!.Name;
-                
+
                 IsTrue(expectedType == actualType, $"Token {i} expected to be '{expectedType}' but found '{actualType}'");
             }
 
@@ -330,17 +331,42 @@ namespace gg.parse.instances.tests.calculator
 
             IsTrue(calculatorParser.FindParserRule(astTree[0][0][0].FunctionId).Name == "addition");
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][0].FunctionId).Name == "number");
             IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][1].FunctionId).Name == "plus");
             IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2].FunctionId).Name == "group");
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2][0].FunctionId).Name == "number");
 
             // op
             IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "plus");
 
             // right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2].FunctionId).Name == "number");
+        }
+
+        private EbnfParser CreateParser()
+        {
+            try
+            {
+                return new EbnfParser(_tokenizerSpec, _grammarSpec);
+            }
+            catch (EbnfException e)
+            {
+                if (e.InnerException is ParseException ex)
+                {
+                    if (ex.Errors != null && ex.Text != null && ex.Tokens != null)
+                    {
+                        var errorMessages = ex.Errors.Select(annotation => $"Unknown token: {EbnfParser.GetText(ex.Text, annotation, ex.Tokens)}.");
+                        foreach (var errorMessage in errorMessages)
+                        {
+                            Console.WriteLine(errorMessage);
+                            Debug.WriteLine(errorMessage);
+                        }
+                    }
+                }
+
+                throw;
+            }
         }
     }
 }

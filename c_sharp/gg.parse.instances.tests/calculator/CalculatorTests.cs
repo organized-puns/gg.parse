@@ -7,9 +7,8 @@ namespace gg.parse.instances.tests.calculator
     [TestClass]
     public class CalculatorTests
     {
-        private static readonly string _tokenizerSpec = File.ReadAllText("assets/calculator_1.tokens");
-        private static readonly string _grammarSpec = File.ReadAllText("assets/calculator_1.grammar");
-
+        private static readonly string _tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
+        private static readonly string _grammarSpec = File.ReadAllText("assets/calculator.grammar");
 
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseAndCalculate_ExpectMatchingOutpout()
@@ -40,6 +39,7 @@ namespace gg.parse.instances.tests.calculator
                 ("(1 - 2) * (2 + 1)", -3.0),
                 ("2 * 2 * (2)", 8.0),
                 ("2 * 2 * (2 + (3 - -3))", 32.0),
+                ("2 * 2 * (2 + (3 - -3)) + --(1)", 33.0),
             ];
 
             foreach (var (input, expectedOutput) in testValues)
