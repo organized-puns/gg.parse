@@ -7,10 +7,10 @@ namespace gg.parse.instances.tests.calculator
     [TestClass]
     public class CalculatorTests
     {
-        private static readonly string _tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
-        private static readonly string _grammarSpec = File.ReadAllText("assets/calculator.grammar");
+        private static readonly string _tokenizerSpec = File.ReadAllText("assets/calculator_1.tokens");
+        private static readonly string _grammarSpec = File.ReadAllText("assets/calculator_1.grammar");
 
-       
+
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseAndCalculate_ExpectMatchingOutpout()
         {
@@ -19,17 +19,20 @@ namespace gg.parse.instances.tests.calculator
             
             (string input, double expectedOutput)[] testValues = [
                 ("42", 42.0),
+                // xxx fails because trailing -3 is tokenized as an int
+                // not part of the preceding operation
+                ("1 + 2-3", 0.0),
                 ("1.5 * 2", 3.0),
                 ("2 * 2 + 1", 5.0),
                 ("2 + 2*1", 4.0),
-                // note 3 - - 3 is valid in c# but it's int parser will throw an exception
-                // so we leave it out the valid examples and it will only 
-                // see the first 3 (ie expected outcome of the example below is 3)
-                ("3- - 3", 3.0),
+                ("3- - 3", 6.0),
                 ("3-3", 0.0),
                 ("3 - +3", 0.0),
                 ("3--3", 6.0),
                 ("3 - -3", 6.0),
+                ("(1)-3", -2.0),
+                ("((1))-3", -2.0),
+                ("((1))-(3)", -2.0),
                 ("2 * 2 + 1-3", 2.0),
                 ("2 * 2 + 1- -3", 8.0),
                 ("(2 + (2)) + 1", 5.0),

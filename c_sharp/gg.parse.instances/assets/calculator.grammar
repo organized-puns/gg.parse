@@ -2,13 +2,11 @@
  * Simple EBNF-like notation for the grammar of a simple calculator
  */
 
-#expression		   = valid_expression | unknown_expression;
-
-#valid_expression  = operation | value;
+#expression		   = operation | value | unknown_expression;
 
 #value             = number | group;
 
-#number			   = float | int;
+number			   = (?(plus | minus) number_base);
 
 // group needs to produce an annotation, if it's transitive the precedence parsing will happily move the expression
 // up the ast tree, removing the effect of a group
@@ -21,4 +19,4 @@ division       75  = value, div,   value;
 addition       50  = value, plus,  value;
 subtraction    25  = value, minus, value;
 
-unknown_expression = error "unknown expression found." valid_expression;
+unknown_expression = error "unknown expression found." (operation | value);

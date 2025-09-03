@@ -9,9 +9,13 @@ namespace gg.parse.instances.calculator
         {
             public static readonly string Group = "group";
 
-            public static readonly string Float = "float";
+            public static readonly string Number = "number";
 
-            public static readonly string Int = "int";
+            public static readonly string Unary = "unary_operation";
+
+            public static readonly string Plus = "plus";
+
+            public static readonly string Minus = "minus";
 
             public static readonly string Multiply = "multiplication";
 
@@ -26,9 +30,13 @@ namespace gg.parse.instances.calculator
         {
             public int Group { get; init; }
 
-            public int Float { get; init; }
+            public int Number { get; init; }
 
-            public int Int { get; init; }
+            public int Unary { get; init; }
+
+            public int Plus { get; init; }
+
+            public int Minus { get; init; }
 
             public int Multiply { get; init; }
 
@@ -52,8 +60,10 @@ namespace gg.parse.instances.calculator
         private CalculatorInterpreter SetIds(RuleGraph<int> graph)
         {
             if (!graph.TryFindRule<RuleBase<int>>(NodeNames.Group, out var groupRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Float, out var floatRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Int, out var intRule) ||
+                !graph.TryFindRule<RuleBase<int>>(NodeNames.Number, out var numberRule) ||
+                !graph.TryFindRule<RuleBase<int>>(NodeNames.Unary, out var unaryRule) ||
+                !graph.TryFindRule<RuleBase<int>>(NodeNames.Plus, out var plusRule) ||
+                !graph.TryFindRule<RuleBase<int>>(NodeNames.Minus, out var minusRule) ||
                 !graph.TryFindRule<RuleBase<int>>(NodeNames.Multiply, out var multiplyRule) ||
                 !graph.TryFindRule<RuleBase<int>>(NodeNames.Division, out var divisionRule) ||
                 !graph.TryFindRule<RuleBase<int>>(NodeNames.Addition, out var additionRule) ||
@@ -65,8 +75,10 @@ namespace gg.parse.instances.calculator
             _graphIds = new Ids
             {
                 Group = groupRule!.Id,
-                Float = floatRule!.Id,
-                Int = intRule!.Id,
+                Number = numberRule!.Id,
+                Unary = unaryRule!.Id,
+                Plus = plusRule!.Id,
+                Minus = minusRule!.Id,
                 Multiply = multiplyRule!.Id,
                 Divide = divisionRule!.Id,
                 Add = additionRule!.Id,
@@ -88,15 +100,15 @@ namespace gg.parse.instances.calculator
 
         public double Interpret(string text, Annotation node, List<Annotation> tokens)
         {
-            if (node.FunctionId == _graphIds.Int)
-            {
-                var valueText = EbnfParser.GetText(text, node, tokens);
-                return int.Parse(valueText, CultureInfo.InvariantCulture);
-            }
-            else if (node.FunctionId == _graphIds.Float)
+            if (node.FunctionId == _graphIds.Number)
             {
                 var valueText = EbnfParser.GetText(text, node, tokens);
                 return double.Parse(valueText, CultureInfo.InvariantCulture);
+            }
+            else if (node.FunctionId == _graphIds.Unary)
+            {
+                var sign = node.Children[0].FunctionId == _graphIds.Plus ? 1.0 : -1.0;
+                return sign * Interpret(text, node.Children[1], tokens);
             }
             else if (node.FunctionId == _graphIds.Multiply)
             {

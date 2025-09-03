@@ -132,9 +132,10 @@ Todo (for v1.0)
     - test if a triple operator works where each op is higher than the previous one (done)
         eg a op1 b op2 c op3 d where op3 > op2 > op1 (done)
     - Create basic calculator example (done)
+    - Annotation debug name does not correctly get set
     - Fix the issue in the CalculatorTests see xxx
     
-- bug? Seems rule = #(a | b) is not parsing ? transitive operator issue ?
+- bug? Seems rule = #(a | b) or ~(...) is not parsing ? production operator issue with group?
 
 - Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
   or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'

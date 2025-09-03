@@ -19,10 +19,9 @@ div             = '/';
 // need to let the tokenizer know the form of an operation, so an operation
 // takes precedence over a signed number. IE without this rule, "3-3" is tokenized as
 // int(3), int(-3) rather than int(3), minus, int(3)
-// xxx prolly needs number | group *()
 //     and *(operator, number)
 
-#operation      = number, *white_space, operator, *white_space, number; 
+#operation      = (number|group_end), *white_space, operator, *white_space, (number|group_start); 
 
 float           = int, '.', +digit, ?(('e' | 'E'), ?sign, +digit);
 

@@ -254,7 +254,10 @@ namespace gg.parse.ebnf
 
                         if (tokenizerErrors.Count > 0)
                         {
-                            throw new TokenizeException("input contains characters which could not be mapped to a token.", tokenizerErrors);
+                            throw new TokenizeException(
+                                "input contains characters which could not be mapped to a token.", 
+                                tokenizerErrors
+                            );
                         }
 
                         var astResult = Parse(tokenizationResult.Annotations);
@@ -272,7 +275,12 @@ namespace gg.parse.ebnf
 
                             if (grammarErrors.Count > 0)
                             {
-                                throw new ParseException("input contains tokens which could not be mapped to grammar.", grammarErrors);
+                                throw new ParseException(
+                                        "input contains tokens which could not be mapped to grammar.", 
+                                        grammarErrors,
+                                        text,
+                                        tokenizationResult.Annotations
+                                );
                             }
 
                             return (tokenizationResult.Annotations, astResult.Annotations);

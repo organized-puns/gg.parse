@@ -1,0 +1,24 @@
+/* 
+ * Simple EBNF-like notation for the tokens in a calculator
+ */
+
+#calculator_tokens = *(valid_token | white_space | unknown_token);
+
+// note: this implicitely defines the order of token matching
+#valid_token    = mult | div | plus | minus | number | group_start | group_end;
+
+mult            = '*';
+div             = '/';
+plus            = '+';
+minus           = '-';
+
+number			= +digit, ?('.', +digit, ?(('e' | 'E'), ?('+'|'-'), +digit));
+
+digit           = { '0'..'9' };
+
+group_start     = '(';
+group_end       = ')';
+
+~white_space	= { ' \t\r\n' };
+
+unknown_token	= error "unknown token found." valid_token;
