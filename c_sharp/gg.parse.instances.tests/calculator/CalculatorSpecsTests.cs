@@ -292,7 +292,7 @@ namespace gg.parse.instances.tests.calculator
         {
             var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
             var testText = "(2 + (3)) + 4";
-            
+                        
             IsTrue(calculatorParser.TryBuildAstTree(testText, out var tokens, out var astTree));
 
             var expectedTokenTypes = new[]
@@ -320,12 +320,21 @@ namespace gg.parse.instances.tests.calculator
 
 
             IsTrue(astTree.FoundMatch);
+            IsTrue(astTree.MatchedLength == expectedTokenTypes.Length);
 
             // root
-            IsTrue(calculatorParser.FindParserRule(astTree[0].FunctionId).Name == "addition");
+            IsTrue(calculatorParser.FindParserRule(astTree![0]!.FunctionId)!.Name == "addition");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "group");
+            IsTrue(calculatorParser.FindParserRule(astTree[0]![0]!.FunctionId)!.Name == "group");
+
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0].FunctionId).Name == "addition");
+
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][0].FunctionId).Name == "int");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][1].FunctionId).Name == "plus");
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2].FunctionId).Name == "group");
+
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2][0].FunctionId).Name == "int");
 
             // op
             IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "plus");

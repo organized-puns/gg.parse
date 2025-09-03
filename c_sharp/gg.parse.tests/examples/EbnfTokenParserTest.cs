@@ -321,7 +321,7 @@ namespace gg.parse.tests.examples
             IsNotNull(zeroOrMore);
             IsTrue(zeroOrMore.Min == 0);
             IsTrue(zeroOrMore.Max == 0);
-            IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(Literal)"));
+            IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -333,7 +333,7 @@ namespace gg.parse.tests.examples
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 1);
             IsTrue(oneOrMore.Max == 0);          
-            IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(Literal)"));
+            IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -345,7 +345,7 @@ namespace gg.parse.tests.examples
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 0);
             IsTrue(oneOrMore.Max == 1);
-            IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(Literal)"));
+            IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule of Literal"));
         }
 
         [TestMethod]
@@ -359,7 +359,7 @@ namespace gg.parse.tests.examples
             IsTrue(error.TestFunction == table.FindRule("error_rule skip_until Not"));
             var matchFunction = error.TestFunction as MatchNotFunction<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not(not Literal)"));
+            IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not, type: Not(Literal)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 

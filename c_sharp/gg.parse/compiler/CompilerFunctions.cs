@@ -144,7 +144,7 @@ namespace gg.parse.compiler
                     var elementAnnotation = ruleDefinition.Children[i];
                     var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
 
-                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{declaration.Name}[{i}], type: {elementName}");
                     var sequenceElement = compilationFunction(compiler, elementDeclaration, session);
 
                     if (sequenceElement == null)
@@ -175,7 +175,7 @@ namespace gg.parse.compiler
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
                     var (compilationFunction, elementName) =  compiler.Functions[elementAnnotation.FunctionId];
-                    var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Annotation, $"{elementName}:{declaration.Name}[{i}]");
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Annotation, $"{declaration.Name}[{i}], type: {elementName}");
                     var optionElement = compilationFunction(compiler, elementDeclaration, context);
 
                     if (optionElement == null)
@@ -207,7 +207,7 @@ namespace gg.parse.compiler
                     var elementAnnotation = ruleDefinition.Children[i];
                     var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
 
-                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{declaration.Name}[{i}], type: {elementName}");
                     var elementFunction = 
                         compilationFunction(compiler, elementDeclaration, session) 
                         ?? throw new CompilationException<char>($"Compiling evaluation, can't find function for element at {elementAnnotation.Range}.", elementAnnotation.Range, null);
@@ -273,7 +273,7 @@ namespace gg.parse.compiler
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
-            var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Transitive, $"{declaration.Name}({elementName})");
+            var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Transitive, $"{declaration.Name} of {elementName}");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -300,7 +300,7 @@ namespace gg.parse.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}(not {elementName})");
+            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}, type: Not({elementName})");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -327,7 +327,7 @@ namespace gg.parse.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}(try {elementName})");
+            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{elementName}, type: {declaration.Name}");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)

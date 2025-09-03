@@ -69,5 +69,12 @@
 
             return result;
         }
+
+        public override string ToString()
+        {
+            return Rule == null
+                ? base.ToString()
+                : $"ref_to:{Rule.ToString()}({base.ToString()})";
+        }
     }
 }

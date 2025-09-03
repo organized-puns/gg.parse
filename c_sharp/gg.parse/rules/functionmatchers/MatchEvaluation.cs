@@ -22,8 +22,6 @@ namespace gg.parse.rulefunctions.rulefunctions
 
         public IEnumerable<RuleBase<T>> SubRules => RuleOptions;
 
-        public Func<int, RuleBase<T>> FindRule { get; init; }
-
         public MatchEvaluation(string name, params RuleBase<T>[] options)
             : base(name, AnnotationProduct.Annotation)
         {
@@ -31,10 +29,7 @@ namespace gg.parse.rulefunctions.rulefunctions
             Contract.Requires(options!.Any(v => v != null));
 
             RuleOptions = options!;
-            FindRule = DefaultFindRule;
         }
-
-        
 
         public MatchEvaluation(string name, AnnotationProduct production, int precedence, params RuleBase<T>[] options)
             : base(name, production, precedence)
@@ -43,7 +38,6 @@ namespace gg.parse.rulefunctions.rulefunctions
             Contract.Requires(options!.Any(v => v != null));
 
             RuleOptions = options!;
-            FindRule = DefaultFindRule;
         }
 
         /// <summary>
@@ -54,10 +48,12 @@ namespace gg.parse.rulefunctions.rulefunctions
         /// <returns></returns>
         public override ParseResult Parse(T[] input, int start)
         {            
-            var parent = FindMatch(input, start);
+            var parentResult = FindMatch(input, start);
 
-            if (parent != null)
+            if (parentResult.FoundMatch)
             {               
+                var parent = parentResult.Annotations![0];
+
                 if (parent.Children == null || parent.Children.Count < 3)
                 {                     
                     // unary operator / value, nothing more to evaluate
@@ -65,6 +61,7 @@ namespace gg.parse.rulefunctions.rulefunctions
                 }
 
                 var root = parent;
+                var tokensRead = parentResult.MatchedLength;
 
                 // move the token pointer to the end of the last child annotation, so we can try to match another 
                 // binary. The assumption here is that the root of this annotation expresses the operator
@@ -73,14 +70,17 @@ namespace gg.parse.rulefunctions.rulefunctions
                 // so take the third child token position and try to find another match
                 var tokenIndex = parent.Children[2].Start;
                 
-                Annotation? nextMatch;
+                ParseResult nextMatchResult;
 
                 // have we run out of tokens ?
                 while (tokenIndex < input.Length
                     // is there another match ?
-                    && (nextMatch = FindMatch(input, tokenIndex)) != null) 
+                    && (nextMatchResult = FindMatch(input, tokenIndex)).FoundMatch) 
                 {
+                    var nextMatch = nextMatchResult.Annotations![0];
                     var nextPrecedence = FindRule(nextMatch.FunctionId).Precedence;
+
+                    tokensRead += (nextMatchResult.MatchedLength - 1);
 
                     // move up the right hand side of the tree until we reach the root of the tree
                     // or until we find a node with a lower precedence
@@ -120,8 +120,18 @@ namespace gg.parse.rulefunctions.rulefunctions
                     tokenIndex = nextMatch.Children[2].Start;
                     parent = nextMatch;
                 }
-                
-                return BuildFunctionRuleResult(UpdateRanges(root), [root]);
+
+                UpdateRanges(root);
+
+                // root can span more tokens than comes from the result of the range union called inside
+                // updateRanges.
+                // eg when tokens are dropped at the end of a match, eg: group = ~group_start, expression, ~group_end;
+                // while this will yield correct results for the internal nodes of the evaluation,
+                // the root may return less tokens read as a result.
+                // So set the range of the root according to the tokens read
+                root.Range = new Range(start, tokensRead);
+
+                return BuildFunctionRuleResult(root.Range, [root]);
             }
 
             return ParseResult.Failure;
@@ -134,7 +144,7 @@ namespace gg.parse.rulefunctions.rulefunctions
                 : node.Range = Range.Union(node.Children!.Select(c => UpdateRanges(c)));
         }
 
-        private Annotation? FindMatch(T[] input, int start)
+        private ParseResult FindMatch(T[] input, int start)
         {
             foreach (var option in RuleOptions)
             {   
@@ -151,13 +161,13 @@ namespace gg.parse.rulefunctions.rulefunctions
                                     && result.Annotations[0] != null, "No annotations found in result. Evaluation result must have exactly 1 annotation.");
                     Contract.Requires(result.Annotations!.Count == 1, "Multiple annotations found. Evaluation result must have exactly 1 annotation.");
 
-                    return result.Annotations[0];
+                    return result;
                 }
             }
-            return null;
+            return ParseResult.Failure;
         }
 
-        private RuleBase<T>? DefaultFindRule(int id)
+        private RuleBase<T>? FindRule(int id)
         {
             foreach (var option in _options!)
             {
