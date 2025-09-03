@@ -110,24 +110,28 @@ namespace gg.parse
                 {
                     foreach (var referenceRule in composition.SubRules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                     {
-                        var replacement = FindRule(referenceRule.Reference);
+                        var referredRule = FindRule(referenceRule.Reference);
 
-                        Contract.Requires(replacement != null, $"Cannot find reference {referenceRule.Reference}.");
+                        Contract.Requires(referredRule != null, $"Cannot find reference {referenceRule.Reference}.");
 
-                        referenceRule.Rule = replacement!;
+                        // note: we don't replace the rule we just set the reference. This allows
+                        // these subrules to have their own annotation production. If we replace these 
+                        // any production modifiers will affect the original rule
+                        referenceRule.Rule = referredRule!;
                         referenceRule.IsPartOfComposition = true;
                     }
                 }
                 if (rule is RuleReference<T> reference)
                 {
-                    var replacement = FindRule(reference.Reference);
+                    var referredRule = FindRule(reference.Reference);
 
-                    Contract.Requires(replacement != null, $"Cannot find reference {reference.Reference}.");
+                    Contract.Requires(referredRule != null, $"Cannot find reference {reference.Reference}.");
 
-                    reference.Rule = replacement;
+                    reference.Rule = referredRule;
+                    
                     // do not overwrite this property, if this rule is lower than its composition in the table
                     // this will be reset
-                    //reference.IsPartOfComposition = false;
+                    // reference.IsPartOfComposition = false;
                 }
             }
         }

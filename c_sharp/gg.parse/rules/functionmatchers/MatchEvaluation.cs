@@ -157,17 +157,6 @@ namespace gg.parse.rulefunctions.rulefunctions
             return null;
         }
 
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.RequiresNotNull(replacement, $"{nameof(MatchOneOfFunction<T>)} cannot have null as its options.");
-
-            var index = Array.IndexOf(RuleOptions, subRule);
-            
-            Contract.Requires(index >= 0);
-
-            RuleOptions[index] = replacement;
-        }
-
         private RuleBase<T>? DefaultFindRule(int id)
         {
             foreach (var option in _options!)

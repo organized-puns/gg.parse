@@ -58,16 +58,5 @@ namespace gg.parse.rulefunctions.rulefunctions
 
             return this.BuildFunctionRuleResult(new Range(start, index - start), children);
         }
-
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.RequiresNotNull(replacement, "Sequence cannot have null as its subrules.");
-
-            var index = Array.IndexOf(SequenceSubfunctions, subRule);
-            
-            Contract.Requires(index >= 0);
-
-            SequenceSubfunctions[index] = replacement;
-        }
     }
 }

@@ -285,6 +285,54 @@ namespace gg.parse.instances.tests.calculator
 
             IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0].FunctionId).Name == "addition");
         }
+
+
+        [TestMethod]
+        public void CreateTokenizerAndGrammar_ParseGroupWithInnerGroup_ExpectToFindAllElements()
+        {
+            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
+            var testText = "(2 + (3)) + 4";
+            
+            IsTrue(calculatorParser.TryBuildAstTree(testText, out var tokens, out var astTree));
+
+            var expectedTokenTypes = new[]
+            {
+                "group_start",
+                "int",
+                "plus",
+                "group_start",
+                "int",
+                "group_end",
+                "group_end",
+                "plus",
+                "int"
+            };
+
+            IsTrue(tokens!.Annotations!.Count == expectedTokenTypes.Length, $"Expected {expectedTokenTypes.Length} tokens but found {tokens.Annotations.Count} tokens.");
+
+            for (int i = 0; i < expectedTokenTypes.Length; i++)
+            {
+                var expectedType = expectedTokenTypes[i];
+                var actualType = calculatorParser.EbnfTokenizer.FindRule(tokens![i]!.FunctionId)!.Name;
+                
+                IsTrue(expectedType == actualType, $"Token {i} expected to be '{expectedType}' but found '{actualType}'");
+            }
+
+
+            IsTrue(astTree.FoundMatch);
+
+            // root
+            IsTrue(calculatorParser.FindParserRule(astTree[0].FunctionId).Name == "addition");
+
+            // left
+            IsTrue(calculatorParser.FindParserRule(astTree[0][0].FunctionId).Name == "group");
+
+            // op
+            IsTrue(calculatorParser.FindParserRule(astTree[0][1].FunctionId).Name == "plus");
+
+            // right
+            IsTrue(calculatorParser.FindParserRule(astTree[0][2].FunctionId).Name == "int");
+        }
     }
 }
 

@@ -49,16 +49,5 @@ namespace gg.parse.rulefunctions.rulefunctions
             }
             return ParseResult.Failure;
         }
-
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.RequiresNotNull(replacement, $"{nameof(MatchOneOfFunction<T>)} cannot have null as its options.");
-
-            var index = Array.IndexOf(RuleOptions, subRule);
-            
-            Contract.Requires(index >= 0);
-
-            RuleOptions[index] = replacement;
-        }
     }
 }

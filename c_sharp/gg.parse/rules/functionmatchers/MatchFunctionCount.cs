@@ -48,11 +48,5 @@ namespace gg.parse.rulefunctions.rulefunctions
                 ? this.BuildFunctionRuleResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
         }
-
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.Requires(subRule == Function);
-            Function = replacement;
-        }
     }
 }
