@@ -32,7 +32,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
             }
 
-            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product);
+            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileIdentifier<T>(
@@ -65,7 +65,7 @@ namespace gg.parse.compiler
                 compiler.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
             }
 
-            return new RuleReference<T>(declaration.Name, referenceName, product);
+            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterSet(
@@ -90,7 +90,7 @@ namespace gg.parse.compiler
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 
-            return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray());
+            return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray(), declaration.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterRange(
@@ -123,14 +123,12 @@ namespace gg.parse.compiler
 
             return 
                 // xxx parameter order...
-                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product);
+                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product, declaration.Precedence);
         }
-
-        
-
+       
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-
+        // xxx check the overlap with option and eval (and club together)
         public static RuleBase<T> CompileSequence<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
@@ -146,7 +144,7 @@ namespace gg.parse.compiler
                     var elementAnnotation = ruleDefinition.Children[i];
                     var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
 
-                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{elementName}:{declaration.Name}[{i}]");
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{declaration.Name}[{i}], type: {elementName}");
                     var sequenceElement = compilationFunction(compiler, elementDeclaration, session);
 
                     if (sequenceElement == null)
@@ -160,7 +158,7 @@ namespace gg.parse.compiler
                 }
             }
 
-            return new MatchFunctionSequence<T>(declaration.Name, declaration.Product, [.. sequenceElements]);
+            return new MatchFunctionSequence<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. sequenceElements]);
         }
 
         public static RuleBase<T> CompileOption<T>(
@@ -177,7 +175,7 @@ namespace gg.parse.compiler
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
                     var (compilationFunction, elementName) =  compiler.Functions[elementAnnotation.FunctionId];
-                    var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Annotation, $"{elementName}:{declaration.Name}[{i}]");
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Annotation, $"{declaration.Name}[{i}], type: {elementName}");
                     var optionElement = compilationFunction(compiler, elementDeclaration, context);
 
                     if (optionElement == null)
@@ -191,7 +189,34 @@ namespace gg.parse.compiler
                 }
             }
 
-            return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, [.. optionElements]);
+            return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
+        }
+
+        public static RuleBase<T> CompileEvaluation<T>(
+            RuleCompiler<T> compiler,
+            RuleDeclaration declaration,
+            CompileSession<T> session) where T : IComparable<T>
+        {
+            var evaluationElements = new List<RuleBase<T>>();
+            var ruleDefinition = declaration.AssociatedAnnotation;
+
+            if (ruleDefinition.Children != null)
+            {
+                for (var i = 0; i < ruleDefinition.Children.Count; i++)
+                {
+                    var elementAnnotation = ruleDefinition.Children[i];
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+
+                    var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{declaration.Name}[{i}], type: {elementName}");
+                    var elementFunction = 
+                        compilationFunction(compiler, elementDeclaration, session) 
+                        ?? throw new CompilationException<char>($"Compiling evaluation, can't find function for element at {elementAnnotation.Range}.", elementAnnotation.Range, null);
+
+                    evaluationElements.Add(elementFunction);
+                }
+            }
+
+            return new MatchEvaluation<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. evaluationElements]);
         }
 
         public static RuleBase<T> CompileGroup<T>(
@@ -248,7 +273,7 @@ namespace gg.parse.compiler
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
-            var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Transitive, $"{declaration.Name}({elementName})");
+            var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Transitive, $"{declaration.Name} of {elementName}");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -258,7 +283,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementAnnotation.Range, null);
             }
 
-            return new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max);
+            return new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileNot<T>(
@@ -275,7 +300,7 @@ namespace gg.parse.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}(not {elementName})");
+            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}, type: Not({elementName})");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -285,7 +310,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Not.", elementAnnotation.Range, null);
             }
 
-            return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction);
+            return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileTryMatch<T>(
@@ -302,7 +327,7 @@ namespace gg.parse.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}(try {elementName})");
+            var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{elementName}, type: {declaration.Name}");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -312,7 +337,7 @@ namespace gg.parse.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Try match.", elementAnnotation.Range, null);
             }
 
-            return new TryMatchFunction<T>(declaration.Name, declaration.Product, subFunction);
+            return new TryMatchFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileAny<T>(
@@ -322,7 +347,7 @@ namespace gg.parse.compiler
         {
             Contract.Requires(declaration != null);
 
-            return new MatchAnyData<T>(declaration.Name, declaration.Product);
+            return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
         }
 
         public static RuleBase<T> CompileError<T>(

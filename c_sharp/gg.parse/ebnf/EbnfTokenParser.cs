@@ -6,10 +6,8 @@ using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
 {
-
-
     /// <summary>
-    /// Parses
+    /// Turns a list of tokens into an abstract syntax tree according to EBNF(like) grammar.
     /// </summary>
     public class EbnfTokenParser : RuleGraph<int>
     {
@@ -27,11 +25,15 @@ namespace gg.parse.ebnf
 
         public MatchSingleData<int>        MatchRuleName { get; private set; }
 
+        public MatchSingleData<int>        MatchPrecedence { get; private set; }
+
         public MatchFunctionSequence<int>  MatchIdentifier { get; private set; }
 
         public MatchFunctionSequence<int>  MatchSequence { get; private set; }
 
         public MatchFunctionSequence<int>  MatchOption { get; private set; }
+
+        public MatchFunctionSequence<int>  MatchEval { get; private set; }
 
         public MatchFunctionSequence<int>  MatchCharacterSet { get; private set; }
 
@@ -92,7 +94,6 @@ namespace gg.parse.ebnf
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
-
             var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
                 this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
                     MatchTransitiveSelector,
@@ -135,7 +136,20 @@ namespace gg.parse.ebnf
                     ruleTerms,
                     this.ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
 
-            var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption);
+            // xxx this is the same pattern as sequence and option, create a function for it
+            var nextEvalElement = this.Sequence("#NextEvalElement", AnnotationProduct.Transitive,
+                    Token(CommonTokenNames.OptionWithPrecedence),
+                    ruleTerms);
+
+
+            // a / b / c
+            MatchEval = this.Sequence("Evaluation", AnnotationProduct.Annotation,
+                    ruleTerms,
+                    Token(CommonTokenNames.OptionWithPrecedence),
+                    ruleTerms,
+                    this.ZeroOrMore("#EvaluationRest", AnnotationProduct.Transitive, nextEvalElement));
+
+            var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval);
 
             var ruleDefinition = this.OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
                 binaryRuleTerms, 
@@ -186,14 +200,14 @@ namespace gg.parse.ebnf
             ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
                                     MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError];
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
-
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
+
+            MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
 
             MatchRule = this.Sequence("Rule", AnnotationProduct.Annotation,
                     ruleProduction,
                     MatchRuleName,
+                    this.ZeroOrOne("#RulePrecedence",AnnotationProduct.Transitive, MatchPrecedence),
                     Token(CommonTokenNames.Assignment),
                     ruleDefinition,
                     Token(CommonTokenNames.EndStatement));
@@ -240,7 +254,10 @@ namespace gg.parse.ebnf
 
                         if (tokenizerErrors.Count > 0)
                         {
-                            throw new TokenizeException("input contains characters which could not be mapped to a token.", tokenizerErrors);
+                            throw new TokenizeException(
+                                "input contains characters which could not be mapped to a token.", 
+                                tokenizerErrors
+                            );
                         }
 
                         var astResult = Parse(tokenizationResult.Annotations);
@@ -258,7 +275,12 @@ namespace gg.parse.ebnf
 
                             if (grammarErrors.Count > 0)
                             {
-                                throw new ParseException("input contains tokens which could not be mapped to grammar.", grammarErrors);
+                                throw new ParseException(
+                                        "input contains tokens which could not be mapped to grammar.", 
+                                        grammarErrors,
+                                        text,
+                                        tokenizationResult.Annotations
+                                );
                             }
 
                             return (tokenizationResult.Annotations, astResult.Annotations);

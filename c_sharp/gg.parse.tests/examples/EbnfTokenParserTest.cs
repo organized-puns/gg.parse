@@ -185,7 +185,8 @@ namespace gg.parse.tests.examples
             name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
             IsTrue(name == "TryMatch");
         }
-                
+
+
         [TestMethod]
         public void TokenizeParseCompileLitRule_ExpectSuccess()
         {
@@ -320,7 +321,7 @@ namespace gg.parse.tests.examples
             IsNotNull(zeroOrMore);
             IsTrue(zeroOrMore.Min == 0);
             IsTrue(zeroOrMore.Max == 0);
-            IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule(Literal)"));
+            IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -332,7 +333,7 @@ namespace gg.parse.tests.examples
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 1);
             IsTrue(oneOrMore.Max == 0);          
-            IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule(Literal)"));
+            IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -344,7 +345,7 @@ namespace gg.parse.tests.examples
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 0);
             IsTrue(oneOrMore.Max == 1);
-            IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule(Literal)"));
+            IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule of Literal"));
         }
 
         [TestMethod]
@@ -358,7 +359,7 @@ namespace gg.parse.tests.examples
             IsTrue(error.TestFunction == table.FindRule("error_rule skip_until Not"));
             var matchFunction = error.TestFunction as MatchNotFunction<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not(not Literal)"));
+            IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not, type: Not(Literal)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 
@@ -369,8 +370,28 @@ namespace gg.parse.tests.examples
 
             var matchAny = table.FindRule("any_rule") as MatchAnyData<char>;
             IsNotNull(matchAny);
-            IsTrue(matchAny.MinLength == 1);
-            IsTrue(matchAny.MaxLength == 1);
+        }
+
+
+        [TestMethod]
+        public void SetupTokenizeParseCompileWithPrecedence_TestPrecedence_ExpectPredenceToMatchInput()
+        {
+            var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; ~ rule_three -1 = .;");
+
+            var rule1 = table.FindRule("rule1") as MatchAnyData<char>;
+            IsNotNull(rule1);
+            IsTrue(rule1.Precedence == 100);
+            IsTrue(rule1.Production == AnnotationProduct.Annotation);
+
+            var rule2 = table.FindRule("rule2") as MatchAnyData<char>;
+            IsNotNull(rule2);
+            IsTrue(rule2.Precedence == 200);
+            IsTrue(rule2.Production == AnnotationProduct.Transitive);
+
+            var ruleThree = table.FindRule("rule_three") as MatchAnyData<char>;
+            IsNotNull(ruleThree);
+            IsTrue(ruleThree.Precedence == -1);
+            IsTrue(ruleThree.Production == AnnotationProduct.None);
         }
 
         [TestMethod]
@@ -441,8 +462,6 @@ namespace gg.parse.tests.examples
                 IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
             }
         }
-
-
     }
 }
 

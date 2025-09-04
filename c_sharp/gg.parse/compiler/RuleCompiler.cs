@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Contracts;
+﻿
+using gg.core.util;
 
 namespace gg.parse.compiler
 {
@@ -100,20 +101,27 @@ namespace gg.parse.compiler
             return false;
         }
 
-
         private RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
+            // annotation product is optional, (will default to Annotation)
             if (TryGetProduct(ruleNodes[idx].FunctionId, out var product))
             {
                 idx++;
             }
 
+            // xxx assuming this is a string literal, need to validate
             var name = context.GetText(ruleNodes[idx].Range);
             idx++;
 
-            return new(ruleNodes[idx], product, name);
+            // precedence is optional (will default to 0)
+            if (int.TryParse(context.GetText(ruleNodes[idx].Range), out var precedence))
+            {
+                idx++;
+            }
+
+            return new(ruleNodes[idx], product, name, precedence);
         }
     }
 }

@@ -71,6 +71,7 @@
         public static readonly string EndStatement = "EndStatement";
         public static readonly string Elipsis = "Elipsis";
         public static readonly string Option = "Option";
+        public static readonly string OptionWithPrecedence = "OptionWithPrecedence";
         public static readonly string GroupStart = "GroupStart";
         public static readonly string GroupEnd = "GroupEnd";
         public static readonly string ZeroOrOneOperator = "ZeroOrOneOperator";

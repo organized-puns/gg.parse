@@ -22,9 +22,12 @@ namespace gg.parse.rulefunctions.rulefunctions
 
         public IEnumerable<RuleBase<T>> SubRules => SequenceSubfunctions;
 
-
-        public MatchFunctionSequence(string name, AnnotationProduct production = AnnotationProduct.Annotation, params RuleBase<T>[] sequence)
-            : base(name, production) 
+        public MatchFunctionSequence(
+            string name, 
+            AnnotationProduct production = AnnotationProduct.Annotation, 
+            int precedence = 0,
+            params RuleBase<T>[] sequence
+        ) : base(name, production, precedence) 
         {
             SequenceSubfunctions = sequence;
         }
@@ -54,17 +57,6 @@ namespace gg.parse.rulefunctions.rulefunctions
             }
 
             return this.BuildFunctionRuleResult(new Range(start, index - start), children);
-        }
-
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.RequiresNotNull(replacement, "Sequence cannot have null as its subrules.");
-
-            var index = Array.IndexOf(SequenceSubfunctions, subRule);
-            
-            Contract.Requires(index >= 0);
-
-            SequenceSubfunctions[index] = replacement;
         }
     }
 }

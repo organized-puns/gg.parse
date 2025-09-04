@@ -59,9 +59,9 @@ namespace gg.parse.tests.ebnf
         {
             try
             {
-                // & and / are no valid tokens, so this should raise an exception
+                // & and : are no valid tokens, so this should raise an exception
                 // xxx no exceptions in the constructor
-                var parser = new EbnfParser("foo='string';", "^ bar=foo; /");
+                var parser = new EbnfParser("foo='string';", "^ bar=foo; :");
                 Fail();
             }
             catch (EbnfException ebnfException)

@@ -1,7 +1,10 @@
 ﻿using gg.parse.compiler;
 using gg.parse.rulefunctions.datafunctions;
+using gg.parse.rulefunctions.rulefunctions;
 
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using static gg.parse.compiler.CompilerFunctions;
+
 
 namespace gg.parse.tests.compiler
 {
@@ -568,6 +571,81 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.Annotations[0].FunctionId == optionFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+        }
+
+        /// <summary>
+        /// Tests & demonstrates how to generate a ruletable using a compiler containing an evaluation
+        /// of literals (which is non-sensical but serves the purpose of the test)
+        /// </summary>
+        [TestMethod]
+        public void TestRegisterAndCompileSingleUnaryEvaluation()
+        {
+            var compiler = new RuleCompiler<char>();
+
+            var literalId = 42;
+            var evalId = 64;
+
+            var session = new CompileSession<char>()
+                .WithText("rule='add'/'mult';")
+                .WithTokens(new Annotation(0, new(0, 4)), // rule
+                            new Annotation(1, new(5, 5)), // add
+                            new Annotation(2, new(10, 1)), // operator /
+                            new Annotation(1, new(11, 6))); // mult
+
+
+            session.AstNodes = [
+                new Annotation(2, new(0, 3), [
+                    // child capturing the token(s) defining the rule name
+                    new(0, new Range(0, 1)), 
+
+                    // child capturing the sequence
+                    new(evalId, new Range(1, 3), [
+                        // add literal
+                        new(literalId, new Range(1, 1)),
+                        // mult literal
+                        new(literalId, new Range(3, 1))
+                    ])
+                ])
+            ];
+
+            // compile a rule table which can tokenize 'foo'
+            var table = compiler
+                        .RegisterFunction(literalId, CompileLiteral)
+                        .RegisterFunction(evalId, CompileEvaluation)
+                        .Compile(session);
+
+            IsNotNull(table);
+            IsNotNull(table.Root);
+
+            // the ebnf declared the evaluation as 'rule'
+            var evalFunction = table.FindRule("rule") as MatchEvaluation<char>;
+            
+            IsNotNull(evalFunction);
+
+            // the compiled table's root should be able to parse a foo OR bar string 
+            var testInputs = new string[] { "add", "mult" };
+
+            for (var i = 0; i < testInputs.Length; i++)
+            {
+                var testText = testInputs[i];
+                var result = table.Root.Parse(testText.ToCharArray(), 0);
+
+                // the result should hold a token which describes a eval spanning
+                // the length of the test text
+                IsTrue(result.FoundMatch);
+                IsTrue(result.Annotations != null);
+                IsTrue(result.Annotations.Count == 1);
+                IsTrue(result.Annotations[0].FunctionId == evalFunction.Id);
+                IsTrue(result.Annotations[0].Start == 0);
+                IsTrue(result.Annotations[0].Length == testText.Length);
+
+                // should have one child annotation which is the add literal
+                IsNotNull(result.Annotations[0].Children);
+                var literalChild = result.Annotations[0].Children[0];
+
+                IsTrue(literalChild.FunctionId == evalFunction.RuleOptions[i].Id);
+            }
+
         }
 
         /// <summary>

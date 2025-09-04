@@ -18,11 +18,11 @@ namespace gg.parse.tests.rules
             // "'", *(!"'", .), "'"
             var delimiter       = new MatchDataSequence<char>("delimiter", ['\''], AnnotationProduct.None);
             var notDelimiter    = new MatchNotFunction<char>("not_delimiter", AnnotationProduct.None, delimiter);
-            var stringCharacter = new MatchFunctionSequence<char>("string_character", AnnotationProduct.None,
+            var stringCharacter = new MatchFunctionSequence<char>("string_character", AnnotationProduct.None, 0,
                                         notDelimiter,
                                         new MatchAnyData<char>("any_char"));
             var stringSequence  = new MatchFunctionSequence<char>("string",
-                                        AnnotationProduct.Annotation,
+                                        AnnotationProduct.Annotation, 0,
                                         delimiter,
                                         new MatchFunctionCount<char>("string_characters", stringCharacter, min: 0, max: 0),
                                         delimiter);
@@ -41,7 +41,7 @@ namespace gg.parse.tests.rules
 
             matchError.Id = 42;
 
-            var stringWithFallback = new MatchOneOfFunction<char>("string_with_fallback", AnnotationProduct.Transitive,
+            var stringWithFallback = new MatchOneOfFunction<char>("string_with_fallback", AnnotationProduct.Transitive, 0,
                                         stringSequence, matchError);
 
             // normal string should still match

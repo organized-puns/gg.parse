@@ -2,6 +2,8 @@
 using gg.parse.instances.json;
 using gg.parse.rulefunctions;
 
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
 namespace gg.parse.tests.examples
 {
     [TestClass]
@@ -15,14 +17,35 @@ namespace gg.parse.tests.examples
 
             var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
 
-            Assert.IsTrue(isSuccess);
-            Assert.IsTrue(charactersRead == rule.Length);
-            Assert.IsTrue(annotations!.Count == 5);
-            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-            Assert.IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.ZeroOrMoreOperator).Id);
-            Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 5);
+            IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.ZeroOrMoreOperator).Id);
+            IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+        }
+
+        [TestMethod]
+        public void CreateEvalRule_Tokenize_ExpectOptionWithPrecedenceTokens()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var rule = "rule_name = 'foo' / 'bar' / 'baz';";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 8);
+            IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence).Id);
+            IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[5].FunctionId == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence).Id);
+            IsTrue(annotations[6].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
+            IsTrue(annotations[7].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
         }
 
         [TestMethod]
@@ -58,6 +81,61 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(annotations[2].Length == 4);
             Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
             Assert.IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+        }
+
+        [TestMethod]
+        public void DefineRuleWithoutPrecedence_Tokenize_ExpectValidRuleDeclarations()
+        {
+            var tokenizer = new EbnfTokenizer();
+            
+            // no precedence defined
+            var rule = "rule_name = .;";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            Assert.IsTrue(isSuccess);
+            Assert.IsTrue(charactersRead == rule.Length);
+            Assert.IsTrue(annotations!.Count == 4);
+            Assert.IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+            Assert.IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+            Assert.IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.AnyCharacter).Id);
+            Assert.IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+        }
+
+        [TestMethod]
+        public void DefineRuleWithPrecedence_Tokenize_ExpectValidRuleDeclarations()
+        {
+            var tokenizer = new EbnfTokenizer();
+
+            // simple precedence defined
+            var ruleDefinitions = new string[] {
+                // try different rulename, spacings and precedence values
+                "rule_name   100= .;",
+                "rule_name 42  = .;",
+                "rule_name1 -1  = .;",
+            };
+
+            var expectedPrecedences = new int[] { 100, 42, -1 };
+
+            for (var i = 0; i < ruleDefinitions.Length; i++)
+            {
+                var rule = ruleDefinitions[i];
+                var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+                IsTrue(isSuccess);
+                IsTrue(charactersRead == rule.Length);
+                IsTrue(annotations!.Count == 5);
+                IsTrue(annotations[0].FunctionId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
+                IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Integer).Id);
+
+                IsTrue(annotations[1].FunctionId == tokenizer.FindRule(CommonTokenNames.Integer).Id);
+                var value = ruleDefinitions[i].AsSpan(annotations[1].Range.Start, annotations[1].Range.Length).ToString();
+                IsTrue(int.Parse(value) == expectedPrecedences[i]);
+
+                IsTrue(annotations[2].FunctionId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
+                IsTrue(annotations[3].FunctionId == tokenizer.FindRule(CommonTokenNames.AnyCharacter).Id);
+                IsTrue(annotations[4].FunctionId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            }
         }
 
 

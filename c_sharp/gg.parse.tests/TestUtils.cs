@@ -47,6 +47,7 @@ namespace gg.parse.tests
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
+            Assert.IsTrue(result.Annotations[0].FunctionId != parser.UnknownInputError.Id);
 
             var astNodes = result.Annotations;
 

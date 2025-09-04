@@ -27,12 +27,11 @@ namespace gg.parse.rulefunctions.rulefunctions
             RuleOptions = options;
         }
 
-        public MatchOneOfFunction(string name, AnnotationProduct production, params RuleBase<T>[] options)
-            : base(name, production)
+        public MatchOneOfFunction(string name, AnnotationProduct production, int precedence = 0, params RuleBase<T>[] options)
+            : base(name, production, precedence)
         {
             RuleOptions = options;
         }
-
 
         public override ParseResult Parse(T[] input, int start)
         {
@@ -49,17 +48,6 @@ namespace gg.parse.rulefunctions.rulefunctions
                 }
             }
             return ParseResult.Failure;
-        }
-
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.RequiresNotNull(replacement, $"{nameof(MatchOneOfFunction<T>)} cannot have null as its options.");
-
-            var index = Array.IndexOf(RuleOptions, subRule);
-            
-            Contract.Requires(index >= 0);
-
-            RuleOptions[index] = replacement;
         }
     }
 }

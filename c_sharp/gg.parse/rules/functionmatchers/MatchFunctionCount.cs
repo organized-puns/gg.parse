@@ -3,11 +3,14 @@
 namespace gg.parse.rulefunctions.rulefunctions
 {
     public class MatchFunctionCount<T>(
-        string name, RuleBase<T> function, AnnotationProduct production = AnnotationProduct.Annotation, int min = 1, int max = 1)
-        : RuleBase<T>(name, production), IRuleComposition<T>
-        where T : IComparable<T>
+        string name, 
+        RuleBase<T> function, 
+        AnnotationProduct production = AnnotationProduct.Annotation, 
+        int min = 1, 
+        int max = 1, 
+        int precedence = 0
+    ) : RuleBase<T>(name, production, precedence), IRuleComposition<T> where T : IComparable<T>
     {
-       
         public RuleBase<T> Function { get; private set; } = function;
         
         public int Min { get; } = min;
@@ -44,12 +47,6 @@ namespace gg.parse.rulefunctions.rulefunctions
             return Min <= 0 || count >= Min
                 ? this.BuildFunctionRuleResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
-        }
-
-        public void ReplaceSubRule(RuleBase<T> subRule, RuleBase<T> replacement)
-        {
-            Contract.Requires(subRule == Function);
-            Function = replacement;
         }
     }
 }

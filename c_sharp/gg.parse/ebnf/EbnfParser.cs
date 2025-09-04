@@ -7,8 +7,6 @@ using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {
-
-
     public class EbnfParser
     {
         private RuleGraph<char> _ebnfTokenizer;
@@ -172,8 +170,8 @@ namespace gg.parse.ebnf
             Dictionary<string, RuleGraph<char>> cache,
             string[]? paths = null)
         {
-            List<Annotation> tokenizerTokens = null;
-            List<Annotation> tokenizerAstNodes = null;
+            List<Annotation> tokenizerTokens;
+            List<Annotation> tokenizerAstNodes;
 
             var tokenizerParser = new EbnfTokenParser(tokenizer);
             
@@ -181,10 +179,13 @@ namespace gg.parse.ebnf
             {
                 (tokenizerTokens, tokenizerAstNodes) = tokenizerParser.Parse(tokenizerText);
             }
-            catch (Exception e) when (e is ParseException || e is TokenizeException)
+            catch (TokenizeException te)
             {
-                // add information where this went wrong
-                throw new EbnfException("Failed to build tokenizer. See inner exception for details.", e);
+                throw new EbnfException("Exception in tokens. Failed to build tokenizer. See inner exception for details.", te);
+            }
+            catch (ParseException pe) 
+            {
+                throw new EbnfException("Exception in grammar. Failed to build tokenizer. See inner exception for details.", pe);
             }
 
             var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstNodes);
