@@ -10,7 +10,7 @@
         {
             if (start < input.Length)
             {
-                return this.BuildDataRuleResult(new Range(start, 1));
+                return BuildDataRuleResult(new Range(start, 1));
             }
 
             return ParseResult.Failure;

@@ -1,5 +1,7 @@
 ﻿using gg.parse.rulefunctions.datafunctions;
 
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
 namespace gg.parse.tests.rules
 {
     [TestClass]
@@ -10,9 +12,9 @@ namespace gg.parse.tests.rules
         {
             var function = new MatchAnyData<char>("TestFunction");
 
-            Assert.IsTrue(function.Parse("a".ToCharArray(), 0).FoundMatch);
-            Assert.IsTrue(function.Parse("1".ToCharArray(), 0).FoundMatch);
-            Assert.IsTrue(function.Parse("%".ToCharArray(), 0).FoundMatch);
+            IsTrue(function.Parse(['a'], 0).FoundMatch);
+            IsTrue(function.Parse(['1'], 0).FoundMatch);
+            IsTrue(function.Parse(['%'], 0).FoundMatch);
         }
 
         [TestMethod]
@@ -20,8 +22,8 @@ namespace gg.parse.tests.rules
         {
             var function = new MatchAnyData<int>("TestFunction");
 
-            Assert.IsTrue(function.Parse([1], 0).FoundMatch);
-            Assert.IsTrue(function.Parse([-1, 0], 1).FoundMatch);
+            IsTrue(function.Parse([1], 0).FoundMatch);
+            IsTrue(function.Parse([-1, 0], 1).FoundMatch);
         }
 
         [TestMethod]
@@ -29,8 +31,8 @@ namespace gg.parse.tests.rules
         {
             var function = new MatchAnyData<char>("TestFunction");
 
-            Assert.IsFalse(function.Parse([], 0).FoundMatch);
-            Assert.IsFalse(function.Parse(['a'], 1).FoundMatch);
+            IsFalse(function.Parse([], 0).FoundMatch);
+            IsFalse(function.Parse(['a'], 1).FoundMatch);
         }
     }
 }

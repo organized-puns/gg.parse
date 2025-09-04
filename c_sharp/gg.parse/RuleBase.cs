@@ -41,7 +41,7 @@
             return Production switch
             {
                 AnnotationProduct.Annotation =>
-                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) {  DebugName = Name }]),
+                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) { DebugName = Name }]),
 
                 AnnotationProduct.Transitive =>
                     new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) { DebugName = Name }]),
@@ -70,14 +70,31 @@
 
         public ParseResult BuildFunctionRuleResult(Range dataRange, List<Annotation>? children = null)
         {
+#if DEBUG
+            return Production switch
+            {
+                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
+                                        [new Annotation(Id, dataRange, children) { DebugName = Name }]),
+
+                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
+                
+                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
+
+                _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
+            };
+#else
             return Production switch
             {
                 AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
                                         [new Annotation(Id, dataRange, children)]),
+
                 AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
+
                 AnnotationProduct.None => new ParseResult(true, dataRange.Length),
+
                 _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
             };
+#endif
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace gg.parse
 {
-    public class Annotation(int functionId, Range range, List<Annotation>? children = null) : IComparable
+    public class Annotation : IComparable
     {
-        public Range Range { get; set; } = range;
+        public Range Range { get; set; }
         
         public int Start => Range.Start;
 
@@ -13,18 +13,30 @@
         /// <summary>
         /// Function which produced this annotation.
         /// </summary>
-        public int FunctionId { get; init; } = functionId;
+        public int FunctionId { get; init; }
 
-        public List<Annotation>? Children { get; } = children;
+        public List<Annotation>? Children { get; init; }
 
-        public Annotation? Parent { get; set; } = null;
+        public Annotation? Parent { get; set; }
 
-        public Annotation? this[int index] => Children == null ? null : Children![index];
+        public Annotation? this[int index] => 
+            Children == null 
+            ? null 
+            : Children![index];
 
 
 #if DEBUG
+        // Defaults to the annotation's name. Generally will be overwritten by a rule
+        // with the rule name during parsing and constructing of the parse results.
         public string DebugName { get; set; } = nameof(Annotation);
 #endif
+
+        public Annotation(int functionId, Range range, List<Annotation>? children = null)
+        {
+            FunctionId = functionId;
+            Range = range;
+            Children = children;
+        }
 
         public int CompareTo(object? obj)
         {

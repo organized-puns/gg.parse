@@ -123,7 +123,6 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-- Annotation debug name does not correctly get set    
 - bug? Seems rule = #(a | b) or ~(...) is not parsing ? production operator issue with group?
 
 - Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
