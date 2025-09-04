@@ -1,5 +1,6 @@
 ﻿using gg.parse.ebnf;
 using System.Diagnostics;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.instances.tests.calculator
@@ -13,12 +14,10 @@ namespace gg.parse.instances.tests.calculator
         /// <summary>
         /// Basic test to ensure that all tokens in the calculator example are found.
         /// </summary>
-        /*[TestMethod]
+        [TestMethod]
         public void CreateTokenizer_FindTokens_ExpectAllTokensFound()
         {
-            var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
-            
-            var calculatorParser = new EbnfParser(tokenizerSpec, null);
+            var calculatorParser = new EbnfParser(_tokenizerSpec, null);
 
             IsNotNull(calculatorParser);
 
@@ -30,10 +29,8 @@ namespace gg.parse.instances.tests.calculator
                 "minus",
                 "mult",
                 "div",
-                "sign",
                 "digit",
-                "float",
-                "int",
+                "number",
                 "group_start",
                 "group_end",
                 "white_space",
@@ -52,10 +49,7 @@ namespace gg.parse.instances.tests.calculator
         [TestMethod]
         public void CreateTokenizerAndGrammar_FindTokens_ExpectAllTokensFound()
         {
-            var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
-            var grammarSpec = File.ReadAllText("assets/calculator.grammar");
-
-            var calculatorParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var calculatorParser = CreateParser();
 
             IsNotNull(calculatorParser);
             IsNotNull(calculatorParser.EbnfGrammarParser!.Root);
@@ -63,21 +57,23 @@ namespace gg.parse.instances.tests.calculator
             var expectedRules = new[]
             {
                 "expression",
+                "term",
+                "unary_operation",
                 "multiplication",
                 "division",
                 "addition",
                 "subtraction",
                 "group",
-                "int",
                 "number",
-                "float"
+                "plus",
+                "minus",
             };
 
             foreach (var ruleName in expectedRules)
             {
                 IsNotNull(calculatorParser.EbnfGrammarParser.FindRule(ruleName), $"Rule '{ruleName}' not found.");
             }
-        }*/
+        }
 
         /// <summary>
         /// See if a simple number gets parsed as expected.

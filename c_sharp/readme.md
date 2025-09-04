@@ -123,18 +123,7 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-- Implement a calculator (in progress)
-    - Implement precendence rule (eval) (done)
-        - add test to check for left precedence (done)
-    - Add eval/precedence rule to rule declaration (done)
-    - Add precedence to ebnf tokenizer/grammar (done)
-    - Add eval rule to ebnf tokenizer/grammar (done)
-    - test if a triple operator works where each op is higher than the previous one (done)
-        eg a op1 b op2 c op3 d where op3 > op2 > op1 (done)
-    - Create basic calculator example (done)
-    - Annotation debug name does not correctly get set
-    - Fix the issue in the CalculatorTests see xxx
-    
+- Annotation debug name does not correctly get set    
 - bug? Seems rule = #(a | b) or ~(...) is not parsing ? production operator issue with group?
 
 - Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
