@@ -55,6 +55,8 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int> Include { get; private set; }
 
+        public MatchFunctionSequence<int> UnexpectedProductError { get; private set; }
+
         public MarkError<int> UnknownInputError { get; private set; }
 
         public EbnfTokenParser()
@@ -65,6 +67,20 @@ namespace gg.parse.ebnf
         public EbnfTokenParser(EbnfTokenizer tokenizer)
         {
             Tokenizer = tokenizer;
+
+            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
+
+            var endStatement = Token(CommonTokenNames.EndStatement);
+            var any = new MatchAnyData<int>("Any");
+            var eof = new MatchNotFunction<int>("~EOF", any);
+
+            var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
+                this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
+                    MatchTransitiveSelector,
+                    MatchNoProductSelector
+                )
+            );
 
             // "abc" or 'abc'
             MatchLiteral = this.OneOf("Literal", AnnotationProduct.Annotation,
@@ -91,21 +107,11 @@ namespace gg.parse.ebnf
                     Token(CommonTokenNames.ScopeEnd)
             );
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
-
-            var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
-                this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
-                    MatchTransitiveSelector,
-                    MatchNoProductSelector
-                )
-            );
-
             MatchIdentifier = this.Sequence("Identifier", AnnotationProduct.Annotation,
                                 ruleProduction,
                                 Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier));
 
-            // literal | set
+            
             var ruleTerms = this.OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
                 MatchLiteral, 
                 MatchAnyToken, 
@@ -151,9 +157,12 @@ namespace gg.parse.ebnf
 
             var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval);
 
-            var ruleDefinition = this.OneOf("#RuleDefinition", AnnotationProduct.Transitive, 
+            var ruleDefinition = this.OneOf(
+                "#RuleDefinition", 
+                AnnotationProduct.Transitive, 
                 binaryRuleTerms, 
-                ruleTerms);
+                ruleTerms
+            );
 
             // ( a, b, c )
             MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
@@ -192,16 +201,55 @@ namespace gg.parse.ebnf
                     ruleDefinition
             );
 
-            Include = this.Sequence("Include", AnnotationProduct.Annotation,
-                Token(CommonTokenNames.Include), 
-                MatchLiteral,
-                Token(CommonTokenNames.EndStatement));
 
-            ruleTerms.RuleOptions = [.. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
-                                    MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError];
+
+            // A stray production modifier found, production modifier can only appear in front of references
+            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
+            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
+            // in script: (~|#), error "unexpected product modifier" .
+            UnexpectedProductError = this.Sequence(
+                "#UnexpectedProductionModifier",
+                AnnotationProduct.Transitive,
+
+                new TryMatchFunction<int>(
+                    "TryMatchProduction",
+                    AnnotationProduct.None,
+                    ruleProduction
+                ),
+                this.Error(
+                    "UnexpectedProductionModifier",
+                    AnnotationProduct.Annotation,
+                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations.",
+                    new MatchNotFunction<int>(
+                        "NotProduction",
+                        AnnotationProduct.None,
+                        ruleProduction
+                    ),
+                    1
+                ),
+                new MatchOneOfFunction<int>(
+                    "~SkipUntil",
+                    eof,
+                    ruleTerms
+                )
+            );
+
+            ruleTerms.RuleOptions = [
+                .. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
+                MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError,
+                UnexpectedProductError
+            ];
+
+            Include = this.Sequence(
+                "Include", 
+                AnnotationProduct.Annotation,
+                Token(CommonTokenNames.Include),
+                MatchLiteral,
+                Token(CommonTokenNames.EndStatement)
+            );
+
 
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
-
             MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
 
             MatchRule = this.Sequence("Rule", AnnotationProduct.Annotation,
@@ -210,9 +258,10 @@ namespace gg.parse.ebnf
                     this.ZeroOrOne("#RulePrecedence",AnnotationProduct.Transitive, MatchPrecedence),
                     Token(CommonTokenNames.Assignment),
                     ruleDefinition,
-                    Token(CommonTokenNames.EndStatement));
+                    endStatement);
 
             var validStatement = this.OneOf("#ValidStatement", AnnotationProduct.Transitive, Include, MatchRule);
+           
 
             // fallback in case nothing matches
             UnknownInputError = this.Error(

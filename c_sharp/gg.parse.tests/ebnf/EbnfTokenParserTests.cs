@@ -72,5 +72,37 @@ namespace gg.parse.tests.ebnf
 
             IsTrue(eval.Children.All(child => child.FunctionId == tokenizerParser.MatchLiteral.Id));
         }
+
+        /// <summary>
+        /// Random # or ~ without following keyword should lead to an error that these are being ignored.
+        /// </summary>
+        [TestMethod]
+        public void CreateGroupedRuleWithProductionModifier_ParseRule_ExpectAnnotationIndicatingProductionsAreIgnored()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = #('foo', ~bar, ~'baz', 'qad', #) ~;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+            IsTrue(tokenizeResult.Annotations.Count == 18);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 1);
+
+            // xxx fix this
+            // test whether or not the parser caught the stray modifiers
+            IsTrue(parseResult.Annotations[0].Children != null && parseResult.Annotations[0].Children!.Count == 4);
+
+            // children = rulename, UnexpectedProductError, sequence, UnexpectedProductError
+            IsTrue(parseResult.Annotations[0].Children!.Count( c => c.FunctionId == tokenizerParser.UnexpectedProductError.Id ) == 2);
+
+            IsTrue(parseResult.Annotations[0][2]!.Children != null && parseResult.Annotations[0][2]!.Children!.Count == 6);
+
+            // sequence = literal, ref, UnexpectedProductError, literal, literal, UnexpectedProductError
+            IsTrue(parseResult.Annotations[0][2]!.Children!.Count(c => c.FunctionId == tokenizerParser.UnexpectedProductError.Id) == 2);
+        }
     }
 }
