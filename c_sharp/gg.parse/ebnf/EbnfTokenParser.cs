@@ -55,7 +55,9 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int> Include { get; private set; }
 
-        public MatchFunctionSequence<int> UnexpectedProductError { get; private set; }
+        public MatchFunctionSequence<int> MatchUnexpectedProductError { get; private set; }
+
+        public MarkError<int> UnexpectedProductError { get; private set; }
 
         public MarkError<int> UnknownInputError { get; private set; }
 
@@ -111,50 +113,79 @@ namespace gg.parse.ebnf
                                 ruleProduction,
                                 Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier));
 
-            
-            var ruleTerms = this.OneOf("#UnaryRuleTerms", AnnotationProduct.Transitive, 
-                MatchLiteral, 
-                MatchAnyToken, 
-                MatchCharacterSet, 
-                MatchCharacterRange, 
+            var matchDataRules = this.OneOf(
+                "MatchDataFunctions",
+                AnnotationProduct.Transitive,
+                MatchLiteral,
+                MatchAnyToken,
+                MatchCharacterSet,
+                MatchCharacterRange,
                 MatchIdentifier
             );
 
+            // A stray production modifier found, production modifier can only appear in front of references
+            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
+            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
+            // in script: (~|#), error "unexpected product modifier" .
+            UnexpectedProductError = this.Error(
+                    "UnexpectedProductionModifier",
+                    AnnotationProduct.Annotation,
+                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations.",
+                    this.OneOf(eof, this.Any()),
+                    maxSkip: 1
+            );
+
+            MatchUnexpectedProductError = this.Sequence(
+                "UnexpectedProductErrorMatch",
+                AnnotationProduct.Annotation,
+                ruleProduction, 
+                matchDataRules,
+                UnexpectedProductError
+            );
+
+            var ruleTerms = this.OneOf(
+                "#DataMatchers", 
+                AnnotationProduct.Transitive, 
+                [.. matchDataRules.RuleOptions, MatchUnexpectedProductError]
+            );
+
+            // a, b, c
             var nextSequenceElement = this.Sequence("#NextSequenceElement", AnnotationProduct.Transitive,
                     Token(CommonTokenNames.CollectionSeparator),
                     ruleTerms);
 
-            // a, b, c
+            
             MatchSequence = this.Sequence("Sequence", AnnotationProduct.Annotation,
                     ruleTerms,
                     Token(CommonTokenNames.CollectionSeparator),
                     ruleTerms,
                     this.ZeroOrMore("#SequenceRest", AnnotationProduct.Transitive, nextSequenceElement));
 
+            // a | b | c
             var nextOptionElement = this.Sequence("#NextOptionElement", AnnotationProduct.Transitive,
                     Token(CommonTokenNames.Option),
                     ruleTerms);
-
-            // a | b | c
+            
             MatchOption = this.Sequence("Option", AnnotationProduct.Annotation,
                     ruleTerms,
                     Token(CommonTokenNames.Option),
                     ruleTerms,
                     this.ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
 
+            // a / b / c
+
             // xxx this is the same pattern as sequence and option, create a function for it
             var nextEvalElement = this.Sequence("#NextEvalElement", AnnotationProduct.Transitive,
                     Token(CommonTokenNames.OptionWithPrecedence),
                     ruleTerms);
 
-
-            // a / b / c
             MatchEval = this.Sequence("Evaluation", AnnotationProduct.Annotation,
                     ruleTerms,
                     Token(CommonTokenNames.OptionWithPrecedence),
                     ruleTerms,
                     this.ZeroOrMore("#EvaluationRest", AnnotationProduct.Transitive, nextEvalElement));
 
+            // xxx redundant can be rolled up in ruleTerms
             var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval);
 
             var ruleDefinition = this.OneOf(
@@ -202,42 +233,9 @@ namespace gg.parse.ebnf
             );
 
 
-
-            // A stray production modifier found, production modifier can only appear in front of references
-            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
-            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
-            // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductError = this.Sequence(
-                "#UnexpectedProductionModifier",
-                AnnotationProduct.Transitive,
-
-                new TryMatchFunction<int>(
-                    "TryMatchProduction",
-                    AnnotationProduct.None,
-                    ruleProduction
-                ),
-                this.Error(
-                    "UnexpectedProductionModifier",
-                    AnnotationProduct.Annotation,
-                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations.",
-                    new MatchNotFunction<int>(
-                        "NotProduction",
-                        AnnotationProduct.None,
-                        ruleProduction
-                    ),
-                    1
-                ),
-                new MatchOneOfFunction<int>(
-                    "~SkipUntil",
-                    eof,
-                    ruleTerms
-                )
-            );
-
             ruleTerms.RuleOptions = [
                 .. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
                 MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError,
-                UnexpectedProductError
             ];
 
             Include = this.Sequence(
@@ -261,14 +259,13 @@ namespace gg.parse.ebnf
                     endStatement);
 
             var validStatement = this.OneOf("#ValidStatement", AnnotationProduct.Transitive, Include, MatchRule);
-           
 
             // fallback in case nothing matches
             UnknownInputError = this.Error(
-                "UnknownInput", 
+                "UnknownInput",
                 AnnotationProduct.Annotation,
-                "Can't match the token at the given position to a astNode.", 
-                validStatement, 
+                "Can't match the token at the given position to a astNode.",
+                validStatement,
                 0
             );
 
