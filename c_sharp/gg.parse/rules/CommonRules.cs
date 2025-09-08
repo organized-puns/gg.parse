@@ -344,11 +344,11 @@ namespace gg.parse.rulefunctions
 
 
         public static MarkError<T> Error<T>(this RuleGraph<T> graph, 
-            string name, AnnotationProduct product, string description, RuleBase<T>? testFunction, int maxLength)
+            string name, AnnotationProduct product, string description, RuleBase<T>? testFunction, int maxSkip)
             where T: IComparable<T> =>
             graph.TryFindRule(name, out MarkError<T>? existingRule)
                      ? existingRule!
-                     : graph.RegisterRule(new MarkError<T>(name, product, description, testFunction, maxLength));
+                     : graph.RegisterRule(new MarkError<T>(name, product, description, testFunction, maxSkip));
 
 
         public static RuleBase<char> InSet(this RuleGraph<char> graph, params char[] set)
@@ -363,6 +363,27 @@ namespace gg.parse.rulefunctions
             graph.TryFindRule(ruleName, out MatchDataSet<char>? existingRule)
                 ? existingRule!
                 : graph.RegisterRule(new MatchDataSet<char>(ruleName, product, set));
+
+        public static TryMatchFunction<T> TryMatch<T>(
+            this RuleGraph<T> graph, 
+            string ruleName, 
+            AnnotationProduct product, 
+            RuleBase<T> function
+        ) where T : IComparable<T> =>
+
+            graph.TryFindRule(ruleName, out TryMatchFunction<T>? existingRule)
+                ? existingRule!
+                : graph.RegisterRule(new TryMatchFunction<T>(ruleName, product, function));
+
+
+        public static TryMatchFunction<T> TryMatch<T>(this RuleGraph<T> graph, RuleBase<T> function) where T : IComparable<T> =>
+
+            TryMatch(
+                graph,
+                $"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.TryMatchOperator}({string.Join(", ", function)})",
+                AnnotationProduct.None,
+                function
+            );            
     }
 }
 

@@ -94,8 +94,6 @@ Eg: forgetting a ; after a rule in the grammar can be handled with
     }
 ```
 
-
-
 ## Extending the EBNF Parser
 
 - Create a new rule class
@@ -115,6 +113,14 @@ Adding tests:
 - Add a compiler test in `RuleCompilerTests.cs`
 - Add an integration test, add the rule in an .ebnf, parse/compile and test.
 
+Good to remember (FAQ?):
+------------------------
+
+- bug? Seems rule = #(a | b) or ~(...) is not parsing ? production operator issue with group?
+    IS _AS INTENDED_... groups by definition are always transitive and any other.
+-   Data functions, eg {'a'..'b'} ALWAYS have production `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
+    IT SHOULD have a clear error though, something like "found production rule without identifier".
+
 Todo (for v1.0)
 ---------------
 
@@ -122,8 +128,6 @@ Todo (for v1.0)
   - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
   - address all xxx
-
-- bug? Seems rule = #(a | b) or ~(...) is not parsing ? production operator issue with group?
 
 - Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
   or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'

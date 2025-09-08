@@ -66,7 +66,7 @@ namespace gg.parse.ebnf
                     this.SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
                     this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
 
-                    // should be below comments
+                    // should be below comments, because conflicts with /* or //
                     MapNameToToken(OptionWithPrecedence, "/")
                 );
 
