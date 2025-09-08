@@ -133,10 +133,6 @@ Todo (for v1.0)
   or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
 
 - keywords should end with whitespace | non_keyword_char
-- add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
-- add full/short names versions for "or /|"
-- add alternative for "= / :"
-- replace any with _, disallow identifier to start with '_' ?
 - (Bug) add guard against infinite loop with zero or more (and other cases)
 
 - add optional namespaces to avoid grammar / token name clash 
@@ -148,14 +144,16 @@ Todo (for v1.0)
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
 
-- implement a Ebnf based EbnfParser and Tokenizer
 
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)
 	see if sequence can go without ,
 	see if range can go without {}
 
-
-
+- implement a Ebnf based EbnfParser and Tokenizer
+- add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
+- add full/short names versions for "or /|"
+- add alternative for "= / :"
+- replace any with _, disallow identifier to start with '_' ?
 
 - Implement a function console

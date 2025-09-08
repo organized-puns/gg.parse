@@ -11,7 +11,7 @@ namespace gg.parse.ebnf
     /// </summary>
     public class EbnfTokenParser : RuleGraph<int>
     {
-        public EbnfTokenizer Tokenizer { get; init; }      
+        public EbnfTokenizer               Tokenizer { get; init; }      
 
         public MatchOneOfFunction<int>     MatchLiteral { get; private set; }
 
@@ -59,7 +59,11 @@ namespace gg.parse.ebnf
 
         public MarkError<int> UnexpectedProductError { get; private set; }
 
+        public MarkError<int> InvalidRuleDefinitionError { get; private set; }
+
         public MarkError<int> UnknownInputError { get; private set; }
+
+        public MarkError<int> MissingRuleEndError { get; private set; }
 
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
@@ -109,9 +113,12 @@ namespace gg.parse.ebnf
                     Token(CommonTokenNames.ScopeEnd)
             );
 
-            MatchIdentifier = this.Sequence("Identifier", AnnotationProduct.Annotation,
-                                ruleProduction,
-                                Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier));
+            MatchIdentifier = this.Sequence(
+                "Identifier", 
+                AnnotationProduct.Annotation,
+                ruleProduction,
+                Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier)
+            );
 
             var matchDataRules = new RuleBase<int>[] {
                 MatchLiteral,
@@ -139,7 +146,7 @@ namespace gg.parse.ebnf
             var ruleDefinition = this.OneOf(
                 "#RuleDefinition", 
                 AnnotationProduct.Transitive,
-                // match this before anary terms
+                // match this before unary terms
                 this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval), 
                 unaryAndDataTerms
             );
@@ -208,10 +215,12 @@ namespace gg.parse.ebnf
                 UnexpectedProductError
             );
 
-            MatchError = this.Sequence("Error", AnnotationProduct.Annotation,
-                    Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
-                    MatchLiteral,
-                    ruleDefinition
+            MatchError = this.Sequence(
+                "Error", 
+                AnnotationProduct.Annotation,
+                Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
+                MatchLiteral,
+                ruleDefinition
             );
 
             unaryAndDataTerms.RuleOptions = [
@@ -233,13 +242,52 @@ namespace gg.parse.ebnf
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
             MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
 
-            MatchRule = this.Sequence("Rule", AnnotationProduct.Annotation,
-                    ruleProduction,
-                    MatchRuleName,
-                    this.ZeroOrOne("#RulePrecedence",AnnotationProduct.Transitive, MatchPrecedence),
-                    Token(CommonTokenNames.Assignment),
-                    ruleDefinition,
-                    endStatement);
+            var ruleDeclaration = this.Sequence(
+                "#RuleDeclaration",
+                AnnotationProduct.Transitive,
+                ruleProduction,
+                MatchRuleName,
+                this.ZeroOrOne("#RulePrecedence", AnnotationProduct.Transitive, MatchPrecedence)
+            );
+
+            InvalidRuleDefinitionError = this.Error(
+                    "CannotParseRuleDefinition",
+                    AnnotationProduct.Annotation,
+                    "Unable to parse the rule definition, please check the definition for mistakes.",
+                    this.OneOf(eof, endStatement),
+                    maxSkip: 1
+            );
+
+            var ruleDefinitionOptions = this.OneOf(
+                "#RuleDefinitionOptions",
+                AnnotationProduct.Transitive,
+                ruleDefinition,
+                InvalidRuleDefinitionError
+            );
+
+            MissingRuleEndError = this.Error(
+                "MissingEndRule",
+                AnnotationProduct.Annotation,
+                "Missing end of rule (;) at the given position.",
+                this.OneOf(eof, this.Any()),
+                1
+            );            
+
+            var endStatementOptions = this.OneOf(
+                "#EndStatementOptions",
+                AnnotationProduct.Transitive,
+                endStatement,
+                MissingRuleEndError
+            );
+
+            MatchRule = this.Sequence(
+                "Rule", 
+                AnnotationProduct.Annotation,
+                ruleDeclaration,
+                Token(CommonTokenNames.Assignment),
+                ruleDefinitionOptions,
+                endStatementOptions
+            );
 
             var validStatement = this.OneOf("#ValidStatement", AnnotationProduct.Transitive, Include, MatchRule);
 

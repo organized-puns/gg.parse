@@ -214,8 +214,8 @@ namespace gg.parse.tests.ebnf
         }
 
         private static void TestParseUnexpectedProductError(
-            string testData, 
-            int expectedTokenCount, 
+            string testData,
+            int expectedTokenCount,
             Func<EbnfTokenParser, int>[] expectedFunctionIds
         )
         {
@@ -254,7 +254,7 @@ namespace gg.parse.tests.ebnf
 
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
-            
+
             var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
@@ -268,6 +268,52 @@ namespace gg.parse.tests.ebnf
             IsTrue(sequence[0]!.FunctionId == tokenizerParser.MatchIdentifier.Id);
             IsTrue(sequence[1]!.FunctionId == tokenizerParser.MatchUnexpectedProductError.Id);
             IsTrue(sequence[2]!.FunctionId == tokenizerParser.MatchUnexpectedProductError.Id);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithInvalidRuleDefinition_Parse_ExpectDefintionMarkedWithError()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = *; rule2 = 'foo';");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 2);
+            IsTrue(parseResult.Annotations[0] != null 
+                    && parseResult.Annotations[0]!.Children != null
+                    && parseResult.Annotations[0]!.Children!.Count == 2);
+            IsTrue(parseResult.Annotations[0]!.Children![1].FunctionId == tokenizerParser.InvalidRuleDefinitionError.Id);
+            IsTrue(parseResult.Annotations[0]!.Children![1].Range.Equals(new Range(2, 1)));
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingEndRule_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = 'bar' rule2 = 'foo'");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 2);
+            IsTrue(parseResult.Annotations[0] != null
+                    && parseResult.Annotations[0]!.Children != null
+                    && parseResult.Annotations[0]!.Children!.Count == 3);
+            IsTrue(parseResult.Annotations[0]!.Children![2].FunctionId == tokenizerParser.MissingRuleEndError.Id);
+
+            IsTrue(parseResult.Annotations[1] != null
+                    && parseResult.Annotations[1]!.Children != null
+                    && parseResult.Annotations[1]!.Children!.Count == 3);
+            IsTrue(parseResult.Annotations[1]!.Children![2].FunctionId == tokenizerParser.MissingRuleEndError.Id);
         }
     }
 }
