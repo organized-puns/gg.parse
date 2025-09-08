@@ -80,9 +80,13 @@ namespace gg.parse.tests.ebnf
         public void CreateTokensForLiteralWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
         {
             TestParseUnexpectedProductError(
-                ["#'foo'", "~'bar'"],
+                "~'foo'",
                 2,
-                tokenizerParser => tokenizerParser.MatchLiteral.Id
+                [
+                    tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchLiteral.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
             );
         }
 
@@ -93,9 +97,13 @@ namespace gg.parse.tests.ebnf
         public void CreateTokensForRangeWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
         {
             TestParseUnexpectedProductError(
-                ["#{'a'..'z'}", "~{'0'..'9'}"], 
-                6, 
-                tokenizerParser => tokenizerParser.MatchCharacterRange.Id
+                "~ {'0'..'9'}",
+                6,
+                [
+                    tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchCharacterRange.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
             );
         }
 
@@ -106,9 +114,13 @@ namespace gg.parse.tests.ebnf
         public void CreateTokensForSetWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
         {
             TestParseUnexpectedProductError(
-                ["#{'abc'}", "~{'123'}"],
+                "#{'abc'}",
                 4,
-                tokenizerParser => tokenizerParser.MatchCharacterSet.Id
+                [
+                    tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchCharacterSet.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
             );
         }
 
@@ -119,34 +131,114 @@ namespace gg.parse.tests.ebnf
         public void CreateTokensForAnyWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
         {
             TestParseUnexpectedProductError(
-                ["#.", "~."],
+                "#.",
                 2,
-                tokenizerParser => tokenizerParser.MatchAnyToken.Id
+                [
+                    tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchAnyToken.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
             );
         }
 
-        public void TestParseUnexpectedProductError(string[] testData, int expectedTokenCount, Func<EbnfTokenParser, int> expectedFunctionId)
+        /// <summary>
+        /// Try parse a group with a production qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForGroupWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
         {
-            foreach (var inputText in testData)
+            TestParseUnexpectedProductError(
+                "#('foo')",
+                4,
+                [
+                    tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
+                    // group is transitive
+                    tokenizerParser => tokenizerParser.MatchLiteral.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
+            );
+        }
+
+        /// <summary>
+        /// Try parse a not with a production qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForNotWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "~!'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchNotOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
+            );
+        }
+
+        /// <summary>
+        /// Try parse a count with a production qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForCountWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "#*'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchZeroOrMoreOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
+            );
+
+            TestParseUnexpectedProductError(
+                "~?'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchZeroOrOneOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
+            );
+
+            TestParseUnexpectedProductError(
+                "~+'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
+                    tokenizerParser => tokenizerParser.MatchOneOrMoreOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                ]
+            );
+        }
+
+        private static void TestParseUnexpectedProductError(
+            string testData, 
+            int expectedTokenCount, 
+            Func<EbnfTokenParser, int>[] expectedFunctionIds
+        )
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizeResult = tokenizer.Tokenize(testData);
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsTrue(tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count == expectedTokenCount);
+
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var errorParseResult = tokenizerParser.MatchUnexpectedProductError.Parse(tokenizeResult.Annotations.Select(a => a.FunctionId).ToArray(), 0);
+
+            IsTrue(errorParseResult.FoundMatch);
+            IsTrue(errorParseResult.MatchedLength == expectedTokenCount);
+            IsTrue(errorParseResult.Annotations != null
+                    && errorParseResult.Annotations.Count == 1
+                    && errorParseResult.Annotations[0].Children != null
+                    && errorParseResult.Annotations[0].Children!.Count == 3
+                    && errorParseResult.Annotations[0].FunctionId == tokenizerParser.MatchUnexpectedProductError.Id);
+
+            for (var i = 0; i < expectedFunctionIds.Length; i++)
             {
-                var tokenizer = new EbnfTokenizer();
-                var tokenizeResult = tokenizer.Tokenize(inputText);
-
-                IsTrue(tokenizeResult.FoundMatch);
-                IsTrue(tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count == expectedTokenCount);
-
-                var tokenizerParser = new EbnfTokenParser(tokenizer);
-                var errorParseResult = tokenizerParser.MatchUnexpectedProductError.Parse(tokenizeResult.Annotations.Select(a => a.FunctionId).ToArray(), 0);
-
-                IsTrue(errorParseResult.FoundMatch);
-                IsTrue(errorParseResult.MatchedLength == expectedTokenCount);
-                IsTrue(errorParseResult.Annotations != null
-                        && errorParseResult.Annotations.Count == 1
-                        && errorParseResult.Annotations[0].Children != null
-                        && errorParseResult.Annotations[0].Children!.Count == 3
-                        && errorParseResult.Annotations[0].FunctionId == tokenizerParser.MatchUnexpectedProductError.Id
-                        && errorParseResult.Annotations[0][1]!.FunctionId == expectedFunctionId(tokenizerParser)
-                        && errorParseResult.Annotations[0][2]!.FunctionId == tokenizerParser.UnexpectedProductError.Id);
+                IsTrue(errorParseResult.Annotations[0][i]!.FunctionId == expectedFunctionIds[i](tokenizerParser));
             }
         }
 

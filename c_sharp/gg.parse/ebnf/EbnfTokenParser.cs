@@ -113,15 +113,76 @@ namespace gg.parse.ebnf
                                 ruleProduction,
                                 Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier));
 
-            var matchDataRules = this.OneOf(
-                "MatchDataFunctions",
-                AnnotationProduct.Transitive,
+            var matchDataRules = new RuleBase<int>[] {
                 MatchLiteral,
                 MatchAnyToken,
                 MatchCharacterSet,
                 MatchCharacterRange,
                 MatchIdentifier
+            };
+
+            var unaryAndDataTerms = this.OneOf(
+                "#DataMatchers", 
+                AnnotationProduct.Transitive, 
+                [.. matchDataRules]
             );
+
+            // a, b, c
+            MatchSequence = BinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryAndDataTerms);
+
+            // a | b | c
+            MatchOption = BinaryOperator("Option", CommonTokenNames.Option, unaryAndDataTerms);
+
+            // a / b / c
+            MatchEval = BinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
+
+            var ruleDefinition = this.OneOf(
+                "#RuleDefinition", 
+                AnnotationProduct.Transitive,
+                // match this before anary terms
+                this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval), 
+                unaryAndDataTerms
+            );
+
+            // ( a, b, c )
+            MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
+                Token(CommonTokenNames.GroupStart),
+                ruleDefinition,
+                Token(CommonTokenNames.GroupEnd));
+
+            // *(a | b | c)
+            MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
+                Token(CommonTokenNames.ZeroOrMoreOperator),
+                unaryAndDataTerms);
+
+            // ?(a | b | c)
+            MatchZeroOrOneOperator = this.Sequence("ZeroOrOne", AnnotationProduct.Annotation,
+                Token(CommonTokenNames.ZeroOrOneOperator),
+                unaryAndDataTerms);
+
+            // +(a | b | c)
+            MatchOneOrMoreOperator = this.Sequence("OneOrMore", AnnotationProduct.Annotation,
+                Token(CommonTokenNames.OneOrMoreOperator),
+                unaryAndDataTerms);
+
+            // !(a | b | c)
+            MatchNotOperator = this.Sequence("Not", AnnotationProduct.Annotation,
+                Token(CommonTokenNames.NotOperator),
+                unaryAndDataTerms);
+
+            // >(a | b | c) / try ( a | b | c)
+            TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
+                this.OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
+                unaryAndDataTerms);
+
+            var unaryOperators = new RuleBase<int>[]
+            {
+                MatchZeroOrMoreOperator,
+                MatchZeroOrOneOperator,
+                MatchOneOrMoreOperator,
+                MatchNotOperator,
+                TryMatchOperator
+            };
 
             // A stray production modifier found, production modifier can only appear in front of references
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
@@ -138,93 +199,14 @@ namespace gg.parse.ebnf
             MatchUnexpectedProductError = this.Sequence(
                 "UnexpectedProductErrorMatch",
                 AnnotationProduct.Annotation,
-                ruleProduction, 
-                matchDataRules,
+                ruleProduction,
+                this.OneOf(
+                    "#UnexpectedProductErrorMatchTerm", 
+                    AnnotationProduct.Transitive, 
+                    [..matchDataRules, ..unaryOperators, MatchGroup]
+                ), 
                 UnexpectedProductError
             );
-
-            var ruleTerms = this.OneOf(
-                "#DataMatchers", 
-                AnnotationProduct.Transitive, 
-                [.. matchDataRules.RuleOptions, MatchUnexpectedProductError]
-            );
-
-            // a, b, c
-            var nextSequenceElement = this.Sequence("#NextSequenceElement", AnnotationProduct.Transitive,
-                    Token(CommonTokenNames.CollectionSeparator),
-                    ruleTerms);
-
-            
-            MatchSequence = this.Sequence("Sequence", AnnotationProduct.Annotation,
-                    ruleTerms,
-                    Token(CommonTokenNames.CollectionSeparator),
-                    ruleTerms,
-                    this.ZeroOrMore("#SequenceRest", AnnotationProduct.Transitive, nextSequenceElement));
-
-            // a | b | c
-            var nextOptionElement = this.Sequence("#NextOptionElement", AnnotationProduct.Transitive,
-                    Token(CommonTokenNames.Option),
-                    ruleTerms);
-            
-            MatchOption = this.Sequence("Option", AnnotationProduct.Annotation,
-                    ruleTerms,
-                    Token(CommonTokenNames.Option),
-                    ruleTerms,
-                    this.ZeroOrMore("#OptionRest", AnnotationProduct.Transitive, nextOptionElement));
-
-            // a / b / c
-
-            // xxx this is the same pattern as sequence and option, create a function for it
-            var nextEvalElement = this.Sequence("#NextEvalElement", AnnotationProduct.Transitive,
-                    Token(CommonTokenNames.OptionWithPrecedence),
-                    ruleTerms);
-
-            MatchEval = this.Sequence("Evaluation", AnnotationProduct.Annotation,
-                    ruleTerms,
-                    Token(CommonTokenNames.OptionWithPrecedence),
-                    ruleTerms,
-                    this.ZeroOrMore("#EvaluationRest", AnnotationProduct.Transitive, nextEvalElement));
-
-            // xxx redundant can be rolled up in ruleTerms
-            var binaryRuleTerms = this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval);
-
-            var ruleDefinition = this.OneOf(
-                "#RuleDefinition", 
-                AnnotationProduct.Transitive, 
-                binaryRuleTerms, 
-                ruleTerms
-            );
-
-            // ( a, b, c )
-            MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
-                Token(CommonTokenNames.GroupStart),
-                ruleDefinition,
-                Token(CommonTokenNames.GroupEnd));
-
-            // *(a | b | c)
-            MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
-                Token(CommonTokenNames.ZeroOrMoreOperator),
-                ruleTerms);
-
-            // ?(a | b | c)
-            MatchZeroOrOneOperator = this.Sequence("ZeroOrOne", AnnotationProduct.Annotation,
-                Token(CommonTokenNames.ZeroOrOneOperator),
-                ruleTerms);
-
-            // +(a | b | c)
-            MatchOneOrMoreOperator = this.Sequence("OneOrMore", AnnotationProduct.Annotation,
-                Token(CommonTokenNames.OneOrMoreOperator),
-                ruleTerms);
-
-            // !(a | b | c)
-            MatchNotOperator = this.Sequence("Not", AnnotationProduct.Annotation,
-                Token(CommonTokenNames.NotOperator),
-                ruleTerms);
-
-            // >(a | b | c) / try ( a | b | c)
-            TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
-                this.OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
-                ruleTerms);
 
             MatchError = this.Sequence("Error", AnnotationProduct.Annotation,
                     Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
@@ -232,10 +214,12 @@ namespace gg.parse.ebnf
                     ruleDefinition
             );
 
-
-            ruleTerms.RuleOptions = [
-                .. ruleTerms.RuleOptions, MatchGroup, MatchZeroOrMoreOperator, 
-                MatchZeroOrOneOperator, MatchOneOrMoreOperator, MatchNotOperator, TryMatchOperator, MatchError,
+            unaryAndDataTerms.RuleOptions = [
+                ..unaryAndDataTerms.RuleOptions, 
+                ..unaryOperators,
+                MatchGroup, 
+                MatchError,
+                MatchUnexpectedProductError
             ];
 
             Include = this.Sequence(
@@ -245,7 +229,6 @@ namespace gg.parse.ebnf
                 MatchLiteral,
                 Token(CommonTokenNames.EndStatement)
             );
-
 
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
             MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
@@ -381,6 +364,20 @@ namespace gg.parse.ebnf
 
             return result;
         }
+
+        private MatchFunctionSequence<int> BinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
+        {
+            var nextSequenceElement = this.Sequence($"#Next{name}Element", AnnotationProduct.Transitive,
+                    Token(operatorTokenName),
+                    ruleTerms);
+
+            return this.Sequence(name, AnnotationProduct.Annotation,
+                    ruleTerms,
+                    Token(operatorTokenName),
+                    ruleTerms,
+                    this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, nextSequenceElement));
+        }
+
     }
 }
 
