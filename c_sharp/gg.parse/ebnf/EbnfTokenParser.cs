@@ -3,6 +3,7 @@ using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 
 using static gg.parse.rulefunctions.CommonRules;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.ebnf
 {
@@ -65,6 +66,14 @@ namespace gg.parse.ebnf
 
         public MarkError<int> MissingRuleEndError { get; private set; }
 
+        private MatchNotFunction<int> Eof { get; set; }
+
+        private MatchAnyData<int> MatchAny { get; set; }
+
+        private MatchSingleData<int> GroupStart { get; set; }
+        
+        private MatchSingleData<int> GroupEnd { get; set; }
+
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
         {
@@ -78,8 +87,11 @@ namespace gg.parse.ebnf
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
             var endStatement = Token(CommonTokenNames.EndStatement);
-            var any = new MatchAnyData<int>("Any");
-            var eof = new MatchNotFunction<int>("~EOF", any);
+
+            GroupStart = Token(CommonTokenNames.GroupStart);
+            GroupEnd = Token(CommonTokenNames.GroupEnd);
+            MatchAny = new MatchAnyData<int>("Any");
+            Eof = new MatchNotFunction<int>("~EOF", MatchAny);
 
             var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
                 this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
@@ -153,9 +165,9 @@ namespace gg.parse.ebnf
 
             // ( a, b, c )
             MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
-                Token(CommonTokenNames.GroupStart),
+                GroupStart,
                 ruleDefinition,
-                Token(CommonTokenNames.GroupEnd));
+                GroupEnd);
 
             // *(a | b | c)
             MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
@@ -199,7 +211,7 @@ namespace gg.parse.ebnf
                     "UnexpectedProductionModifier",
                     AnnotationProduct.Annotation,
                     "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations.",
-                    this.OneOf(eof, this.Any()),
+                    this.OneOf(Eof, MatchAny),
                     maxSkip: 1
             );
 
@@ -254,7 +266,7 @@ namespace gg.parse.ebnf
                     "CannotParseRuleDefinition",
                     AnnotationProduct.Annotation,
                     "Unable to parse the rule definition, please check the definition for mistakes.",
-                    this.OneOf(eof, endStatement),
+                    this.OneOf(Eof, endStatement),
                     maxSkip: 1
             );
 
@@ -269,7 +281,7 @@ namespace gg.parse.ebnf
                 "MissingEndRule",
                 AnnotationProduct.Annotation,
                 "Missing end of rule (;) at the given position.",
-                this.OneOf(eof, this.Any()),
+                this.OneOf(Eof, MatchAny),
                 1
             );            
 
@@ -314,71 +326,86 @@ namespace gg.parse.ebnf
         {
             if (!string.IsNullOrEmpty(text))
             {
-                var tokenizationResult = Tokenizer.Tokenize(text);
-
-                if (tokenizationResult.FoundMatch)
-                {
-                    var tokenizerTokens = tokenizationResult.Annotations;
-
-                    if (tokenizerTokens == null)
-                    {
-                        throw new TokenizeException("input contains no valid tokens.");
-                    }
-
-                    if (tokenizationResult.Annotations != null)
-                    {
-                        var tokenizerErrors = CollectErrors(tokenizerTokens, Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id);
-
-                        if (tokenizerErrors.Count > 0)
-                        {
-                            throw new TokenizeException(
-                                "input contains characters which could not be mapped to a token.", 
-                                tokenizerErrors
-                            );
-                        }
-
-                        var astResult = Parse(tokenizationResult.Annotations);
-
-                        if (astResult.FoundMatch)
-                        {
-                            var astNodes = astResult.Annotations;
-
-                            if (astNodes == null)
-                            {
-                                throw new ParseException("input contains no valid grammar.");
-                            }
-
-                            var grammarErrors = CollectErrors(astNodes, UnknownInputError.Id);
-
-                            if (grammarErrors.Count > 0)
-                            {
-                                throw new ParseException(
-                                        "input contains tokens which could not be mapped to grammar.", 
-                                        grammarErrors,
-                                        text,
-                                        tokenizationResult.Annotations
-                                );
-                            }
-
-                            return (tokenizationResult.Annotations, astResult.Annotations);
-                        }   
-                        else
-                        {
-                            return (tokenizationResult.Annotations, []);
-                        }
-                    }
-                    else
-                    {
-                        return ([], []);
-                    }
+                var tokenizerTokens = TokenizeText(text);
+                
+                if (tokenizerTokens.Count > 0)
+                { 
+                    return ParseGrammar(text, tokenizerTokens!);
                 }
+            }
+
+            return ([], []);
+
+        }
+
+        private List<Annotation> TokenizeText(string text)
+        {
+            var tokenizationResult = Tokenizer.Tokenize(text);
+
+            if (tokenizationResult.FoundMatch && tokenizationResult.Annotations != null)
+            {
+                var tokenizerTokens = tokenizationResult.Annotations;
+
+                var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
+                var errorPredicate = new Func<Annotation, bool>(a => a.FunctionId == unknownTokenId);
+                var tokenizerErrors = new List<Annotation>();
+
+                foreach (var annotation in tokenizationResult.Annotations)
+                {
+                    annotation.Collect(errorPredicate, tokenizerErrors);
+                }
+
+                if (tokenizerErrors.Count > 0)
+                {
+                    throw new TokenizeException(
+                        "input contains characters which could not be mapped to a token.",
+                        tokenizerErrors
+                    );
+                }
+
+                return tokenizerTokens!;
+            }
+
+            throw new TokenizeException("input contains no valid tokens.");
+        }
+
+        private (List<Annotation> tokens, List<Annotation> astNodes) ParseGrammar(string text, List<Annotation> tokens)
+        {
+            var astResult = Parse(tokens);
+
+            if (astResult.FoundMatch)
+            {
+                var astNodes = astResult.Annotations;
+
+                if (astNodes == null)
+                {
+                    throw new ParseException("input contains no valid grammar.");
+                }
+
+                var errorPredicate = new Func<Annotation, bool>(a => FindRule(a.FunctionId) is MarkError<int>);
+                var grammarErrors = new List<Annotation>();
+
+                foreach (var annotation in astNodes)
+                {
+                    annotation.Collect(errorPredicate, grammarErrors);
+                }
+
+                if (grammarErrors.Count > 0)
+                {
+                    throw new ParseException(
+                            "input contains tokens which could not be mapped to grammar.",
+                            grammarErrors,
+                            text,
+                            tokens
+                    );
+                }
+
+                return (tokens, astResult.Annotations!);
             }
             else
             {
-                return ([], []);
+                return (tokens, []);
             }
-
-            throw new ArgumentException("Invalid input");
         }
 
         private MatchSingleData<int> Token(string tokenName)
@@ -393,7 +420,8 @@ namespace gg.parse.ebnf
             return this.Single(ruleName, product, rule.Id);
         }
 
-        private static List<Annotation> CollectErrors(List<Annotation> annotationList, int errorId, List<Annotation>? collectedErrors = null)
+        // xxx fix
+        /*private static List<Annotation> CollectErrors(List<Annotation> annotationList, int errorId, List<Annotation>? collectedErrors = null)
         {
             var result = collectedErrors ?? new List<Annotation>();
 
@@ -411,13 +439,16 @@ namespace gg.parse.ebnf
             }
 
             return result;
-        }
+        }*/
 
         private MatchFunctionSequence<int> BinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
         {
             var nextSequenceElement = this.Sequence($"#Next{name}Element", AnnotationProduct.Transitive,
                     Token(operatorTokenName),
                     ruleTerms);
+
+            var validNextElement = this.OneOf(Eof, GroupStart);
+
 
             return this.Sequence(name, AnnotationProduct.Annotation,
                     ruleTerms,

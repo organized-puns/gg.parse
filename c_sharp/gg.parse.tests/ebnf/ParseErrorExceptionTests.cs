@@ -47,8 +47,8 @@ namespace gg.parse.tests.ebnf
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
-                IsTrue(e.Errors.ElementAt(0).Start == 0);
-                IsTrue(e.Errors.ElementAt(0).Length == 3);
+                IsTrue(e.Errors.ElementAt(0).Start == 3);
+                IsTrue(e.Errors.ElementAt(0).Length == 0);
                 IsTrue(e.Errors.ElementAt(1).Start == 7);
                 IsTrue(e.Errors.ElementAt(1).Length == 3);
             }
@@ -91,13 +91,11 @@ namespace gg.parse.tests.ebnf
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
-                IsTrue(e.Errors.ElementAt(0).Start == 0);
-                IsTrue(e.Errors.ElementAt(0).Length == 3);
+                IsTrue(e.Errors.ElementAt(0).Start == 3);
+                IsTrue(e.Errors.ElementAt(0).Length == 0);
                 IsTrue(e.Errors.ElementAt(1).Start == 7);
                 IsTrue(e.Errors.ElementAt(1).Length == 3);
-            }
-
-            
+            }           
         }
     }
 }

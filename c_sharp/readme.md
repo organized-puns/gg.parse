@@ -129,8 +129,14 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-- Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
-  or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
+- Error handling, 
+ 
+    var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
+    wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
+    missing assignment
+    wrong token for precedence
+    missing term after unary
+    
 
 - keywords should end with whitespace | non_keyword_char
 - (Bug) add guard against infinite loop with zero or more (and other cases)
