@@ -174,7 +174,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) =  compiler.Functions[elementAnnotation.FunctionId];
+                    var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.FunctionId);
                     var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Annotation, $"{declaration.Name}[{i}], type: {elementName}");
                     var optionElement = compilationFunction(compiler, elementDeclaration, context);
 
@@ -191,6 +191,8 @@ namespace gg.parse.compiler
 
             return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
         }
+
+        
 
         public static RuleBase<T> CompileEvaluation<T>(
             RuleCompiler<T> compiler,

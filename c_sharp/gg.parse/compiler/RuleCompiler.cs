@@ -3,6 +3,17 @@ using gg.core.util;
 
 namespace gg.parse.compiler
 {
+    public class NoCompilationFunctionException : Exception
+    {
+        public int RuleId { get; init; }
+
+        public NoCompilationFunctionException(int id) 
+            : base("No complilation function for the given rule id.")
+        {
+            RuleId = id;
+        }
+    }
+
     public delegate RuleBase<T> CompileFunction<T>(
         RuleCompiler<T> compiler,
         RuleDeclaration declaration, 
@@ -10,6 +21,8 @@ namespace gg.parse.compiler
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
+
+
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
@@ -26,6 +39,16 @@ namespace gg.parse.compiler
 
             Functions.Add(parseFunctionId, (function!, name ?? $"function_id:{parseFunctionId}"));
             return this;
+        }
+
+        public (CompileFunction<T> function, string? name) FindCompilationFunction(int parseFunctionId)
+        {
+            if (Functions.TryGetValue(parseFunctionId, out var compilationFunction))
+            {
+                return compilationFunction;
+            }
+
+            throw new NoCompilationFunctionException(parseFunctionId);
         }
 
         public RuleGraph<T> Compile(CompileSession<T> context)

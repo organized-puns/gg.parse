@@ -129,17 +129,20 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
+- (Bug) add guard against infinite loop with zero or more (and other cases)
+
 - Error handling, 
  
+    Add remaining error cases in CreateBinaryOperator    
+    Add match error to corpus
     var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
     wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
     missing assignment
-    wrong token for precedence
-    missing term after unary
-    
+    wrong token for rule precedence
+    missing term after unary operation
 
 - keywords should end with whitespace | non_keyword_char
-- (Bug) add guard against infinite loop with zero or more (and other cases)
+
 
 - add optional namespaces to avoid grammar / token name clash 
 

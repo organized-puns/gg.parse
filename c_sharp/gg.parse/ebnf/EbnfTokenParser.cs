@@ -64,6 +64,8 @@ namespace gg.parse.ebnf
 
         public MarkError<int> UnknownInputError { get; private set; }
 
+        public MarkError<int> ExpectedOperatorError { get; private set; }
+
         public MarkError<int> MissingRuleEndError { get; private set; }
 
         private MatchNotFunction<int> Eof { get; set; }
@@ -73,6 +75,8 @@ namespace gg.parse.ebnf
         private MatchSingleData<int> GroupStart { get; set; }
         
         private MatchSingleData<int> GroupEnd { get; set; }
+
+        private MatchSingleData<int> RuleEnd { get; set; }
 
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
@@ -86,8 +90,7 @@ namespace gg.parse.ebnf
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
-            var endStatement = Token(CommonTokenNames.EndStatement);
-
+            RuleEnd = Token(CommonTokenNames.EndStatement);
             GroupStart = Token(CommonTokenNames.GroupStart);
             GroupEnd = Token(CommonTokenNames.GroupEnd);
             MatchAny = new MatchAnyData<int>("Any");
@@ -147,13 +150,13 @@ namespace gg.parse.ebnf
             );
 
             // a, b, c
-            MatchSequence = BinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryAndDataTerms);
+            MatchSequence = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryAndDataTerms);
 
             // a | b | c
-            MatchOption = BinaryOperator("Option", CommonTokenNames.Option, unaryAndDataTerms);
+            MatchOption = CreateBinaryOperator("Option", CommonTokenNames.Option, unaryAndDataTerms);
 
             // a / b / c
-            MatchEval = BinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
+            MatchEval = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
 
             var ruleDefinition = this.OneOf(
                 "#RuleDefinition", 
@@ -266,7 +269,7 @@ namespace gg.parse.ebnf
                     "CannotParseRuleDefinition",
                     AnnotationProduct.Annotation,
                     "Unable to parse the rule definition, please check the definition for mistakes.",
-                    this.OneOf(Eof, endStatement),
+                    this.OneOf(Eof, RuleEnd),
                     maxSkip: 1
             );
 
@@ -288,7 +291,7 @@ namespace gg.parse.ebnf
             var endStatementOptions = this.OneOf(
                 "#EndStatementOptions",
                 AnnotationProduct.Transitive,
-                endStatement,
+                RuleEnd,
                 MissingRuleEndError
             );
 
@@ -382,7 +385,9 @@ namespace gg.parse.ebnf
                     throw new ParseException("input contains no valid grammar.");
                 }
 
-                var errorPredicate = new Func<Annotation, bool>(a => FindRule(a.FunctionId) is MarkError<int>);
+                var errorPredicate = new Func<Annotation, bool>(
+                    a => FindRule(a.FunctionId) is MarkError<int> or MatchError<int>
+                );
                 var grammarErrors = new List<Annotation>();
 
                 foreach (var annotation in astNodes)
@@ -420,43 +425,72 @@ namespace gg.parse.ebnf
             return this.Single(ruleName, product, rule.Id);
         }
 
-        // xxx fix
-        /*private static List<Annotation> CollectErrors(List<Annotation> annotationList, int errorId, List<Annotation>? collectedErrors = null)
+        private MatchFunctionSequence<int> CreateBinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
         {
-            var result = collectedErrors ?? new List<Annotation>();
+            // end_of_operator = (eof | ruleEnd | endGroup)
 
-            foreach (var annotation in annotationList)
-            {
-                if (annotation.FunctionId == errorId)
-                {
-                    result.Add(annotation);
-                }
+            // remainder       = *((operator, ruleTerms)            -- next element 
+            //                  | (!end_of_operator, (
+            //                      error_if ruleTerms                      "missing operator." 
+            //                      | error_if (operator, !ruleTerms)       "missing rule terms after operator." 
+            //                      | error_if (!operator, ., ruleTerms)    "expector operator, found another token." 
+            //                    )
 
-                if (annotation.Children != null && annotation.Children.Count > 0)
-                {
-                    CollectErrors(annotation.Children, errorId, result);
-                }
-            }
+            // binary_operator = (ruleTerms, operator, ruleterms, remainder)
+            //                  | error_if (ruleTerms, operator, !ruleterms), "missing ruleterms"
 
-            return result;
-        }*/
+            var operatorToken = Token(operatorTokenName);
 
-        private MatchFunctionSequence<int> BinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
-        {
-            var nextSequenceElement = this.Sequence($"#Next{name}Element", AnnotationProduct.Transitive,
+            var nextElement = this.Sequence(
+                    $"#Next{name}Element", 
+                    AnnotationProduct.Transitive,
                     Token(operatorTokenName),
                     ruleTerms);
 
-            var validNextElement = this.OneOf(Eof, GroupStart);
+            var notEndOfOperator = this.Not(this.OneOf(Eof, RuleEnd, GroupEnd));
 
+            // user forgot an operator eg: a, b  c;
+            var matchMissingOperatorError = this.MatchError(
+                $"MissingOperatorError({operatorTokenName})",
+                AnnotationProduct.Annotation,
+                $"Expected an operator ({operatorTokenName}) but did not find any.",
+                ruleTerms
+            );
+
+            // user used a different operator by mistake (?) eg: a, b | c, d or a wrong token altogether
+            // eg a, b, . c
+            var matchWrongOperatorError = this.MatchError(
+                $"WrongOperatorError({operatorTokenName})",
+                AnnotationProduct.Annotation,
+                $"Expected an operator ({operatorTokenName}) but found something else.",
+                this.Sequence(this.Not(operatorToken), MatchAny, ruleTerms)
+            );
+
+            var matchOperatorError = this.Sequence(
+                $"#MatchOperatorErrors({operatorTokenName}",
+                AnnotationProduct.Transitive,
+                notEndOfOperator,
+                this.OneOf(
+                    "#OneOfOperatorError", 
+                    AnnotationProduct.Transitive,
+                    matchMissingOperatorError,
+                    matchWrongOperatorError
+                )
+            );
+
+            var remainder = this.OneOf(
+                $"#OperatorRemainder({operatorTokenName})",
+                AnnotationProduct.Transitive,
+                nextElement,
+                matchOperatorError
+            );
 
             return this.Sequence(name, AnnotationProduct.Annotation,
                     ruleTerms,
-                    Token(operatorTokenName),
+                    operatorToken,
                     ruleTerms,
-                    this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, nextSequenceElement));
+                    this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, remainder)
+            );
         }
-
     }
 }
-

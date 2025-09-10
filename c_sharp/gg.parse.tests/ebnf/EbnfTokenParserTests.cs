@@ -1,6 +1,6 @@
 ﻿
 using gg.parse.ebnf;
-
+using gg.parse.rulefunctions;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.ebnf
@@ -314,6 +314,54 @@ namespace gg.parse.tests.ebnf
                     && parseResult.Annotations[1]!.Children != null
                     && parseResult.Annotations[1]!.Children!.Count == 3);
             IsTrue(parseResult.Annotations[1]!.Children![2].FunctionId == tokenizerParser.MissingRuleEndError.Id);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingRemainderOperator_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = a, b c;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            
+            // expecting: rule[0] / sequence[1] / error[2]
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule!.Name.Contains("Error"));
+            IsTrue(errorRule!.Name.Contains(CommonTokenNames.CollectionSeparator));
+        }
+
+        [TestMethod]
+        public void CreateRuleWithDifferentRemainderOperator_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"r1 = a, b |c; r2 = d;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // should find two rules
+            IsTrue(parseResult.Annotations!.Count == 2);
+            
+            // expecting: rule[0] / sequence[1] / error[2]
+
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule is MatchError<int>);
+            IsTrue(errorRule!.Name.Contains(CommonTokenNames.CollectionSeparator));
         }
     }
 }

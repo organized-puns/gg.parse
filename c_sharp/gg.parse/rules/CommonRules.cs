@@ -125,7 +125,7 @@ namespace gg.parse.rulefunctions
         
             graph.Not($"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.Not}({rule.Name})", AnnotationProduct.None, rule);
         
-
+            
         public static MatchNotFunction<T> Not<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, RuleBase<T> rule)
             where T : IComparable<T> =>
 
@@ -349,6 +349,13 @@ namespace gg.parse.rulefunctions
             graph.TryFindRule(name, out MarkError<T>? existingRule)
                      ? existingRule!
                      : graph.RegisterRule(new MarkError<T>(name, product, description, testFunction, maxSkip));
+
+        public static MatchError<T> MatchError<T>(this RuleGraph<T> graph,
+            string name, AnnotationProduct product, string description, RuleBase<T> testFunction)
+            where T : IComparable<T> =>
+            graph.TryFindRule(name, out MatchError<T>? existingRule)
+                     ? existingRule!
+                     : graph.RegisterRule(new MatchError<T>(name, product, description, testFunction));
 
 
         public static RuleBase<char> InSet(this RuleGraph<char> graph, params char[] set)

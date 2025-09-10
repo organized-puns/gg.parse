@@ -163,7 +163,6 @@ namespace gg.parse.ebnf
             return new Range(start, length);
         }
 
-
         public static RuleGraph<char> CreateTokenizerFromEbnfFile(
             string tokenizerText,
             EbnfTokenizer tokenizer,
@@ -198,12 +197,28 @@ namespace gg.parse.ebnf
                                     tokenizerAstNodes, 
                                     cache,
                                     paths,
-                                    (text, includePaths) => CreateTokenizerFromEbnfFile(text, tokenizer, cache, includePaths)); 
+                                    (text, includePaths) => CreateTokenizerFromEbnfFile(text, tokenizer, cache, includePaths));
 
-            return new RuleCompiler<char>()
-                    .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
-                    .RegisterTokenizerCompilerFunctions(tokenizerParser)
-                    .Compile(tokenContext, includedSources);
+            try
+            {
+                return new RuleCompiler<char>()
+                        .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
+                        .RegisterTokenizerCompilerFunctions(tokenizerParser)
+                        .Compile(tokenContext, includedSources);
+            }
+            catch (NoCompilationFunctionException nce)
+            {
+                var rule = tokenizerParser.FindRule(nce.RuleId);
+
+                if (rule == null)
+                {
+                    throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
+                }
+                else
+                {
+                    throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
+                }
+            }
         }
 
         /// <summary>
