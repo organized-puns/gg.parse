@@ -63,14 +63,14 @@ namespace gg.parse.compiler
                 var declaration = GetRuleDeclaration(session, node.Children, 0);
                 var ruleDefinition = declaration.AssociatedAnnotation;
 
-                if (!Functions.ContainsKey(ruleDefinition.FunctionId))
+                /*if (!Functions.ContainsKey(ruleDefinition.FunctionId))
                 {
                     throw new CompilationException<int>(
                         $"Unable to match rule {ruleDefinition.FunctionId} to a compile function.", 
                         ruleDefinition.Range);
-                }
+                }*/
 
-                var compilationFunction = Functions[ruleDefinition.FunctionId].function;
+                var (compilationFunction, _) = FindCompilationFunction(ruleDefinition.FunctionId);
 
                 if (result.FindRule(declaration.Name) == null)
                 {

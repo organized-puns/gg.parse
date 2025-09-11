@@ -68,6 +68,11 @@ namespace gg.parse.ebnf
 
         public MarkError<int> MissingRuleEndError { get; private set; }
 
+        public Dictionary<string, MatchError<int>> MissingTermAfterOperatorInRemainderError { get; init; } = [];
+
+        public Dictionary<string, MatchError<int>> MissingTermAfterOperatorError { get; init; } = [];
+
+
         private MatchNotFunction<int> Eof { get; set; }
 
         private MatchAnyData<int> MatchAny { get; set; }
@@ -77,6 +82,8 @@ namespace gg.parse.ebnf
         private MatchSingleData<int> GroupEnd { get; set; }
 
         private MatchSingleData<int> RuleEnd { get; set; }
+
+
 
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
@@ -150,19 +157,22 @@ namespace gg.parse.ebnf
             );
 
             // a, b, c
-            MatchSequence = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryAndDataTerms);
+            // mainSequence contains both the match and error handling
+            (var mainSequence, MatchSequence) = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryAndDataTerms);
 
             // a | b | c
-            MatchOption = CreateBinaryOperator("Option", CommonTokenNames.Option, unaryAndDataTerms);
+            // mainOption contains both the match and error handling
+            (var mainOption, MatchOption) = CreateBinaryOperator("Option", CommonTokenNames.Option, unaryAndDataTerms);
 
             // a / b / c
-            MatchEval = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
+            // mainEval contains both the match and error handling
+            (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
 
             var ruleDefinition = this.OneOf(
                 "#RuleDefinition", 
                 AnnotationProduct.Transitive,
                 // match this before unary terms
-                this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, MatchSequence, MatchOption, MatchEval), 
+                this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, mainSequence, mainOption, mainEval), 
                 unaryAndDataTerms
             );
 
@@ -257,7 +267,7 @@ namespace gg.parse.ebnf
             MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
             MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
 
-            var ruleDeclaration = this.Sequence(
+            var ruleHeader = this.Sequence(
                 "#RuleDeclaration",
                 AnnotationProduct.Transitive,
                 ruleProduction,
@@ -273,10 +283,13 @@ namespace gg.parse.ebnf
                     maxSkip: 1
             );
 
-            var ruleDefinitionOptions = this.OneOf(
+            var ruleBodyOptions = this.OneOf(
                 "#RuleDefinitionOptions",
                 AnnotationProduct.Transitive,
+                
                 ruleDefinition,
+                // xxx should mark this as a warning - empty rule
+                this.TryMatch(RuleEnd),
                 InvalidRuleDefinitionError
             );
 
@@ -298,9 +311,9 @@ namespace gg.parse.ebnf
             MatchRule = this.Sequence(
                 "Rule", 
                 AnnotationProduct.Annotation,
-                ruleDeclaration,
+                ruleHeader,
                 Token(CommonTokenNames.Assignment),
-                ruleDefinitionOptions,
+                ruleBodyOptions,
                 endStatementOptions
             );
 
@@ -425,7 +438,8 @@ namespace gg.parse.ebnf
             return this.Single(ruleName, product, rule.Id);
         }
 
-        private MatchFunctionSequence<int> CreateBinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
+        private (MatchOneOfFunction<int> mainFunction, MatchFunctionSequence<int> matchOperationFunction) 
+            CreateBinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
         {
             // end_of_operator = (eof | ruleEnd | endGroup)
 
@@ -457,6 +471,16 @@ namespace gg.parse.ebnf
                 ruleTerms
             );
 
+            // user forgot an term after the operator eg: a, b, ;
+            var matchMissingTermError = this.MatchError(
+                $"MissingTermError({operatorTokenName})",
+                AnnotationProduct.Annotation,
+                $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
+                this.Sequence(Token(operatorTokenName), this.Not(ruleTerms))
+            );
+
+            MissingTermAfterOperatorInRemainderError[operatorTokenName] = matchMissingTermError;
+
             // user used a different operator by mistake (?) eg: a, b | c, d or a wrong token altogether
             // eg a, b, . c
             var matchWrongOperatorError = this.MatchError(
@@ -467,12 +491,13 @@ namespace gg.parse.ebnf
             );
 
             var matchOperatorError = this.Sequence(
-                $"#MatchOperatorErrors({operatorTokenName}",
+                $"#MatchOperatorErrors({operatorTokenName})",
                 AnnotationProduct.Transitive,
                 notEndOfOperator,
                 this.OneOf(
-                    "#OneOfOperatorError", 
+                    $"#OneOfOperatorError({operatorTokenName})", 
                     AnnotationProduct.Transitive,
+                    matchMissingTermError,
                     matchMissingOperatorError,
                     matchWrongOperatorError
                 )
@@ -485,11 +510,32 @@ namespace gg.parse.ebnf
                 matchOperatorError
             );
 
-            return this.Sequence(name, AnnotationProduct.Annotation,
-                    ruleTerms,
-                    operatorToken,
-                    ruleTerms,
-                    this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, remainder)
+            var matchOperatorSequence = this.Sequence(
+                name,
+                AnnotationProduct.Annotation,
+                ruleTerms,
+                operatorToken,
+                ruleTerms,
+                this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, remainder)
+            );
+
+            var matchOperatorSequenceError = this.MatchError(
+                $"MatchOperatorSequenceError({operatorTokenName})",
+                AnnotationProduct.Annotation,
+                $"Expected a rule term after operator ({operatorTokenName}) but found something else.",
+                this.Sequence(ruleTerms, operatorToken, this.Not(ruleTerms))
+            );
+
+            MissingTermAfterOperatorError[operatorTokenName] = matchOperatorSequenceError;
+
+            return (
+                this.OneOf(
+                    $"#OneOfBinaryOperator(({operatorTokenName})", 
+                    AnnotationProduct.Transitive,
+                    matchOperatorSequence,
+                    matchOperatorSequenceError
+                ),
+                matchOperatorSequence
             );
         }
     }

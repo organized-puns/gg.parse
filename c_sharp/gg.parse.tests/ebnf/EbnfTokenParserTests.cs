@@ -363,5 +363,57 @@ namespace gg.parse.tests.ebnf
             IsTrue(errorRule is MatchError<int>);
             IsTrue(errorRule!.Name.Contains(CommonTokenNames.CollectionSeparator));
         }
+
+        [TestMethod]
+        public void CreateRuleWithMissingTermsAfterOperatorInRemainder_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"r1 = a, b,; r2 = d;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // should find two rules
+            IsTrue(parseResult.Annotations!.Count == 2);
+
+            // expecting: rule[0] / sequence[1] / error[2]
+
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+            var expectedRule = tokenizerParser.MissingTermAfterOperatorInRemainderError[CommonTokenNames.CollectionSeparator];
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule == expectedRule);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingTermsAfterOperator_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"r1 = a,; r2 = d;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // should find two rules
+            IsTrue(parseResult.Annotations!.Count == 2);
+
+            // expecting: rule[0] / sequence[1] / error[2]
+
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]!.FunctionId);
+            var expectedRule = tokenizerParser.MissingTermAfterOperatorError[CommonTokenNames.CollectionSeparator];
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule == expectedRule);
+        }
     }
 }
