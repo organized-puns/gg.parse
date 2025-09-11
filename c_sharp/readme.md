@@ -129,10 +129,6 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-
-
-- (Bug) add guard against infinite loop with zero or more (and other cases)
-
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
