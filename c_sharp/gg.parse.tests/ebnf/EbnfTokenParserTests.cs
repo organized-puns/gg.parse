@@ -332,10 +332,9 @@ namespace gg.parse.tests.ebnf
             
             // expecting: rule[0] / sequence[1] / error[2]
             var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+            var expectedRule = tokenizerParser.MissingOperatorError[CommonTokenNames.CollectionSeparator];
 
-            // name should be error containing an indication what operator we're missing
-            IsTrue(errorRule!.Name.Contains("Error"));
-            IsTrue(errorRule!.Name.Contains(CommonTokenNames.CollectionSeparator));
+            IsTrue(errorRule == expectedRule);
         }
 
         [TestMethod]
@@ -360,8 +359,10 @@ namespace gg.parse.tests.ebnf
             var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
 
             // name should be error containing an indication what operator we're missing
-            IsTrue(errorRule is MatchError<int>);
-            IsTrue(errorRule!.Name.Contains(CommonTokenNames.CollectionSeparator));
+            var expectedRule = tokenizerParser.WrongOperatorTokenError[CommonTokenNames.CollectionSeparator];
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule == expectedRule);
         }
 
         [TestMethod]

@@ -130,7 +130,6 @@ Todo (for v1.0)
   - address all xxx
 
 
-Add remaining error cases in CreateBinaryOperator    
 
 - (Bug) add guard against infinite loop with zero or more (and other cases)
 

@@ -68,10 +68,13 @@ namespace gg.parse.ebnf
 
         public MarkError<int> MissingRuleEndError { get; private set; }
 
+        public Dictionary<string, MatchError<int>> MissingOperatorError { get; init; } = [];
+
         public Dictionary<string, MatchError<int>> MissingTermAfterOperatorInRemainderError { get; init; } = [];
 
         public Dictionary<string, MatchError<int>> MissingTermAfterOperatorError { get; init; } = [];
 
+        public Dictionary<string, MatchError<int>> WrongOperatorTokenError { get; init; } = [];
 
         private MatchNotFunction<int> Eof { get; set; }
 
@@ -438,6 +441,15 @@ namespace gg.parse.ebnf
             return this.Single(ruleName, product, rule.Id);
         }
 
+        /// <summary>
+        /// Create a rule to match a binary operator such as "a | b | c". Also takes in account
+        /// the various errors which could occur such as missing operators (see the code for more details).
+        /// </summary>
+        /// <param name="name">Name of the returned matchOperationFunction</param>
+        /// <param name="operatorTokenName">The name of the operator token (eg Option)</param>
+        /// <param name="ruleTerms">A function which can match the rule terms </param>
+        /// <returns>A tuple which contains the main function, ie the function which holds all
+        /// success and error conditions and matchOperationFunction which holds the success condition</returns>
         private (MatchOneOfFunction<int> mainFunction, MatchFunctionSequence<int> matchOperationFunction) 
             CreateBinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
         {
@@ -471,6 +483,8 @@ namespace gg.parse.ebnf
                 ruleTerms
             );
 
+            MissingOperatorError[operatorTokenName] = matchMissingOperatorError;
+
             // user forgot an term after the operator eg: a, b, ;
             var matchMissingTermError = this.MatchError(
                 $"MissingTermError({operatorTokenName})",
@@ -489,6 +503,8 @@ namespace gg.parse.ebnf
                 $"Expected an operator ({operatorTokenName}) but found something else.",
                 this.Sequence(this.Not(operatorToken), MatchAny, ruleTerms)
             );
+
+            WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;
 
             var matchOperatorError = this.Sequence(
                 $"#MatchOperatorErrors({operatorTokenName})",
