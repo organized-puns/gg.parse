@@ -416,5 +416,41 @@ namespace gg.parse.tests.ebnf
             // name should be error containing an indication what operator we're missing
             IsTrue(errorRule == expectedRule);
         }
+
+        [TestMethod]
+        public void CreateLogErrorRuleWithText_ParseWithMatchLog_ExpectMatchFound()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizeResult = tokenizer.Tokenize($"lerror 'text'");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var tokens = tokenizeResult.CollectRuleIds();
+            
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var parseResult = tokenizerParser.MatchLog.Parse(tokens, 0);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult[0]!.Children != null && parseResult[0]!.Children!.Count == 2);
+        }
+
+        [TestMethod]
+        public void CreateLogErrorRuleWithTextAndCondition_ParseWithMatchLog_ExpectMatchFound()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizeResult = tokenizer.Tokenize($"warning 'text' if !'foo'");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var tokens = tokenizeResult.CollectRuleIds();
+
+            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var parseResult = tokenizerParser.MatchLog.Parse(tokens, 0);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult[0]!.Children != null && parseResult[0]!.Children!.Count == 3);
+        }
     }
 }

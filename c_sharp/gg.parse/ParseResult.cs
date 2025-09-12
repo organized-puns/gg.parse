@@ -18,5 +18,7 @@
             matchedLength = MatchedLength;
             annotations = Annotations;
         }
+
+        public int[] CollectRuleIds() => Annotations == null ? [] : [.. Annotations.Select(a => a.RuleId)];
     }
 }

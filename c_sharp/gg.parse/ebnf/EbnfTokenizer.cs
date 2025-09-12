@@ -28,6 +28,7 @@ namespace gg.parse.ebnf
                     this.Keyword(LogWarning, AnnotationProduct.Annotation, LogWarning),
                     this.Keyword(LogInfo, AnnotationProduct.Annotation, LogInfo),
                     this.Keyword(LogDebug, AnnotationProduct.Annotation, LogDebug),
+                    this.Keyword(If, AnnotationProduct.Annotation, If),
 
                     // try match and shorthand
                     MapNameToToken(TryMatchOperatorShortHand, ">"),

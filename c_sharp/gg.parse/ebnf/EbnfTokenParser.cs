@@ -12,47 +12,49 @@ namespace gg.parse.ebnf
     /// </summary>
     public class EbnfTokenParser : RuleGraph<int>
     {
-        public EbnfTokenizer               Tokenizer { get; init; }      
+        public EbnfTokenizer Tokenizer { get; init; }
 
-        public MatchOneOfFunction<int>     MatchLiteral { get; private set; }
+        public MatchOneOfFunction<int> MatchLiteral { get; private set; }
 
-        public MatchSingleData<int>        MatchAnyToken { get; private set; }
+        public MatchSingleData<int> MatchAnyToken { get; private set; }
 
-        public MatchSingleData<int>        MatchTransitiveSelector { get; private set; }
+        public MatchSingleData<int> MatchTransitiveSelector { get; private set; }
 
-        public MatchSingleData<int>        MatchNoProductSelector { get; private set; }
+        public MatchSingleData<int> MatchNoProductSelector { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchRule { get; private set; }
+        public MatchFunctionSequence<int> MatchRule { get; private set; }
 
-        public MatchSingleData<int>        MatchRuleName { get; private set; }
+        public MatchSingleData<int> MatchRuleName { get; private set; }
 
-        public MatchSingleData<int>        MatchPrecedence { get; private set; }
+        public MatchSingleData<int> MatchPrecedence { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchIdentifier { get; private set; }
+        public MatchFunctionSequence<int> MatchIdentifier { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchSequence { get; private set; }
+        public MatchFunctionSequence<int> MatchSequence { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchOption { get; private set; }
+        public MatchFunctionSequence<int> MatchOption { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchEval { get; private set; }
+        public MatchFunctionSequence<int> MatchEval { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchCharacterSet { get; private set; }
+        public MatchFunctionSequence<int> MatchCharacterSet { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchCharacterRange { get; private set; }
+        public MatchFunctionSequence<int> MatchCharacterRange { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchGroup { get; private set; }
+        public MatchFunctionSequence<int> MatchGroup { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchZeroOrMoreOperator { get; private set; }
+        public MatchFunctionSequence<int> MatchZeroOrMoreOperator { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchZeroOrOneOperator { get; private set; }
+        public MatchFunctionSequence<int> MatchZeroOrOneOperator { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchOneOrMoreOperator { get; private set; }
+        public MatchFunctionSequence<int> MatchOneOrMoreOperator { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchNotOperator { get; private set; }
+        public MatchFunctionSequence<int> MatchNotOperator { get; private set; }
 
-        public MatchFunctionSequence<int>  TryMatchOperator { get; private set; }
+        public MatchFunctionSequence<int> TryMatchOperator { get; private set; }
 
-        public MatchFunctionSequence<int>  MatchError { get; private set; }
+        public MatchFunctionSequence<int> MatchError { get; private set; }
+
+        public MatchFunctionSequence<int> MatchLog { get; private set; }
 
         public MatchFunctionSequence<int> Include { get; private set; }
 
@@ -81,7 +83,7 @@ namespace gg.parse.ebnf
         private MatchAnyData<int> MatchAny { get; set; }
 
         private MatchSingleData<int> GroupStart { get; set; }
-        
+
         private MatchSingleData<int> GroupEnd { get; set; }
 
         private MatchSingleData<int> RuleEnd { get; set; }
@@ -139,7 +141,7 @@ namespace gg.parse.ebnf
             );
 
             MatchIdentifier = this.Sequence(
-                "Identifier", 
+                "Identifier",
                 AnnotationProduct.Annotation,
                 ruleProduction,
                 Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier)
@@ -154,8 +156,8 @@ namespace gg.parse.ebnf
             };
 
             var unaryAndDataTerms = this.OneOf(
-                "#DataMatchers", 
-                AnnotationProduct.Transitive, 
+                "#DataMatchers",
+                AnnotationProduct.Transitive,
                 [.. matchDataRules]
             );
 
@@ -172,10 +174,10 @@ namespace gg.parse.ebnf
             (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
 
             var ruleDefinition = this.OneOf(
-                "#RuleDefinition", 
+                "#RuleDefinition",
                 AnnotationProduct.Transitive,
                 // match this before unary terms
-                this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, mainSequence, mainOption, mainEval), 
+                this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, mainSequence, mainOption, mainEval),
                 unaryAndDataTerms
             );
 
@@ -236,31 +238,34 @@ namespace gg.parse.ebnf
                 AnnotationProduct.Annotation,
                 ruleProduction,
                 this.OneOf(
-                    "#UnexpectedProductErrorMatchTerm", 
-                    AnnotationProduct.Transitive, 
-                    [..matchDataRules, ..unaryOperators, MatchGroup]
-                ), 
+                    "#UnexpectedProductErrorMatchTerm",
+                    AnnotationProduct.Transitive,
+                    [.. matchDataRules, .. unaryOperators, MatchGroup]
+                ),
                 UnexpectedProductError
             );
 
             MatchError = this.Sequence(
-                "Error", 
+                "Error",
                 AnnotationProduct.Annotation,
                 Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
                 MatchLiteral,
                 ruleDefinition
             );
 
+            MatchLog = CreateMatchLog(ruleDefinition);
+
             unaryAndDataTerms.RuleOptions = [
-                ..unaryAndDataTerms.RuleOptions, 
+                ..unaryAndDataTerms.RuleOptions,
                 ..unaryOperators,
-                MatchGroup, 
+                MatchGroup,
                 MatchError,
+                MatchLog,
                 MatchUnexpectedProductError
             ];
 
             Include = this.Sequence(
-                "Include", 
+                "Include",
                 AnnotationProduct.Annotation,
                 Token(CommonTokenNames.Include),
                 MatchLiteral,
@@ -289,7 +294,7 @@ namespace gg.parse.ebnf
             var ruleBodyOptions = this.OneOf(
                 "#RuleDefinitionOptions",
                 AnnotationProduct.Transitive,
-                
+
                 ruleDefinition,
                 // xxx should mark this as a warning - empty rule
                 this.TryMatch(RuleEnd),
@@ -302,7 +307,7 @@ namespace gg.parse.ebnf
                 "Missing end of rule (;) at the given position.",
                 this.OneOf(Eof, MatchAny),
                 1
-            );            
+            );
 
             var endStatementOptions = this.OneOf(
                 "#EndStatementOptions",
@@ -312,7 +317,7 @@ namespace gg.parse.ebnf
             );
 
             MatchRule = this.Sequence(
-                "Rule", 
+                "Rule",
                 AnnotationProduct.Annotation,
                 ruleHeader,
                 Token(CommonTokenNames.Assignment),
@@ -332,7 +337,7 @@ namespace gg.parse.ebnf
             );
 
             Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive,
-                this.OneOf("#Statement", AnnotationProduct.Transitive, validStatement, UnknownInputError));           
+                this.OneOf("#Statement", AnnotationProduct.Transitive, validStatement, UnknownInputError));
         }
 
         public ParseResult Parse(List<Annotation> tokens)
@@ -346,9 +351,9 @@ namespace gg.parse.ebnf
             if (!string.IsNullOrEmpty(text))
             {
                 var tokenizerTokens = TokenizeText(text);
-                
+
                 if (tokenizerTokens.Count > 0)
-                { 
+                {
                     return ParseGrammar(text, tokenizerTokens!);
                 }
             }
@@ -450,7 +455,7 @@ namespace gg.parse.ebnf
         /// <param name="ruleTerms">A function which can match the rule terms </param>
         /// <returns>A tuple which contains the main function, ie the function which holds all
         /// success and error conditions and matchOperationFunction which holds the success condition</returns>
-        private (MatchOneOfFunction<int> mainFunction, MatchFunctionSequence<int> matchOperationFunction) 
+        private (MatchOneOfFunction<int> mainFunction, MatchFunctionSequence<int> matchOperationFunction)
             CreateBinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
         {
             // end_of_operator = (eof | ruleEnd | endGroup)
@@ -468,7 +473,7 @@ namespace gg.parse.ebnf
             var operatorToken = Token(operatorTokenName);
 
             var nextElement = this.Sequence(
-                    $"#Next{name}Element", 
+                    $"#Next{name}Element",
                     AnnotationProduct.Transitive,
                     Token(operatorTokenName),
                     ruleTerms);
@@ -511,7 +516,7 @@ namespace gg.parse.ebnf
                 AnnotationProduct.Transitive,
                 notEndOfOperator,
                 this.OneOf(
-                    $"#OneOfOperatorError({operatorTokenName})", 
+                    $"#OneOfOperatorError({operatorTokenName})",
                     AnnotationProduct.Transitive,
                     matchMissingTermError,
                     matchMissingOperatorError,
@@ -546,12 +551,46 @@ namespace gg.parse.ebnf
 
             return (
                 this.OneOf(
-                    $"#OneOfBinaryOperator(({operatorTokenName})", 
+                    $"#OneOfBinaryOperator(({operatorTokenName})",
                     AnnotationProduct.Transitive,
                     matchOperatorSequence,
                     matchOperatorSequenceError
                 ),
                 matchOperatorSequence
+            );
+        }
+
+        private MatchFunctionSequence<int> CreateMatchLog(MatchOneOfFunction<int> condition)
+        {
+            var matchLogLevel = this.OneOf(
+                "LogLevel",
+                AnnotationProduct.Annotation,
+                Token(CommonTokenNames.LogFatal, AnnotationProduct.Annotation, CommonTokenNames.LogFatal),
+                Token(CommonTokenNames.LogError, AnnotationProduct.Annotation, CommonTokenNames.LogError),
+                Token(CommonTokenNames.LogWarning, AnnotationProduct.Annotation, CommonTokenNames.LogWarning),
+                Token(CommonTokenNames.LogInfo, AnnotationProduct.Annotation, CommonTokenNames.LogInfo),
+                Token(CommonTokenNames.LogDebug, AnnotationProduct.Annotation, CommonTokenNames.LogDebug)
+            );
+
+            var matchText = MatchLiteral;
+
+            var matchOptionalCondition = this.ZeroOrOne(
+                "#OptionalLogCondition", 
+                AnnotationProduct.Transitive, 
+                this.Sequence(
+                    "LogCondition",
+                    AnnotationProduct.Transitive,
+                    Token(CommonTokenNames.If),
+                    condition
+                )
+            );
+
+            return this.Sequence(
+                "MatchLog",
+                AnnotationProduct.Annotation,
+                matchLogLevel,
+                matchText,
+                matchOptionalCondition
             );
         }
     }

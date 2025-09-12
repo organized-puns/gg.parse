@@ -95,6 +95,8 @@
         public static readonly string LogWarning = "warning";
         public static readonly string LogInfo    = "info";
         public static readonly string LogDebug   = "debug";
+        
+        public static readonly string If         = "if";
 
         public static string GetPrefix(this AnnotationProduct production)
         {

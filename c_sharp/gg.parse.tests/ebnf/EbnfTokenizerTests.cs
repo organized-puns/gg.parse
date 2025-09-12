@@ -14,7 +14,7 @@ namespace gg.parse.tests.ebnf
     public class EbnfTokenizerTests
     {
         [TestMethod]
-        public void CreateLogTokens_Parse_ExpectLogTokensFound()
+        public void CreateLogLevelTokens_Parse_ExpectLogLevelsFound()
         {
             var tokenizer = new EbnfTokenizer();
             var testText = "fatal lerror warning info debug";
@@ -30,6 +30,28 @@ namespace gg.parse.tests.ebnf
                 CommonTokenNames.LogWarning,
                 CommonTokenNames.LogInfo,
                 CommonTokenNames.LogDebug
+            };
+
+            for (var i = 0; i < expectedNames.Length; i++)
+            {
+                var name = tokenizer.FindRule(result.Annotations![i].RuleId)!.Name;
+                IsTrue(name == expectedNames[i]);
+            }
+        }
+
+        [TestMethod]
+        public void CreateIfTokens_Parse_ExpectLogIfFound()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var testText = "if";
+            var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == testText.Length);
+
+            var expectedNames = new string[]
+            {
+                CommonTokenNames.If,
             };
 
             for (var i = 0; i < expectedNames.Length; i++)

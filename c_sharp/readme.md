@@ -132,7 +132,7 @@ Todo (for v1.0)
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
-        Add fatal/error/warning/log/debug to corpus
+        Add fatal/error/warning/log/debug to compiler
         Deal with log error in parsing (don't check for is Log but Log & Log is error)
         Test if fatal error is captured corect
         Remove MarkError (and everything)
