@@ -16,7 +16,7 @@ namespace gg.parse.rulefunctions.rulefunctions
         
         public int Max { get; } = max;
 
-        public IEnumerable<RuleBase<T>> SubRules => [Function];
+        public IEnumerable<RuleBase<T>> Rules => [Function];
 
         public override ParseResult Parse(T[] input, int start)
         {

@@ -1,14 +1,16 @@
 ﻿
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace gg.parse.rulefunctions
 {
     public enum LogLevel
     {
-        Fatal       = 1,
-        Error       = 2,
-        Warning     = 3,
-        Info        = 4,
-        Debug       = 5
+        Fatal = 1,
+        Error = 2,
+        Warning = 3,
+        Info = 4,
+        Debug = 5
     }
 
     public class FatalConditionException<T> : Exception where T : IComparable<T>
@@ -22,21 +24,51 @@ namespace gg.parse.rulefunctions
         }
     }
 
-    public class LogRule<T>(string name, AnnotationProduct product, string? description, RuleBase<T>? condition = null, LogLevel level = LogLevel.Info)
-        : RuleBase<T>(name, product), IRuleComposition<T>
-        where T : IComparable<T>
+    public class LogRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-        public LogLevel Level { get; init; } = level;
+        private static readonly RuleBase<T>[] EmptyRuleComposition = [];
+
+        public LogLevel Level { get; init; }
 
         /// <summary>
-        /// Message describing the nature of the error
+        /// Contains the log's text
         /// </summary>
-        public string? Message { get; } = description;
+        public string? Text { get; init; }
 
-        public RuleBase<T>? Condition { get; set; } = condition;
+        private RuleBase<T> _condition;
+        private RuleBase<T>[] _rulesCollection;
 
-        // xxx deal with nullable case
-        public IEnumerable<RuleBase<T>> SubRules => [Condition];
+        public RuleBase<T>? Condition
+        {
+            get => _condition;
+            init
+            {
+                if (value != null)
+                {
+                    _condition = value;
+                    _rulesCollection = [_condition];
+                }
+                else
+                {
+                    _rulesCollection = EmptyRuleComposition;
+                }
+            }
+        }
+
+        public IEnumerable<RuleBase<T>> Rules => _rulesCollection;
+
+        public LogRule(
+            string name, 
+            AnnotationProduct product, 
+            string? text, 
+            RuleBase<T>? condition = null, 
+            LogLevel level = LogLevel.Info
+        ) : base(name, product)
+        {
+            Text = text;
+            Condition = condition;
+            Level = level;
+        }
 
         public override ParseResult Parse(T[] input, int start)
         {

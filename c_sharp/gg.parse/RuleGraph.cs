@@ -81,7 +81,7 @@ namespace gg.parse
 
                 if (rule is IRuleComposition<T> ruleFunction)
                 {
-                    foreach (var subRule in ruleFunction.SubRules)
+                    foreach (var subRule in ruleFunction.Rules)
                     {
                         RegisterRuleAndSubRules(subRule);
                     }
@@ -108,7 +108,7 @@ namespace gg.parse
             {
                 if (rule is IRuleComposition<T> composition)
                 {
-                    foreach (var referenceRule in composition.SubRules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                    foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                     {
                         var referredRule = FindRule(referenceRule.Reference);
 

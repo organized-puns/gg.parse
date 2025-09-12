@@ -20,7 +20,7 @@ namespace gg.parse.rulefunctions
         /// </summary>
         public RuleBase<T>? TestFunction { get; set; } = testFunction;
 
-        public IEnumerable<RuleBase<T>> SubRules => [TestFunction];
+        public IEnumerable<RuleBase<T>> Rules => [TestFunction];
 
         public override ParseResult Parse(T[] input, int start)
         {

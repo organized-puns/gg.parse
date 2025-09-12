@@ -5,7 +5,7 @@ namespace gg.parse.rulefunctions.rulefunctions
     {
         public RuleBase<T> Rule { get; private set; }
 
-        public IEnumerable<RuleBase<T>> SubRules => [Rule];
+        public IEnumerable<RuleBase<T>> Rules => [Rule];
 
         public TryMatchFunction(
             string name, 

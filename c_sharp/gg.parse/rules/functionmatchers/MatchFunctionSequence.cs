@@ -20,7 +20,7 @@ namespace gg.parse.rulefunctions.rulefunctions
         }
 
 
-        public IEnumerable<RuleBase<T>> SubRules => SequenceSubfunctions;
+        public IEnumerable<RuleBase<T>> Rules => SequenceSubfunctions;
 
         public MatchFunctionSequence(
             string name, 
