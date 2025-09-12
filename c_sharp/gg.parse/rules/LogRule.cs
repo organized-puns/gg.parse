@@ -1,6 +1,5 @@
 ﻿
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace gg.parse.rulefunctions
 {

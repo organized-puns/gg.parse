@@ -42,7 +42,8 @@ namespace gg.parse.ebnf
                     .RegisterFunction(parser.MatchSequence, CompileSequence)
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne)
-                    .RegisterFunction(parser.MatchEval, CompileEvaluation);
+                    .RegisterFunction(parser.MatchEval, CompileEvaluation)
+                    .RegisterFunction(parser.MatchLog, CompileLog);
         }
 
         // xxx needs to move out of compiler utils

@@ -23,16 +23,16 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.AssociatedAnnotation;
             var literalText = context.GetText(ruleDefinition.Range);
-            literalText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
+            var unescapedLiteralText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
 
-            if (string.IsNullOrEmpty(literalText))
+            if (string.IsNullOrEmpty(unescapedLiteralText))
             {
                 // xxx add warnings
                 // xxx resolve rule
                 throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
             }
 
-            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product, declaration.Precedence);
+            return new MatchDataSequence<char>(declaration.Name, unescapedLiteralText.ToCharArray(), declaration.Product, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileIdentifier<T>(
@@ -387,6 +387,51 @@ namespace gg.parse.compiler
             }
 
             return new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0);
+        }
+
+        public static RuleBase<T> CompileLog<T>(
+           RuleCompiler<T> compiler,
+           RuleDeclaration declaration,
+           CompileSession<T> context) where T : IComparable<T>
+        {
+            var ruleDefinition = declaration.AssociatedAnnotation;
+
+            Contract.Requires(ruleDefinition != null);
+            Contract.Requires(ruleDefinition!.Children != null);
+            Contract.Requires(ruleDefinition.Children!.Count > 0);
+
+            var logLevelText = context.GetText(ruleDefinition.Children[0].Range);
+            var logLevel = Enum.Parse<LogLevel>(logLevelText, ignoreCase: true);
+
+            var message = context.GetText(ruleDefinition.Children[1].Range);
+
+            if (string.IsNullOrEmpty(message) || message.Length < 2)
+            {
+                throw new CompilationException<T>("LogText is missing (quotes).",
+                    ruleDefinition.Range,
+                    annotation: declaration.AssociatedAnnotation);
+            }
+
+            message = message.Substring(1, message.Length - 2);
+
+            RuleBase<T>? condition = null;
+
+            if (ruleDefinition.Children.Count == 3)
+            {
+                var conditionDefinition = ruleDefinition.Children[2];
+                var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.RuleId];
+                var conditionDeclaration = new RuleDeclaration(conditionDefinition, AnnotationProduct.Annotation, $"{declaration.Name} skip_until {elementName}");
+                condition = compilationFunction(compiler, conditionDeclaration, context);
+
+                if (condition == null)
+                {
+                    // xxx add warnings
+                    // xxx resolve rule
+                    throw new CompilationException<char>("Cannot compile condition for Log.", conditionDefinition.Range, null);
+                }
+            }
+
+            return new LogRule<T>(declaration.Name, declaration.Product, message, condition, logLevel);
         }
     }
 }
