@@ -132,12 +132,18 @@ Todo (for v1.0)
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
-    Add log to corpus
-    var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
-    wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
-    missing assignment
-    wrong token for rule precedence
-    missing term after unary operation
+        Deal with null subrules in IRuleComposition
+        Add fatal/error/warning/log/debug to corpus
+        Deal with log error in parsing
+        Test if fatal error is captured corect
+        Remove MarkError (and everything)
+    
+    Deal with the following cases:
+      var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
+      wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
+      missing assignment
+      wrong token for rule precedence
+      missing term after unary operation
 
 - keywords should end with whitespace | non_keyword_char
 

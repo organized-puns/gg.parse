@@ -11,7 +11,18 @@ namespace gg.parse.rulefunctions
         Debug       = 5
     }
 
-    public class Log<T>(string name, AnnotationProduct product, string? description, RuleBase<T>? condition = null, LogLevel level = LogLevel.Info)
+    public class FatalConditionException<T> : Exception where T : IComparable<T>
+    {
+        public LogRule<T> Rule { get; init; }
+
+        public FatalConditionException(LogRule<T> rule)
+            : base($"Fatal condition encountered while parsing {rule.Name}, parsing terminates at this point. See exception / inner exception for more details.")
+        {
+            Rule = rule;
+        }
+    }
+
+    public class LogRule<T>(string name, AnnotationProduct product, string? description, RuleBase<T>? condition = null, LogLevel level = LogLevel.Info)
         : RuleBase<T>(name, product), IRuleComposition<T>
         where T : IComparable<T>
     {
@@ -24,6 +35,7 @@ namespace gg.parse.rulefunctions
 
         public RuleBase<T>? Condition { get; set; } = condition;
 
+        // xxx deal with nullable case
         public IEnumerable<RuleBase<T>> SubRules => [Condition];
 
         public override ParseResult Parse(T[] input, int start)
@@ -36,6 +48,11 @@ namespace gg.parse.rulefunctions
 
                     if (conditionalResult.FoundMatch)
                     {
+                        if (Level == LogLevel.Fatal)
+                        {
+                            throw new FatalConditionException<T>(this);
+                        }
+
                         return BuildDataRuleResult(new(start, conditionalResult.MatchedLength));
                     }
                 }
