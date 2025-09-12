@@ -68,13 +68,13 @@ namespace gg.parse.ebnf
 
         public MarkError<int> MissingRuleEndError { get; private set; }
 
-        public Dictionary<string, MatchError<int>> MissingOperatorError { get; init; } = [];
+        public Dictionary<string, Log<int>> MissingOperatorError { get; init; } = [];
 
-        public Dictionary<string, MatchError<int>> MissingTermAfterOperatorInRemainderError { get; init; } = [];
+        public Dictionary<string, Log<int>> MissingTermAfterOperatorInRemainderError { get; init; } = [];
 
-        public Dictionary<string, MatchError<int>> MissingTermAfterOperatorError { get; init; } = [];
+        public Dictionary<string, Log<int>> MissingTermAfterOperatorError { get; init; } = [];
 
-        public Dictionary<string, MatchError<int>> WrongOperatorTokenError { get; init; } = [];
+        public Dictionary<string, Log<int>> WrongOperatorTokenError { get; init; } = [];
 
         private MatchNotFunction<int> Eof { get; set; }
 
@@ -402,7 +402,7 @@ namespace gg.parse.ebnf
                 }
 
                 var errorPredicate = new Func<Annotation, bool>(
-                    a => FindRule(a.FunctionId) is MarkError<int> or MatchError<int>
+                    a => FindRule(a.FunctionId) is MarkError<int> or Log<int>
                 );
                 var grammarErrors = new List<Annotation>();
 

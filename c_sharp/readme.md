@@ -132,7 +132,7 @@ Todo (for v1.0)
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
-    Add match error to corpus
+    Add log to corpus
     var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
     wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
     missing assignment
@@ -140,7 +140,6 @@ Todo (for v1.0)
     missing term after unary operation
 
 - keywords should end with whitespace | non_keyword_char
-
 
 - add optional namespaces to avoid grammar / token name clash 
 
