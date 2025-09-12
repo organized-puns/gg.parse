@@ -23,9 +23,9 @@ namespace gg.parse.tests.examples
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
-            var name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
+            var name = parser.FindRule(nodes[0].Children[0].RuleId).Name;
             IsTrue(name == "RuleName");
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "Literal");
 
             // try parsing a set
@@ -39,7 +39,7 @@ namespace gg.parse.tests.examples
 
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "CharacterRange");
 
             // try parsing a sequence
@@ -48,7 +48,7 @@ namespace gg.parse.tests.examples
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "Sequence");
 
             // try parsing an option
@@ -56,7 +56,7 @@ namespace gg.parse.tests.examples
 
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "Option");
 
             // try parsing a group  
@@ -65,107 +65,107 @@ namespace gg.parse.tests.examples
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "Sequence");
 
-            name = parser.FindRule(nodes[0].Children[1].Children[0].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].Children[0].RuleId).Name;
             IsTrue(name == "Literal");
 
-            name = parser.FindRule(nodes[0].Children[1].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].Children[1].RuleId).Name;
             IsTrue(name == "CharacterSet");
 
             // try parsing zero or more
             (tokens, nodes) = parser.Parse("rule = *('123'|{'foo'});");
 
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "ZeroOrMore");
 
-            name = parser.FindRule(nodes[0].Children[1].Children[0].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].Children[0].RuleId).Name;
             IsTrue(name == "Option");
 
             // try parsing a transitive rule
             (tokens, nodes) = parser.Parse("#rule = !('123',{'foo'});");
 
-            name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[0].RuleId).Name;
 
-            name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[0].RuleId).Name;
             IsTrue(name == "TransitiveSelector");
 
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "RuleName");
 
-            name = parser.FindRule(nodes[0].Children[2].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[2].RuleId).Name;
             IsTrue(name == "Not");
 
             // try parsing a no production rule
             (tokens, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
 
-            name = parser.FindRule(nodes[0].Children[0].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[0].RuleId).Name;
             IsTrue(name == "NoProductSelector");
 
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "RuleName");
 
-            name = parser.FindRule(nodes[0].Children[2].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[2].RuleId).Name;
             IsTrue(name == "ZeroOrOne");
 
             // try parsing an identifier
             (tokens, nodes) = parser.Parse("rule = +(one, two, three);");
 
             var node = nodes[0].Children[1];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "OneOrMore");
 
             node = node.Children[0];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Sequence");
 
             node = node.Children[0];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Identifier");
 
             // try parsing a simple error
             (tokens, nodes) = parser.Parse("rule = error \"message\" skip_until;");
 
             node = nodes[0].Children[0];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "RuleName");
 
             node = nodes[0].Children[1];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Error");
 
             node = nodes[0].Children[1].Children[0];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "ErrorKeyword");
 
             node = nodes[0].Children[1].Children[1];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Literal");
 
             node = nodes[0].Children[1].Children[2];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Identifier");
 
             // try parsing an error with a complex skip rule
             (tokens, nodes) = parser.Parse("rule = error \"message\" ( foo | \"lit\");");
 
             node = nodes[0].Children[1].Children[2];
-            name = parser.FindRule(node.FunctionId).Name;
+            name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Option");
 
             // try parsing a try match 
             (tokens, nodes) = parser.Parse("rule = try \"lit\";");
 
             IsTrue(nodes != null);
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "TryMatch");
 
             // try parsing a try match with eoln
             (tokens, nodes) = parser.Parse("rule = try\n\"lit\";");
 
             IsTrue(nodes != null);
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "TryMatch");
 
             // try parsing a try match with out space, should result in an unknown error
@@ -182,7 +182,7 @@ namespace gg.parse.tests.examples
             (tokens, nodes) = parser.Parse("rule = >\"lit\";");
 
             IsTrue(nodes != null);
-            name = parser.FindRule(nodes[0].Children[1].FunctionId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
             IsTrue(name == "TryMatch");
         }
 
@@ -441,7 +441,7 @@ namespace gg.parse.tests.examples
 
             for (var i = 0; i < expectedTokens.Length; i++)
             {
-                IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
+                IsTrue(result.Annotations[i].RuleId == table.FindRule(expectedTokens[i]).Id);
             }
         }
 
@@ -459,7 +459,7 @@ namespace gg.parse.tests.examples
 
             for (var i = 0; i < expectedTokens.Length; i++)
             {
-                IsTrue(result.Annotations[i].FunctionId == table.FindRule(expectedTokens[i]).Id);
+                IsTrue(result.Annotations[i].RuleId == table.FindRule(expectedTokens[i]).Id);
             }
         }
     }

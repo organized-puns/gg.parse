@@ -66,7 +66,7 @@ namespace gg.parse.ebnf
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
                 {
-                    astTree = _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.FunctionId).ToArray(), 0);
+                    astTree = _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.RuleId).ToArray(), 0);
                 }
                 else
                 {
@@ -98,7 +98,7 @@ namespace gg.parse.ebnf
 
         public void Dump(StringBuilder builder, int indentCount, string indentStr, Annotation node, string text, List<Annotation> tokens)
         {
-            var function = FindParserRule(node.FunctionId);
+            var function = FindParserRule(node.RuleId);
 
             for (var i = 0; i < indentCount; i++)
             {
@@ -320,7 +320,7 @@ namespace gg.parse.ebnf
             {
                 var statement = astTree[i];
 
-                if (statement.FunctionId == includeId)
+                if (statement.RuleId == includeId)
                 {
                     var fileName = ResolveFile(GetText(inputText, statement.Children[0], tokens), paths);
                     

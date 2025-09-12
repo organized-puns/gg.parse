@@ -337,7 +337,7 @@ namespace gg.parse.ebnf
 
         public ParseResult Parse(List<Annotation> tokens)
         {
-            var functionIds = tokens.Select(t => t.FunctionId).ToArray();
+            var functionIds = tokens.Select(t => t.RuleId).ToArray();
             return Root.Parse(functionIds, 0);
         }
 
@@ -366,7 +366,7 @@ namespace gg.parse.ebnf
                 var tokenizerTokens = tokenizationResult.Annotations;
 
                 var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
-                var errorPredicate = new Func<Annotation, bool>(a => a.FunctionId == unknownTokenId);
+                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
                 var tokenizerErrors = new List<Annotation>();
 
                 foreach (var annotation in tokenizationResult.Annotations)
@@ -402,7 +402,7 @@ namespace gg.parse.ebnf
                 }
 
                 var errorPredicate = new Func<Annotation, bool>(
-                    a => FindRule(a.FunctionId) is MarkError<int> or LogRule<int>
+                    a => FindRule(a.RuleId) is MarkError<int> or LogRule<int>
                 );
                 var grammarErrors = new List<Annotation>();
 

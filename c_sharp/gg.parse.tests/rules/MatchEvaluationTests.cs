@@ -38,8 +38,8 @@ namespace gg.parse.tests.rulefunctions
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.MatchedLength == 3);
-            Assert.IsTrue(result.Annotations[0].FunctionId == evalRule.Id);
-            Assert.IsTrue(result.Annotations[0].Children[0].FunctionId == addFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == evalRule.Id);
+            Assert.IsTrue(result.Annotations[0].Children[0].RuleId == addFunction.Id);
         }
 
         /// <summary>
@@ -83,10 +83,10 @@ namespace gg.parse.tests.rulefunctions
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.MatchedLength == 5);
-            Assert.IsTrue(result.Annotations[0].FunctionId == evalRule.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == evalRule.Id);
 
             var addRoot = result.Annotations[0].Children[0];
-            Assert.IsTrue(addRoot.FunctionId == addFunction.Id);
+            Assert.IsTrue(addRoot.RuleId == addFunction.Id);
             Assert.IsTrue(addRoot.Start == 0);
             Assert.IsTrue(addRoot.End == 5);
             
@@ -95,24 +95,24 @@ namespace gg.parse.tests.rulefunctions
 
             Assert.IsTrue(left.Range.Start == 0);
             Assert.IsTrue(left.Range.End == 3);
-            Assert.IsTrue(left.FunctionId == addFunction.Id);
-            Assert.IsTrue(left.Children[0].FunctionId == matchNumber.Id);
-            Assert.IsTrue(left.Children[1].FunctionId == matchOperator.Id);
-            Assert.IsTrue(left.Children[0].FunctionId == matchNumber.Id);
+            Assert.IsTrue(left.RuleId == addFunction.Id);
+            Assert.IsTrue(left.Children[0].RuleId == matchNumber.Id);
+            Assert.IsTrue(left.Children[1].RuleId == matchOperator.Id);
+            Assert.IsTrue(left.Children[0].RuleId == matchNumber.Id);
 
             // check operator
             var op = addRoot.Children[1];
             
             Assert.IsTrue(op.Range.Start == 3);
             Assert.IsTrue(op.Range.End == 4);
-            Assert.IsTrue(op.FunctionId == matchOperator.Id);
+            Assert.IsTrue(op.RuleId == matchOperator.Id);
 
             // check right
             var right = addRoot.Children[2];
 
             Assert.IsTrue(right.Range.Start == 4);
             Assert.IsTrue(right.Range.End == 5);
-            Assert.IsTrue(right.FunctionId == matchNumber.Id);
+            Assert.IsTrue(right.RuleId == matchNumber.Id);
         }
 
         /// <summary>
@@ -168,10 +168,10 @@ namespace gg.parse.tests.rulefunctions
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.MatchedLength == 5);
-            Assert.IsTrue(result.Annotations[0].FunctionId == evalRule.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == evalRule.Id);
 
             var addRoot = result.Annotations[0].Children[0];
-            Assert.IsTrue(addRoot.FunctionId == addFunction.Id);
+            Assert.IsTrue(addRoot.RuleId == addFunction.Id);
             Assert.IsTrue(addRoot.Start == 0);
             Assert.IsTrue(addRoot.End == 5);
 
@@ -180,24 +180,24 @@ namespace gg.parse.tests.rulefunctions
 
             Assert.IsTrue(right.Range.Start == 2);
             Assert.IsTrue(right.Range.End == 5);
-            Assert.IsTrue(right.FunctionId == multFunction.Id);
-            Assert.IsTrue(right.Children[0].FunctionId == matchNumber.Id);
-            Assert.IsTrue(right.Children[1].FunctionId == matchMultOperator.Id);
-            Assert.IsTrue(right.Children[0].FunctionId == matchNumber.Id);
+            Assert.IsTrue(right.RuleId == multFunction.Id);
+            Assert.IsTrue(right.Children[0].RuleId == matchNumber.Id);
+            Assert.IsTrue(right.Children[1].RuleId == matchMultOperator.Id);
+            Assert.IsTrue(right.Children[0].RuleId == matchNumber.Id);
 
             // check operator
             var op = addRoot.Children[1];
 
             Assert.IsTrue(op.Range.Start == 1);
             Assert.IsTrue(op.Range.End == 2);
-            Assert.IsTrue(op.FunctionId == matchAddOperator.Id);
+            Assert.IsTrue(op.RuleId == matchAddOperator.Id);
 
             // check left
             var left = addRoot.Children[0];
 
             Assert.IsTrue(left.Range.Start == 0);
             Assert.IsTrue(left.Range.End == 1);
-            Assert.IsTrue(left.FunctionId == matchNumber.Id);
+            Assert.IsTrue(left.RuleId == matchNumber.Id);
         }
 
         /// <summary>
@@ -252,10 +252,10 @@ namespace gg.parse.tests.rulefunctions
 
             IsTrue(result.FoundMatch);
             IsTrue(result.MatchedLength == 5);
-            IsTrue(result.Annotations[0].FunctionId == evalRule.Id);
+            IsTrue(result.Annotations[0].RuleId == evalRule.Id);
 
             var addRoot = result.Annotations[0].Children[0];
-            IsTrue(addRoot.FunctionId == addFunction.Id);
+            IsTrue(addRoot.RuleId == addFunction.Id);
             IsTrue(addRoot.Start == 0);
             IsTrue(addRoot.End == 5);
 
@@ -264,24 +264,24 @@ namespace gg.parse.tests.rulefunctions
 
             IsTrue(left.Range.Start == 0);
             IsTrue(left.Range.End == 3);
-            IsTrue(left.FunctionId == multFunction.Id);
-            IsTrue(left.Children[0].FunctionId == matchNumber.Id);
-            IsTrue(left.Children[1].FunctionId == matchMultOperator.Id);
-            IsTrue(left.Children[0].FunctionId == matchNumber.Id);
+            IsTrue(left.RuleId == multFunction.Id);
+            IsTrue(left.Children[0].RuleId == matchNumber.Id);
+            IsTrue(left.Children[1].RuleId == matchMultOperator.Id);
+            IsTrue(left.Children[0].RuleId == matchNumber.Id);
 
             // check operator
             var op = addRoot.Children[1];
 
             IsTrue(op.Range.Start == 3);
             IsTrue(op.Range.End == 4);
-            IsTrue(op.FunctionId == matchAddOperator.Id);
+            IsTrue(op.RuleId == matchAddOperator.Id);
 
             // check right
             var right = addRoot.Children[2];
 
             IsTrue(right.Range.Start == 4);
             IsTrue(right.Range.End == 5);
-            IsTrue(right.FunctionId == matchNumber.Id);
+            IsTrue(right.RuleId == matchNumber.Id);
         }
 
         /// <summary>
@@ -340,28 +340,28 @@ namespace gg.parse.tests.rulefunctions
 
             // for expectation see method summary
             IsTrue(result.FoundMatch);
-            IsTrue(result[0].FunctionId == evalRule.Id);
+            IsTrue(result[0].RuleId == evalRule.Id);
 
             var root = result[0][0];
-            IsTrue(root.FunctionId == addFunction.Id);
+            IsTrue(root.RuleId == addFunction.Id);
             
             // check left is another function
             var left = root[0];
 
-            IsTrue(left.FunctionId == addFunction.Id);
+            IsTrue(left.RuleId == addFunction.Id);
 
-            IsTrue(left[0].FunctionId == matchNumber.Id);
-            IsTrue(left[1].FunctionId == matchAddOperator.Id);
+            IsTrue(left[0].RuleId == matchNumber.Id);
+            IsTrue(left[1].RuleId == matchAddOperator.Id);
 
             var rightLeft = left[2];
 
-            IsTrue(rightLeft.FunctionId == multFunction.Id);
-            IsTrue(rightLeft[0].FunctionId == matchNumber.Id);
-            IsTrue(rightLeft[1].FunctionId == matchMultOperator.Id);
-            IsTrue(rightLeft[2].FunctionId == matchNumber.Id);
+            IsTrue(rightLeft.RuleId == multFunction.Id);
+            IsTrue(rightLeft[0].RuleId == matchNumber.Id);
+            IsTrue(rightLeft[1].RuleId == matchMultOperator.Id);
+            IsTrue(rightLeft[2].RuleId == matchNumber.Id);
 
-            IsTrue(root[1].FunctionId == matchAddOperator.Id);
-            IsTrue(root[2].FunctionId == matchNumber.Id);
+            IsTrue(root[1].RuleId == matchAddOperator.Id);
+            IsTrue(root[2].RuleId == matchNumber.Id);
 
             // test ranges
             // eval
@@ -437,27 +437,27 @@ namespace gg.parse.tests.rulefunctions
 
             // for expectation see method summary
             IsTrue(result.FoundMatch);
-            IsTrue(result[0].FunctionId == evalRule.Id);
+            IsTrue(result[0].RuleId == evalRule.Id);
 
             var root = result[0][0];
-            IsTrue(root.FunctionId == minusFunction.Id);
+            IsTrue(root.RuleId == minusFunction.Id);
             
-            IsTrue(root[0].FunctionId == matchNumber.Id);
-            IsTrue(root[1].FunctionId == matchMinOperator.Id);
+            IsTrue(root[0].RuleId == matchNumber.Id);
+            IsTrue(root[1].RuleId == matchMinOperator.Id);
 
             var right = root[2];
 
-            IsTrue(right.FunctionId == addFunction.Id);
+            IsTrue(right.RuleId == addFunction.Id);
 
             var leftRight = right[0];
 
-            IsTrue(leftRight.FunctionId == multFunction.Id);
-            IsTrue(leftRight[0].FunctionId == matchNumber.Id);
-            IsTrue(leftRight[1].FunctionId == matchMultOperator.Id);
-            IsTrue(leftRight[2].FunctionId == matchNumber.Id);
+            IsTrue(leftRight.RuleId == multFunction.Id);
+            IsTrue(leftRight[0].RuleId == matchNumber.Id);
+            IsTrue(leftRight[1].RuleId == matchMultOperator.Id);
+            IsTrue(leftRight[2].RuleId == matchNumber.Id);
 
-            IsTrue(right[1].FunctionId == matchAddOperator.Id);
-            IsTrue(right[2].FunctionId == matchNumber.Id);
+            IsTrue(right[1].RuleId == matchAddOperator.Id);
+            IsTrue(right[2].RuleId == matchNumber.Id);
         }
 
         /// <summary>
@@ -523,25 +523,25 @@ namespace gg.parse.tests.rulefunctions
 
             // for expectation see method summary
             IsTrue(result.FoundMatch);
-            IsTrue(result[0].FunctionId == evalRule.Id);
+            IsTrue(result[0].RuleId == evalRule.Id);
 
             var root = result[0][0];
-            IsTrue(root.FunctionId == minusFunction.Id);
+            IsTrue(root.RuleId == minusFunction.Id);
 
-            IsTrue(root[0].FunctionId == matchNumber.Id);
-            IsTrue(root[1].FunctionId == matchMinOperator.Id);
+            IsTrue(root[0].RuleId == matchNumber.Id);
+            IsTrue(root[1].RuleId == matchMinOperator.Id);
 
             var right = root[2];
 
-            IsTrue(right.FunctionId == addFunction.Id);
+            IsTrue(right.RuleId == addFunction.Id);
 
-            IsTrue(right[0].FunctionId == matchNumber.Id);
-            IsTrue(right[1].FunctionId == matchAddOperator.Id);
-            IsTrue(right[2].FunctionId == multFunction.Id);
+            IsTrue(right[0].RuleId == matchNumber.Id);
+            IsTrue(right[1].RuleId == matchAddOperator.Id);
+            IsTrue(right[2].RuleId == multFunction.Id);
 
-            IsTrue(right[2][0].FunctionId == matchNumber.Id);
-            IsTrue(right[2][1].FunctionId == matchMultOperator.Id);
-            IsTrue(right[2][2].FunctionId == matchNumber.Id);
+            IsTrue(right[2][0].RuleId == matchNumber.Id);
+            IsTrue(right[2][1].RuleId == matchMultOperator.Id);
+            IsTrue(right[2][2].RuleId == matchNumber.Id);
 
         }
     }

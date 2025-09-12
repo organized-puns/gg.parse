@@ -90,6 +90,12 @@
 
         public static readonly string MarkError = "Error";
 
+        public static readonly string LogFatal   = "fatal";
+        public static readonly string LogError   = "lerror";
+        public static readonly string LogWarning = "warning";
+        public static readonly string LogInfo    = "info";
+        public static readonly string LogDebug   = "debug";
+
         public static string GetPrefix(this AnnotationProduct production)
         {
             return production switch

@@ -132,11 +132,11 @@ Todo (for v1.0)
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
-        Deal with null subrules in IRuleComposition
         Add fatal/error/warning/log/debug to corpus
-        Deal with log error in parsing
+        Deal with log error in parsing (don't check for is Log but Log & Log is error)
         Test if fatal error is captured corect
         Remove MarkError (and everything)
+        Add Warning to empty rule in ebnf parser
     
     Deal with the following cases:
       var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
@@ -144,8 +144,6 @@ Todo (for v1.0)
       missing assignment
       wrong token for rule precedence
       missing term after unary operation
-
-- keywords should end with whitespace | non_keyword_char
 
 - add optional namespaces to avoid grammar / token name clash 
 

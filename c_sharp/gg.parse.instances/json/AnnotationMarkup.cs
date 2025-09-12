@@ -82,7 +82,7 @@ namespace gg.parse.instances.json
                     outputIndex = annotation.Range.Start;
                 }
 
-                builder.Append($"<span class=\"{ruleTable.FindRule(annotation.FunctionId).Name}\">");
+                builder.Append($"<span class=\"{ruleTable.FindRule(annotation.RuleId).Name}\">");
 
                 builder.Append(sourceText.AsSpan(annotation.Range.Start, annotation.Range.Length));
 

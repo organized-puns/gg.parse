@@ -34,8 +34,8 @@ namespace gg.parse.tests.ebnf
             IsTrue(root.Children != null && root.Children.Count == 3);
 
             // declaration should have name and precedence 
-            IsTrue(root.Children[0].FunctionId == tokenizerParser.MatchRuleName.Id);
-            IsTrue(root.Children[1].FunctionId == tokenizerParser.MatchPrecedence.Id);
+            IsTrue(root.Children[0].RuleId == tokenizerParser.MatchRuleName.Id);
+            IsTrue(root.Children[1].RuleId == tokenizerParser.MatchPrecedence.Id);
         }
 
         [TestMethod]
@@ -59,18 +59,18 @@ namespace gg.parse.tests.ebnf
 
             var root = parseResult.Annotations[0];
 
-            IsTrue(root.FunctionId == tokenizerParser.MatchRule.Id);
+            IsTrue(root.RuleId == tokenizerParser.MatchRule.Id);
             IsTrue(root.Children != null && root.Children.Count == 2);
 
             // declaration should have name and an eval
-            IsTrue(root.Children[0].FunctionId == tokenizerParser.MatchRuleName.Id);
-            IsTrue(root.Children[1].FunctionId == tokenizerParser.MatchEval.Id);
+            IsTrue(root.Children[0].RuleId == tokenizerParser.MatchRuleName.Id);
+            IsTrue(root.Children[1].RuleId == tokenizerParser.MatchEval.Id);
 
             var eval = root.Children[1];
 
             IsTrue(eval.Children != null && eval.Children.Count == 3);
 
-            IsTrue(eval.Children.All(child => child.FunctionId == tokenizerParser.MatchLiteral.Id));
+            IsTrue(eval.Children.All(child => child.RuleId == tokenizerParser.MatchLiteral.Id));
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count == expectedTokenCount);
 
             var tokenizerParser = new EbnfTokenParser(tokenizer);
-            var errorParseResult = tokenizerParser.MatchUnexpectedProductError.Parse(tokenizeResult.Annotations.Select(a => a.FunctionId).ToArray(), 0);
+            var errorParseResult = tokenizerParser.MatchUnexpectedProductError.Parse(tokenizeResult.Annotations.Select(a => a.RuleId).ToArray(), 0);
 
             IsTrue(errorParseResult.FoundMatch);
             IsTrue(errorParseResult.MatchedLength == expectedTokenCount);
@@ -234,11 +234,11 @@ namespace gg.parse.tests.ebnf
                     && errorParseResult.Annotations.Count == 1
                     && errorParseResult.Annotations[0].Children != null
                     && errorParseResult.Annotations[0].Children!.Count == 3
-                    && errorParseResult.Annotations[0].FunctionId == tokenizerParser.MatchUnexpectedProductError.Id);
+                    && errorParseResult.Annotations[0].RuleId == tokenizerParser.MatchUnexpectedProductError.Id);
 
             for (var i = 0; i < expectedFunctionIds.Length; i++)
             {
-                IsTrue(errorParseResult.Annotations[0][i]!.FunctionId == expectedFunctionIds[i](tokenizerParser));
+                IsTrue(errorParseResult.Annotations[0][i]!.RuleId == expectedFunctionIds[i](tokenizerParser));
             }
         }
 
@@ -265,9 +265,9 @@ namespace gg.parse.tests.ebnf
 
             var sequence = parseResult[0]![1];
             IsTrue(sequence!.Children != null && sequence!.Children!.Count == 3);
-            IsTrue(sequence[0]!.FunctionId == tokenizerParser.MatchIdentifier.Id);
-            IsTrue(sequence[1]!.FunctionId == tokenizerParser.MatchUnexpectedProductError.Id);
-            IsTrue(sequence[2]!.FunctionId == tokenizerParser.MatchUnexpectedProductError.Id);
+            IsTrue(sequence[0]!.RuleId == tokenizerParser.MatchIdentifier.Id);
+            IsTrue(sequence[1]!.RuleId == tokenizerParser.MatchUnexpectedProductError.Id);
+            IsTrue(sequence[2]!.RuleId == tokenizerParser.MatchUnexpectedProductError.Id);
         }
 
         [TestMethod]
@@ -287,7 +287,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.Annotations[0] != null 
                     && parseResult.Annotations[0]!.Children != null
                     && parseResult.Annotations[0]!.Children!.Count == 2);
-            IsTrue(parseResult.Annotations[0]!.Children![1].FunctionId == tokenizerParser.InvalidRuleDefinitionError.Id);
+            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.InvalidRuleDefinitionError.Id);
             IsTrue(parseResult.Annotations[0]!.Children![1].Range.Equals(new Range(2, 1)));
         }
 
@@ -308,12 +308,12 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.Annotations[0] != null
                     && parseResult.Annotations[0]!.Children != null
                     && parseResult.Annotations[0]!.Children!.Count == 3);
-            IsTrue(parseResult.Annotations[0]!.Children![2].FunctionId == tokenizerParser.MissingRuleEndError.Id);
+            IsTrue(parseResult.Annotations[0]!.Children![2].RuleId == tokenizerParser.MissingRuleEndError.Id);
 
             IsTrue(parseResult.Annotations[1] != null
                     && parseResult.Annotations[1]!.Children != null
                     && parseResult.Annotations[1]!.Children!.Count == 3);
-            IsTrue(parseResult.Annotations[1]!.Children![2].FunctionId == tokenizerParser.MissingRuleEndError.Id);
+            IsTrue(parseResult.Annotations[1]!.Children![2].RuleId == tokenizerParser.MissingRuleEndError.Id);
         }
 
         [TestMethod]
@@ -331,7 +331,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.FoundMatch);
             
             // expecting: rule[0] / sequence[1] / error[2]
-            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.RuleId);
             var expectedRule = tokenizerParser.MissingOperatorError[CommonTokenNames.CollectionSeparator];
 
             IsTrue(errorRule == expectedRule);
@@ -356,7 +356,7 @@ namespace gg.parse.tests.ebnf
             
             // expecting: rule[0] / sequence[1] / error[2]
 
-            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.RuleId);
 
             // name should be error containing an indication what operator we're missing
             var expectedRule = tokenizerParser.WrongOperatorTokenError[CommonTokenNames.CollectionSeparator];
@@ -384,7 +384,7 @@ namespace gg.parse.tests.ebnf
 
             // expecting: rule[0] / sequence[1] / error[2]
 
-            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.FunctionId);
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]![2]!.RuleId);
             var expectedRule = tokenizerParser.MissingTermAfterOperatorInRemainderError[CommonTokenNames.CollectionSeparator];
 
             // name should be error containing an indication what operator we're missing
@@ -410,7 +410,7 @@ namespace gg.parse.tests.ebnf
 
             // expecting: rule[0] / sequence[1] / error[2]
 
-            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]!.FunctionId);
+            var errorRule = tokenizerParser.FindRule(parseResult[0]![1]!.RuleId);
             var expectedRule = tokenizerParser.MissingTermAfterOperatorError[CommonTokenNames.CollectionSeparator];
 
             // name should be error containing an indication what operator we're missing

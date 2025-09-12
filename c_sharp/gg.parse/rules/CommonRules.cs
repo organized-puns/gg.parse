@@ -230,8 +230,15 @@ namespace gg.parse.rulefunctions
             var ruleName = name ?? $"{product.GetPrefix()}{name}({keyword})";
             return graph.TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
-                : graph.RegisterRule(new MatchFunctionSequence<char>(ruleName, product, 0, 
-                                    graph.Literal(keyword), graph.Whitespace()));
+                : graph.RegisterRule(
+                    new MatchFunctionSequence<char>(
+                        ruleName, 
+                        product, 
+                        0, 
+                        graph.Literal(keyword), 
+                        graph.Not(graph.IdentifierCharacter(product: AnnotationProduct.None))
+                    )
+                );
         }
 
         public static RuleBase<char> Float(this RuleGraph<char> graph,

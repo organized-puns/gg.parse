@@ -13,7 +13,7 @@
         /// <summary>
         /// Function which produced this annotation.
         /// </summary>
-        public int FunctionId { get; init; }
+        public int RuleId { get; init; }
 
         public List<Annotation>? Children { get; init; }
 
@@ -33,7 +33,7 @@
 
         public Annotation(int functionId, Range range, List<Annotation>? children = null)
         {
-            FunctionId = functionId;
+            RuleId = functionId;
             Range = range;
             Children = children;
         }
@@ -42,7 +42,7 @@
         {
             if (obj is Annotation other)
             {
-                return FunctionId.CompareTo(other.Range.Start);
+                return RuleId.CompareTo(other.Range.Start);
             }
 
             return 0;
@@ -51,7 +51,7 @@
         public override string ToString() =>
         
 #if DEBUG
-            $"{DebugName}({FunctionId}, {Range})";
+            $"{DebugName}({RuleId}, {Range})";
 #else
             $"Annotation(Id: {FunctionId}, Range: {Range})";
 #endif

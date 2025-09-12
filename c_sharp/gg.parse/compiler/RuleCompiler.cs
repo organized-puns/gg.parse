@@ -70,7 +70,7 @@ namespace gg.parse.compiler
                         ruleDefinition.Range);
                 }*/
 
-                var (compilationFunction, _) = FindCompilationFunction(ruleDefinition.FunctionId);
+                var (compilationFunction, _) = FindCompilationFunction(ruleDefinition.RuleId);
 
                 if (result.FindRule(declaration.Name) == null)
                 {
@@ -129,7 +129,7 @@ namespace gg.parse.compiler
             var idx = index;
 
             // annotation product is optional, (will default to Annotation)
-            if (TryGetProduct(ruleNodes[idx].FunctionId, out var product))
+            if (TryGetProduct(ruleNodes[idx].RuleId, out var product))
             {
                 idx++;
             }

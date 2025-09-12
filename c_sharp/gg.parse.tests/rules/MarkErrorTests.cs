@@ -1,4 +1,5 @@
 ﻿using gg.parse.rulefunctions;
+
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 
@@ -48,14 +49,14 @@ namespace gg.parse.tests.rules
             var result = stringWithFallback.Parse("'foo'".ToCharArray(), 0);
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations[0].FunctionId == stringSequence.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == stringSequence.Id);
 
             var stringWithError = "'foo";
             result = stringWithFallback.Parse(stringWithError.ToCharArray(), 0);
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations[0].FunctionId == matchError.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == matchError.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == stringWithError.Length);
         }

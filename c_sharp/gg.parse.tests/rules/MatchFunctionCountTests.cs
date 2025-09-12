@@ -23,9 +23,9 @@ namespace gg.parse.tests.rulefunctions
             IsTrue(result.FoundMatch);
             AreEqual(3, result.MatchedLength);
             IsTrue(result.Annotations!.Count == 1);
-            IsTrue(result.Annotations![0].FunctionId == rule.Id);
+            IsTrue(result.Annotations![0].RuleId == rule.Id);
             IsTrue(result.Annotations![0].Children!.Count == 1);
-            IsTrue(result.Annotations![0].Children![0].FunctionId == function.Id);
+            IsTrue(result.Annotations![0].Children![0].RuleId == function.Id);
         }
 
         [TestMethod]
@@ -44,12 +44,12 @@ namespace gg.parse.tests.rulefunctions
             IsTrue(result.Annotations!.Count == 1);
             IsTrue(result.Annotations![0].Range.Start == 0);
             IsTrue(result.Annotations![0].Range.End == 6);
-            IsTrue(result.Annotations![0].FunctionId == rule.Id);
+            IsTrue(result.Annotations![0].RuleId == rule.Id);
             IsTrue(result.Annotations![0].Children!.Count == 2);
-            IsTrue(result.Annotations![0].Children![0].FunctionId == function.Id);
+            IsTrue(result.Annotations![0].Children![0].RuleId == function.Id);
             IsTrue(result.Annotations![0].Children![0].Start == 0);
             IsTrue(result.Annotations![0].Children![0].End == 3);
-            IsTrue(result.Annotations![0].Children![1].FunctionId == function.Id);
+            IsTrue(result.Annotations![0].Children![1].RuleId == function.Id);
             IsTrue(result.Annotations![0].Children![1].Start == 3);
             IsTrue(result.Annotations![0].Children![1].End == 6);
         }
@@ -70,11 +70,11 @@ namespace gg.parse.tests.rulefunctions
             IsTrue(result.Annotations!.Count == 2);
             IsTrue(result.Annotations![0].Range.Start == 0);
             IsTrue(result.Annotations![0].Range.End == 3);
-            IsTrue(result.Annotations![0].FunctionId == function.Id);
+            IsTrue(result.Annotations![0].RuleId == function.Id);
             IsTrue(result.Annotations![0].Children == null);
             IsTrue(result.Annotations![1].Range.Start == 3);
             IsTrue(result.Annotations![1].Range.End == 6);
-            IsTrue(result.Annotations![1].FunctionId == function.Id);
+            IsTrue(result.Annotations![1].RuleId == function.Id);
             IsTrue(result.Annotations![1].Children == null);
         }
 

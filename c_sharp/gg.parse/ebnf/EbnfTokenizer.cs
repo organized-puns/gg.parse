@@ -23,7 +23,12 @@ namespace gg.parse.ebnf
                     
                     // make sure keywords are before the identifier
                     this.Keyword(MarkError, AnnotationProduct.Annotation, "error"),
-                    
+                    this.Keyword(LogFatal, AnnotationProduct.Annotation, LogFatal),
+                    this.Keyword(LogError, AnnotationProduct.Annotation, LogError),
+                    this.Keyword(LogWarning, AnnotationProduct.Annotation, LogWarning),
+                    this.Keyword(LogInfo, AnnotationProduct.Annotation, LogInfo),
+                    this.Keyword(LogDebug, AnnotationProduct.Annotation, LogDebug),
+
                     // try match and shorthand
                     MapNameToToken(TryMatchOperatorShortHand, ">"),
                     this.Sequence(TryMatchOperator, AnnotationProduct.Annotation,

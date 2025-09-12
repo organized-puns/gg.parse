@@ -68,7 +68,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == literalFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == literalFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == validInput.Length);
 
@@ -139,7 +139,7 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == setFunction.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == setFunction.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].Length == validInput[i].Length);
             }
@@ -217,7 +217,7 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == rangeRule.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == rangeRule.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].Length == validInput[i].Length);
             }
@@ -295,7 +295,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == identifierRule.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == identifierRule.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
         }
@@ -433,7 +433,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == groupFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == groupFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
         }
@@ -495,7 +495,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == sequenceFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == sequenceFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
         }
@@ -557,7 +557,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == optionFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == optionFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
 
@@ -568,7 +568,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == optionFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == optionFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
         }
@@ -635,7 +635,7 @@ namespace gg.parse.tests.compiler
                 IsTrue(result.FoundMatch);
                 IsTrue(result.Annotations != null);
                 IsTrue(result.Annotations.Count == 1);
-                IsTrue(result.Annotations[0].FunctionId == evalFunction.Id);
+                IsTrue(result.Annotations[0].RuleId == evalFunction.Id);
                 IsTrue(result.Annotations[0].Start == 0);
                 IsTrue(result.Annotations[0].Length == testText.Length);
 
@@ -643,7 +643,7 @@ namespace gg.parse.tests.compiler
                 IsNotNull(result.Annotations[0].Children);
                 var literalChild = result.Annotations[0].Children[0];
 
-                IsTrue(literalChild.FunctionId == evalFunction.RuleOptions[i].Id);
+                IsTrue(literalChild.RuleId == evalFunction.RuleOptions[i].Id);
             }
 
         }
@@ -715,7 +715,7 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == notFunction.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == notFunction.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].Length == 0);
             }
@@ -777,7 +777,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == tryMatch.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == tryMatch.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == 0);
 
@@ -836,7 +836,7 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == anyFunction.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == anyFunction.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].Length == 1);
             }
@@ -905,7 +905,7 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == errorRule.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == errorRule.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 // error should have skipped until the end of the input (as all cases have 
                 // foo at their end or no foo)
@@ -980,7 +980,7 @@ namespace gg.parse.tests.compiler
             Assert.IsTrue(result.MatchedLength == expectedLength);
             Assert.IsTrue(result.Annotations != null);
             Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == countFunction.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId == countFunction.Id);
             Assert.IsTrue(result.Annotations[0].Start == 0);
             Assert.IsTrue(result.Annotations[0].Length == testText.Length);
 
@@ -999,7 +999,7 @@ namespace gg.parse.tests.compiler
                 Assert.IsTrue(result.MatchedLength == testText.Length - 3);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == countFunction.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == countFunction.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].Length == max * 3);
             }

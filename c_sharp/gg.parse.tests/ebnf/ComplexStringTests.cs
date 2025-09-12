@@ -35,7 +35,7 @@ namespace gg.parse.tests.ebnf
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations[0].FunctionId == stringRule.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == stringRule.Id);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].End == validString.Length);
                 Assert.IsTrue(result.Annotations[0].Length == validString.Length);
@@ -65,7 +65,7 @@ namespace gg.parse.tests.ebnf
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations[0].FunctionId == errEOF.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == errEOF.Id);
                 Assert.IsTrue(result.Annotations[0].Start == validString.Length);
                 Assert.IsTrue(result.Annotations[0].End == validString.Length);
                 Assert.IsTrue(result.Annotations[0].Length == 0);
@@ -98,7 +98,7 @@ namespace gg.parse.tests.ebnf
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations[0].FunctionId == errEOLN.Id);
+                Assert.IsTrue(result.Annotations[0].RuleId == errEOLN.Id);
                 Assert.IsTrue(result.Annotations[0].Start == testConfig.expectedPosition);
                 Assert.IsTrue(result.Annotations[0].Length == testConfig.expectedLength);
                 Assert.IsTrue(result.Annotations[0].Children == null);
@@ -135,7 +135,7 @@ namespace gg.parse.tests.ebnf
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == testConfig.functionIds.Length);
 
-                Assert.IsTrue(result.Annotations.Select(a => a.FunctionId)
+                Assert.IsTrue(result.Annotations.Select(a => a.RuleId)
                                 .SequenceEqual(testConfig.functionIds));
             }
         }
