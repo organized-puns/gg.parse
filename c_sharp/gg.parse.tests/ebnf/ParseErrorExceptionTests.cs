@@ -78,6 +78,25 @@ namespace gg.parse.tests.ebnf
         }
 
         [TestMethod]
+        public void CreateSpecWithMissingRuleInGrammar_CreateParser_ExpectException()
+        {
+            try
+            {
+                var parser = new EbnfParser("foo='string';", "bar=foo");
+                Fail();
+            }
+            catch (EbnfException ebnfException)
+            {
+                var e = ebnfException.InnerException as ParseException;
+
+                IsTrue(e.Errors != null);
+                IsTrue(e.Errors.Count() == 1);
+                IsTrue(e.Errors.ElementAt(0).Start == 3);
+                IsTrue(e.Errors.ElementAt(0).Length == 0);
+            }
+        }
+
+        [TestMethod]
         public void InvalidGrammarInGrammar_CreateParser_ExpectException()
         {
             try

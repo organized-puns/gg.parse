@@ -21,7 +21,7 @@ namespace gg.parse.tests.ebnf
             IsNotNull(tokenizeResult.Annotations);
             IsTrue(tokenizeResult.Annotations.Count == 5);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsNotNull(parseResult);
             IsTrue(parseResult.FoundMatch);
@@ -50,7 +50,7 @@ namespace gg.parse.tests.ebnf
             IsNotNull(tokenizeResult.Annotations);
             IsTrue(tokenizeResult.Annotations.Count == 8);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsNotNull(parseResult);
             IsTrue(parseResult.FoundMatch);
@@ -255,7 +255,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
             IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 1);
@@ -280,7 +280,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
             IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 2);
@@ -301,7 +301,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
             IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 2);
@@ -326,7 +326,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
             
@@ -347,7 +347,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
 
@@ -375,7 +375,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
 
@@ -401,7 +401,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);
 
-            var parseResult = tokenizerParser.Parse(tokenizeResult.Annotations);
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
             IsTrue(parseResult.FoundMatch);
 

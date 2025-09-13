@@ -357,12 +357,12 @@ namespace gg.parse.rulefunctions
                      ? existingRule!
                      : graph.RegisterRule(new MarkError<T>(name, product, description, testFunction, maxSkip));
 
-        public static LogRule<T> MatchError<T>(this RuleGraph<T> graph,
-            string name, AnnotationProduct product, string description, RuleBase<T> testFunction)
+        public static LogRule<T> LogError<T>(this RuleGraph<T> graph,
+            string name, AnnotationProduct product, string description, RuleBase<T>? condition = null)
             where T : IComparable<T> =>
             graph.TryFindRule(name, out LogRule<T>? existingRule)
                      ? existingRule!
-                     : graph.RegisterRule(new LogRule<T>(name, product, description, testFunction));
+                     : graph.RegisterRule(new LogRule<T>(name, product, description, condition, LogLevel.Error));
 
 
         public static RuleBase<char> InSet(this RuleGraph<char> graph, params char[] set)

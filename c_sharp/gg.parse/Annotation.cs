@@ -2,6 +2,7 @@
 {
     public class Annotation : IComparable
     {
+        
         public Range Range { get; set; }
         
         public int Start => Range.Start;

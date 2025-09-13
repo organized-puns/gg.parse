@@ -121,7 +121,7 @@ Good to remember (FAQ?):
 -   Data functions, eg {'a'..'b'} ALWAYS have production `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
     IT SHOULD have a clear error though, something like "found production rule without identifier".
 
-Todo (for v1.0)
+Todo (for mvp)
 ---------------
 
 - Clean up:  
@@ -132,7 +132,6 @@ Todo (for v1.0)
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
-        Deal with log error in parsing (don't check for is Log but Log & Log is error)
         Test if fatal error is captured corect
         Remove MarkError (and everything)
         Add Warning to empty rule in ebnf parser
@@ -144,7 +143,11 @@ Todo (for v1.0)
       wrong token for rule precedence
       missing term after unary operation
 
+v2.0
+----
+
 - add optional namespaces to avoid grammar / token name clash 
+- Implement a function console
 
 - build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
@@ -152,7 +155,6 @@ Todo (for v1.0)
      all common tokens defined
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
-
 
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)
@@ -164,5 +166,3 @@ Todo (for v1.0)
 - add full/short names versions for "or /|"
 - add alternative for "= / :"
 - replace any with _, disallow identifier to start with '_' ?
-
-- Implement a function console

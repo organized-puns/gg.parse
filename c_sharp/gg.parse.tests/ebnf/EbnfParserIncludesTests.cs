@@ -35,7 +35,7 @@ namespace gg.parse.tests.ebnf
 
             Assert.IsTrue(tokenIds.SequenceEqual(expectedIds));
 
-            var tokenizerAstTree = tokenizerParser.Parse(tokenizerTokens).Annotations;
+            var tokenizerAstTree = tokenizerParser.Root!.Parse(tokenizerTokens).Annotations;
 
             // expect an 'include' and a 'rule'
             var expectedAstNodes = new int[] {

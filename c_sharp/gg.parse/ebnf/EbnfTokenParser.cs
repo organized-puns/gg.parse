@@ -68,7 +68,7 @@ namespace gg.parse.ebnf
 
         public MarkError<int> ExpectedOperatorError { get; private set; }
 
-        public MarkError<int> MissingRuleEndError { get; private set; }
+        public LogRule<int> MissingRuleEndError { get; private set; }
 
         public Dictionary<string, LogRule<int>> MissingOperatorError { get; init; } = [];
 
@@ -82,11 +82,11 @@ namespace gg.parse.ebnf
 
         private MatchAnyData<int> MatchAny { get; set; }
 
-        private MatchSingleData<int> GroupStart { get; set; }
+        private MatchSingleData<int> GroupStartToken { get; set; }
 
-        private MatchSingleData<int> GroupEnd { get; set; }
+        private MatchSingleData<int> GroupEndToken { get; set; }
 
-        private MatchSingleData<int> RuleEnd { get; set; }
+        private MatchSingleData<int> RuleEndToken { get; set; }
 
 
 
@@ -102,9 +102,9 @@ namespace gg.parse.ebnf
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
-            RuleEnd = Token(CommonTokenNames.EndStatement);
-            GroupStart = Token(CommonTokenNames.GroupStart);
-            GroupEnd = Token(CommonTokenNames.GroupEnd);
+            RuleEndToken = Token(CommonTokenNames.EndStatement);
+            GroupStartToken = Token(CommonTokenNames.GroupStart);
+            GroupEndToken = Token(CommonTokenNames.GroupEnd);
             MatchAny = new MatchAnyData<int>("Any");
             Eof = new MatchNotFunction<int>("~EOF", MatchAny);
 
@@ -173,8 +173,8 @@ namespace gg.parse.ebnf
             // mainEval contains both the match and error handling
             (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
 
-            var ruleDefinition = this.OneOf(
-                "#RuleDefinition",
+            var ruleBody = this.OneOf(
+                "#RuleBody",
                 AnnotationProduct.Transitive,
                 // match this before unary terms
                 this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, mainSequence, mainOption, mainEval),
@@ -183,9 +183,9 @@ namespace gg.parse.ebnf
 
             // ( a, b, c )
             MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
-                GroupStart,
-                ruleDefinition,
-                GroupEnd);
+                GroupStartToken,
+                ruleBody,
+                GroupEndToken);
 
             // *(a | b | c)
             MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
@@ -250,10 +250,10 @@ namespace gg.parse.ebnf
                 AnnotationProduct.Annotation,
                 Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
                 MatchLiteral,
-                ruleDefinition
+                ruleBody
             );
 
-            MatchLog = CreateMatchLog(ruleDefinition);
+            MatchLog = CreateMatchLog(ruleBody);
 
             unaryAndDataTerms.RuleOptions = [
                 ..unaryAndDataTerms.RuleOptions,
@@ -287,32 +287,30 @@ namespace gg.parse.ebnf
                     "CannotParseRuleDefinition",
                     AnnotationProduct.Annotation,
                     "Unable to parse the rule definition, please check the definition for mistakes.",
-                    this.OneOf(Eof, RuleEnd),
+                    this.OneOf(Eof, RuleEndToken),
                     maxSkip: 1
             );
 
             var ruleBodyOptions = this.OneOf(
-                "#RuleDefinitionOptions",
+                "#RuleBodyOptions",
                 AnnotationProduct.Transitive,
 
-                ruleDefinition,
+                ruleBody,
                 // xxx should mark this as a warning - empty rule
-                this.TryMatch(RuleEnd),
+                this.TryMatch(RuleEndToken),
                 InvalidRuleDefinitionError
             );
 
-            MissingRuleEndError = this.Error(
+            MissingRuleEndError = this.LogError(
                 "MissingEndRule",
                 AnnotationProduct.Annotation,
-                "Missing end of rule (;) at the given position.",
-                this.OneOf(Eof, MatchAny),
-                1
+                "Missing end of rule (;) at the given position."
             );
 
             var endStatementOptions = this.OneOf(
                 "#EndStatementOptions",
                 AnnotationProduct.Transitive,
-                RuleEnd,
+                RuleEndToken,
                 MissingRuleEndError
             );
 
@@ -340,12 +338,13 @@ namespace gg.parse.ebnf
                 this.OneOf("#Statement", AnnotationProduct.Transitive, validStatement, UnknownInputError));
         }
 
-        public ParseResult Parse(List<Annotation> tokens)
-        {
-            var functionIds = tokens.Select(t => t.RuleId).ToArray();
-            return Root.Parse(functionIds, 0);
-        }
-
+        /// <summary>
+        /// Parse and validate the results of the various steps involved.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        /// <exception cref="TokenizeException">Thrown when the tokenization step results in errors.</exception>
+        /// <exception cref="ParseException">Thrown when parsing reports error.</exception>
         public (List<Annotation> tokens, List<Annotation> astNodes) Parse(string text)
         {
             if (!string.IsNullOrEmpty(text))
@@ -371,7 +370,10 @@ namespace gg.parse.ebnf
                 var tokenizerTokens = tokenizationResult.Annotations;
 
                 var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
-                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
+                // only need to capture errors, fatals will throw an exception
+                var loggedErrorId  = Tokenizer.FindRule(CommonTokenNames.LogError).Id;
+                
+                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId || a.RuleId == loggedErrorId);
                 var tokenizerErrors = new List<Annotation>();
 
                 foreach (var annotation in tokenizationResult.Annotations)
@@ -395,7 +397,7 @@ namespace gg.parse.ebnf
 
         private (List<Annotation> tokens, List<Annotation> astNodes) ParseGrammar(string text, List<Annotation> tokens)
         {
-            var astResult = Parse(tokens);
+            var astResult = Root!.Parse(tokens);
 
             if (astResult.FoundMatch)
             {
@@ -407,7 +409,14 @@ namespace gg.parse.ebnf
                 }
 
                 var errorPredicate = new Func<Annotation, bool>(
-                    a => FindRule(a.RuleId) is MarkError<int> or LogRule<int>
+                    a => {
+                        var rule = FindRule(a.RuleId);
+
+                        return (rule is MarkError<int>)
+                            // only need to capture errors, fatals will throw an exception
+                            // so no need to capture them
+                            || (rule is LogRule<int> logRule && logRule.Level == LogLevel.Error);
+                    }
                 );
                 var grammarErrors = new List<Annotation>();
 
@@ -478,10 +487,10 @@ namespace gg.parse.ebnf
                     Token(operatorTokenName),
                     ruleTerms);
 
-            var notEndOfOperator = this.Not(this.OneOf(Eof, RuleEnd, GroupEnd));
+            var notEndOfOperator = this.Not(this.OneOf(Eof, RuleEndToken, GroupEndToken));
 
             // user forgot an operator eg: a, b  c;
-            var matchMissingOperatorError = this.MatchError(
+            var matchMissingOperatorError = this.LogError(
                 $"MissingOperatorError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an operator ({operatorTokenName}) but did not find any.",
@@ -491,7 +500,7 @@ namespace gg.parse.ebnf
             MissingOperatorError[operatorTokenName] = matchMissingOperatorError;
 
             // user forgot an term after the operator eg: a, b, ;
-            var matchMissingTermError = this.MatchError(
+            var matchMissingTermError = this.LogError(
                 $"MissingTermError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
@@ -502,7 +511,7 @@ namespace gg.parse.ebnf
 
             // user used a different operator by mistake (?) eg: a, b | c, d or a wrong token altogether
             // eg a, b, . c
-            var matchWrongOperatorError = this.MatchError(
+            var matchWrongOperatorError = this.LogError(
                 $"WrongOperatorError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an operator ({operatorTokenName}) but found something else.",
@@ -540,7 +549,7 @@ namespace gg.parse.ebnf
                 this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, remainder)
             );
 
-            var matchOperatorSequenceError = this.MatchError(
+            var matchOperatorSequenceError = this.LogError(
                 $"MatchOperatorSequenceError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected a rule term after operator ({operatorTokenName}) but found something else.",

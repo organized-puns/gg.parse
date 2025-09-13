@@ -43,7 +43,7 @@ namespace gg.parse.tests
 
             var tokens = result.Annotations;
 
-            result = parser.Parse(tokens);
+            result = parser.Root!.Parse(tokens);
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
@@ -72,7 +72,7 @@ namespace gg.parse.tests
 
             var tokens = result.Annotations;
 
-            result = parser.Parse(tokens);
+            result = parser.Root!.Parse(tokens);
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
