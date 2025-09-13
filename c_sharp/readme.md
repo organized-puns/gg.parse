@@ -1,5 +1,5 @@
-gg.parse v(0.0.1)
-======================
+gg.parse (working towards an MVP)
+=================================
 
 Quickstart
 ----------------------
@@ -132,7 +132,7 @@ Todo (for mvp)
 - Error handling, 
 
     Rewrite Error / Match Error as Log Error/Warning/Info    
-        Test if fatal error is captured corect
+        Remove condition from log, it can be replaced with sequence(condition, log)
         Remove MarkError (and everything)
         Add Warning to empty rule in ebnf parser
     
@@ -143,13 +143,24 @@ Todo (for mvp)
       wrong token for rule precedence
       missing term after unary operation
 
-v2.0
-----
+    Move ebnf to its own project and rename ebnf to something else, script ?
+
+    Add getText to annotation extensions
+
+    Map error range to row/column in source file
+
+    Rename try to 'if' remove '>' token 
+
+
+alpha (featured complete, buggy, ugly mess)
+-------------------------------------------
+
+- Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
+
+- build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
 - add optional namespaces to avoid grammar / token name clash 
 - Implement a function console
-
-- build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
 - add BuildMatcher() class (add function to EbnfParser?) which takes a tokenizer rule term and will match a string and has
      all common tokens defined

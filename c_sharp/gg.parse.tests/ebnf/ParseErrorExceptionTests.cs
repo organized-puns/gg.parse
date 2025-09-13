@@ -1,5 +1,5 @@
 ﻿using gg.parse.ebnf;
-
+using gg.parse.rulefunctions;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.ebnf
@@ -115,6 +115,26 @@ namespace gg.parse.tests.ebnf
                 IsTrue(e.Errors.ElementAt(1).Start == 7);
                 IsTrue(e.Errors.ElementAt(1).Length == 3);
             }           
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FatalConditionException<int>))]
+        public void SetupRuleWithFatalWithCondition_CreateParserAndParseRule_ExpectException()
+        {
+            var parser = new EbnfParser("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
+
+            // should trigger the fatal exception 
+            parser.Parse("trigger fatal");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FatalConditionException<int>))]
+        public void SetupRuleWithFatalWithoutCondition_CreateParserAndParseRule_ExpectException()
+        {
+            var parser = new EbnfParser("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
+
+            // should trigger the fatal exception 
+            parser.Parse("trigger fatal");
         }
     }
 }

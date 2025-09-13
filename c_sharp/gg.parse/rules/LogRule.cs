@@ -91,6 +91,11 @@ namespace gg.parse.rulefunctions
                 return ParseResult.Failure;
             }
 
+            if (Level == LogLevel.Fatal)
+            {
+                throw new FatalConditionException<T>(this);
+            }
+
             return BuildDataRuleResult(new(start, 0));
         }
     }
