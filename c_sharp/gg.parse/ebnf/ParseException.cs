@@ -1,4 +1,6 @@
-﻿namespace gg.parse.ebnf
+﻿using System.Diagnostics;
+
+namespace gg.parse.ebnf
 {
     public class ParseException : Exception
     {
@@ -25,6 +27,18 @@
             Errors = errors;
             Text = text;
             Tokens = tokens;
+        }
+
+        public void WriteErrors(Action<string> writeError)
+        {
+            if (Errors != null && Text != null && Tokens != null)
+            {
+                var errorMessages = Errors.Select(annotation => $"Parse error at: {annotation.GetText(Text, Tokens)}.");
+                foreach (var errorMessage in errorMessages)
+                {
+                    writeError(errorMessage);
+                }
+            }
         }
     }
 }

@@ -120,7 +120,8 @@ Good to remember (FAQ?):
     IS _AS INTENDED_... groups by definition are always transitive and any other.
 -   Data functions, eg {'a'..'b'} ALWAYS have production `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
     IT SHOULD have a clear error though, something like "found production rule without identifier".
-
+- DO NOT DO THIS: Remove condition from log, it can be replaced with sequence(condition, log). No it can't because the log RANGE will NOT cover the preceding sequence.
+  
 Todo (for mvp)
 ---------------
 
@@ -131,9 +132,15 @@ Todo (for mvp)
 
 - Error handling, 
 
-    Rewrite Error / Match Error as Log Error/Warning/Info    
-        Remove condition from log, it can be replaced with sequence(condition, log)
-        Remove MarkError (and everything)
+      Rewrite Error / Match Error as Log Error/Warning/Info     
+      Remove MarkError (and everything)  
+      Add skip_until  skip_until_eof_or
+            - create rule
+            - add rule to tokenizer
+            - add rule to parser
+            - add rule to compiler
+      Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c)
+        
         Add Warning to empty rule in ebnf parser
     
     Deal with the following cases:

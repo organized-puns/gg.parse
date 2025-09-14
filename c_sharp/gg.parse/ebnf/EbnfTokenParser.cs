@@ -52,21 +52,19 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int> TryMatchOperator { get; private set; }
 
-        public MatchFunctionSequence<int> MatchError { get; private set; }
-
         public MatchFunctionSequence<int> MatchLog { get; private set; }
 
         public MatchFunctionSequence<int> Include { get; private set; }
 
         public MatchFunctionSequence<int> MatchUnexpectedProductError { get; private set; }
 
-        public MarkError<int> UnexpectedProductError { get; private set; }
+        public LogRule<int> UnexpectedProductError { get; private set; }
 
-        public MarkError<int> InvalidRuleDefinitionError { get; private set; }
+        public LogRule<int> RuleBodyError { get; private set; }
 
-        public MarkError<int> UnknownInputError { get; private set; }
+        public LogRule<int> UnknownInputError { get; private set; }
 
-        public MarkError<int> ExpectedOperatorError { get; private set; }
+        public LogRule<int> ExpectedOperatorError { get; private set; }
 
         public LogRule<int> MissingRuleEndError { get; private set; }
 
@@ -225,12 +223,10 @@ namespace gg.parse.ebnf
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
             // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
             // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductError = this.Error(
+            UnexpectedProductError = this.LogError(
                     "UnexpectedProductionModifier",
                     AnnotationProduct.Annotation,
-                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations.",
-                    this.OneOf(Eof, MatchAny),
-                    maxSkip: 1
+                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
             );
 
             MatchUnexpectedProductError = this.Sequence(
@@ -245,21 +241,12 @@ namespace gg.parse.ebnf
                 UnexpectedProductError
             );
 
-            MatchError = this.Sequence(
-                "Error",
-                AnnotationProduct.Annotation,
-                Token("ErrorKeyword", AnnotationProduct.Annotation, CommonTokenNames.MarkError),
-                MatchLiteral,
-                ruleBody
-            );
-
             MatchLog = CreateMatchLog(ruleBody);
 
             unaryAndDataTerms.RuleOptions = [
                 ..unaryAndDataTerms.RuleOptions,
                 ..unaryOperators,
                 MatchGroup,
-                MatchError,
                 MatchLog,
                 MatchUnexpectedProductError
             ];
@@ -283,12 +270,11 @@ namespace gg.parse.ebnf
                 this.ZeroOrOne("#RulePrecedence", AnnotationProduct.Transitive, MatchPrecedence)
             );
 
-            InvalidRuleDefinitionError = this.Error(
-                    "CannotParseRuleDefinition",
-                    AnnotationProduct.Annotation,
-                    "Unable to parse the rule definition, please check the definition for mistakes.",
-                    this.OneOf(Eof, RuleEndToken),
-                    maxSkip: 1
+            RuleBodyError = this.LogError(
+                "RuleBodyError",
+                AnnotationProduct.Annotation,
+                "Unable to parse the rule body, please check the definition for mistakes.",
+                this.Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
             var ruleBodyOptions = this.OneOf(
@@ -298,7 +284,7 @@ namespace gg.parse.ebnf
                 ruleBody,
                 // xxx should mark this as a warning - empty rule
                 this.TryMatch(RuleEndToken),
-                InvalidRuleDefinitionError
+                RuleBodyError
             );
 
             MissingRuleEndError = this.LogError(
@@ -326,13 +312,14 @@ namespace gg.parse.ebnf
             var validStatement = this.OneOf("#ValidStatement", AnnotationProduct.Transitive, Include, MatchRule);
 
             // fallback in case nothing matches
-            UnknownInputError = this.Error(
+            UnknownInputError = this.LogError(
                 "UnknownInput",
                 AnnotationProduct.Annotation,
                 "Can't match the token at the given position to a astNode.",
-                validStatement,
-                0
-            );
+                // xxx add skip until valid statement as part of the condition so the range
+                // represents the error
+                this.Skip(stopCondition: validStatement, failOnEoF: false)
+            );            
 
             Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive,
                 this.OneOf("#Statement", AnnotationProduct.Transitive, validStatement, UnknownInputError));
@@ -370,10 +357,8 @@ namespace gg.parse.ebnf
                 var tokenizerTokens = tokenizationResult.Annotations;
 
                 var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
-                // only need to capture errors, fatals will throw an exception
-                var loggedErrorId  = Tokenizer.FindRule(CommonTokenNames.LogError).Id;
                 
-                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId || a.RuleId == loggedErrorId);
+                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
                 var tokenizerErrors = new List<Annotation>();
 
                 foreach (var annotation in tokenizationResult.Annotations)
@@ -385,7 +370,8 @@ namespace gg.parse.ebnf
                 {
                     throw new TokenizeException(
                         "input contains characters which could not be mapped to a token.",
-                        tokenizerErrors
+                        tokenizerErrors,
+                        text
                     );
                 }
 
@@ -412,10 +398,9 @@ namespace gg.parse.ebnf
                     a => {
                         var rule = FindRule(a.RuleId);
 
-                        return (rule is MarkError<int>)
-                            // only need to capture errors, fatals will throw an exception
-                            // so no need to capture them
-                            || (rule is LogRule<int> logRule && logRule.Level == LogLevel.Error);
+                        // only need to capture errors, fatals will throw an exception
+                        // so no need to capture them
+                        return (rule is LogRule<int> logRule && logRule.Level == LogLevel.Error);
                     }
                 );
                 var grammarErrors = new List<Annotation>();

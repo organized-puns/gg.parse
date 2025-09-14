@@ -1,6 +1,7 @@
 ﻿using gg.parse.ebnf;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.rulefunctions;
+using System.Diagnostics;
 
 namespace gg.parse.tests.ebnf
 {
@@ -31,7 +32,7 @@ namespace gg.parse.tests.ebnf
 
             foreach (var validString in validStrings)
             {
-                var result = tokenizer.Root.Parse(validString.ToArray(), 0);
+                var result = tokenizer.Root.Parse(validString);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
@@ -59,16 +60,15 @@ namespace gg.parse.tests.ebnf
                 "\"",
             };
 
-            foreach (var validString in invalidStrings)
+            foreach (var testString in invalidStrings)
             {
-                var result = tokenizer.Root.Parse(validString.ToArray(), 0);
+                var result = tokenizer.Root.Parse(testString);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations[0].RuleId == errEOF.Id);
-                Assert.IsTrue(result.Annotations[0].Start == validString.Length);
-                Assert.IsTrue(result.Annotations[0].End == validString.Length);
-                Assert.IsTrue(result.Annotations[0].Length == 0);
+                Assert.IsTrue(result.Annotations[0].Start == 0);
+                Assert.IsTrue(result.Annotations[0].End == testString.Length);
                 Assert.IsTrue(result.Annotations[0].Children == null);
             }
         }
@@ -81,15 +81,13 @@ namespace gg.parse.tests.ebnf
         public void InvalidEOLNTerminatedString_Parse_ExpectErrors()
         {
             var tokenizer = Setup_BuildStringTokenizerFromEbnfFile();
-            var errEOLN = tokenizer.FindRule("err_string_eoln");
+            var errEOLN = tokenizer.FindRule("log_err_string_eoln");
 
             var testConfigurations = new (string input, int expectedPosition, int expectedLength) []
             {
-                ("\"foo\n\"", 4, 2),
+                ("\"foo\n\"", 0, 5),
                 // 
-                ("\"bar\r\n\"", 4, 3),
-                // expected length = 1 because there is a valid string ("", before bar) right there
-                ("\"foo\n\"\"bar\"", 4, 1)
+                ("\"bar\r\n\"", 0, 6),
             };
 
             foreach (var testConfig in testConfigurations)
@@ -114,7 +112,7 @@ namespace gg.parse.tests.ebnf
         {
             var tokenizer = Setup_BuildStringTokenizerFromEbnfFile();
             var stringRule = tokenizer.FindRule("string");
-            var errEOLN = tokenizer.FindRule("err_string_eoln");
+            var errEOLN = tokenizer.FindRule("log_err_string_eoln");
             var errEOF = tokenizer.FindRule("err_string_eof");
 
             // modify the root to expect one or more strings
@@ -143,27 +141,55 @@ namespace gg.parse.tests.ebnf
         private static RuleGraph<char> Setup_BuildStringTokenizerFromEbnfFile()
         {
             var text = File.ReadAllText("assets/string_tokenization.ebnf");
-            var tokenizer = new EbnfParser(text, null).EbnfTokenizer;
 
-            // check everything has build correctly
-            Assert.IsTrue(tokenizer != null);
-            Assert.IsTrue(tokenizer.Root != null);
+            try
+            {
+                var tokenizer = new EbnfParser(text, null).EbnfTokenizer;
 
-            // check all expected rules are there
-            var stringOptionsRule = tokenizer.FindRule("string_options");
-            Assert.IsTrue(stringOptionsRule != null);
-            Assert.IsTrue(tokenizer.Root == stringOptionsRule);
+                // check everything has build correctly
+                Assert.IsTrue(tokenizer != null);
+                Assert.IsTrue(tokenizer.Root != null);
 
-            var stringRule = tokenizer.FindRule("string");
-            Assert.IsTrue(stringRule != null);
+                // check all expected rules are there
+                var stringOptionsRule = tokenizer.FindRule("string_options");
+                Assert.IsTrue(stringOptionsRule != null);
+                Assert.IsTrue(tokenizer.Root == stringOptionsRule);
 
-            var errEOF = tokenizer.FindRule("err_string_eof") as MarkError<char>;
-            Assert.IsTrue(errEOF != null);
+                var stringRule = tokenizer.FindRule("string");
+                Assert.IsTrue(stringRule != null);
 
-            var errEOLN = tokenizer.FindRule("err_string_eoln") as MarkError<char>;
-            Assert.IsTrue(errEOF != null);
-        
-            return tokenizer;
+                var errEOF = tokenizer.FindRule("err_string_eof") as LogRule<char>;
+                Assert.IsTrue(errEOF != null && errEOF.Level == LogLevel.Error);
+
+                var errEOLN = (tokenizer.FindRule("err_string_eoln") as MatchFunctionSequence<char>);
+                var logEOLNerr = (errEOLN.SequenceSubfunctions[0] as RuleReference<char>).Rule as LogRule<char>;
+                Assert.IsTrue(logEOLNerr  != null && logEOLNerr.Level == LogLevel.Error);
+
+                return tokenizer;
+            }
+            catch (EbnfException e)
+            {
+                if (e.InnerException is TokenizeException tex)
+                {
+                    var errorList = new List<string>();
+                    tex.WriteErrors(err =>
+                    {
+                        Debug.WriteLine(err);
+                        errorList.Add(err);
+                    });
+                }
+                else if (e.InnerException is ParseException pex)
+                {
+                    var errorList = new List<string>();
+                    pex.WriteErrors(err =>
+                    {
+                        Debug.WriteLine(err);
+                        errorList.Add(err);
+                    });
+                }
+
+                throw;
+            }
         }
     }
 }

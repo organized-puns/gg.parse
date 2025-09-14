@@ -3,6 +3,7 @@ using gg.parse.rulefunctions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ namespace gg.parse.tests.ebnf
         public void CreateLogLevelTokens_Parse_ExpectLogLevelsFound()
         {
             var tokenizer = new EbnfTokenizer();
-            var testText = "fatal lerror warning info debug";
+            var testText = "fatal error warning info debug";
             var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
@@ -52,6 +53,29 @@ namespace gg.parse.tests.ebnf
             var expectedNames = new string[]
             {
                 CommonTokenNames.If,
+            };
+
+            for (var i = 0; i < expectedNames.Length; i++)
+            {
+                var name = tokenizer.FindRule(result.Annotations![i].RuleId)!.Name;
+                IsTrue(name == expectedNames[i]);
+            }
+        }
+
+        [TestMethod]
+        public void CreateInputWithUnknownToken_Parse_ExpectError()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var testText = "^ valid_token";
+            var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == testText.Length);
+
+            var expectedNames = new string[]
+            {
+                CommonTokenNames.UnknownToken,
+                CommonTokenNames.Identifier,
             };
 
             for (var i = 0; i < expectedNames.Length; i++)

@@ -63,7 +63,13 @@ namespace gg.parse.instances.json
             // example of recovery
             var keyValueMatch = this.Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
             var objRecovery = this.OneOf(value, comma, objectEnd);
-            var errorValueMissing = RegisterRule(new MarkError<int>("err_missing_value", AnnotationProduct.Annotation, testFunction: objRecovery));
+            var errorValueMissing =
+                this.LogError(
+                    "err_missing_value",
+                    AnnotationProduct.Annotation,
+                    "missing json value",
+                    this.Skip(stopCondition: objRecovery, failOnEoF: false)
+                );
             var valueMissingMatch = this.Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
             var separatorMissingMatch = this.Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
             var keyValue = this.OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);

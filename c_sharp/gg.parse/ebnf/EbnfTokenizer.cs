@@ -22,7 +22,6 @@ namespace gg.parse.ebnf
                     this.EndOfLine(product: AnnotationProduct.None),
                     
                     // make sure keywords are before the identifier
-                    this.Keyword(MarkError, AnnotationProduct.Annotation, "error"),
                     this.Keyword(LogFatal, AnnotationProduct.Annotation, LogFatal),
                     this.Keyword(LogError, AnnotationProduct.Annotation, LogError),
                     this.Keyword(LogWarning, AnnotationProduct.Annotation, LogWarning),
@@ -76,14 +75,28 @@ namespace gg.parse.ebnf
                     MapNameToToken(OptionWithPrecedence, "/")
                 );
 
-            var error = this.Error(UnknownToken, AnnotationProduct.Annotation,
-                "Can't match the character at the given position to a token.", ebnfTokens, 0);
+            var noMatchFallback = 
+                this.LogError(
+                    UnknownToken,
+                    AnnotationProduct.Annotation,
+                    "Can't match the character at the given position to a token.",
+                    this.Skip(stopCondition: ebnfTokens, failOnEoF: false)
+                );
 
-            Root = this.ZeroOrMore("#EbnfTokenizer", AnnotationProduct.Transitive,
-                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, ebnfTokens, this.Whitespace(), error));
+            Root = this.ZeroOrMore(
+                    "#EbnfTokenizer", 
+                    AnnotationProduct.Transitive,
+                    this.OneOf(
+                        "#TokenWhiteSpaceOrNoMatchFallback", 
+                        AnnotationProduct.Transitive, 
+                        ebnfTokens, 
+                        this.Whitespace(), 
+                        noMatchFallback
+                    )
+            );
         }
         
-        public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
+        public ParseResult Tokenize(string text) => Root!.Parse(text.ToCharArray(), 0);
 
         private RuleBase<char> MapNameToToken(string name, string token) =>
             this.Literal(name, AnnotationProduct.Annotation, token.ToCharArray());

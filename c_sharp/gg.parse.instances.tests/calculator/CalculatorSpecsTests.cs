@@ -352,7 +352,7 @@ namespace gg.parse.instances.tests.calculator
                 {
                     if (ex.Errors != null && ex.Text != null && ex.Tokens != null)
                     {
-                        var errorMessages = ex.Errors.Select(annotation => $"Unknown token: {EbnfParser.GetText(ex.Text, annotation, ex.Tokens)}.");
+                        var errorMessages = ex.Errors.Select(annotation => $"Error: {EbnfParser.GetText(ex.Text, annotation, ex.Tokens)}.");
                         foreach (var errorMessage in errorMessages)
                         {
                             Console.WriteLine(errorMessage);

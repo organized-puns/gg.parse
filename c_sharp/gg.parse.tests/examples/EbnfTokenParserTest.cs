@@ -351,13 +351,15 @@ namespace gg.parse.tests.examples
         [TestMethod]
         public void TokenizeParseCompileErrorRule_ExpectSuccess()
         {
-            var (_, _, _, table) = SetupTokenizeParseCompile("error_rule = error 'msg' !'bar';");
+            var (_, _, _, table) = SetupTokenizeParseCompile("error_rule = error 'msg' if !'bar';");
 
-            var error = table.FindRule("error_rule") as MarkError<char>;
+            var error = table.FindRule("error_rule") as LogRule<char>;
             IsNotNull(error);
-            IsTrue(error.Message == "msg");
-            IsTrue(error.TestFunction == table.FindRule("error_rule skip_until Not"));
-            var matchFunction = error.TestFunction as MatchNotFunction<char>;
+            IsTrue(error.Text == "msg");
+            IsTrue(error.Level == LogLevel.Error);
+            // xxx fix find rule
+            IsTrue(error.Condition == table.FindRule("error_rule skip_until Not"));
+            var matchFunction = error.Condition as MatchNotFunction<char>;
             IsNotNull(matchFunction);
             IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not, type: Not(Literal)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);

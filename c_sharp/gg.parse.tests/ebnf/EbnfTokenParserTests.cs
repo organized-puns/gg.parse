@@ -287,7 +287,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.Annotations[0] != null 
                     && parseResult.Annotations[0]!.Children != null
                     && parseResult.Annotations[0]!.Children!.Count == 2);
-            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.InvalidRuleDefinitionError.Id);
+            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.RuleBodyError.Id);
             IsTrue(parseResult.Annotations[0]!.Children![1].Range.Equals(new Range(2, 1)));
         }
 
@@ -421,7 +421,7 @@ namespace gg.parse.tests.ebnf
         public void CreateLogErrorRuleWithText_ParseWithMatchLog_ExpectMatchFound()
         {
             var tokenizer = new EbnfTokenizer();
-            var tokenizeResult = tokenizer.Tokenize($"lerror 'text'");
+            var tokenizeResult = tokenizer.Tokenize($"error 'text'");
 
             IsTrue(tokenizeResult.FoundMatch);
             IsNotNull(tokenizeResult.Annotations);

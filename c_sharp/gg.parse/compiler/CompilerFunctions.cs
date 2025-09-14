@@ -352,43 +352,6 @@ namespace gg.parse.compiler
             return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
         }
 
-        public static RuleBase<T> CompileError<T>(
-           RuleCompiler<T> compiler,
-           RuleDeclaration declaration,
-           CompileSession<T> context) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.AssociatedAnnotation;
-
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count > 0);
-
-            var message = context.GetText(ruleDefinition.Children[1].Range);
-
-            if (string.IsNullOrEmpty(message) || message.Length <= 2)
-            {
-                throw new CompilationException<T>("Text defining the error is null or empty", 
-                    ruleDefinition.Range, 
-                    annotation: declaration.AssociatedAnnotation);
-            }
-
-            message = message.Substring(1, message.Length - 2);
-
-            var skipAnnotation = ruleDefinition.Children[2];
-            var (compilationFunction, elementName) = compiler.Functions[skipAnnotation.RuleId];
-            var skipDeclaration = new RuleDeclaration(skipAnnotation, AnnotationProduct.Annotation, $"{declaration.Name} skip_until {elementName}");
-            var testFunction = compilationFunction(compiler, skipDeclaration, context);
-
-            if (testFunction == null)
-            {
-                // xxx add warnings
-                // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for Error.", skipAnnotation.Range, null);
-            }
-
-            return new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0);
-        }
-
         public static RuleBase<T> CompileLog<T>(
            RuleCompiler<T> compiler,
            RuleDeclaration declaration,
@@ -420,7 +383,7 @@ namespace gg.parse.compiler
             {
                 var conditionDefinition = ruleDefinition.Children[2];
                 var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.RuleId];
-                var conditionDeclaration = new RuleDeclaration(conditionDefinition, AnnotationProduct.Annotation, $"{declaration.Name} skip_until {elementName}");
+                var conditionDeclaration = new RuleDeclaration(conditionDefinition, AnnotationProduct.Annotation, $"{declaration.Name} condition: {elementName}");
                 condition = compilationFunction(compiler, conditionDeclaration, context);
 
                 if (condition == null)

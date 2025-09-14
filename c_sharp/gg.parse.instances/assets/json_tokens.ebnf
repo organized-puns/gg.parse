@@ -38,4 +38,4 @@ item_separator	= ',';
 ~white_space	= { ' \t\r\n' };
 
 // errors
-unknown_token	= error "unknown token found." json_token;
+unknown_token	= error "unknown token found." if *(!json_token, .);

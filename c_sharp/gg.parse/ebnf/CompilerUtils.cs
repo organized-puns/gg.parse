@@ -15,7 +15,7 @@ namespace gg.parse.ebnf
                     .RegisterFunction(parser.MatchAnyToken, CompileAny)
                     .RegisterFunction(parser.MatchCharacterRange, CompileCharacterRange)
                     .RegisterFunction(parser.MatchCharacterSet, CompileCharacterSet)
-                    .RegisterFunction(parser.MatchError, CompileError)
+                    .RegisterFunction(parser.MatchLog, CompileLog)
                     .RegisterFunction(parser.MatchGroup, CompileGroup)
                     .RegisterFunction(parser.MatchIdentifier, CompileIdentifier)
                     .RegisterFunction(parser.MatchLiteral, CompileLiteral)
@@ -32,7 +32,6 @@ namespace gg.parse.ebnf
         {
             return compiler
                     .RegisterFunction(parser.MatchAnyToken, CompileAny)
-                    .RegisterFunction(parser.MatchError, CompileError)
                     .RegisterFunction(parser.MatchGroup, CompileGroup)
                     .RegisterFunction(parser.MatchIdentifier, CompileIdentifier)
                     .RegisterFunction(parser.MatchNotOperator, CompileNot)

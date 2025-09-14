@@ -88,15 +88,14 @@
         public static readonly string SingleLineComment = "SingleLineComment";
         public static readonly string MultiLineComment = "MultiLineComment";
 
-        public static readonly string MarkError = "Error";
-
         public static readonly string LogFatal   = "fatal";
-        public static readonly string LogError   = "lerror";
+        public static readonly string LogError   = "error";
         public static readonly string LogWarning = "warning";
         public static readonly string LogInfo    = "info";
         public static readonly string LogDebug   = "debug";
         
         public static readonly string If         = "if";
+        public static readonly string Skip       = "SkipUntil";
 
         public static string GetPrefix(this AnnotationProduct production)
         {
