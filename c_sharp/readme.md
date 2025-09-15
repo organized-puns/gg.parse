@@ -131,17 +131,8 @@ Todo (for mvp)
   - address all xxx
 
 - Error handling, 
-
-      Rewrite Error / Match Error as Log Error/Warning/Info     
-      Remove MarkError (and everything)  
-      Add skip_until  skip_until_eof_or
-            - create rule
-            - add rule to tokenizer
-            - add rule to parser
-            - add rule to compiler
-      Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c)
         
-        Add Warning to empty rule in ebnf parser
+    Add Warning to empty rule in ebnf parser
     
     Deal with the following cases:
       var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
@@ -149,6 +140,15 @@ Todo (for mvp)
       missing assignment
       wrong token for rule precedence
       missing term after unary operation
+
+    Add skip_until >> skip_until_eof_or >>> 
+        - add rule to tokenizer
+        - add rule to parser
+        - add rule to compiler
+- 
+    Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c)
+ 
+
 
     Move ebnf to its own project and rename ebnf to something else, script ?
 
