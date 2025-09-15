@@ -1,5 +1,6 @@
 ﻿using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
+using System.Linq;
 
 namespace gg.parse.rulefunctions
 {
@@ -125,7 +126,7 @@ namespace gg.parse.rulefunctions
         
             graph.Not($"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.Not}({rule.Name})", AnnotationProduct.None, rule);
         
-
+            
         public static MatchNotFunction<T> Not<T>(this RuleGraph<T> graph, string name, AnnotationProduct product, RuleBase<T> rule)
             where T : IComparable<T> =>
 
@@ -230,8 +231,15 @@ namespace gg.parse.rulefunctions
             var ruleName = name ?? $"{product.GetPrefix()}{name}({keyword})";
             return graph.TryFindRule(ruleName, out MatchFunctionSequence<char>? existingRule)
                 ? existingRule!
-                : graph.RegisterRule(new MatchFunctionSequence<char>(ruleName, product, 0, 
-                                    graph.Literal(keyword), graph.Whitespace()));
+                : graph.RegisterRule(
+                    new MatchFunctionSequence<char>(
+                        ruleName, 
+                        product, 
+                        precedence: 0, 
+                        graph.Literal(keyword), 
+                        graph.Not(graph.IdentifierCharacter(product: AnnotationProduct.None))
+                    )
+                );
         }
 
         public static RuleBase<char> Float(this RuleGraph<char> graph,
@@ -342,13 +350,30 @@ namespace gg.parse.rulefunctions
                      ? existingRule!
                      : graph.RegisterRule(new MatchDataSet<char>(name, product, [' ', '\r', '\n', '\t']));
 
-
-        public static MarkError<T> Error<T>(this RuleGraph<T> graph, 
-            string name, AnnotationProduct product, string description, RuleBase<T>? testFunction, int maxSkip)
-            where T: IComparable<T> =>
-            graph.TryFindRule(name, out MarkError<T>? existingRule)
+        public static LogRule<T> LogError<T>(this RuleGraph<T> graph,
+            string name, AnnotationProduct product, string description, RuleBase<T>? condition = null)
+            where T : IComparable<T> =>
+            graph.TryFindRule(name, out LogRule<T>? existingRule)
                      ? existingRule!
-                     : graph.RegisterRule(new MarkError<T>(name, product, description, testFunction, maxSkip));
+                     : graph.RegisterRule(new LogRule<T>(name, product, description, condition, LogLevel.Error));
+
+        public static SkipRule<T> Skip<T>(this RuleGraph<T> graph, RuleBase<T> stopCondition, bool failOnEoF = true)
+            where T : IComparable<T>
+        {
+            return graph.Skip(
+                $"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.Skip}", 
+                AnnotationProduct.None, 
+                stopCondition, 
+                failOnEoF
+            );
+        }
+
+        public static SkipRule<T> Skip<T>(this RuleGraph<T> graph,
+            string name, AnnotationProduct product, RuleBase<T> stopCondition, bool failOnEoF = true)
+            where T : IComparable<T> =>
+            graph.TryFindRule(name, out SkipRule<T>? existingRule)
+                     ? existingRule!
+                     : graph.RegisterRule(new SkipRule<T>(name, product, stopCondition, failOnEoF));
 
 
         public static RuleBase<char> InSet(this RuleGraph<char> graph, params char[] set)

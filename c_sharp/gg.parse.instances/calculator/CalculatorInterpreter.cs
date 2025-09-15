@@ -100,33 +100,33 @@ namespace gg.parse.instances.calculator
 
         public double Interpret(string text, Annotation node, List<Annotation> tokens)
         {
-            if (node.FunctionId == _graphIds.Number)
+            if (node.RuleId == _graphIds.Number)
             {
                 var valueText = EbnfParser.GetText(text, node, tokens);
                 return double.Parse(valueText, CultureInfo.InvariantCulture);
             }
-            else if (node.FunctionId == _graphIds.Unary)
+            else if (node.RuleId == _graphIds.Unary)
             {
-                var sign = node.Children[0].FunctionId == _graphIds.Plus ? 1.0 : -1.0;
+                var sign = node.Children[0].RuleId == _graphIds.Plus ? 1.0 : -1.0;
                 return sign * Interpret(text, node.Children[1], tokens);
             }
-            else if (node.FunctionId == _graphIds.Multiply)
+            else if (node.RuleId == _graphIds.Multiply)
             {
                 return Interpret(text, node.Children[0], tokens) * Interpret(text, node.Children[2], tokens);
             }
-            else if (node.FunctionId == _graphIds.Add)
+            else if (node.RuleId == _graphIds.Add)
             {
                 return Interpret(text, node.Children[0], tokens) + Interpret(text, node.Children[2], tokens);
             }
-            else if (node.FunctionId == _graphIds.Subtract)
+            else if (node.RuleId == _graphIds.Subtract)
             {
                 return Interpret(text, node.Children[0], tokens) - Interpret(text, node.Children[2], tokens);
             }
-            else if (node.FunctionId == _graphIds.Divide)
+            else if (node.RuleId == _graphIds.Divide)
             {
                 return Interpret(text, node.Children[0], tokens) / Interpret(text, node.Children[2], tokens);
             }
-            else if (node.FunctionId == _graphIds.Group)
+            else if (node.RuleId == _graphIds.Group)
             {
                 return Interpret(text, node.Children[0], tokens);
             }

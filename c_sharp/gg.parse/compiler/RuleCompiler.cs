@@ -3,6 +3,17 @@ using gg.core.util;
 
 namespace gg.parse.compiler
 {
+    public class NoCompilationFunctionException : Exception
+    {
+        public int RuleId { get; init; }
+
+        public NoCompilationFunctionException(int id) 
+            : base("No complilation function for the given rule id.")
+        {
+            RuleId = id;
+        }
+    }
+
     public delegate RuleBase<T> CompileFunction<T>(
         RuleCompiler<T> compiler,
         RuleDeclaration declaration, 
@@ -10,6 +21,8 @@ namespace gg.parse.compiler
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
+
+
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
@@ -28,6 +41,16 @@ namespace gg.parse.compiler
             return this;
         }
 
+        public (CompileFunction<T> function, string? name) FindCompilationFunction(int parseFunctionId)
+        {
+            if (Functions.TryGetValue(parseFunctionId, out var compilationFunction))
+            {
+                return compilationFunction;
+            }
+
+            throw new NoCompilationFunctionException(parseFunctionId);
+        }
+
         public RuleGraph<T> Compile(CompileSession<T> context)
         {
             return Compile(context, new RuleGraph<T>());
@@ -40,14 +63,14 @@ namespace gg.parse.compiler
                 var declaration = GetRuleDeclaration(session, node.Children, 0);
                 var ruleDefinition = declaration.AssociatedAnnotation;
 
-                if (!Functions.ContainsKey(ruleDefinition.FunctionId))
+                /*if (!Functions.ContainsKey(ruleDefinition.FunctionId))
                 {
                     throw new CompilationException<int>(
                         $"Unable to match rule {ruleDefinition.FunctionId} to a compile function.", 
                         ruleDefinition.Range);
-                }
+                }*/
 
-                var compilationFunction = Functions[ruleDefinition.FunctionId].function;
+                var (compilationFunction, _) = FindCompilationFunction(ruleDefinition.RuleId);
 
                 if (result.FindRule(declaration.Name) == null)
                 {
@@ -106,7 +129,7 @@ namespace gg.parse.compiler
             var idx = index;
 
             // annotation product is optional, (will default to Annotation)
-            if (TryGetProduct(ruleNodes[idx].FunctionId, out var product))
+            if (TryGetProduct(ruleNodes[idx].RuleId, out var product))
             {
                 idx++;
             }

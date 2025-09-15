@@ -1,5 +1,5 @@
-gg.parse v(0.0.1)
-======================
+gg.parse (working towards an MVP)
+=================================
 
 Quickstart
 ----------------------
@@ -120,8 +120,9 @@ Good to remember (FAQ?):
     IS _AS INTENDED_... groups by definition are always transitive and any other.
 -   Data functions, eg {'a'..'b'} ALWAYS have production `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
     IT SHOULD have a clear error though, something like "found production rule without identifier".
-
-Todo (for v1.0)
+- DO NOT DO THIS: Remove condition from log, it can be replaced with sequence(condition, log). No it can't because the log RANGE will NOT cover the preceding sequence.
+  
+Todo (for mvp)
 ---------------
 
 - Clean up:  
@@ -129,33 +130,57 @@ Todo (for v1.0)
   - Add some more documentation, extend readme.
   - address all xxx
 
-- Error handling, example: var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
-  or var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
+- Error handling, 
+        
+    Add Warning to empty rule in ebnf parser
+    
+    Deal with the following cases:
+      var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
+      wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
+      missing assignment
+      wrong token for rule precedence
+      missing term after unary operation
 
-- keywords should end with whitespace | non_keyword_char
-- add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
-- add full/short names versions for "or /|"
-- add alternative for "= / :"
-- replace any with _, disallow identifier to start with '_' ?
-- (Bug) add guard against infinite loop with zero or more (and other cases)
+    Add skip_until >> skip_until_eof_or >>> 
+        - add rule to tokenizer
+        - add rule to parser
+        - add rule to compiler
+- 
+    Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c)
+ 
 
-- add optional namespaces to avoid grammar / token name clash 
+
+    Move ebnf to its own project and rename ebnf to something else, script ?
+
+    Add getText to annotation extensions
+
+    Map error range to row/column in source file
+
+    Rename try to 'if' remove '>' token 
+
+
+alpha (featured complete, buggy, ugly mess)
+-------------------------------------------
+
+- Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
 
 - build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
+
+- add optional namespaces to avoid grammar / token name clash 
+- Implement a function console
 
 - add BuildMatcher() class (add function to EbnfParser?) which takes a tokenizer rule term and will match a string and has
      all common tokens defined
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
 
-- implement a Ebnf based EbnfParser and Tokenizer
-
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)
 	see if sequence can go without ,
 	see if range can go without {}
 
-
-
-
-- Implement a function console
+- implement a Ebnf based EbnfParser and Tokenizer
+- add full/short names versions for "not /!" "any /." "optional /?" "zero_or_more /*", "one_or_more /+", "ignore, drop? /~", "transitive /#"
+- add full/short names versions for "or /|"
+- add alternative for "= / :"
+- replace any with _, disallow identifier to start with '_' ?

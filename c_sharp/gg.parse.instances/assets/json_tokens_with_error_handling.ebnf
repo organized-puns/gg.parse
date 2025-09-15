@@ -23,7 +23,7 @@ null			= 'null';
 EOLN		    = ("\r\n" | "\n");	
 string_char		= !'"', !EOLN, !EOF, .;
 string			= '"', *string_char, '"'
-				| '"', *string_char, EOLN, error "string opened with \" but not properly closed before the EOLN." EOLN)
+				| ('"', *string_char, EOLN, error "string opened with \" but not properly closed before the EOLN." +(!EOLN, .)
 				| ('"', *string_char, EOF, error "string opened with \" but not properly closed before EOF." .);
 
 

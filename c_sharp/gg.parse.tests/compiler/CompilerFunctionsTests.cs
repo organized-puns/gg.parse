@@ -4,6 +4,7 @@ using gg.parse.rulefunctions.rulefunctions;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using static gg.parse.compiler.CompilerFunctions;
+using gg.parse.rulefunctions;
 
 
 namespace gg.parse.tests.compiler
@@ -51,13 +52,13 @@ namespace gg.parse.tests.compiler
             // compile a rule table which can tokenize 'foo'
             var table = compiler.Compile(session);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the literal as 'rule'
             var literalFunction = table.FindRule("rule");
 
-            Assert.IsNotNull(literalFunction);
+            IsNotNull(literalFunction);
 
             // the compiled table's root should be able to parse a foo string 
             var validInput = "foo";
@@ -65,19 +66,19 @@ namespace gg.parse.tests.compiler
 
             // the result should hold a token which describes a literal spanning
             // the length of the test text
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == literalFunction.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == validInput.Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == literalFunction.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == validInput.Length);
 
             var invalidInput = new string[] { "bar", "Foo", "f", "fo", "" };
 
             for (var i = 0; i < invalidInput.Length; i++)
             {
                 result = table.Root.Parse(invalidInput[i].ToCharArray(), 0);
-                Assert.IsFalse(result.FoundMatch);
+                IsFalse(result.FoundMatch);
             }
         }
 
@@ -120,13 +121,13 @@ namespace gg.parse.tests.compiler
             // compile a rule table which can tokenize a character in the set of 'abc'
             var table = compiler.Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the set rule as 'rule'
             var setFunction = table.FindRule("rule");
 
-            Assert.IsNotNull(setFunction);
+            IsNotNull(setFunction);
 
             // the compiled table's root should be able to parse a foo string 
             var validInput = new string[] { "a", "b", "c" };
@@ -136,12 +137,12 @@ namespace gg.parse.tests.compiler
 
                 // the result should hold a token which describes a character in the set abc spanning
                 // the length of the test text
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == setFunction.Id);
-                Assert.IsTrue(result.Annotations[0].Start == 0);
-                Assert.IsTrue(result.Annotations[0].Length == validInput[i].Length);
+                IsTrue(result.FoundMatch);
+                IsTrue(result.Annotations != null);
+                IsTrue(result.Annotations.Count == 1);
+                IsTrue(result.Annotations[0].RuleId == setFunction.Id);
+                IsTrue(result.Annotations[0].Start == 0);
+                IsTrue(result.Annotations[0].Length == validInput[i].Length);
             }
 
             // should not match any of these
@@ -150,7 +151,7 @@ namespace gg.parse.tests.compiler
             for (var i = 0; i < invalidInput.Length; i++)
             {
                 var result = table.Root.Parse(invalidInput[i].ToCharArray(), 0);
-                Assert.IsFalse(result.FoundMatch);
+                IsFalse(result.FoundMatch);
             }
         }
 
@@ -198,13 +199,13 @@ namespace gg.parse.tests.compiler
             // compile a rule table which can tokenize a character in the set of 'abc'
             var table = compiler.Compile(session);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the range rule as 'rule'
             var rangeRule = table.FindRule("rule");
 
-            Assert.IsNotNull(rangeRule);
+            IsNotNull(rangeRule);
 
             // the compiled table's root should be able to parse any char in the range a..e 
             var validInput = new string[] { "a", "b", "c", "d", "e" };
@@ -214,12 +215,12 @@ namespace gg.parse.tests.compiler
 
                 // the result should hold a token which describes a character in the set abc spanning
                 // the length of the test text
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == rangeRule.Id);
-                Assert.IsTrue(result.Annotations[0].Start == 0);
-                Assert.IsTrue(result.Annotations[0].Length == validInput[i].Length);
+                IsTrue(result.FoundMatch);
+                IsTrue(result.Annotations != null);
+                IsTrue(result.Annotations.Count == 1);
+                IsTrue(result.Annotations[0].RuleId == rangeRule.Id);
+                IsTrue(result.Annotations[0].Start == 0);
+                IsTrue(result.Annotations[0].Length == validInput[i].Length);
             }
 
             // should not match any of these
@@ -228,7 +229,7 @@ namespace gg.parse.tests.compiler
             for (var i = 0; i < invalidInput.Length; i++)
             {
                 var result = table.Root.Parse(invalidInput[i].ToCharArray(), 0);
-                Assert.IsFalse(result.FoundMatch);
+                IsFalse(result.FoundMatch);
             }
         }
 
@@ -278,13 +279,13 @@ namespace gg.parse.tests.compiler
             // compile a rule table which can tokenize foo
             table = compiler.Compile(context, table);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the literal as 'rule'
             var identifierRule = table.FindRule("rule");
 
-            Assert.IsNotNull(identifierRule);
+            IsNotNull(identifierRule);
 
             // the compiled table's root should be able to parse a bar string 
             var testText = "bar";
@@ -292,12 +293,12 @@ namespace gg.parse.tests.compiler
 
             // the result should hold a token which describes an identifier spanning
             // the length of the test text
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == identifierRule.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == identifierRule.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == testText.Length);
         }
 
         /// <summary>
@@ -354,22 +355,22 @@ namespace gg.parse.tests.compiler
                     .WithAnnotationProductMapping([(noneProductId, AnnotationProduct.None)])
                     .Compile(context, table);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the literal as 'rule'
             var identifierRule = table.FindRule("rule");
 
-            Assert.IsNotNull(identifierRule);
-            Assert.IsTrue(identifierRule.Production == AnnotationProduct.None);
+            IsNotNull(identifierRule);
+            IsTrue(identifierRule.Production == AnnotationProduct.None);
 
             // the compiled table's root should be able to parse a bar string 
             var testText = "bar";
             var result = table.Root.Parse(testText.ToCharArray(), 0);
 
             // 
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations == null);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations == null);
         }
 
         /// <summary>
@@ -416,13 +417,13 @@ namespace gg.parse.tests.compiler
                 .RegisterFunction(groupId, CompileGroup)
                 .Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var groupFunction = table.FindRule("rule");
 
-            Assert.IsNotNull(groupFunction);
+            IsNotNull(groupFunction);
 
             // the compiled table's root should be able to parse a foobar string 
             var testText = "foobar";
@@ -430,12 +431,12 @@ namespace gg.parse.tests.compiler
 
             // the result should hold a token which describes a sequence spanning
             // the length of the test text
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == groupFunction.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == groupFunction.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == testText.Length);
         }
 
         /// <summary>
@@ -478,13 +479,13 @@ namespace gg.parse.tests.compiler
                     .RegisterFunction(sequenceId, CompileSequence)
                     .Compile(session);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var sequenceFunction = table.FindRule("rule");
 
-            Assert.IsNotNull(sequenceFunction);
+            IsNotNull(sequenceFunction);
 
             // the compiled table's root should be able to parse a foobar string 
             var testText = "foobar";
@@ -492,12 +493,12 @@ namespace gg.parse.tests.compiler
 
             // the result should hold a token which describes a sequence spanning
             // the length of the test text
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == sequenceFunction.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == sequenceFunction.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == testText.Length);
         }
 
         /// <summary>
@@ -540,13 +541,13 @@ namespace gg.parse.tests.compiler
                         .RegisterFunction(optionId, CompileOption)
                         .Compile(session);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var optionFunction = table.FindRule("rule");
 
-            Assert.IsNotNull(optionFunction);
+            IsNotNull(optionFunction);
 
             // the compiled table's root should be able to parse a foo OR bar string 
             var testText = "foo";
@@ -554,23 +555,23 @@ namespace gg.parse.tests.compiler
 
             // the result should hold a token which describes a sequence spanning
             // the length of the test text
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == optionFunction.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == optionFunction.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == testText.Length);
 
             // do the same test with bar
             testText = "bar";
             result = table.Root.Parse(testText.ToCharArray(), 0);
             
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == optionFunction.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == optionFunction.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == testText.Length);
         }
 
         /// <summary>
@@ -635,7 +636,7 @@ namespace gg.parse.tests.compiler
                 IsTrue(result.FoundMatch);
                 IsTrue(result.Annotations != null);
                 IsTrue(result.Annotations.Count == 1);
-                IsTrue(result.Annotations[0].FunctionId == evalFunction.Id);
+                IsTrue(result.Annotations[0].RuleId == evalFunction.Id);
                 IsTrue(result.Annotations[0].Start == 0);
                 IsTrue(result.Annotations[0].Length == testText.Length);
 
@@ -643,7 +644,7 @@ namespace gg.parse.tests.compiler
                 IsNotNull(result.Annotations[0].Children);
                 var literalChild = result.Annotations[0].Children[0];
 
-                IsTrue(literalChild.FunctionId == evalFunction.RuleOptions[i].Id);
+                IsTrue(literalChild.RuleId == evalFunction.RuleOptions[i].Id);
             }
 
         }
@@ -697,12 +698,12 @@ namespace gg.parse.tests.compiler
                         .RegisterFunction(notId, CompileNot)
                         .Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var notFunction = table.FindRule("rule");
-            Assert.IsNotNull(notFunction);
+            IsNotNull(notFunction);
 
             var validInput = new string[] { "a", "", "_", "FoO", "fOo", "FOO", "fo" };
             var result = ParseResult.Failure;
@@ -712,18 +713,18 @@ namespace gg.parse.tests.compiler
                 result = table.Root.Parse(validInput[i].ToCharArray(), 0);
 
                 // the result should hold a token which describes a not foo
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == notFunction.Id);
-                Assert.IsTrue(result.Annotations[0].Start == 0);
-                Assert.IsTrue(result.Annotations[0].Length == 0);
+                IsTrue(result.FoundMatch);
+                IsTrue(result.Annotations != null);
+                IsTrue(result.Annotations.Count == 1);
+                IsTrue(result.Annotations[0].RuleId == notFunction.Id);
+                IsTrue(result.Annotations[0].Start == 0);
+                IsTrue(result.Annotations[0].Length == 0);
             }
 
             var invalidInput = "foo";
             
             result = table.Root.Parse(invalidInput.ToCharArray(), 0);
-            Assert.IsFalse(result.FoundMatch);
+            IsFalse(result.FoundMatch);
         }
 
         /// <summary>
@@ -763,28 +764,28 @@ namespace gg.parse.tests.compiler
                         .RegisterFunction(tryMatchId, CompileTryMatch)
                         .Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var tryMatch = table.FindRule("rule");
-            Assert.IsNotNull(tryMatch);
+            IsNotNull(tryMatch);
 
             var validInput = "foo";
             var result = table.Root.Parse(validInput.ToCharArray(), 0);
 
             // the result should hold a token which describes a not foo
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == tryMatch.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == 0);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == tryMatch.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == 0);
 
             var invalidInput = "bar";
 
             result = table.Root.Parse(invalidInput.ToCharArray(), 0);
-            Assert.IsFalse(result.FoundMatch);
+            IsFalse(result.FoundMatch);
         }
 
         /// <summary>
@@ -818,12 +819,12 @@ namespace gg.parse.tests.compiler
                         .RegisterFunction(anyId, CompileAny)
                         .Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var anyFunction = table.FindRule("rule");
-            Assert.IsNotNull(anyFunction);
+            IsNotNull(anyFunction);
 
             var validInput = new string[] { "a", "b", "1", "_", "~" };
             var result = ParseResult.Failure;
@@ -833,39 +834,42 @@ namespace gg.parse.tests.compiler
                 result = table.Root.Parse(validInput[i].ToCharArray(), 0);
 
                 // the result should hold a token which describes a not foo
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == anyFunction.Id);
-                Assert.IsTrue(result.Annotations[0].Start == 0);
-                Assert.IsTrue(result.Annotations[0].Length == 1);
+                IsTrue(result.FoundMatch);
+                IsTrue(result.Annotations != null);
+                IsTrue(result.Annotations.Count == 1);
+                IsTrue(result.Annotations[0].RuleId == anyFunction.Id);
+                IsTrue(result.Annotations[0].Start == 0);
+                IsTrue(result.Annotations[0].Length == 1);
             }
 
             var invalidInput = "";
 
             result = table.Root.Parse(invalidInput.ToCharArray(), 0);
-            Assert.IsFalse(result.FoundMatch);
+            IsFalse(result.FoundMatch);
         }
 
         /// <summary>
         /// Tests & demonstrates how to generate a ruletable using a compiler containing 
-        /// an error rule
+        /// a log rule
         /// </summary>
         [TestMethod]
-        public void TestErrorFunction()
+        public void SetUpCompileContext_Compile_ExpectValidLogRule()
         {
             var compiler = new RuleCompiler<char>();
 
-            var litId = 42;
-            var errorId = 64;
+            var conditionId = 42;
+            var logId = 64;
+            var literalId  = 128;
+            var logLevelId = 256;
 
             var context = new CompileSession<char>()
-                .WithText($"rule=error 'message' 'foo'")
+                .WithText($"rule=debug 'message' if 'foo'")
                 .WithTokens(new Annotation(0, new(0, 4)),  // rule
-                            new Annotation(1, new(4, 5)),  // error declaration
-                            new Annotation(1, new(10, 8)), // message
-                            new Annotation(1, new(19, 5))  // match literal
-                ); 
+                            new Annotation(1, new(5, 5)),  // log level
+                            new Annotation(2, new(11, 9)), // message
+                            new Annotation(3, new(21, 2)), // if
+                            new Annotation(4, new(24, 5))  // match literal (condition)
+                );
 
             context.AstNodes = [
                 new Annotation(2, new(0, 3), [
@@ -873,44 +877,35 @@ namespace gg.parse.tests.compiler
                     new(0, new Range(0, 1)), 
 
                     // error
-                    new (errorId, new Range(1, 3), [
-                        new (0, new Range(1, 1)),       // error decl
-                        new (1, new Range(2, 1)),       // message
-                        new (litId, new Range(3, 1)),   // skip function
+                    new (logId, new Range(1, 3), [
+                        new (logLevelId, new Range(1, 1)),    // log level
+                        new (literalId, new Range(2, 1)),     // message
+                        new (literalId, new Range(4, 1)),     // condition
                     ])
                 ])
             ];
 
             // compile a rule table which can tokenize invoke an error
             var table = compiler
-                        .RegisterFunction(litId, CompileLiteral)
-                        .RegisterFunction(errorId, CompileError)
+                        .RegisterFunction(literalId, CompileLiteral)
+                        .RegisterFunction(logId, CompileLog)
                         .Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the error as 'rule'
-            var errorRule = table.FindRule("rule");
-            Assert.IsNotNull(errorRule);
+            var logRule = table.FindRule("rule");
+            IsTrue(logRule != null && logRule is LogRule<char>);
 
-            var validInput = new string[] { "foo", "123foo", "123", "" };
-            var result = ParseResult.Failure;
+            var result = table.Root.Parse("foo".ToCharArray(), 0);
 
-            for (var i = 0; i < validInput.Length; i++)
-            {
-                result = table.Root.Parse(validInput[i].ToCharArray(), 0);
-
-                // the result should hold a token which describes a not foo
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == errorRule.Id);
-                Assert.IsTrue(result.Annotations[0].Start == 0);
-                // error should have skipped until the end of the input (as all cases have 
-                // foo at their end or no foo)
-                Assert.IsTrue(result.Annotations[0].Length == validInput[i].Length);
-            }
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == logRule.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == "foo".Length);
         }
 
         private void TestRegisterAndCompileCountFunction(CompileFunction<char> function, char operatorChar, int min, int max)
@@ -945,12 +940,12 @@ namespace gg.parse.tests.compiler
                         .RegisterFunction(countId, function)
                         .Compile(context);
 
-            Assert.IsNotNull(table);
-            Assert.IsNotNull(table.Root);
+            IsNotNull(table);
+            IsNotNull(table.Root);
 
             // the ebnf declared the sequence as 'rule'
             var countFunction = table.FindRule("rule");
-            Assert.IsNotNull(countFunction);
+            IsNotNull(countFunction);
 
             var testText = "";
             var result = ParseResult.Failure;
@@ -960,12 +955,12 @@ namespace gg.parse.tests.compiler
             result = table.Root.Parse(testText.ToCharArray(), 0);
             if (min == 0)
             {
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.MatchedLength == 0);
+                IsTrue(result.FoundMatch);
+                IsTrue(result.MatchedLength == 0);
             }
             else
             {
-                Assert.IsFalse(result.FoundMatch);
+                IsFalse(result.FoundMatch);
             }
 
             for (var i = 0; i < min + 1; i++)
@@ -975,14 +970,14 @@ namespace gg.parse.tests.compiler
 
             result = table.Root.Parse(testText.ToCharArray(), 0);
             
-            Assert.IsTrue(result.FoundMatch);
+            IsTrue(result.FoundMatch);
             var expectedLength = max == 0 ? testText.Length : max * 3;
-            Assert.IsTrue(result.MatchedLength == expectedLength);
-            Assert.IsTrue(result.Annotations != null);
-            Assert.IsTrue(result.Annotations.Count == 1);
-            Assert.IsTrue(result.Annotations[0].FunctionId == countFunction.Id);
-            Assert.IsTrue(result.Annotations[0].Start == 0);
-            Assert.IsTrue(result.Annotations[0].Length == testText.Length);
+            IsTrue(result.MatchedLength == expectedLength);
+            IsTrue(result.Annotations != null);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].RuleId == countFunction.Id);
+            IsTrue(result.Annotations[0].Start == 0);
+            IsTrue(result.Annotations[0].Length == testText.Length);
 
             if (max > 0)
             {
@@ -995,13 +990,13 @@ namespace gg.parse.tests.compiler
                 
                 result = table.Root.Parse(testText.ToCharArray(), 0);
 
-                Assert.IsTrue(result.FoundMatch);
-                Assert.IsTrue(result.MatchedLength == testText.Length - 3);
-                Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == 1);
-                Assert.IsTrue(result.Annotations[0].FunctionId == countFunction.Id);
-                Assert.IsTrue(result.Annotations[0].Start == 0);
-                Assert.IsTrue(result.Annotations[0].Length == max * 3);
+                IsTrue(result.FoundMatch);
+                IsTrue(result.MatchedLength == testText.Length - 3);
+                IsTrue(result.Annotations != null);
+                IsTrue(result.Annotations.Count == 1);
+                IsTrue(result.Annotations[0].RuleId == countFunction.Id);
+                IsTrue(result.Annotations[0].Start == 0);
+                IsTrue(result.Annotations[0].Length == max * 3);
             }
         }
     }

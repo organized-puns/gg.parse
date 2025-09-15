@@ -1,6 +1,8 @@
 ﻿using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
 namespace gg.parse.tests.rulefunctions
 {
     [TestClass]
@@ -17,12 +19,13 @@ namespace gg.parse.tests.rulefunctions
 
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
-            Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(3, result.MatchedLength);
-            Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].FunctionId == rule.Id);
-            Assert.IsTrue(result.Annotations![0].Children!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].Children![0].FunctionId == function.Id);
+            
+            IsTrue(result.FoundMatch);
+            AreEqual(3, result.MatchedLength);
+            IsTrue(result.Annotations!.Count == 1);
+            IsTrue(result.Annotations![0].RuleId == rule.Id);
+            IsTrue(result.Annotations![0].Children!.Count == 1);
+            IsTrue(result.Annotations![0].Children![0].RuleId == function.Id);
         }
 
         [TestMethod]
@@ -36,19 +39,19 @@ namespace gg.parse.tests.rulefunctions
 
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
-            Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(6, result.MatchedLength);
-            Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].Range.Start == 0);
-            Assert.IsTrue(result.Annotations![0].Range.End == 6);
-            Assert.IsTrue(result.Annotations![0].FunctionId == rule.Id);
-            Assert.IsTrue(result.Annotations![0].Children!.Count == 2);
-            Assert.IsTrue(result.Annotations![0].Children![0].FunctionId == function.Id);
-            Assert.IsTrue(result.Annotations![0].Children![0].Start == 0);
-            Assert.IsTrue(result.Annotations![0].Children![0].End == 3);
-            Assert.IsTrue(result.Annotations![0].Children![1].FunctionId == function.Id);
-            Assert.IsTrue(result.Annotations![0].Children![1].Start == 3);
-            Assert.IsTrue(result.Annotations![0].Children![1].End == 6);
+            IsTrue(result.FoundMatch);
+            AreEqual(6, result.MatchedLength);
+            IsTrue(result.Annotations!.Count == 1);
+            IsTrue(result.Annotations![0].Range.Start == 0);
+            IsTrue(result.Annotations![0].Range.End == 6);
+            IsTrue(result.Annotations![0].RuleId == rule.Id);
+            IsTrue(result.Annotations![0].Children!.Count == 2);
+            IsTrue(result.Annotations![0].Children![0].RuleId == function.Id);
+            IsTrue(result.Annotations![0].Children![0].Start == 0);
+            IsTrue(result.Annotations![0].Children![0].End == 3);
+            IsTrue(result.Annotations![0].Children![1].RuleId == function.Id);
+            IsTrue(result.Annotations![0].Children![1].Start == 3);
+            IsTrue(result.Annotations![0].Children![1].End == 6);
         }
 
         [TestMethod]
@@ -62,17 +65,17 @@ namespace gg.parse.tests.rulefunctions
 
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
-            Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(6, result.MatchedLength);
-            Assert.IsTrue(result.Annotations!.Count == 2);
-            Assert.IsTrue(result.Annotations![0].Range.Start == 0);
-            Assert.IsTrue(result.Annotations![0].Range.End == 3);
-            Assert.IsTrue(result.Annotations![0].FunctionId == function.Id);
-            Assert.IsTrue(result.Annotations![0].Children == null);
-            Assert.IsTrue(result.Annotations![1].Range.Start == 3);
-            Assert.IsTrue(result.Annotations![1].Range.End == 6);
-            Assert.IsTrue(result.Annotations![1].FunctionId == function.Id);
-            Assert.IsTrue(result.Annotations![1].Children == null);
+            IsTrue(result.FoundMatch);
+            AreEqual(6, result.MatchedLength);
+            IsTrue(result.Annotations!.Count == 2);
+            IsTrue(result.Annotations![0].Range.Start == 0);
+            IsTrue(result.Annotations![0].Range.End == 3);
+            IsTrue(result.Annotations![0].RuleId == function.Id);
+            IsTrue(result.Annotations![0].Children == null);
+            IsTrue(result.Annotations![1].Range.Start == 3);
+            IsTrue(result.Annotations![1].Range.End == 6);
+            IsTrue(result.Annotations![1].RuleId == function.Id);
+            IsTrue(result.Annotations![1].Children == null);
         }
 
         [TestMethod]
@@ -86,9 +89,52 @@ namespace gg.parse.tests.rulefunctions
 
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
-            Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(6, result.MatchedLength);
-            Assert.IsTrue(result.Annotations == null);
+            IsTrue(result.FoundMatch);
+            AreEqual(6, result.MatchedLength);
+            IsTrue(result.Annotations == null);
+        }
+
+        [TestMethod]
+        public void CreateZeroOrMoreFunctionWithLiteral_Parse_ExpectSuccess()
+        {
+            var fooLiteral = new MatchDataSequence<char>("fooLiteral", "foo".ToCharArray());
+            var function = new MatchFunctionCount<char>("TestFunction", fooLiteral, min: 0, max: 0);
+
+            var result = function.Parse("foo".ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == 3);
+
+            result = function.Parse("foofoofoo".ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == 9);
+
+            result = function.Parse("foobarfoo".ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == 3);
+
+            result = function.Parse("bar".ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == 0);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidProgramException))]
+        public void CreateZeroOrMoreFunctionWithPotentialEndlessLoop_Parse_ExpectException()
+        {
+            var fooLiteral = new MatchDataSequence<char>("fooLiteral", "foo".ToCharArray());
+            var function1 = new MatchFunctionCount<char>("TestFunction1", fooLiteral, min: 0, max: 0);
+            var function2 = new MatchFunctionCount<char>("TestFunction2", function1, min: 0, max: 0);
+
+            var result = function2.Parse("foo".ToCharArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == 3);
+
+            result = function2.Parse("bar".ToCharArray(), 0);
         }
     }
 }

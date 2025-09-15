@@ -1,5 +1,4 @@
-﻿using gg.core.util;
-
+﻿
 namespace gg.parse.rulefunctions.rulefunctions
 {
     public class MatchFunctionCount<T>(
@@ -17,7 +16,7 @@ namespace gg.parse.rulefunctions.rulefunctions
         
         public int Max { get; } = max;
 
-        public IEnumerable<RuleBase<T>> SubRules => [Function];
+        public IEnumerable<RuleBase<T>> Rules => [Function];
 
         public override ParseResult Parse(T[] input, int start)
         {
@@ -33,6 +32,11 @@ namespace gg.parse.rulefunctions.rulefunctions
                     break;
                 }
         
+                if (result.MatchedLength == 0 && Max <= 0)
+                {
+                    throw new InvalidProgramException($"Rule {Name} detected an infinite loop with its subrule {Function.Name}.");
+                }
+
                 count++;
                 index += result.MatchedLength;
 

@@ -22,10 +22,16 @@ namespace gg.parse.instances.json
                     Literal("]", ArrayEnd),
                     Literal("null", Null),
                     Literal(",", CollectionSeparator),
-                    Literal(":", KeyValueSeparator));
+                    Literal(":", KeyValueSeparator)
+                );
 
-            var error = this.Error(UnknownToken, AnnotationProduct.Annotation,
-                "Can't match the character at the given position to a token.", jsonTokens, 0);
+            var error = 
+                this.LogError(
+                    UnknownToken, 
+                    AnnotationProduct.Annotation,
+                    "Can't match the character at the given position to a token.", 
+                    this.Skip(jsonTokens, failOnEoF: false)
+                );
 
             Root = this.ZeroOrMore("#JsonTokenizer", AnnotationProduct.Transitive,
                                 this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, this.Whitespace(), jsonTokens, error));

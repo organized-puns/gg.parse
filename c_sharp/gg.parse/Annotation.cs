@@ -2,6 +2,7 @@
 {
     public class Annotation : IComparable
     {
+        
         public Range Range { get; set; }
         
         public int Start => Range.Start;
@@ -13,7 +14,7 @@
         /// <summary>
         /// Function which produced this annotation.
         /// </summary>
-        public int FunctionId { get; init; }
+        public int RuleId { get; init; }
 
         public List<Annotation>? Children { get; init; }
 
@@ -33,7 +34,7 @@
 
         public Annotation(int functionId, Range range, List<Annotation>? children = null)
         {
-            FunctionId = functionId;
+            RuleId = functionId;
             Range = range;
             Children = children;
         }
@@ -42,7 +43,7 @@
         {
             if (obj is Annotation other)
             {
-                return FunctionId.CompareTo(other.Range.Start);
+                return RuleId.CompareTo(other.Range.Start);
             }
 
             return 0;
@@ -51,9 +52,36 @@
         public override string ToString() =>
         
 #if DEBUG
-            $"{DebugName}({FunctionId}, {Range})";
+            $"{DebugName}({RuleId}, {Range})";
 #else
             $"Annotation(Id: {FunctionId}, Range: {Range})";
 #endif
+
+        /// <summary>
+        /// Checks if this annotation matches the predicate, if so adds it to the target. Then
+        /// does the same for all its children (if any)
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="target"></param>
+        /// <returns>target</returns>
+        public List<Annotation> Collect(Func<Annotation, bool> predicate, List<Annotation>? target = null)
+        {
+            target ??= [];
+
+            if (predicate(this))
+            {
+                target.Add(this);
+            }
+
+            if (Children != null && Children.Count > 0)
+            {
+                foreach (var child in Children)
+                {
+                    child.Collect(predicate, target);
+                }
+            }
+
+            return target;
+        }
     }
 }

@@ -88,7 +88,14 @@
         public static readonly string SingleLineComment = "SingleLineComment";
         public static readonly string MultiLineComment = "MultiLineComment";
 
-        public static readonly string MarkError = "Error";
+        public static readonly string LogFatal   = "fatal";
+        public static readonly string LogError   = "error";
+        public static readonly string LogWarning = "warning";
+        public static readonly string LogInfo    = "info";
+        public static readonly string LogDebug   = "debug";
+        
+        public static readonly string If         = "if";
+        public static readonly string Skip       = "SkipUntil";
 
         public static string GetPrefix(this AnnotationProduct production)
         {
@@ -99,6 +106,38 @@
                 AnnotationProduct.None => NoProductPrefix,
                 _ => throw new NotImplementedException(),
             };
+        }
+
+        /// Note: this will only return true because of the current assumption that the product character
+        /// will always start at 0 and defaults to AnnotationProduct.Annotation. Should this change in the future
+        /// we can more easily revert.
+        public static bool TryGetProduct(this string name, out AnnotationProduct product, out int start, out int length)
+        {
+            product = AnnotationProduct.Annotation;
+            length = 0;
+
+            start = name.IndexOf(TransitiveProductPrefix);
+
+            if (start == 0)
+            {
+                product = AnnotationProduct.Transitive;
+                length = TransitiveProductPrefix.Length;
+                return true;
+            }
+
+            start = name.IndexOf(NoProductPrefix);
+
+            if (start == 0)
+            {
+                product = AnnotationProduct.None;
+                length = NoProductPrefix.Length;
+
+                return true;
+            }
+
+            start = 0;
+
+            return true;
         }
     }
 }

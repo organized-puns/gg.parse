@@ -43,11 +43,11 @@ namespace gg.parse.tests
 
             var tokens = result.Annotations;
 
-            result = parser.Parse(tokens);
+            result = parser.Root!.Parse(tokens);
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
-            Assert.IsTrue(result.Annotations[0].FunctionId != parser.UnknownInputError.Id);
+            Assert.IsTrue(result.Annotations[0].RuleId != parser.UnknownInputError.Id);
 
             var astNodes = result.Annotations;
 
@@ -72,7 +72,7 @@ namespace gg.parse.tests
 
             var tokens = result.Annotations;
 
-            result = parser.Parse(tokens);
+            result = parser.Root!.Parse(tokens);
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);

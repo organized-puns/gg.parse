@@ -23,16 +23,16 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.AssociatedAnnotation;
             var literalText = context.GetText(ruleDefinition.Range);
-            literalText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
+            var unescapedLiteralText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
 
-            if (string.IsNullOrEmpty(literalText))
+            if (string.IsNullOrEmpty(unescapedLiteralText))
             {
                 // xxx add warnings
                 // xxx resolve rule
                 throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
             }
 
-            return new MatchDataSequence<char>(declaration.Name, literalText.ToCharArray(), declaration.Product, declaration.Precedence);
+            return new MatchDataSequence<char>(declaration.Name, unescapedLiteralText.ToCharArray(), declaration.Product, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileIdentifier<T>(
@@ -62,7 +62,7 @@ namespace gg.parse.compiler
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasProductionOperator)
             {
-                compiler.TryGetProduct(ruleDefinition.Children[0].FunctionId, out product);
+                compiler.TryGetProduct(ruleDefinition.Children[0].RuleId, out product);
             }
 
             return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
@@ -142,7 +142,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
 
                     var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{declaration.Name}[{i}], type: {elementName}");
                     var sequenceElement = compilationFunction(compiler, elementDeclaration, session);
@@ -174,7 +174,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) =  compiler.Functions[elementAnnotation.FunctionId];
+                    var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.RuleId);
                     var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Annotation, $"{declaration.Name}[{i}], type: {elementName}");
                     var optionElement = compilationFunction(compiler, elementDeclaration, context);
 
@@ -192,6 +192,8 @@ namespace gg.parse.compiler
             return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
         }
 
+        
+
         public static RuleBase<T> CompileEvaluation<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
@@ -205,7 +207,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
 
                     var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Transitive, $"{declaration.Name}[{i}], type: {elementName}");
                     var elementFunction = 
@@ -231,7 +233,7 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction,_) = compiler.Functions[elementAnnotation.FunctionId];
+            var (compilationFunction,_) = compiler.Functions[elementAnnotation.RuleId];
             var groupDeclaration = new RuleDeclaration(elementAnnotation, declaration.Product, declaration.Name);
 
             return compilationFunction(compiler, groupDeclaration, context);
@@ -272,7 +274,7 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
             var elementDeclaration = new RuleDeclaration(elementAnnotation,AnnotationProduct.Transitive, $"{declaration.Name} of {elementName}");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
@@ -298,7 +300,7 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{declaration.Name}, type: Not({elementName})");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
@@ -325,7 +327,7 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.FunctionId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(elementAnnotation, AnnotationProduct.Annotation, $"{elementName}, type: {declaration.Name}");
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
@@ -350,7 +352,7 @@ namespace gg.parse.compiler
             return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
         }
 
-        public static RuleBase<T> CompileError<T>(
+        public static RuleBase<T> CompileLog<T>(
            RuleCompiler<T> compiler,
            RuleDeclaration declaration,
            CompileSession<T> context) where T : IComparable<T>
@@ -361,30 +363,38 @@ namespace gg.parse.compiler
             Contract.Requires(ruleDefinition!.Children != null);
             Contract.Requires(ruleDefinition.Children!.Count > 0);
 
+            var logLevelText = context.GetText(ruleDefinition.Children[0].Range);
+            var logLevel = Enum.Parse<LogLevel>(logLevelText, ignoreCase: true);
+
             var message = context.GetText(ruleDefinition.Children[1].Range);
 
-            if (string.IsNullOrEmpty(message) || message.Length <= 2)
+            if (string.IsNullOrEmpty(message) || message.Length < 2)
             {
-                throw new CompilationException<T>("Text defining the error is null or empty", 
-                    ruleDefinition.Range, 
+                throw new CompilationException<T>("LogText is missing (quotes).",
+                    ruleDefinition.Range,
                     annotation: declaration.AssociatedAnnotation);
             }
 
             message = message.Substring(1, message.Length - 2);
 
-            var skipAnnotation = ruleDefinition.Children[2];
-            var (compilationFunction, elementName) = compiler.Functions[skipAnnotation.FunctionId];
-            var skipDeclaration = new RuleDeclaration(skipAnnotation, AnnotationProduct.Annotation, $"{declaration.Name} skip_until {elementName}");
-            var testFunction = compilationFunction(compiler, skipDeclaration, context);
+            RuleBase<T>? condition = null;
 
-            if (testFunction == null)
+            if (ruleDefinition.Children.Count == 3)
             {
-                // xxx add warnings
-                // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for Error.", skipAnnotation.Range, null);
+                var conditionDefinition = ruleDefinition.Children[2];
+                var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.RuleId];
+                var conditionDeclaration = new RuleDeclaration(conditionDefinition, AnnotationProduct.Annotation, $"{declaration.Name} condition: {elementName}");
+                condition = compilationFunction(compiler, conditionDeclaration, context);
+
+                if (condition == null)
+                {
+                    // xxx add warnings
+                    // xxx resolve rule
+                    throw new CompilationException<char>("Cannot compile condition for Log.", conditionDefinition.Range, null);
+                }
             }
 
-            return new MarkError<T>(declaration.Name, declaration.Product, message, testFunction, 0);
+            return new LogRule<T>(declaration.Name, declaration.Product, message, condition, logLevel);
         }
     }
 }
