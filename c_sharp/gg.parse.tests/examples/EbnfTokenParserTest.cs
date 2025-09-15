@@ -21,11 +21,11 @@ namespace gg.parse.tests.examples
             var (tokens, nodes) = parser.Parse("rule = 'foo';");
 
             IsTrue(tokens != null && tokens.Count > 0);
-            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
 
-            var name = parser.FindRule(nodes[0].Children[0].RuleId).Name;
+            var name = parser.FindRule(nodes[0].Children![0].RuleId)!.Name;
             IsTrue(name == "RuleName");
-            name = parser.FindRule(nodes[0].Children[1].RuleId).Name;
+            name = parser.FindRule(nodes[0].Children[1].RuleId)!.Name;
             IsTrue(name == "Literal");
 
             // try parsing a set
@@ -124,36 +124,7 @@ namespace gg.parse.tests.examples
             name = parser.FindRule(node.RuleId).Name;
             IsTrue(name == "Identifier");
 
-            // try parsing a simple error
-            (tokens, nodes) = parser.Parse("rule = error \"message\" skip_until;");
-
-            node = nodes[0].Children[0];
-            name = parser.FindRule(node.RuleId).Name;
-            IsTrue(name == "RuleName");
-
-            node = nodes[0].Children[1];
-            name = parser.FindRule(node.RuleId).Name;
-            IsTrue(name == "Error");
-
-            node = nodes[0].Children[1].Children[0];
-            name = parser.FindRule(node.RuleId).Name;
-            IsTrue(name == "ErrorKeyword");
-
-            node = nodes[0].Children[1].Children[1];
-            name = parser.FindRule(node.RuleId).Name;
-            IsTrue(name == "Literal");
-
-            node = nodes[0].Children[1].Children[2];
-            name = parser.FindRule(node.RuleId).Name;
-            IsTrue(name == "Identifier");
-
-            // try parsing an error with a complex skip rule
-            (tokens, nodes) = parser.Parse("rule = error \"message\" ( foo | \"lit\");");
-
-            node = nodes[0].Children[1].Children[2];
-            name = parser.FindRule(node.RuleId).Name;
-            IsTrue(name == "Option");
-
+            
             // try parsing a try match 
             (tokens, nodes) = parser.Parse("rule = try \"lit\";");
 
@@ -357,11 +328,10 @@ namespace gg.parse.tests.examples
             IsNotNull(error);
             IsTrue(error.Text == "msg");
             IsTrue(error.Level == LogLevel.Error);
-            // xxx fix find rule
-            IsTrue(error.Condition == table.FindRule("error_rule skip_until Not"));
+            IsTrue(error.Condition == table.FindRule("error_rule condition: Not"));
             var matchFunction = error.Condition as MatchNotFunction<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule("error_rule skip_until Not, type: Not(Literal)"));
+            IsTrue(matchFunction.Rule == table.FindRule("error_rule condition: Not, type: Not(Literal)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 

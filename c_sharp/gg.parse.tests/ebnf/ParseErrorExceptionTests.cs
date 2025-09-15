@@ -101,6 +101,7 @@ namespace gg.parse.tests.ebnf
         {
             try
             {
+                // missing ';' after 'bar=foo' and missing '=' after 'baz'
                 var parser = new EbnfParser("foo='string';", "bar=foo xxx=foo; baz foo;");
                 Fail();
             }

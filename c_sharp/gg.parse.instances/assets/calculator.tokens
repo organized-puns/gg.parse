@@ -21,4 +21,4 @@ group_end       = ')';
 
 ~white_space	= { ' \t\r\n' };
 
-unknown_token	= error "unknown token found." valid_token;
+unknown_token	= error "unknown token found." if *(!valid_token, .);

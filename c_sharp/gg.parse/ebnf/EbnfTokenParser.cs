@@ -1,16 +1,15 @@
 ﻿using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
-
+using gg.parse.rules;
 using static gg.parse.rulefunctions.CommonRules;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.ebnf
 {
     /// <summary>
     /// Turns a list of tokens into an abstract syntax tree according to EBNF(like) grammar.
     /// </summary>
-    public class EbnfTokenParser : RuleGraph<int>
+    public class EbnfTokenParser : CommonGraphWrapper<int>
     {
         public EbnfTokenizer Tokenizer { get; init; }
 
@@ -290,7 +289,9 @@ namespace gg.parse.ebnf
             MissingRuleEndError = this.LogError(
                 "MissingEndRule",
                 AnnotationProduct.Annotation,
-                "Missing end of rule (;) at the given position."
+                "Missing end of rule (;) at the given position.",
+                // skip until the start of the next rule, if any
+                skip("~skipUntilNextHeaderOrEof", ruleHeader, failOnEoF: false)
             );
 
             var endStatementOptions = this.OneOf(
@@ -316,9 +317,7 @@ namespace gg.parse.ebnf
                 "UnknownInput",
                 AnnotationProduct.Annotation,
                 "Can't match the token at the given position to a astNode.",
-                // xxx add skip until valid statement as part of the condition so the range
-                // represents the error
-                this.Skip(stopCondition: validStatement, failOnEoF: false)
+                skip("~skipUntilNextValidStatement", stopCondition: validStatement, failOnEoF: false)
             );            
 
             Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive,

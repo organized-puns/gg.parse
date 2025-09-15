@@ -19,4 +19,4 @@ division       75  = term, div,   term;
 addition       50  = term, plus,  term;
 subtraction    25  = term, minus, term;
 
-unknown_expression = error "unknown expression found." (operation | term);
+unknown_expression = error "unknown expression found." if *(!(operation | term), .);

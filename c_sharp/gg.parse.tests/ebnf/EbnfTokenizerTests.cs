@@ -83,6 +83,6 @@ namespace gg.parse.tests.ebnf
                 var name = tokenizer.FindRule(result.Annotations![i].RuleId)!.Name;
                 IsTrue(name == expectedNames[i]);
             }
-        }
+        }      
     }
 }

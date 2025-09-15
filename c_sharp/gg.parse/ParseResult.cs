@@ -20,5 +20,17 @@
         }
 
         public int[] CollectRuleIds() => Annotations == null ? [] : [.. Annotations.Select(a => a.RuleId)];
+
+        public override string ToString()
+        {
+            if (FoundMatch)
+            {
+                return $"match, length={MatchedLength}, count={(Annotations == null ? 0 : Annotations.Count)}";
+            }
+            else
+            {
+                return $"no match, length={MatchedLength}";
+            }
+        }
     }
 }

@@ -107,5 +107,37 @@
                 _ => throw new NotImplementedException(),
             };
         }
+
+        /// Note: this will only return true because of the current assumption that the product character
+        /// will always start at 0 and defaults to AnnotationProduct.Annotation. Should this change in the future
+        /// we can more easily revert.
+        public static bool TryGetProduct(this string name, out AnnotationProduct product, out int start, out int length)
+        {
+            product = AnnotationProduct.Annotation;
+            length = 0;
+
+            start = name.IndexOf(TransitiveProductPrefix);
+
+            if (start == 0)
+            {
+                product = AnnotationProduct.Transitive;
+                length = TransitiveProductPrefix.Length;
+                return true;
+            }
+
+            start = name.IndexOf(NoProductPrefix);
+
+            if (start == 0)
+            {
+                product = AnnotationProduct.None;
+                length = NoProductPrefix.Length;
+
+                return true;
+            }
+
+            start = 0;
+
+            return true;
+        }
     }
 }
