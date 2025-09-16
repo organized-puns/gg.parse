@@ -1,6 +1,8 @@
 gg.parse (working towards an MVP)
 =================================
 
+!_Please Note_! the code base is under heavy development and lots of changes are being made while the documentation below is not up to date.
+
 Quickstart
 ----------------------
 
@@ -132,7 +134,10 @@ Todo (for mvp)
 
 - Error handling, 
         
-    Add Warning to empty rule in ebnf parser
+    Implement logger
+    Map tokens to line & column numbers 
+    Allow for certain tokes in the error message, eg {line}, {column}, {filename}
+
     
     Deal with the following cases:
       var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
@@ -140,6 +145,8 @@ Todo (for mvp)
       missing assignment
       wrong token for rule precedence
       missing term after unary operation
+
+    Rename try match by if match and remove the short hand >  
 
     Add skip_until >> skip_until_eof_or >>> 
         - add rule to tokenizer
@@ -150,9 +157,7 @@ Todo (for mvp)
  
 
 
-    Move ebnf to its own project and rename ebnf to something else, script ?
-
-    Add getText to annotation extensions
+    Move ebnf to its own project and rename ebnf to something else, script ? -> consider it a pipeline
 
     Map error range to row/column in source file
 

@@ -1,5 +1,6 @@
 ﻿
 using gg.core.util;
+using gg.parse.rulefunctions;
 
 namespace gg.parse.compiler
 {
@@ -21,7 +22,7 @@ namespace gg.parse.compiler
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
-
+        public List<int> IgnoredRules { get; private set; } = [];
 
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
@@ -56,53 +57,54 @@ namespace gg.parse.compiler
             return Compile(context, new RuleGraph<T>());
         }
 
-        public RuleGraph<T> Compile(CompileSession<T> session, RuleGraph<T> result)
+        public RuleGraph<T> Compile(CompileSession<T> session, RuleGraph<T> resultGraph)
         {
             foreach (var node in session.AstNodes)
             {
                 var declaration = GetRuleDeclaration(session, node.Children, 0);
-                var ruleDefinition = declaration.AssociatedAnnotation;
+                var ruleBody = declaration.RuleBodyAnnotation;
 
-                /*if (!Functions.ContainsKey(ruleDefinition.FunctionId))
+                // user provided an empty body - which is results in a warning but is allowed
+                if (ruleBody == null)
                 {
-                    throw new CompilationException<int>(
-                        $"Unable to match rule {ruleDefinition.FunctionId} to a compile function.", 
-                        ruleDefinition.Range);
-                }*/
+                    var compiledRule = resultGraph.RegisterRuleAndSubRules(new NopRule<T>(declaration.Name));
 
-                var (compilationFunction, _) = FindCompilationFunction(ruleDefinition.RuleId);
-
-                if (result.FindRule(declaration.Name) == null)
-                {
-                    var compiledRule = compilationFunction(this, declaration, session);
-                    
-                    result.RegisterRuleAndSubRules(compiledRule);
-                    
                     // First compiled rule will be assigned to the root. Seems the most intuitive
                     // xxx replace with name root or smth
-                    if (result.Root == null)
-                    {
-                        result.Root = compiledRule;
-                    }
+                    resultGraph.Root ??= compiledRule;
                 }
                 else
                 {
-                    // xxx add to the compilation errors, don't throw
-                    throw new InvalidOperationException($"Trying to register a rule with the same name ({declaration.Name}).");
+                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.RuleId);
+
+                    if (resultGraph.FindRule(declaration.Name) == null)
+                    {
+                        var compiledRule = compilationFunction(this, declaration, session);
+
+                        resultGraph.RegisterRuleAndSubRules(compiledRule);
+
+                        // First compiled rule will be assigned to the root. Seems the most intuitive
+                        // xxx replace with name root or smth
+                        resultGraph.Root ??= compiledRule;
+                    }
+                    else
+                    {
+                        // xxx add to the compilation errors, don't throw
+                        throw new InvalidOperationException($"Trying to register a rule with the same name ({declaration.Name}).");
+                    }
                 }
-                
             }
 
             // no root defined, this can happen when the input is empty or only contains include statements
-            if (result.Root == null)
+            if (resultGraph.Root == null)
             {
                 // xxx needs to be a warning
                 throw new ArgumentException("Input text contains no root function. Make sure the main input always contains at least one rule.");
             }
 
-            result.ResolveReferences();
+            resultGraph.ResolveReferences();
 
-            return result;
+            return resultGraph;
         }
 
         public bool TryGetProduct(int functionId, out AnnotationProduct product)
@@ -124,6 +126,13 @@ namespace gg.parse.compiler
             return false;
         }
 
+        /// <summary>
+        /// Captures the rule header properties and body node
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         private RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
@@ -139,12 +148,23 @@ namespace gg.parse.compiler
             idx++;
 
             // precedence is optional (will default to 0)
-            if (int.TryParse(context.GetText(ruleNodes[idx].Range), out var precedence))
+            // can exceed range if the rule is empty (ie rule = ;) so test for that
+            var precedence = 0;
+            
+            if (ruleNodes.Count > idx
+                && int.TryParse(context.GetText(ruleNodes[idx].Range), out precedence))
             {
                 idx++;
             }
+            
+            Annotation? ruleBody = null;
 
-            return new(ruleNodes[idx], product, name, precedence);
+            if (ruleNodes.Count > idx)
+            {
+                ruleBody = ruleNodes[idx];
+            }
+
+            return new(product, name, precedence, ruleBody);
         }
     }
 }

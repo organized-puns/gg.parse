@@ -102,7 +102,7 @@ namespace gg.parse.instances.calculator
         {
             if (node.RuleId == _graphIds.Number)
             {
-                var valueText = EbnfParser.GetText(text, node, tokens);
+                var valueText = node.GetText(text, tokens);
                 return double.Parse(valueText, CultureInfo.InvariantCulture);
             }
             else if (node.RuleId == _graphIds.Unary)

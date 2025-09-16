@@ -2,6 +2,7 @@
 {
     public readonly struct ParseResult(bool isSuccess, int charactersRead, List<Annotation>? annotations = null)
     {
+        public static readonly ParseResult Success = new(true, 0, null);
         public static readonly ParseResult Failure = new(false, 0, null);
 
         public bool FoundMatch { get; init; } = isSuccess;

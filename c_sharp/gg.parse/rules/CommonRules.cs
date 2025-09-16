@@ -357,6 +357,14 @@ namespace gg.parse.rulefunctions
                      ? existingRule!
                      : graph.RegisterRule(new LogRule<T>(name, product, description, condition, LogLevel.Error));
 
+        public static LogRule<T> LogWarning<T>(this RuleGraph<T> graph,
+            string name, AnnotationProduct product, string description, RuleBase<T>? condition = null)
+            where T : IComparable<T> =>
+            graph.TryFindRule(name, out LogRule<T>? existingRule)
+                     ? existingRule!
+                     : graph.RegisterRule(new LogRule<T>(name, product, description, condition, LogLevel.Error));
+
+
         public static SkipRule<T> Skip<T>(this RuleGraph<T> graph, RuleBase<T> stopCondition, bool failOnEoF = true)
             where T : IComparable<T>
         {

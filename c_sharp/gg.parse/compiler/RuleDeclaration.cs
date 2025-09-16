@@ -5,18 +5,33 @@
     /// </summary>
     /// <param name="product"></param>
     /// <param name="name"></param>
-    public class RuleDeclaration(Annotation annotation, AnnotationProduct product, string name, int precedence = 0 )
+    public class RuleDeclaration
     {
-        /// <summary>
-        /// Annotation which describes this declaration.
-        /// </summary>
-        public Annotation AssociatedAnnotation { get; init; } = annotation;
+        public string Name { get; init; }
 
-        public string Name { get; init; } = name;
-
-        public AnnotationProduct Product { get; init; } = product;
+        public AnnotationProduct Product { get; init; }
               
+        public int Precedence { get; init; }
 
-        public int Precedence { get; init; } = precedence;
+        /// <summary>
+        /// Annotation which describes the rule's body.
+        /// </summary>
+        public Annotation? RuleBodyAnnotation { get; init; }
+
+        public RuleDeclaration(AnnotationProduct product, string name, int precedence, Annotation? annotation)
+        {
+            Name = name;
+            Product = product;
+            Precedence = precedence;
+            RuleBodyAnnotation = annotation;
+        }
+
+        public RuleDeclaration(AnnotationProduct product, string name, Annotation? annotation)
+        {
+            Name = name;
+            Product = product;
+            Precedence = 0;
+            RuleBodyAnnotation = annotation;
+        }
     }
 }

@@ -46,6 +46,29 @@ namespace gg.parse
             return new Range(start, length);
         }
 
-        
+        /// <summary>
+        /// Recursively goes through all annotations and their children that match the filter 
+        /// </summary>
+        /// <param name="annotations"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public static List<Annotation> Filter(this List<Annotation> annotations, Func<Annotation, bool> filter) =>
+            [.. annotations
+                .Where(a => filter(a))
+                .Select( a => a.FilterChildren(filter))];
+
+        public static Annotation FilterChildren(this Annotation annotation, Func<Annotation, bool> filter) =>
+            
+            annotation.Children == null
+                ? annotation
+                : new Annotation(
+                    annotation.RuleId,
+                    annotation.Range,
+                    [..annotation
+                        .Children
+                        .Where(c => filter(c))
+                        .Select( c => c.FilterChildren(filter))],
+                    annotation.Parent
+                );
     }
 }

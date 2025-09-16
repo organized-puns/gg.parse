@@ -452,5 +452,27 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.FoundMatch);
             IsTrue(parseResult[0]!.Children != null && parseResult[0]!.Children!.Count == 3);
         }
+
+        [TestMethod]
+        public void CreateRuleWithNoBody_ParseWithMatchRule_ExpectWarning()
+        {
+            var tokenizer = new EbnfTokenizer();
+            var tokenizeResult = tokenizer.Tokenize($"rule = ;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var tokens = tokenizeResult.CollectRuleIds();
+
+            var parser = new EbnfTokenParser(tokenizer);
+            var ruleMatcher = parser.MatchRule;
+            var parseResult = ruleMatcher.Parse(tokens, 0);
+
+            IsTrue(parseResult.FoundMatch);
+            var warning = parser.FindRule(parseResult[0]![1]!.RuleId) as LogRule<int>;
+
+            IsNotNull(warning);
+            IsNotNull(warning.Level == LogLevel.Warning);
+        }
     }
 }

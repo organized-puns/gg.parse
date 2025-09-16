@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-using gg.core.util;
 using gg.parse.compiler;
+using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
@@ -16,7 +16,13 @@ namespace gg.parse.ebnf
 
         public RuleGraph<int>? EbnfGrammarParser => _ebnfParser;
 
-        public EbnfParser(string tokenizerDefinition, string? grammarDefinition)
+        /// <summary>
+        /// Handler which will receive all logs (warnings/info/debug) after parsing is complete.
+        /// Can be null
+        /// </summary>
+        public Logger? LogHandler { get; init; }        
+
+        public EbnfParser(string tokenizerDefinition, string? grammarDefinition, Logger? logger = null)
         {
             var tokenizer = new EbnfTokenizer();
 
@@ -24,7 +30,7 @@ namespace gg.parse.ebnf
             
             if (!string.IsNullOrEmpty(grammarDefinition))
             {
-                _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, _ebnfTokenizer);
+                _ebnfParser = CreateParserFromEbnfFile(grammarDefinition, tokenizer, _ebnfTokenizer, logger);
             }
         }
 
@@ -105,7 +111,7 @@ namespace gg.parse.ebnf
                 builder.Append(indentStr);
             }
 
-            var nodeText = Regex.Escape(GetText(text, node, tokens));
+            var nodeText = Regex.Escape(node.GetText(text, tokens));
 
             if (nodeText.Length > 20)
             {
@@ -121,46 +127,6 @@ namespace gg.parse.ebnf
                     Dump(builder, indentCount+1, indentStr, child, text, tokens);
                 }
             }
-        }
-
-
-        public static string GetText(string text, Annotation grammarAnnotation, List<Annotation> tokens)
-        {
-            var range = GetTextRange(grammarAnnotation, tokens);
-            return text.Substring(range.Start, range.Length);
-        }
-
-        public static string GetText(string text, Annotation grammarAnnotation, ParseResult tokens)
-            => GetText(text, grammarAnnotation, tokens.Annotations);
-        
-        public static ReadOnlySpan<char> GetSpan(string text, Annotation grammarAnnotation, ParseResult tokens)
-        {
-            var range = GetTextRange(grammarAnnotation, tokens);
-            return text.AsSpan(range.Start, range.Length);
-        }
-
-        public static Range GetTextRange(Annotation grammarAnnotation, ParseResult tokens) =>
-            GetTextRange(grammarAnnotation.Range, tokens.Annotations);
-
-        public static Range GetTextRange(Annotation grammarAnnotation, List<Annotation> tokens) =>
-            GetTextRange(grammarAnnotation.Range, tokens);
-
-        public static Range GetTextRange(Range tokenRange, List<Annotation> tokens)
-        {
-            Contract.RequiresNotNull(tokens);
-
-            var startIndex = tokens[tokenRange.Start].Start;
-            var start = startIndex;
-            var length = 0;
-
-            for (var i = 0; i < tokenRange.Length; i++)
-            {
-                // need to take in account possible white space
-                var token = tokens[tokenRange.Start + i];
-                length += (token.Start - (startIndex + length)) + token.Length;
-            }
-
-            return new Range(start, length);
         }
 
         public static RuleGraph<char> CreateTokenizerFromEbnfFile(
@@ -232,23 +198,32 @@ namespace gg.parse.ebnf
         public static RuleGraph<int> CreateParserFromEbnfFile(
             string grammarText,
             EbnfTokenizer tokenizer,
-            RuleGraph<char> tokenSource) =>
+            RuleGraph<char> tokenSource,
+            Logger? logHandler = null) =>
 
-            CreateParserFromEbnfFile(grammarText, tokenizer, RegisterTokens(tokenSource, new RuleGraph<int>()), []);
-
-
+            CreateParserFromEbnfFile(
+                grammarText, 
+                tokenizer, 
+                RegisterTokens(tokenSource, new RuleGraph<int>()), 
+                [],
+                logHandler: logHandler
+            );
 
         private static RuleGraph<int> CreateParserFromEbnfFile(
             string grammarText,
             EbnfTokenizer tokenizer,
             RuleGraph<int> target,
             Dictionary<string, RuleGraph<int>> cache,
-            string[]? paths = null)
+            string[]? paths = null,
+            Logger? logHandler = null)
         {
-            List<Annotation> grammarTokens = null;
-            List<Annotation> grammarAstNodes = null;
+            List<Annotation>? grammarTokens = null;
+            List<Annotation>? grammarAstNodes = null;
 
-            var grammarParser = new EbnfTokenParser(tokenizer);
+            var grammarParser = new EbnfTokenParser(tokenizer)
+            {
+                FailOnWarning = logHandler != null && logHandler.FailOnWarning
+            };
 
             try
             {
@@ -260,17 +235,27 @@ namespace gg.parse.ebnf
                 throw new EbnfException("Failed to build grammar parser. See inner exception for details.", e);
             }
 
-            target.Merge(ProcessIncludedFiles(
-                                    grammarText,
-                                    tokenizer,
-                                    grammarParser.Include.Id,
-                                    grammarTokens,
-                                    grammarAstNodes,
-                                    cache,
-                                    paths,
-                                    (text, includePaths) => CreateParserFromEbnfFile(text, tokenizer, target, cache, includePaths)));
+            // merge with the rules coming in from other included files
+            target.Merge(
+                ProcessIncludedFiles(
+                    grammarText,
+                    tokenizer,
+                    grammarParser.Include.Id,
+                    grammarTokens,
+                    grammarAstNodes,
+                    cache,
+                    paths,
+                    (text, includePaths) => 
+                        CreateParserFromEbnfFile(text, tokenizer, target, cache, includePaths, logHandler)
+                )
+            );
 
-            var grammarcontext = new CompileSession<int>(grammarText, grammarTokens, grammarAstNodes);
+            logHandler?.HandleLogs(grammarText, grammarTokens, grammarAstNodes);
+
+            // remove logs from the annotations
+            var filteredNodes = grammarAstNodes.Filter(a => grammarParser.FindRule(a.RuleId) is not LogRule<int>);
+
+            var grammarcontext = new CompileSession<int>(grammarText, grammarTokens, filteredNodes);
 
             return new RuleCompiler<int>()
                     .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
@@ -322,7 +307,7 @@ namespace gg.parse.ebnf
 
                 if (statement.RuleId == includeId)
                 {
-                    var fileName = ResolveFile(GetText(inputText, statement.Children[0], tokens), paths);
+                    var fileName = ResolveFile(statement.Children[0].GetText(inputText, tokens), paths);
                     
                     if (cache.ContainsKey(fileName))
                     {

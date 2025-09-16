@@ -32,11 +32,12 @@
         public string DebugName { get; set; } = nameof(Annotation);
 #endif
 
-        public Annotation(int functionId, Range range, List<Annotation>? children = null)
+        public Annotation(int functionId, Range range, List<Annotation>? children = null, Annotation? parent = null)
         {
             RuleId = functionId;
             Range = range;
             Children = children;
+            Parent = parent;
         }
 
         public int CompareTo(object? obj)

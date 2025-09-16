@@ -3,13 +3,14 @@
 
 namespace gg.parse.rulefunctions
 {
+    [Flags]
     public enum LogLevel
     {
         Fatal = 1,
         Error = 2,
-        Warning = 3,
-        Info = 4,
-        Debug = 5
+        Warning = 4,
+        Info = 8,
+        Debug = 16
     }
 
     public class FatalConditionException<T> : Exception where T : IComparable<T>

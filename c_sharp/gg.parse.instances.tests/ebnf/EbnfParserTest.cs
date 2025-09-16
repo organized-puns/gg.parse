@@ -140,7 +140,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(astTree.Annotations[0].RuleId == jsonParser.FindParserRule("json")!.Id);
 
             var jsonNode = astTree.Annotations[0];
-            var jsonNodeText = EbnfParser.GetText(keyStrValue, jsonNode, tokens);
+            var jsonNodeText = jsonNode.GetText(keyStrValue, tokens.Annotations!);
             Assert.IsTrue(jsonNodeText == keyStrValue);
 
             Assert.IsTrue(jsonNode.Children != null);
@@ -149,7 +149,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(jsonNode.Children[0].RuleId == jsonParser.FindParserRule("object")!.Id);
 
             var objectNode = jsonNode.Children[0];
-            var objectNodeText = EbnfParser.GetText(keyStrValue, objectNode, tokens);
+            var objectNodeText = objectNode.GetText(keyStrValue, tokens.Annotations!);
 
             Assert.IsTrue(objectNodeText == keyStrValue);
 
@@ -163,7 +163,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(objectNode.Children[2].RuleId == jsonParser.FindParserRule("scope_end")!.Id);
 
             var keyValueListNode = objectNode.Children[1];
-            var keyValueListText = EbnfParser.GetText(keyStrValue, keyValueListNode, tokens);
+            var keyValueListText = keyValueListNode.GetText(keyStrValue, tokens.Annotations!);
 
             Assert.IsTrue(keyValueListText == "\"key\": \"value\"");
 

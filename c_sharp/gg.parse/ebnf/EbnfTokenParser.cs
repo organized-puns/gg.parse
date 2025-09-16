@@ -2,6 +2,7 @@
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 using gg.parse.rules;
+using System.ComponentModel.DataAnnotations;
 using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
@@ -12,6 +13,11 @@ namespace gg.parse.ebnf
     public class EbnfTokenParser : CommonGraphWrapper<int>
     {
         public EbnfTokenizer Tokenizer { get; init; }
+
+        /// <summary>
+        /// If set to true an exception will be thrown when a warning is encountered
+        /// </summary>
+        public bool FailOnWarning { get; set; } = false;
 
         public MatchOneOfFunction<int> MatchLiteral { get; private set; }
 
@@ -269,22 +275,15 @@ namespace gg.parse.ebnf
                 this.ZeroOrOne("#RulePrecedence", AnnotationProduct.Transitive, MatchPrecedence)
             );
 
-            RuleBodyError = this.LogError(
+            RuleBodyError = error(
                 "RuleBodyError",
-                AnnotationProduct.Annotation,
                 "Unable to parse the rule body, please check the definition for mistakes.",
                 this.Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
-            var ruleBodyOptions = this.OneOf(
-                "#RuleBodyOptions",
-                AnnotationProduct.Transitive,
+            var emptyBodyWarning = warning("NoRuleBodyWarning", "Rule has no body.", ifMatches(RuleEndToken));
 
-                ruleBody,
-                // xxx should mark this as a warning - empty rule
-                this.TryMatch(RuleEndToken),
-                RuleBodyError
-            );
+            var ruleBodyOptions = oneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
 
             MissingRuleEndError = this.LogError(
                 "MissingEndRule",
@@ -356,7 +355,7 @@ namespace gg.parse.ebnf
                 var tokenizerTokens = tokenizationResult.Annotations;
 
                 var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
-                
+
                 var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
                 var tokenizerErrors = new List<Annotation>();
 
@@ -393,13 +392,17 @@ namespace gg.parse.ebnf
                     throw new ParseException("input contains no valid grammar.");
                 }
 
+                var errorLevel = FailOnWarning 
+                    ? LogLevel.Warning | LogLevel.Error 
+                    : LogLevel.Error;
+
                 var errorPredicate = new Func<Annotation, bool>(
                     a => {
                         var rule = FindRule(a.RuleId);
 
                         // only need to capture errors, fatals will throw an exception
                         // so no need to capture them
-                        return (rule is LogRule<int> logRule && logRule.Level == LogLevel.Error);
+                        return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) == errorLevel);
                     }
                 );
                 var grammarErrors = new List<Annotation>();
@@ -412,7 +415,7 @@ namespace gg.parse.ebnf
                 if (grammarErrors.Count > 0)
                 {
                     throw new ParseException(
-                            "input contains tokens which could not be mapped to grammar.",
+                            "Parsing encountered some errors (or warnings which are treated as errors).",
                             grammarErrors,
                             text,
                             tokens

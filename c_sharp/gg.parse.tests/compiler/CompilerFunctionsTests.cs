@@ -1,10 +1,11 @@
 ﻿using gg.parse.compiler;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
+using gg.parse.rulefunctions;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using static gg.parse.compiler.CompilerFunctions;
-using gg.parse.rulefunctions;
+
 
 
 namespace gg.parse.tests.compiler
