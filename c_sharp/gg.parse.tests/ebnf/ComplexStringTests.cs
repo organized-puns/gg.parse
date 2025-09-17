@@ -144,7 +144,7 @@ namespace gg.parse.tests.ebnf
 
             try
             {
-                var tokenizer = new EbnfParser(text, null).EbnfTokenizer;
+                var tokenizer = new ScriptPipeline(text, null).EbnfTokenizer;
 
                 // check everything has build correctly
                 Assert.IsTrue(tokenizer != null);

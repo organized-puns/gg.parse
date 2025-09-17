@@ -14,7 +14,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var jsonParser = new ScriptPipeline(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.EbnfTokenizer;
 
@@ -42,7 +42,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var jsonParser = new ScriptPipeline(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.EbnfTokenizer;
 
@@ -77,7 +77,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var jsonParser = new ScriptPipeline(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.EbnfTokenizer;
          
@@ -104,7 +104,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var jsonParser = new ScriptPipeline(tokenizerSpec, grammarSpec);
 
             var tokenizer = jsonParser.EbnfTokenizer;
             var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
@@ -122,7 +122,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var jsonParser = new ScriptPipeline(tokenizerSpec, grammarSpec);
 
             var keyStrValue = "{\"key\": \"value\"}";
 
@@ -204,7 +204,7 @@ namespace gg.parse.tests.examples
         {
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
-            var jsonParser = new EbnfParser(tokenizerSpec, grammarSpec);
+            var jsonParser = new ScriptPipeline(tokenizerSpec, grammarSpec);
 
             // try parsing an object with two kvp
             var keyStrValue = "{\r\n\"key1\": \"value\", \n \"key2\": 123}";
@@ -251,7 +251,7 @@ namespace gg.parse.tests.examples
         [TestMethod]
         public void CreateParserUsingTransitiveRule_ExpectNoExceptions()
         {
-            var jsonParser = new EbnfParser("asterix='*';", "#rule=asterix;");
+            var jsonParser = new ScriptPipeline("asterix='*';", "#rule=asterix;");
 
             Assert.IsTrue(jsonParser.TryMatch("*"));
         }

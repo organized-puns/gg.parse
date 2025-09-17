@@ -17,7 +17,7 @@ namespace gg.parse.instances.tests.calculator
         [TestMethod]
         public void CreateTokenizer_FindTokens_ExpectAllTokensFound()
         {
-            var calculatorParser = new EbnfParser(_tokenizerSpec, null);
+            var calculatorParser = new ScriptPipeline(_tokenizerSpec, null);
 
             IsNotNull(calculatorParser);
 
@@ -81,7 +81,7 @@ namespace gg.parse.instances.tests.calculator
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParsePositiveNumber_ExpectCorrectTypeFound()
         {
-            var calculatorParser = new EbnfParser(_tokenizerSpec, _grammarSpec);
+            var calculatorParser = new ScriptPipeline(_tokenizerSpec, _grammarSpec);
 
             var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse("1".ToCharArray(), 0);
 
@@ -340,11 +340,11 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(calculatorParser.FindParserRule(astTree[0][2].RuleId).Name == "number");
         }
 
-        private EbnfParser CreateParser()
+        private ScriptPipeline CreateParser()
         {
             try
             {
-                return new EbnfParser(_tokenizerSpec, _grammarSpec);
+                return new ScriptPipeline(_tokenizerSpec, _grammarSpec);
             }
             catch (EbnfException e)
             {

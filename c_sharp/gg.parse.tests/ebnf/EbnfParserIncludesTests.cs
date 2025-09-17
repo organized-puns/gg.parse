@@ -55,7 +55,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParser_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/string_tokenization.ebnf'; /*dummy main rule */ main=.;";
-            var jsonParser = new EbnfParser(includeCommand, null);
+            var jsonParser = new ScriptPipeline(includeCommand, null);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
@@ -69,7 +69,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParserUsingAFileContainingAnInclude_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/include_test.ebnf'; /*dummy main rule */ grammar_root=.;";
-            var jsonParser = new EbnfParser(includeCommand, null);
+            var jsonParser = new ScriptPipeline(includeCommand, null);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
@@ -82,7 +82,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParser_ParseCompiledRule_ExpectRuleToFindMatch()
         {
             var includeCommand = "include 'assets/string_tokenization.ebnf'; string_ref = string;";
-            var jsonParser = new EbnfParser(includeCommand, null);
+            var jsonParser = new ScriptPipeline(includeCommand, null);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
@@ -106,7 +106,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParser_ParseCompiledRule_ExpectDuplicateIncludesToBeIgnored()
         {
             var includeCommand = "include 'assets/string_tokenization.ebnf'; include 'assets/string_tokenization.ebnf'; string_ref = string;";
-            var jsonParser = new EbnfParser(includeCommand, null);
+            var jsonParser = new ScriptPipeline(includeCommand, null);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.EbnfTokenizer.FindRule("string") != null);
@@ -129,7 +129,7 @@ namespace gg.parse.tests.ebnf
         {
             var includeCommand = "include 'assets/include_circular_1.ebnf';";
             // this should throw and exception
-            new EbnfParser(includeCommand, null);
+            new ScriptPipeline(includeCommand, null);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace gg.parse.tests.ebnf
         [TestMethod]
         public void CreateEbnfParserIncludeJsonGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
-            var jsonParser = new EbnfParser(File.ReadAllText("assets/json_tokens.ebnf"), 
+            var jsonParser = new ScriptPipeline(File.ReadAllText("assets/json_tokens.ebnf"), 
                                             "include 'assets/json_grammar.ebnf';#main=json;");
 
             Assert.IsTrue(jsonParser.EbnfTokenizer != null);
@@ -163,7 +163,7 @@ namespace gg.parse.tests.ebnf
         [TestMethod]
         public void CreateEbnfParserIncludeJsonTokensAndGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
-            var jsonParser = new EbnfParser("include 'assets/json_tokens.ebnf';#token_main = json_tokens;",
+            var jsonParser = new ScriptPipeline("include 'assets/json_tokens.ebnf';#token_main = json_tokens;",
                                             "include 'assets/json_grammar.ebnf'; # main = json;");
 
             Assert.IsTrue(jsonParser.EbnfTokenizer != null);

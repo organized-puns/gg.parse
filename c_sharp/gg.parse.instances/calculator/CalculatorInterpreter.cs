@@ -48,12 +48,12 @@ namespace gg.parse.instances.calculator
         }
 
         private Ids _graphIds;
-        private EbnfParser _parser; 
+        private ScriptPipeline _parser; 
 
 
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
-            _parser = new EbnfParser(tokenizerSpec, grammarSpec);
+            _parser = new ScriptPipeline(tokenizerSpec, grammarSpec);
             SetIds(_parser.EbnfGrammarParser);
         }
 

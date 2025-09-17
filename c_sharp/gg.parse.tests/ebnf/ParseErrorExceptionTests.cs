@@ -14,7 +14,7 @@ namespace gg.parse.tests.ebnf
             {
                 // & and ^ are no valid tokens, so this should raise an exception
                 // xxx no exceptions in the constructor
-                var parser = new EbnfParser("& foo ^", null);
+                var parser = new ScriptPipeline("& foo ^", null);
                 Fail();
             }
             catch (EbnfException ebnfException)
@@ -38,7 +38,7 @@ namespace gg.parse.tests.ebnf
                 // first rule has no terminating ;
                 // second rule is fine
                 // third rule has no assignment, =
-                var parser = new EbnfParser("rule1 = 'foo' rule2 = 'bar'; rule3 'qaz';", null);
+                var parser = new ScriptPipeline("rule1 = 'foo' rule2 = 'bar'; rule3 'qaz';", null);
                 Fail();
             }
             catch (EbnfException ebnfException)
@@ -61,7 +61,7 @@ namespace gg.parse.tests.ebnf
             {
                 // & and : are no valid tokens, so this should raise an exception
                 // xxx no exceptions in the constructor
-                var parser = new EbnfParser("foo='string';", "^ bar=foo; :");
+                var parser = new ScriptPipeline("foo='string';", "^ bar=foo; :");
                 Fail();
             }
             catch (EbnfException ebnfException)
@@ -82,7 +82,7 @@ namespace gg.parse.tests.ebnf
         {
             try
             {
-                var parser = new EbnfParser("foo='string';", "bar=foo");
+                var parser = new ScriptPipeline("foo='string';", "bar=foo");
                 Fail();
             }
             catch (EbnfException ebnfException)
@@ -102,7 +102,7 @@ namespace gg.parse.tests.ebnf
             try
             {
                 // missing ';' after 'bar=foo' and missing '=' after 'baz'
-                var parser = new EbnfParser("foo='string';", "bar=foo xxx=foo; baz foo;");
+                var parser = new ScriptPipeline("foo='string';", "bar=foo xxx=foo; baz foo;");
                 Fail();
             }
             catch (EbnfException ebnfException)
@@ -122,7 +122,7 @@ namespace gg.parse.tests.ebnf
         [ExpectedException(typeof(FatalConditionException<int>))]
         public void SetupRuleWithFatalWithCondition_CreateParserAndParseRule_ExpectException()
         {
-            var parser = new EbnfParser("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
+            var parser = new ScriptPipeline("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
 
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");
@@ -132,7 +132,7 @@ namespace gg.parse.tests.ebnf
         [ExpectedException(typeof(FatalConditionException<int>))]
         public void SetupRuleWithFatalWithoutCondition_CreateParserAndParseRule_ExpectException()
         {
-            var parser = new EbnfParser("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
+            var parser = new ScriptPipeline("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
 
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");

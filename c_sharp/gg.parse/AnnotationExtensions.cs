@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace gg.parse
 {
     public static class AnnotationExtensions
@@ -70,5 +69,36 @@ namespace gg.parse
                         .Select( c => c.FilterChildren(filter))],
                     annotation.Parent
                 );
+
+        /// <summary>
+        /// Map an annotation to a value and add it to the result if the value is not null
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="annotation"></param>
+        /// <param name="predicate"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static List<T> SelectNotNull<T>(this Annotation annotation, Func<Annotation, T> predicate, List<T>? result = null) 
+            where T : class
+        {
+            result ??= [];
+
+            var v = predicate(annotation);
+
+            if (v != null)
+            {
+                result.Add(v);
+            }
+
+            if (annotation.Children != null)
+            {
+                foreach (var child in annotation.Children)
+                {
+                    child.SelectNotNull(predicate, result);
+                }
+            }
+
+            return result;
+        }
     }
 }

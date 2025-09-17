@@ -7,7 +7,7 @@ using gg.parse.rulefunctions.datafunctions;
 
 namespace gg.parse.ebnf
 {
-    public class EbnfParser
+    public class ScriptPipeline
     {
         private RuleGraph<char> _ebnfTokenizer;
         private RuleGraph<int>? _ebnfParser;
@@ -20,9 +20,9 @@ namespace gg.parse.ebnf
         /// Handler which will receive all logs (warnings/info/debug) after parsing is complete.
         /// Can be null
         /// </summary>
-        public Logger? LogHandler { get; init; }        
+        public PipelineLog? LogHandler { get; init; }        
 
-        public EbnfParser(string tokenizerDefinition, string? grammarDefinition, Logger? logger = null)
+        public ScriptPipeline(string tokenizerDefinition, string? grammarDefinition, PipelineLog? logger = null)
         {
             var tokenizer = new EbnfTokenizer();
 
@@ -56,7 +56,6 @@ namespace gg.parse.ebnf
             TryBuildAstTree(text, out var tokens, out var astTree)
                 ? astTree
                 : ParseResult.Failure;
-
                 
         public bool TryBuildAstTree(string text, out ParseResult tokens, out ParseResult astTree)
         {
@@ -199,7 +198,7 @@ namespace gg.parse.ebnf
             string grammarText,
             EbnfTokenizer tokenizer,
             RuleGraph<char> tokenSource,
-            Logger? logHandler = null) =>
+            PipelineLog? logHandler = null) =>
 
             CreateParserFromEbnfFile(
                 grammarText, 
@@ -215,7 +214,7 @@ namespace gg.parse.ebnf
             RuleGraph<int> target,
             Dictionary<string, RuleGraph<int>> cache,
             string[]? paths = null,
-            Logger? logHandler = null)
+            PipelineLog? logHandler = null)
         {
             List<Annotation>? grammarTokens = null;
             List<Annotation>? grammarAstNodes = null;
@@ -224,6 +223,11 @@ namespace gg.parse.ebnf
             {
                 FailOnWarning = logHandler != null && logHandler.FailOnWarning
             };
+
+            if (logHandler != null)
+            {
+                logHandler.FindAstRule = id => grammarParser.FindRule(id);
+            }
 
             try
             {
@@ -250,7 +254,7 @@ namespace gg.parse.ebnf
                 )
             );
 
-            logHandler?.HandleLogs(grammarText, grammarTokens, grammarAstNodes);
+            logHandler?.ProcessAstLogs(grammarText, grammarTokens, grammarAstNodes);
 
             // remove logs from the annotations
             var filteredNodes = grammarAstNodes.Filter(a => grammarParser.FindRule(a.RuleId) is not LogRule<int>);
