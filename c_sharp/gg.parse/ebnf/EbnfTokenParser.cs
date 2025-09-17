@@ -402,7 +402,7 @@ namespace gg.parse.ebnf
 
                         // only need to capture errors, fatals will throw an exception
                         // so no need to capture them
-                        return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) == errorLevel);
+                        return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) > 0);
                     }
                 );
                 var grammarErrors = new List<Annotation>();

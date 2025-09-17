@@ -1,7 +1,6 @@
 ﻿using gg.core.util;
 
 using gg.parse.rulefunctions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.ebnf
 {
@@ -15,6 +14,33 @@ namespace gg.parse.ebnf
         public Action<string>? Out { get; set; } = null;
 
         public Func<int, RuleBase<int>>? FindAstRule { get; set; } = null;
+
+        public Func<int, RuleBase<int>>? FindTokenRule { get; set; } = null;
+
+        public void ProcessTokenLogs(string text, List<Annotation> tokens)
+        {
+            Contract.Requires(Out != null, "No output defined in logger, cannot process logs.");
+            Contract.Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
+
+            var logAnnotations = tokens.Select(a =>
+                                    a!.SelectNotNull(ax =>
+                                        FindTokenRule(ax.RuleId) is LogRule<int> rule
+                                            ? new Tuple<Annotation, LogRule<int>>(ax, rule)
+                                            : null
+                                    ));
+
+            var lineRanges = CollectLineRanges(text);
+
+            foreach (var logList in logAnnotations)
+            {
+                foreach (var (annotation, log) in logList)
+                {
+                    var (line, column) = MapAnnotationRangeToLineColumn(annotation.Range, text, lineRanges);
+                    Out!($"({line}, {column}) {log.Level}, {log.Text}: {text.Substring(annotation.Start, annotation.Length)}");
+                }
+            }
+        }
+
 
         public void ProcessAstLogs(string text, List<Annotation> tokens, List<Annotation> astNodes) 
         {
@@ -84,11 +110,9 @@ namespace gg.parse.ebnf
             return result;
         }
 
-        private (int line, int column) MapAnnotationRangeToLineColumn(Annotation annotation, string text, List<Annotation> tokens, List<Range> lineRanges)
+        private static (int line, int column) MapAnnotationRangeToLineColumn(Range textRange, string text, List<Range> lineRanges)
         {
-            var textRange = tokens.UnionOfRanges(annotation.Range);
             var line = 0;
-            var column = 0;
 
             for (line = 0; line < lineRanges.Count; line++)
             {
@@ -100,5 +124,8 @@ namespace gg.parse.ebnf
 
             return (line + 1, (textRange.Start - lineRanges[line].Start) + 1);
         }
+
+        private static (int line, int column) MapAnnotationRangeToLineColumn(Annotation annotation, string text, List<Annotation> tokens, List<Range> lineRanges) =>
+           MapAnnotationRangeToLineColumn(tokens.UnionOfRanges(annotation.Range), text, lineRanges);         
     }
 }

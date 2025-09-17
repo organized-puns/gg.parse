@@ -138,7 +138,8 @@ Todo (for mvp)
         
     Implement logger
        Add token logger
-       Allow for certain tokes in the error message, eg {line}, {column}, {filename}
+       Add filename to annotation
+       Add filename (if any) to logger
        Capture & process exceptions
     
     Deal with the following cases:
@@ -162,6 +163,8 @@ Todo (for mvp)
     Remove "Function" notion in favor of Rule in names across the project
 
     Check if we can replace RuleId with the actual rule in annotation so we don't have do the look up and make everything simpler
+
+    Figure out if we really need all sub rules in the rulegraph id/name
 
 
 alpha (featured complete, buggy, ugly mess)
