@@ -26,19 +26,19 @@ namespace gg.parse
         /// <summary>
         /// Returns union of the ranges of the tokens from/to the given tokensRange
         /// </summary>
-        /// <param name="annotations"></param>
+        /// <param name="tokens"></param>
         /// <param name="tokensRange"></param>
         /// <returns></returns>
-        public static Range UnionOfRanges(this List<Annotation> annotations, Range tokensRange)
+        public static Range UnionOfRanges(this List<Annotation> tokens, Range tokensRange)
         {
-            var startIndex = annotations[tokensRange.Start].Start;
+            var startIndex = tokens[tokensRange.Start].Start;
             var start = startIndex;
             var length = 0;
 
             for (var i = 0; i < tokensRange.Length; i++)
             {
                 // need to take in account possible white space
-                var token = annotations[tokensRange.Start + i];
+                var token = tokens[tokensRange.Start + i];
                 length += (token.Start - (startIndex + length)) + token.Length;
             }
 

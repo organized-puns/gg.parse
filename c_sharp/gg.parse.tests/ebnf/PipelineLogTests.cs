@@ -19,9 +19,9 @@ namespace gg.parse.tests.ebnf
             };
 
             // this should trigger a warning
-            var pipeline = new ScriptPipeline("foo='bar';", "trigger_warning=;", logger);
+            var pipeline = new ScriptPipeline("foo='bar';", "trigger_warning=;\ntrigger_warning_2=;", logger);
 
-            IsTrue(result.Count == 1);
+            IsTrue(result.Count == 2);
         }
     }
 }

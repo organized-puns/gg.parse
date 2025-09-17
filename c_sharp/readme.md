@@ -137,11 +137,8 @@ Todo (for mvp)
 - Error handling, 
         
     Implement logger
-       Warning empty rule doesn't yield any related text because the size is 0. Go to its parent for some size ? (this needs parents to be set)
        Add token logger
-       Map tokens to line & column numbers 
        Allow for certain tokes in the error message, eg {line}, {column}, {filename}
-       Map error range to row/column in source file
        Capture & process exceptions
     
     Deal with the following cases:

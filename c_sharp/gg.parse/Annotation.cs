@@ -38,6 +38,11 @@
             Range = range;
             Children = children;
             Parent = parent;
+
+            if (children != null)
+            {
+                children.ForEach(c => c.Parent = this);
+            }
         }
 
         public int CompareTo(object? obj)
