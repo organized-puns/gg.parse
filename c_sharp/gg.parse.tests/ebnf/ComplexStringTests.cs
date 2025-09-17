@@ -142,9 +142,11 @@ namespace gg.parse.tests.ebnf
         {
             var text = File.ReadAllText("assets/string_tokenization.ebnf");
 
+            var logger = new PipelineLog();
+
             try
-            {
-                var tokenizer = new ScriptPipeline(text, null).EbnfTokenizer;
+            {   
+                var tokenizer = new ScriptPipeline(text, null, logger).EbnfTokenizer;
 
                 // check everything has build correctly
                 Assert.IsTrue(tokenizer != null);

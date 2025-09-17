@@ -26,6 +26,24 @@ namespace gg.parse.tests.ebnf
         }
 
         [TestMethod]
+        public void SetupPipelineLog_CreatePipeline_ExpectLogsToContainTokenWarnings()
+        {
+            var result = new List<string>();
+
+            var logger = new PipelineLog()
+            {
+                Out = (s) => result.Add(s),
+            };
+
+            // this should trigger a warning (because the rule is empty)
+            var pipeline = new ScriptPipeline("\n\r\nfoo=;", null, logger);
+
+            // logger should have written two warnings to the output
+            IsTrue(result.Count == 1);
+        }
+
+
+        [TestMethod]
         [ExpectedException(typeof(EbnfException))]
         public void SetupPipelineLogWithFailOnWarning_CreatePipeline_ExpectException()
         {

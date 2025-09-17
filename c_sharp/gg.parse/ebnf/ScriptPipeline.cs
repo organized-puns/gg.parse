@@ -26,7 +26,7 @@ namespace gg.parse.ebnf
         {
             var tokenizer = new EbnfTokenizer();
 
-            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, []);
+            _ebnfTokenizer = CreateTokenizerFromEbnfFile(tokenizerDefinition, tokenizer, [], logHandler: logger);
             
             if (!string.IsNullOrEmpty(grammarDefinition))
             {
@@ -132,27 +132,35 @@ namespace gg.parse.ebnf
             string tokenizerText,
             EbnfTokenizer tokenizer,
             Dictionary<string, RuleGraph<char>> cache,
-            string[]? paths = null)
+            string[]? paths = null,
+            PipelineLog? logHandler = null)
         {
             List<Annotation> tokenizerTokens;
             List<Annotation> tokenizerAstNodes;
 
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
-            
+            var tokenizerParser = new EbnfTokenParser(tokenizer)
+            {
+                FailOnWarning = logHandler != null && logHandler.FailOnWarning
+            };
+
+            if (logHandler != null)
+            {
+                logHandler.FindAstRule = id => tokenizerParser.FindRule(id);
+            }
+
             try
             {
                 (tokenizerTokens, tokenizerAstNodes) = tokenizerParser.Parse(tokenizerText);
             }
+            // xxx not necessary to wrap these ?
             catch (TokenizeException te)
-            {
-                throw new EbnfException("Exception in tokens. Failed to build tokenizer. See inner exception for details.", te);
+            {             
+                throw new EbnfException("Exception in token. Failed to build tokenizer. See inner exception for details.", te);
             }
             catch (ParseException pe) 
             {
                 throw new EbnfException("Exception in grammar. Failed to build tokenizer. See inner exception for details.", pe);
             }
-
-            var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, tokenizerAstNodes);
 
             var includedSources = ProcessIncludedFiles(
                                     tokenizerText, 
@@ -162,7 +170,14 @@ namespace gg.parse.ebnf
                                     tokenizerAstNodes, 
                                     cache,
                                     paths,
-                                    (text, includePaths) => CreateTokenizerFromEbnfFile(text, tokenizer, cache, includePaths));
+                                    (text, includePaths) => CreateTokenizerFromEbnfFile(text, tokenizer, cache, includePaths, logHandler));
+
+            logHandler?.ProcessAstLogs(tokenizerText, tokenizerTokens, tokenizerAstNodes);
+
+            // remove logs from the annotations
+            var filteredNodes = tokenizerAstNodes.Filter(a => tokenizerParser.FindRule(a.RuleId) is not LogRule<int>);
+
+            var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, filteredNodes);
 
             try
             {
@@ -175,6 +190,7 @@ namespace gg.parse.ebnf
             {
                 var rule = tokenizerParser.FindRule(nce.RuleId);
 
+                // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
                     throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
@@ -224,15 +240,11 @@ namespace gg.parse.ebnf
                 FailOnWarning = logHandler != null && logHandler.FailOnWarning
             };
 
-            if (logHandler != null)
-            {
-                logHandler.FindAstRule = id => grammarParser.FindRule(id);
-            }
-
             try
             {
                 (grammarTokens, grammarAstNodes) = grammarParser.Parse(grammarText);
             }
+            // xxx not necessary to wrap these ?
             catch (Exception e) when (e is ParseException || e is TokenizeException)
             {
                 // add information where this went wrong
@@ -254,7 +266,12 @@ namespace gg.parse.ebnf
                 )
             );
 
-            logHandler?.ProcessAstLogs(grammarText, grammarTokens, grammarAstNodes);
+            // redirect rule lookup if a logger is set
+            if (logHandler != null)
+            {
+                logHandler.FindAstRule = id => grammarParser.FindRule(id);
+                logHandler.ProcessAstLogs(grammarText, grammarTokens, grammarAstNodes);
+            }
 
             // remove logs from the annotations
             var filteredNodes = grammarAstNodes.Filter(a => grammarParser.FindRule(a.RuleId) is not LogRule<int>);

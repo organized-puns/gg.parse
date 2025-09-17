@@ -352,9 +352,9 @@ namespace gg.parse.ebnf
 
             if (tokenizationResult.FoundMatch && tokenizationResult.Annotations != null)
             {
-                var tokenizerTokens = tokenizationResult.Annotations;
+                //var tokenizerTokens = tokenizationResult.Annotations;
 
-                var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
+                /*var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
 
                 var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
                 var tokenizerErrors = new List<Annotation>();
@@ -364,7 +364,9 @@ namespace gg.parse.ebnf
                     annotation.Collect(errorPredicate, tokenizerErrors);
                 }
 
-                if (tokenizerErrors.Count > 0)
+                if (tokenizerErrors.Count > 0)*/
+
+                if (ContainsTokenErrors(tokenizationResult.Annotations,out var tokenizerErrors))
                 {
                     throw new TokenizeException(
                         "input contains characters which could not be mapped to a token.",
@@ -373,10 +375,34 @@ namespace gg.parse.ebnf
                     );
                 }
 
-                return tokenizerTokens!;
+                return tokenizationResult.Annotations!;
             }
 
             throw new TokenizeException("input contains no valid tokens.");
+        }
+
+        private Func<Annotation, bool> SetupErrorPredicate(bool failOnWarning)
+        {
+            var errorLevel = FailOnWarning
+                    ? LogLevel.Warning | LogLevel.Error
+                    : LogLevel.Error;
+
+            return new Func<Annotation, bool>(
+                a => {
+                    var rule = FindRule(a.RuleId);
+
+                    // only need to capture errors, fatals will throw an exception
+                    // so no need to capture them
+                    if (rule is LogRule<int> logRule)
+                    {
+                        var mask = logRule.Level & errorLevel;
+                        return mask > 0;
+                    }
+
+                    return false;
+                        //return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) > 0);
+                }
+            );
         }
 
         private (List<Annotation> tokens, List<Annotation> astNodes) ParseGrammar(string text, List<Annotation> tokens)
@@ -392,27 +418,7 @@ namespace gg.parse.ebnf
                     throw new ParseException("input contains no valid grammar.");
                 }
 
-                var errorLevel = FailOnWarning 
-                    ? LogLevel.Warning | LogLevel.Error 
-                    : LogLevel.Error;
-
-                var errorPredicate = new Func<Annotation, bool>(
-                    a => {
-                        var rule = FindRule(a.RuleId);
-
-                        // only need to capture errors, fatals will throw an exception
-                        // so no need to capture them
-                        return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) > 0);
-                    }
-                );
-                var grammarErrors = new List<Annotation>();
-
-                foreach (var annotation in astNodes)
-                {
-                    annotation.Collect(errorPredicate, grammarErrors);
-                }
-
-                if (grammarErrors.Count > 0)
+                if (ContainsParseErrors(astNodes, FailOnWarning, out var grammarErrors))
                 {
                     throw new ParseException(
                             "Parsing encountered some errors (or warnings which are treated as errors).",
@@ -428,6 +434,35 @@ namespace gg.parse.ebnf
             {
                 return (tokens, []);
             }
+        }
+
+        private bool ContainsTokenErrors(List<Annotation> annotations, out List<Annotation> errors)
+        {
+            var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
+
+            var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
+
+            errors = [];
+
+            foreach (var annotation in annotations)
+            {
+                annotation.Collect(errorPredicate, errors);
+            }
+
+            return errors.Count > 0;
+        }
+
+        private bool ContainsParseErrors(List<Annotation> annotations, bool failOnWarning, out List<Annotation> errors)
+        {
+            var errorPredicate = SetupErrorPredicate(FailOnWarning);
+            errors = new List<Annotation>();
+
+            foreach (var annotation in annotations)
+            {
+                annotation.Collect(errorPredicate, errors);
+            }
+
+            return errors.Count > 0;
         }
 
         private MatchSingleData<int> Token(string tokenName)

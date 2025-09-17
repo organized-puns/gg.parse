@@ -6,6 +6,8 @@ namespace gg.parse.ebnf
 {
     public class PipelineLog
     {
+        public List<string> ReceivedLogs { get; set; } = [];
+
         /// <summary>
         /// If set to true an exception will be thrown when a warning is encountered
         /// </summary>
@@ -19,7 +21,6 @@ namespace gg.parse.ebnf
 
         public void ProcessTokenLogs(string text, List<Annotation> tokens)
         {
-            Contract.Requires(Out != null, "No output defined in logger, cannot process logs.");
             Contract.Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
 
             var logAnnotations = tokens.Select(a =>
@@ -31,12 +32,17 @@ namespace gg.parse.ebnf
 
             var lineRanges = CollectLineRanges(text);
 
+            ReceivedLogs = [];
+
             foreach (var logList in logAnnotations)
             {
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation.Range, text, lineRanges);
-                    Out!($"({line}, {column}) {log.Level}, {log.Text}: {text.Substring(annotation.Start, annotation.Length)}");
+                    var message = $"({line}, {column}) {log.Level}, {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
+
+                    ReceivedLogs.Add(message);
+                    Out?.Invoke(message);
                 }
             }
         }
@@ -44,7 +50,6 @@ namespace gg.parse.ebnf
 
         public void ProcessAstLogs(string text, List<Annotation> tokens, List<Annotation> astNodes) 
         {
-            Contract.Requires(Out != null, "No output defined in logger, cannot process logs.");
             Contract.Requires(FindAstRule != null, "No method to locate ast rules defined, cannot process logs.");
 
             var logAnnotations = astNodes.Select(a => 
@@ -56,12 +61,18 @@ namespace gg.parse.ebnf
 
             var lineRanges = CollectLineRanges(text);
 
+            ReceivedLogs = [];
+
             foreach (var logList in logAnnotations) 
             {
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation, text, tokens, lineRanges);
-                    Out!($"({line}, {column}) {log.Level}, {log.Text}: {GetAnnotationText(annotation, text, tokens)}");
+                    var message = $"({line}, {column}) {log.Level}, {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
+
+                    ReceivedLogs.Add(message);
+
+                    Out?.Invoke(message);
                 }
             }
         }
