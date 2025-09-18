@@ -12,8 +12,8 @@ namespace gg.parse.rulefunctions.rulefunctions
             get => _sequence;
             set
             {
-                Contract.Requires(value != null);
-                Contract.Requires(value!.Any( v => v != null));
+                Assertions.Requires(value != null);
+                Assertions.Requires(value!.Any( v => v != null));
 
                 _sequence = value!;
             }

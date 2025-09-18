@@ -15,13 +15,13 @@ namespace gg.parse.ebnf
 
         public Action<string>? Out { get; set; } = null;
 
-        public Func<int, RuleBase<int>>? FindAstRule { get; set; } = null;
+        public Func<int, RuleBase<int>?>? FindAstRule { get; set; } = null;
 
         public Func<int, RuleBase<int>>? FindTokenRule { get; set; } = null;
 
         public void ProcessTokenLogs(string text, List<Annotation> tokens)
         {
-            Contract.Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
+            Assertions.Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
 
             var logAnnotations = tokens.Select(a =>
                                     a!.SelectNotNull(ax =>
@@ -50,7 +50,7 @@ namespace gg.parse.ebnf
 
         public void ProcessAstLogs(string text, List<Annotation> tokens, List<Annotation> astNodes) 
         {
-            Contract.Requires(FindAstRule != null, "No method to locate ast rules defined, cannot process logs.");
+            Assertions.Requires(FindAstRule != null, "No method to locate ast rules defined, cannot process logs.");
 
             var logAnnotations = astNodes.Select(a => 
                                     a!.SelectNotNull( ax =>
@@ -79,8 +79,8 @@ namespace gg.parse.ebnf
 
         private string GetAnnotationText(Annotation annotation, string text, List<Annotation> tokens, int minStringLength = 8, int maxStringLength = 60)
         {
-            Contract.Requires(minStringLength < maxStringLength);
-            Contract.Requires(maxStringLength > 4);
+            Assertions.Requires(minStringLength < maxStringLength);
+            Assertions.Requires(maxStringLength > 4);
 
             var annotationText = annotation.GetText(text, tokens);
 

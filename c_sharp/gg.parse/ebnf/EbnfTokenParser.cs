@@ -1,8 +1,9 @@
-﻿using gg.parse.rulefunctions;
+﻿using gg.core.util;
+using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 using gg.parse.rules;
-using System.ComponentModel.DataAnnotations;
+
 using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
@@ -348,24 +349,12 @@ namespace gg.parse.ebnf
 
         private List<Annotation> TokenizeText(string text)
         {
+            Assertions.RequiresNotNullOrEmpty(text, nameof(text));
+
             var tokenizationResult = Tokenizer.Tokenize(text);
 
             if (tokenizationResult.FoundMatch && tokenizationResult.Annotations != null)
             {
-                //var tokenizerTokens = tokenizationResult.Annotations;
-
-                /*var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
-
-                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
-                var tokenizerErrors = new List<Annotation>();
-
-                foreach (var annotation in tokenizationResult.Annotations)
-                {
-                    annotation.Collect(errorPredicate, tokenizerErrors);
-                }
-
-                if (tokenizerErrors.Count > 0)*/
-
                 if (ContainsTokenErrors(tokenizationResult.Annotations,out var tokenizerErrors))
                 {
                     throw new TokenizeException(
@@ -388,20 +377,7 @@ namespace gg.parse.ebnf
                     : LogLevel.Error;
 
             return new Func<Annotation, bool>(
-                a => {
-                    var rule = FindRule(a.RuleId);
-
-                    // only need to capture errors, fatals will throw an exception
-                    // so no need to capture them
-                    if (rule is LogRule<int> logRule)
-                    {
-                        var mask = logRule.Level & errorLevel;
-                        return mask > 0;
-                    }
-
-                    return false;
-                        //return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) > 0);
-                }
+                a => FindRule(a.RuleId) is LogRule<int> logRule && (logRule.Level & errorLevel) > 0
             );
         }
 

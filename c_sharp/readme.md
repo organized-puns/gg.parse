@@ -137,7 +137,6 @@ Todo (for mvp)
 - Error handling, 
         
     Implement logger
-       Add token logger
        Add filename to annotation
        Add filename (if any) to logger
        Capture & process exceptions

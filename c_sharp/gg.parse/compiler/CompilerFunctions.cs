@@ -75,9 +75,9 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count == 1);
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count == 1);
 
             var setText = session.GetText(ruleDefinition.Children[0].Range);
 
@@ -247,9 +247,9 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count > 0);
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction,_) = compiler.Functions[elementAnnotation.RuleId];
@@ -288,9 +288,9 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count > 0);
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
@@ -314,9 +314,9 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count > 0);
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
@@ -341,9 +341,9 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count > 0);
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
@@ -366,7 +366,7 @@ namespace gg.parse.compiler
             RuleDeclaration declaration,
             CompileSession<T> __) where T : IComparable<T>
         {
-            Contract.Requires(declaration != null);
+            Assertions.Requires(declaration != null);
 
             return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
         }
@@ -378,9 +378,9 @@ namespace gg.parse.compiler
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
-            Contract.Requires(ruleDefinition != null);
-            Contract.Requires(ruleDefinition!.Children != null);
-            Contract.Requires(ruleDefinition.Children!.Count > 0);
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var logLevelText = context.GetText(ruleDefinition.Children[0].Range);
             var logLevel = Enum.Parse<LogLevel>(logLevelText, ignoreCase: true);
