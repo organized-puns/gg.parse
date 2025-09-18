@@ -6,18 +6,24 @@ namespace gg.parse.ebnf
 {
     public class PipelineLog
     {
-        public List<string> ReceivedLogs { get; set; } = [];
+        public List<(LogLevel level, string message)> ReceivedLogs { get; set; } = [];
 
         /// <summary>
         /// If set to true an exception will be thrown when a warning is encountered
         /// </summary>
         public bool FailOnWarning { get; set; } = false;
 
-        public Action<string>? Out { get; set; } = null;
+        public Action<LogLevel, string>? Out { get; set; } = null;
 
         public Func<int, RuleBase<int>?>? FindAstRule { get; set; } = null;
 
         public Func<int, RuleBase<int>>? FindTokenRule { get; set; } = null;
+
+        public void Log(LogLevel level, string message)
+        {
+            ReceivedLogs.Add((level, message));
+            Out?.Invoke(level, message);
+        }
 
         public void ProcessTokenLogs(string text, List<Annotation> tokens)
         {
@@ -39,10 +45,10 @@ namespace gg.parse.ebnf
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation.Range, text, lineRanges);
-                    var message = $"({line}, {column}) {log.Level}, {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
+                    var message = $"({line}, {column}) {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
 
-                    ReceivedLogs.Add(message);
-                    Out?.Invoke(message);
+                    ReceivedLogs.Add((log.Level, message));
+                    Out?.Invoke(log.Level, message);
                 }
             }
         }
@@ -61,18 +67,16 @@ namespace gg.parse.ebnf
 
             var lineRanges = CollectLineRanges(text);
 
-            ReceivedLogs = [];
-
             foreach (var logList in logAnnotations) 
             {
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation, text, tokens, lineRanges);
-                    var message = $"({line}, {column}) {log.Level}, {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
+                    var message = $"({line}, {column}) {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
 
-                    ReceivedLogs.Add(message);
+                    ReceivedLogs.Add((log.Level, message));
 
-                    Out?.Invoke(message);
+                    Out?.Invoke(log.Level, message);
                 }
             }
         }

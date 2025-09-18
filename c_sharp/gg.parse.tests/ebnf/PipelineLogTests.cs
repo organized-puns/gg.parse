@@ -15,7 +15,7 @@ namespace gg.parse.tests.ebnf
             
             var logger = new PipelineLog()
             {
-                Out = (s) => result.Add(s),
+                Out = (l, s) => result.Add(s),
             };
 
             // this should trigger a warning (because the rule is empty)
@@ -32,7 +32,7 @@ namespace gg.parse.tests.ebnf
 
             var logger = new PipelineLog()
             {
-                Out = (s) => result.Add(s),
+                Out = (level, message) => result.Add(message),
             };
 
             // this should trigger a warning (because the rule is empty)
@@ -51,7 +51,7 @@ namespace gg.parse.tests.ebnf
 
             var logger = new PipelineLog()
             {
-                Out = (s) => result.Add(s),
+                Out = (level, message) => result.Add(message),
                 FailOnWarning = true
             };
 

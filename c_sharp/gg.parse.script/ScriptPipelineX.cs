@@ -175,38 +175,40 @@ namespace gg.parse.ebnf
                 {
                     Requires(statement.Children != null && statement.Children.Count > 0);
 
-                    var fileName = 
-                        ResolveFile(
-                            statement.Children![0].GetText(session.Text!, session.Tokens!), session.IncludePaths
-                        );
+                    var filename = statement.Children![0].GetText(session.Text!, session.Tokens!);
+                    var filePath = ResolveFile(filename, session.IncludePaths);
 
-                    if (session.IncludedFiles.ContainsKey(fileName))
+                    if (session.IncludedFiles.ContainsKey(filePath))
                     {
-                        if (session.IncludedFiles[fileName] == null)
+                        if (session.IncludedFiles[filePath] == null)
                         {
                             // xxx do this more insightful, doesn't tell where the error occured 
-                            throw new InvalidProgramException($"Circular file include detected: {fileName}.");
+                            throw new InvalidProgramException($"Circular file include detected: {filePath}.");
                         }
                         // cache should already be merged with the result
-                        // xxx so there is no need to store the graph in the cache, make the cache a set ?
+                        
                     }
                     else
                     {
-                       // make sure the cache contains an entry in order to detect circular dependencies
-                       session.IncludedFiles[fileName] = null;
+                        // make sure the cache contains an entry in order to detect circular dependencies
+                        session.IncludedFiles[filePath] = null;
 
-                       var includeSession = RunPipeline(new PipelineSessionX<T>()
-                       {
-                           Text = File.ReadAllText(fileName),
-                           IncludePaths = [Path.GetDirectoryName(fileName), AppContext.BaseDirectory],
+                        session.LogHandler!.Log(LogLevel.Debug, $"including: {filename}({filePath}).");
+
+                        var includeSession = RunPipeline(new PipelineSessionX<T>()
+                        {
+                           Text = File.ReadAllText(filePath),
+                           IncludePaths = [Path.GetDirectoryName(filePath), AppContext.BaseDirectory],
                            Tokenizer = session.Tokenizer,
                            Parser = session.Parser,
                            LogHandler = session.LogHandler,
                            IncludedFiles = session.IncludedFiles,
-                       });
+                           Compiler = session.Compiler,
+                           RuleGraph = new RuleGraph<T>()
+                        });
 
-                        session.IncludedFiles[fileName] = includeSession.RuleGraph;
-                        result.Merge(includeSession.RuleGraph);
+                        session.IncludedFiles[filePath] = includeSession.RuleGraph;
+                        result!.Merge(includeSession.RuleGraph!);
                     }
 
                     session.AstNodes.RemoveAt(i);
@@ -217,7 +219,7 @@ namespace gg.parse.ebnf
                 }
             }
 
-            return result;
+            return result!;
         }
 
         private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)

@@ -1,16 +1,21 @@
-﻿using gg.parse.ebnf;
+﻿using gg.core.util;
+using gg.parse.ebnf;
 
 namespace gg.parse.script
 {
     public class ScriptParser
     {
-        public RuleGraph<char> Tokenizer {get;set;}
+        public RuleGraph<char>? Tokenizer {get;set;}
 
         public RuleGraph<int>? Parser { get; set; }
 
+        public PipelineLog? LogHandler { get; set; }
+
         public ScriptParser CreateFromDefinition(string tokenDefinition, string? grammarDefinition = null, PipelineLog? logger = null)
         {
-            var tokenSession = ScriptPipelineX.RunTokenPipeline(tokenDefinition, logger);
+            LogHandler = logger ?? new PipelineLog();
+            
+            var tokenSession = ScriptPipelineX.RunTokenPipeline(tokenDefinition, LogHandler);
 
             Tokenizer = tokenSession.RuleGraph!;
 
@@ -25,7 +30,10 @@ namespace gg.parse.script
 
         public ParseResult Parse(string input)
         {
-            var tokenizeResult = Tokenizer.Root!.Parse(input);
+            Assertions.RequiresNotNull(Tokenizer!);
+            Assertions.RequiresNotNull(Tokenizer!.Root!);
+
+            var tokenizeResult = Tokenizer!.Root!.Parse(input);
 
             if (tokenizeResult.FoundMatch)
             {
