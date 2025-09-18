@@ -8,13 +8,17 @@ namespace gg.parse.script
 
         public RuleGraph<int>? Parser { get; set; }
 
-        public ScriptParser CreateFromDefinition(string tokenDefinition, string grammarDefinition, PipelineLog? logger = null)
+        public ScriptParser CreateFromDefinition(string tokenDefinition, string? grammarDefinition = null, PipelineLog? logger = null)
         {
-            var tokenSession = ScriptPipeline.RunTokenPipeline(tokenDefinition, logger);
-            var grammarSession = ScriptPipeline.RunGrammarPipeline(grammarDefinition, tokenSession);
+            var tokenSession = ScriptPipelineX.RunTokenPipeline(tokenDefinition, logger);
 
             Tokenizer = tokenSession.RuleGraph!;
-            Parser = grammarSession.RuleGraph;
+
+            if (grammarDefinition != null)
+            {
+                var grammarSession = ScriptPipelineX.RunGrammarPipeline(grammarDefinition, tokenSession);
+                Parser = grammarSession.RuleGraph;
+            }
 
             return this;
         }

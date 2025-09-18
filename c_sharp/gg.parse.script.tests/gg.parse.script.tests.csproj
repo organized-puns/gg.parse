@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/3.6.4">
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,6 +7,12 @@
     <Nullable>enable</Nullable>
     <UseVSTest>true</UseVSTest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="assets\string.tokens">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\gg.parse.script\gg.parse.script.csproj" />

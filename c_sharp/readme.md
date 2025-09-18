@@ -137,9 +137,10 @@ Todo (for mvp)
 - Error handling, 
         
     Implement logger
-       Add filename to annotation
-       Add filename (if any) to logger
-       Capture & process exceptions
+        refactor pipelines
+            move include tests
+       Add filename to annotation -> no, add it to the log       
+       Capture & process exceptions in logger
     
     Deal with the following cases:
       var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
