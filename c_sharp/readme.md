@@ -136,12 +136,7 @@ Todo (for mvp)
 
 - Error handling, 
         
-    Implement logger
-       Capture & process exceptions in logger
-    
     Deal with the following cases:
-      var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
-      wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
       missing assignment
       wrong token for rule precedence
       missing term after unary operation

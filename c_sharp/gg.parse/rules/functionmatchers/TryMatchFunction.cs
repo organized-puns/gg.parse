@@ -1,4 +1,6 @@
 ﻿
+using gg.core.util;
+
 namespace gg.parse.rulefunctions.rulefunctions
 {
     public class TryMatchFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
@@ -14,12 +16,16 @@ namespace gg.parse.rulefunctions.rulefunctions
             int precedence = 0
         ) : base(name, production, precedence)
         {
+            Assertions.RequiresNotNull(rule);
+
             Rule = rule;
         }
 
         public TryMatchFunction(string name, RuleBase<T> rule)
             : base(name, AnnotationProduct.Annotation)
         {
+            Assertions.RequiresNotNull(rule);
+
             Rule = rule;
         }
 
