@@ -93,7 +93,7 @@ namespace gg.parse.script.tests
         /// // xxx should be ignored and downgraded to a warning
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(EbnfException))]
+        [ExpectedException(typeof(ScriptPipelineException))]
         public void CreateEbnfParser_ParseCompiledRule_ExpectExceptionBecauseOfCircularDependencies()
         {
             var includeCommand = "include 'assets/include_circular_1.tokens';";

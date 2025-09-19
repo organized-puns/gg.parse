@@ -1,6 +1,7 @@
 ﻿using gg.parse.compiler;
+using gg.parse.ebnf;
 
-namespace gg.parse.ebnf
+namespace gg.parse.script
 {
     public class PipelineSessionX<T> where T : IComparable<T>
     {

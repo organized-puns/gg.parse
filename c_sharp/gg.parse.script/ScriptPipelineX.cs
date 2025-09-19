@@ -1,10 +1,11 @@
 ﻿using gg.parse.compiler;
+using gg.parse.ebnf;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 
 using static gg.core.util.Assertions;
 
-namespace gg.parse.ebnf
+namespace gg.parse.script
 {
     public static class ScriptPipelineX
     {
@@ -99,11 +100,11 @@ namespace gg.parse.ebnf
                 // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
-                    throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
                 }
                 else
                 {
-                    throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
                 }
             }
         }
@@ -123,11 +124,11 @@ namespace gg.parse.ebnf
                 // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
-                    throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
                 }
                 else
                 {
-                    throw new EbnfException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
                 }
             }
         }
@@ -147,11 +148,11 @@ namespace gg.parse.ebnf
             // xxx not necessary to wrap these ?
             catch (TokenizeException te)
             {
-                throw new EbnfException("Exception in token. Failed to build tokenizer. See inner exception for details.", te);
+                throw new ScriptPipelineException("Exception in token. Failed to build tokenizer. See inner exception for details.", te);
             }
             catch (ParseException pe)
             {
-                throw new EbnfException("Exception in grammar. Failed to build tokenizer. See inner exception for details.", pe);
+                throw new ScriptPipelineException("Exception in grammar. Failed to build tokenizer. See inner exception for details.", pe);
             } 
         }
 
@@ -181,7 +182,7 @@ namespace gg.parse.ebnf
                         if (session.IncludedFiles[filePath] == null)
                         {
                             // xxx do this more insightful, doesn't tell where the error occured 
-                            throw new EbnfException($"Circular include detected {filePath}.");
+                            throw new ScriptPipelineException($"Circular include detected {filePath}.");
                         }
                         // cache should already be merged with the result
                         
@@ -260,7 +261,7 @@ namespace gg.parse.ebnf
                 }
             }
             
-            throw new ArgumentException($"Trying to include {fileName} but doesn't seem to exist.");
+            throw new ScriptPipelineException($"Trying to include {fileName} but doesn't seem to exist.");
         }
     }
 }

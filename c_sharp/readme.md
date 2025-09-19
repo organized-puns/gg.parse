@@ -138,7 +138,6 @@ Todo (for mvp)
         
     Implement logger
         refactor pipelines
-            move include tests
         in pipeline scriptx create EbfnException equivalent
        Capture & process exceptions in logger
     
