@@ -43,8 +43,8 @@ namespace gg.parse.ebnf
 
             (session.Tokens, session.AstNodes) = ParseText(session);
 
-            // create a rulegraph from all the included files
-            session.RuleGraph = MergeIncludes(session);
+            // merge the sessions' rulegraph with all the included files
+            MergeIncludes(session);
 
             // send logs created by parsing to handler.out in a curated format
             session.LogHandler!.ProcessAstLogs(session.Text!, session.Tokens, session.AstNodes);
@@ -155,7 +155,7 @@ namespace gg.parse.ebnf
             } 
         }
 
-        private static RuleGraph<T> MergeIncludes<T>(PipelineSessionX<T> session)
+        private static void MergeIncludes<T>(PipelineSessionX<T> session)
             where T : IComparable<T>
         {
             RequiresNotNull(session);
@@ -164,8 +164,6 @@ namespace gg.parse.ebnf
             RequiresNotNull(session.AstNodes!);
             RequiresNotNull(session.Tokens!);
             RequiresNotNull(session.RuleGraph!);
-
-            var result = session.RuleGraph;
 
             for (var i = 0; i < session.AstNodes!.Count;)
             {
@@ -183,7 +181,7 @@ namespace gg.parse.ebnf
                         if (session.IncludedFiles[filePath] == null)
                         {
                             // xxx do this more insightful, doesn't tell where the error occured 
-                            throw new InvalidProgramException($"Circular file include detected: {filePath}.");
+                            throw new EbnfException($"Circular include detected {filePath}.");
                         }
                         // cache should already be merged with the result
                         
@@ -204,11 +202,10 @@ namespace gg.parse.ebnf
                            LogHandler = session.LogHandler,
                            IncludedFiles = session.IncludedFiles,
                            Compiler = session.Compiler,
-                           RuleGraph = new RuleGraph<T>()
+                           RuleGraph = session.RuleGraph 
                         });
 
                         session.IncludedFiles[filePath] = includeSession.RuleGraph;
-                        result!.Merge(includeSession.RuleGraph!);
                     }
 
                     session.AstNodes.RemoveAt(i);
@@ -218,8 +215,6 @@ namespace gg.parse.ebnf
                     i++;
                 }
             }
-
-            return result!;
         }
 
         private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)

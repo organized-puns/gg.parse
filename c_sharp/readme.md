@@ -139,7 +139,7 @@ Todo (for mvp)
     Implement logger
         refactor pipelines
             move include tests
-       Add filename to annotation -> no, add it to the log       
+        in pipeline scriptx create EbfnException equivalent
        Capture & process exceptions in logger
     
     Deal with the following cases:

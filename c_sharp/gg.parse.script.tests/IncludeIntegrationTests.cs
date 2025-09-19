@@ -90,80 +90,77 @@ namespace gg.parse.script.tests
 
         /// <summary>
         /// Include a file which holds a circular dependency. This should cause an exception.
+        /// // xxx should be ignored and downgraded to a warning
         /// </summary>
-        /*[TestMethod]
-        [ExpectedException(typeof(InvalidProgramException))]
+        [TestMethod]
+        [ExpectedException(typeof(EbnfException))]
         public void CreateEbnfParser_ParseCompiledRule_ExpectExceptionBecauseOfCircularDependencies()
         {
-            var includeCommand = "include 'assets/include_circular_1.ebnf';";
+            var includeCommand = "include 'assets/include_circular_1.tokens';";
             // this should throw and exception
-            new ScriptPipeline(includeCommand, null);
+            new ScriptParser().CreateFromDefinition(includeCommand);
         }
 
+        
         /// <summary>
         /// Test if include files also work with parsers
         /// </summary>
         [TestMethod]
         public void CreateEbnfParserIncludeJsonGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
-            var jsonParser = new ScriptPipeline(File.ReadAllText("assets/json_tokens.ebnf"), 
-                                            "include 'assets/json_grammar.ebnf';#main=json;");
+            var jsonParser = new ScriptParser()
+                                .CreateFromDefinition(
+                                    File.ReadAllText("assets/json.tokens"), 
+                                    "include 'assets/json.grammar';#main=json;"
+                                );
 
-            IsTrue(jsonParser.EbnfTokenizer != null);
-            IsTrue(jsonParser.EbnfTokenizer.Root != null);
-            IsTrue(jsonParser.EbnfGrammarParser != null);
-            IsTrue(jsonParser.EbnfGrammarParser.Root != null);
+            IsTrue(jsonParser.Tokenizer != null);
+            IsTrue(jsonParser.Tokenizer.Root != null);
+            // spot check to see if this rule is in the token rule graph
+            IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
 
-            // spot check to see if object is in the grammar rule graph
-            IsTrue(jsonParser.EbnfGrammarParser.FindRule("object") != null);
+            IsTrue(jsonParser.Parser != null);
+            IsTrue(jsonParser.Parser.Root != null);
+
+            // spot check to see if these rules are in the grammar rule graph
+            IsTrue(jsonParser.Parser.FindRule("string") != null);
+            IsTrue(jsonParser.Parser.FindRule("object") != null);
 
             // check if it compiles json
             var result = jsonParser.Parse("{ \"key\": 123 }");
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations[0].Children[0].RuleId == jsonParser.FindParserRule("object").Id);
-            IsTrue(result.Annotations[0].Children[0].Children[0].RuleId == jsonParser.FindParserRule("key_value_pair").Id);
+            IsTrue(result.Annotations![0].Children![0].RuleId == jsonParser.Parser!.FindRule("object")!.Id);
+            IsTrue(result.Annotations![0].Children![0].Children![0].RuleId == jsonParser.Parser!.FindRule("key_value_pair")!.Id);
         }
 
+        
         /// <summary>
         /// Test if include files also work with tokens AND parsers 
         /// </summary>
         [TestMethod]
         public void CreateEbnfParserIncludeJsonTokensAndGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
-            var jsonParser = new ScriptPipeline("include 'assets/json_tokens.ebnf';#token_main = json_tokens;",
-                                            "include 'assets/json_grammar.ebnf'; # main = json;");
+            var jsonParser = new ScriptParser()
+                                .CreateFromDefinition(
+                                    "include 'assets/json.tokens';#token_main = json_tokens;",
+                                    "include 'assets/json.grammar'; # main = json;"
+                                );
 
-            IsTrue(jsonParser.EbnfTokenizer != null);
-            IsTrue(jsonParser.EbnfTokenizer.Root != null);
-            IsTrue(jsonParser.EbnfGrammarParser != null);
-            IsTrue(jsonParser.EbnfGrammarParser.Root != null);
+            IsTrue(jsonParser.Tokenizer != null);
+            IsTrue(jsonParser.Tokenizer.Root != null);
+            IsTrue(jsonParser.Parser != null);
+            IsTrue(jsonParser.Parser.Root != null);
 
             // spot check to see if object is in the grammar rule graph
-            IsTrue(jsonParser.EbnfGrammarParser.FindRule("object") != null);
+            IsTrue(jsonParser.Parser.FindRule("object") != null);
 
             // check if it compiles json
-            jsonParser.TryBuildAstTree("{ \"key\": 123 }", out var tokens, out var astTree);
-
-            // test if the tokes came out as expected
-            var expectedTokens = new int[]
-            {
-                jsonParser.EbnfTokenizer.FindRule("scope_start").Id,
-                jsonParser.EbnfTokenizer.FindRule("string").Id,
-                jsonParser.EbnfTokenizer.FindRule("kv_separator").Id,
-                jsonParser.EbnfTokenizer.FindRule("int").Id,
-                jsonParser.EbnfTokenizer.FindRule("scope_end").Id,
-            };
-
-            var tokenIds = tokens.Annotations.Select(t => t.RuleId).ToArray();
-
-            IsTrue(tokenIds.SequenceEqual(expectedTokens));
-
             var result = jsonParser.Parse("{ \"key\": 123 }");
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations[0].Children[0].RuleId == jsonParser.FindParserRule("object").Id);
-            IsTrue(result.Annotations[0].Children[0].Children[0].RuleId == jsonParser.FindParserRule("key_value_pair").Id);
-        }*/
+            IsTrue(result.Annotations![0].Children![0].RuleId == jsonParser.Parser.FindRule("object")!.Id);
+            IsTrue(result.Annotations![0].Children![0].Children![0].RuleId == jsonParser.Parser.FindRule("key_value_pair")!.Id);
+        }
     }
 }
