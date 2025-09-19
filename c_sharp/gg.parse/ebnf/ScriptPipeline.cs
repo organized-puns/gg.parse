@@ -194,14 +194,14 @@ namespace gg.parse.ebnf
             // remove logs from the annotations
             var filteredNodes = tokenizerAstNodes.Filter(a => tokenizerParser.FindRule(a.RuleId) is not LogRule<int>);
 
-            var tokenContext = new CompileSession<char>(tokenizerText, tokenizerTokens, filteredNodes);
+            var session = new CompileSession(tokenizerText, tokenizerTokens, filteredNodes);
 
             try
             {
                 return new RuleCompiler<char>()
                         .WithAnnotationProductMapping(tokenizerParser.CreateAnnotationProductMapping())
                         .RegisterTokenizerCompilerFunctions(tokenizerParser)
-                        .Compile(tokenContext, includedSources);
+                        .Compile(session, includedSources);
             }
             catch (NoCompilationFunctionException nce)
             {
@@ -295,12 +295,12 @@ namespace gg.parse.ebnf
             // remove logs from the annotations
             var filteredNodes = grammarAstNodes.Filter(a => grammarParser.FindRule(a.RuleId) is not LogRule<int>);
 
-            var grammarcontext = new CompileSession<int>(grammarText, grammarTokens, filteredNodes);
+            var session = new CompileSession(grammarText, grammarTokens, filteredNodes);
 
             return new RuleCompiler<int>()
                     .WithAnnotationProductMapping(grammarParser.CreateAnnotationProductMapping()) 
                     .RegisterGrammarCompilerFunctions(grammarParser)
-                    .Compile(grammarcontext, target);
+                    .Compile(session, target);
         }
 
         private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)

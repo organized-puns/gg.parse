@@ -18,7 +18,7 @@ namespace gg.parse.compiler
     public delegate RuleBase<T> CompileFunction<T>(
         RuleCompiler<T> compiler,
         RuleDeclaration declaration, 
-        CompileSession<T> context) where T : IComparable<T>;
+        CompileSession context) where T : IComparable<T>;
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
@@ -52,12 +52,12 @@ namespace gg.parse.compiler
             throw new NoCompilationFunctionException(parseFunctionId);
         }
 
-        public RuleGraph<T> Compile(CompileSession<T> context)
+        public RuleGraph<T> Compile(CompileSession context)
         {
             return Compile(context, new RuleGraph<T>());
         }
 
-        public RuleGraph<T> Compile(CompileSession<T> session, RuleGraph<T> resultGraph)
+        public RuleGraph<T> Compile(CompileSession session, RuleGraph<T> resultGraph)
         {
             foreach (var node in session.AstNodes)
             {
@@ -133,7 +133,7 @@ namespace gg.parse.compiler
         /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
+        private RuleDeclaration GetRuleDeclaration(CompileSession context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 

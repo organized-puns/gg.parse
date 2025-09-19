@@ -19,7 +19,7 @@ namespace gg.parse.compiler
         public static RuleBase<char> CompileLiteral(
            RuleCompiler<char> compiler,
            RuleDeclaration declaration,
-           CompileSession<char> context)
+           CompileSession context)
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
             var literalText = context.GetText(ruleDefinition.Range);
@@ -38,7 +38,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileIdentifier<T>(
            RuleCompiler<T> compiler,
            RuleDeclaration declaration,
-           CompileSession<T> session) where T : IComparable<T>
+           CompileSession session) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
             var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
@@ -71,7 +71,7 @@ namespace gg.parse.compiler
         public static RuleBase<char> CompileCharacterSet(
            RuleCompiler<char> compiler,
            RuleDeclaration declaration,
-           CompileSession<char> session)
+           CompileSession session)
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -96,7 +96,7 @@ namespace gg.parse.compiler
         public static RuleBase<char> CompileCharacterRange(
            RuleCompiler<char> compiler,
            RuleDeclaration declaration,
-           CompileSession<char> context)
+           CompileSession context)
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
             var lowerRange = ruleDefinition.Children[0].Range;
@@ -132,7 +132,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileSequence<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> session) where T: IComparable<T>
+            CompileSession session) where T: IComparable<T>
         {
             var sequenceElements = new List<RuleBase<T>>();
             var ruleDefinition = declaration.RuleBodyAnnotation;
@@ -171,7 +171,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileOption<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> context) where T : IComparable<T>
+            CompileSession context) where T : IComparable<T>
         {
             var optionElements = new List<RuleBase<T>>();
             var ruleDefinition = declaration.RuleBodyAnnotation;
@@ -210,7 +210,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileEvaluation<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> session) where T : IComparable<T>
+            CompileSession session) where T : IComparable<T>
         {
             var evaluationElements = new List<RuleBase<T>>();
             var ruleDefinition = declaration.RuleBodyAnnotation;
@@ -243,7 +243,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileGroup<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> context) where T : IComparable<T>
+            CompileSession context) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -261,7 +261,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileZeroOrMore<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> context) where T : IComparable<T> =>
+            CompileSession context) where T : IComparable<T> =>
             
             CompileCount(compiler, declaration, context, 0, 0);
 
@@ -269,21 +269,21 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileOneOrMore<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> context) where T : IComparable<T> =>
+            CompileSession context) where T : IComparable<T> =>
 
             CompileCount(compiler, declaration, context, 1, 0);
 
         public static RuleBase<T> CompileZeroOrOne<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> session) where T : IComparable<T> =>
+            CompileSession session) where T : IComparable<T> =>
 
             CompileCount(compiler, declaration, session, 0, 1);
 
         public static RuleBase<T> CompileCount<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> session,
+            CompileSession session,
             int min, int max) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
@@ -310,7 +310,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileNot<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> session) where T : IComparable<T>
+            CompileSession session) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -337,7 +337,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileTryMatch<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession<T> session) where T : IComparable<T>
+            CompileSession session) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -364,7 +364,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileAny<T>(
             RuleCompiler<T> _,
             RuleDeclaration declaration,
-            CompileSession<T> __) where T : IComparable<T>
+            CompileSession __) where T : IComparable<T>
         {
             Assertions.Requires(declaration != null);
 
@@ -374,7 +374,7 @@ namespace gg.parse.compiler
         public static RuleBase<T> CompileLog<T>(
            RuleCompiler<T> compiler,
            RuleDeclaration declaration,
-           CompileSession<T> context) where T : IComparable<T>
+           CompileSession context) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
