@@ -288,8 +288,10 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.Annotations[0] != null 
                     && parseResult.Annotations[0]!.Children != null
                     && parseResult.Annotations[0]!.Children!.Count == 2);
-            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.RuleBodyError.Id);
+            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.MatchZeroOrMoreOperator.Id);
             IsTrue(parseResult.Annotations[0]!.Children![1].Range.Equals(new Range(2, 1)));
+
+            IsTrue(parseResult[0]![1]![0]!.RuleId == tokenizerParser.MissingUnaryOperatorTerm.Id);
         }
 
         [TestMethod]

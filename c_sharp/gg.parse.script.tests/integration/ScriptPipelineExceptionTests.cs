@@ -327,5 +327,43 @@ namespace gg.parse.script.tests.integration
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");
         }
+
+        [TestMethod]
+        public void MissingUnaryTermInput_CreateParser_ExpectException()
+        {
+            var parser = new ScriptParser();
+
+            try
+            {
+                // first rule has no term after !;
+                // second rule is fine
+                // third rule has a ? and then nothing
+                parser.InitializeFromDefinition("rule1 = !; rule2 = 'bar'; rule3=?");
+                Fail();
+            }
+            catch (ScriptPipelineException pipelineException)
+            {
+                var e = pipelineException.InnerException as ParseException;
+
+                IsTrue(e.Errors != null);
+                IsTrue(e.Errors.Count() == 3);
+                IsTrue(e.Errors.ElementAt(0).Start == 3);
+                IsTrue(e.Errors.ElementAt(0).Length == 0);
+                IsTrue(e.Errors.ElementAt(1).Start == 11);
+                IsTrue(e.Errors.ElementAt(1).Length == 0);
+
+                IsTrue(parser
+                        .LogHandler!
+                        .ReceivedLogs!
+                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .Count() == 1);
+
+                IsTrue(parser
+                        .LogHandler!
+                        .ReceivedLogs!
+                        .Where(entry => entry.level == LogLevel.Error)
+                        .Count() == 3);
+            }
+        }
     }
 }

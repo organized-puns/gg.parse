@@ -133,12 +133,7 @@ Todo (for mvp)
   - Add some more documentation, extend readme.
   - address all xxx
 
-
-- Error handling, 
         
-    Deal with the following cases:
-      missing term after unary operation
-
     Rename try match by if match and remove the short hand >  
 
     Add skip_until >> skip_until_eof_or >>> 

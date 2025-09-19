@@ -82,6 +82,8 @@ namespace gg.parse.ebnf
 
         public LogRule<int> InvalidPrecedenceError { get; private set; }
 
+        public LogRule<int> MissingUnaryOperatorTerm { get; private set; }
+
         public Dictionary<string, LogRule<int>> MissingOperatorError { get; init; } = [];
 
         public Dictionary<string, LogRule<int>> MissingTermAfterOperatorInRemainderError { get; init; } = [];
@@ -201,30 +203,42 @@ namespace gg.parse.ebnf
                 ruleBody,
                 GroupEndToken);
 
+            MissingUnaryOperatorTerm = error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
+
+            var unaryDataTermsOptions =
+                oneOf(
+                    "#UnaryDataTermsOptions",
+                    unaryAndDataTerms,
+                    MissingUnaryOperatorTerm
+                );
+
             // *(a | b | c)
             MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.ZeroOrMoreOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
 
             // ?(a | b | c)
             MatchZeroOrOneOperator = this.Sequence("ZeroOrOne", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.ZeroOrOneOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
 
             // +(a | b | c)
             MatchOneOrMoreOperator = this.Sequence("OneOrMore", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.OneOrMoreOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
+
 
             // !(a | b | c)
-            MatchNotOperator = this.Sequence("Not", AnnotationProduct.Annotation,
+            MatchNotOperator = sequence(
+                "Not", 
                 Token(CommonTokenNames.NotOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions
+            );
 
             // >(a | b | c) / try ( a | b | c)
             TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
                 this.OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
 
             var unaryOperators = new RuleBase<int>[]
             {
@@ -278,11 +292,10 @@ namespace gg.parse.ebnf
             MatchRuleName = token("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
             MatchPrecedence = token("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
 
-            
             InvalidPrecedenceError = error(
                 "PrecedenceNotFoundError", 
                 "Expecting precedence number.",
-                // xxx this is rather weak test as it will fail rule () = .; because () are two tokens
+                // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
                 sequence(any(), ifMatches(AssignmentToken))
             );
 
