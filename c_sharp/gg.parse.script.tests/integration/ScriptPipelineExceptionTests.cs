@@ -142,8 +142,8 @@ namespace gg.parse.script.tests.integration
                 IsTrue(e.Errors.Count() == 2);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
                 IsTrue(e.Errors.ElementAt(0).Length == 0);
-                IsTrue(e.Errors.ElementAt(1).Start == 7);
-                IsTrue(e.Errors.ElementAt(1).Length == 3);
+                IsTrue(e.Errors.ElementAt(1).Start == 8);
+                IsTrue(e.Errors.ElementAt(1).Length == 0);
 
                 IsTrue(parser
                         .LogHandler!
@@ -248,8 +248,8 @@ namespace gg.parse.script.tests.integration
                 IsTrue(e.Errors.Count() == 2);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
                 IsTrue(e.Errors.ElementAt(0).Length == 0);
-                IsTrue(e.Errors.ElementAt(1).Start == 7);
-                IsTrue(e.Errors.ElementAt(1).Length == 3);
+                IsTrue(e.Errors.ElementAt(1).Start == 8);
+                IsTrue(e.Errors.ElementAt(1).Length == 0);
 
                 IsTrue(parser
                     .LogHandler!

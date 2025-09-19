@@ -137,7 +137,6 @@ Todo (for mvp)
 - Error handling, 
         
     Deal with the following cases:
-      missing assignment
       wrong token for rule precedence
       missing term after unary operation
 

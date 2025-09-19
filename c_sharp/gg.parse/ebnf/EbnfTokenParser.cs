@@ -76,6 +76,8 @@ namespace gg.parse.ebnf
 
         public LogRule<int> InvalidProductInHeaderError { get; private set; }
 
+        public LogRule<int> MissingAssignmentError { get; private set; }
+
         public Dictionary<string, LogRule<int>> MissingOperatorError { get; init; } = [];
 
         public Dictionary<string, LogRule<int>> MissingTermAfterOperatorInRemainderError { get; init; } = [];
@@ -96,6 +98,8 @@ namespace gg.parse.ebnf
 
         private MatchSingleData<int> IdentifierToken { get; set; }
 
+        private MatchSingleData<int> AssignmentToken { get; set; }
+
 
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
@@ -112,6 +116,7 @@ namespace gg.parse.ebnf
             RuleEndToken = Token(CommonTokenNames.EndStatement);
             GroupStartToken = Token(CommonTokenNames.GroupStart);
             GroupEndToken = Token(CommonTokenNames.GroupEnd);
+            AssignmentToken = Token(CommonTokenNames.Assignment);
             MatchAny = new MatchAnyData<int>("Any");
             Eof = new MatchNotFunction<int>("~EOF", MatchAny);
             IdentifierToken = Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
@@ -303,11 +308,12 @@ namespace gg.parse.ebnf
                 MissingRuleEndError
             );
 
-            MatchRule = this.Sequence(
+            MissingAssignmentError = error("MissingAssignmentError", "Assignment token '=', expected but encountered something different.");
+
+            MatchRule = sequence(
                 "Rule",
-                AnnotationProduct.Annotation,
                 ruleHeader,
-                Token(CommonTokenNames.Assignment),
+                oneOf("#=", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,
                 endStatementOptions
             );
