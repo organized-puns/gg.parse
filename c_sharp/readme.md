@@ -137,7 +137,6 @@ Todo (for mvp)
 - Error handling, 
         
     Deal with the following cases:
-      wrong token for rule precedence
       missing term after unary operation
 
     Rename try match by if match and remove the short hand >  

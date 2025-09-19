@@ -21,6 +21,23 @@ namespace gg.parse.rules
             return this.Any(ruleName, product);
         }
 
+        public MatchFunctionCount<T> between(int min, int max, RuleBase<T> rule)
+        {
+            var ruleName = $"{AnnotationProduct.None.GetPrefix()}between({min},{max},{rule.Name})";
+            return between(ruleName, min, max, rule);   
+        }
+
+        public MatchFunctionCount<T> between(string ruleName, int min, int max, RuleBase<T> rule)
+        {
+            ruleName.TryGetProduct(out var product, out var start, out var length);
+
+            var name = ruleName.Substring(start + length);
+
+            return TryFindRule(name, out MatchFunctionCount<T>? existingRule)
+                 ? existingRule!
+                 : RegisterRule(new MatchFunctionCount<T>(name, rule, product, min, max));
+        }
+
         public LogRule<T> error(string ruleName, string message, RuleBase<T>? condition = null)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
@@ -78,11 +95,8 @@ namespace gg.parse.rules
         public SkipRule<T> skip(RuleBase<T> stopCondition, bool failOnEoF = true) =>
             this.Skip(stopCondition, failOnEoF);
 
-        private MatchSingleData<T> token(string tokenName, T tokenId) =>
-           this.Single($"{AnnotationProduct.None.GetPrefix()}Token({tokenName})", AnnotationProduct.None, tokenId);
 
-
-        private MatchSingleData<T> token(string ruleName, string tokenName, T tokenId)
+        public MatchSingleData<T> token(string ruleName, T tokenId)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
 
@@ -104,5 +118,15 @@ namespace gg.parse.rules
                  ? existingRule!
                  : RegisterRule(new LogRule<T>(name, product, message, condition, LogLevel.Warning));
         }
+
+        public MatchFunctionCount<T> zeroOrOne(string ruleName, RuleBase<T> rule)
+        {
+            ruleName.TryGetProduct(out var product, out var start, out var length);
+
+            return this.ZeroOrOne(ruleName.Substring(start + length), product, rule);
+        }
+
+        public MatchFunctionSequence<T> zeroOrOne(RuleBase<T> rule) =>
+            this.Sequence(rule);
     }
 }

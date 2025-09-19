@@ -121,6 +121,48 @@ namespace gg.parse.script.tests.integration
         }
 
         [TestMethod]
+        public void SetupInvalidPrecedence_InitializeParser_ExpectException()
+        {
+            var parser = new ScriptParser();
+
+            try
+            {
+                // . is a valid token, just not a valid expression in the header
+                parser.InitializeFromDefinition("foo number ='bar';");
+                Fail();
+            }
+            catch (ScriptPipelineException pipelineException)
+            {
+                // at this point we don't have access to the parser used anymore. 
+                // xxx this is not ideal because we're making assumptions about the rule
+                // later on.
+                var scriptParser = new EbnfTokenParser();
+                var e = pipelineException.InnerException as ParseException;
+
+                IsTrue(e.Errors != null);
+                IsTrue(e.Errors.Count() == 1);
+
+                var error = e.Errors.ElementAt(0);
+
+                IsTrue(error.Start == 1);
+                IsTrue(error.Length == 1);
+                IsTrue(error.RuleId == scriptParser.InvalidPrecedenceError.Id);
+
+                IsTrue(parser
+                        .LogHandler!
+                        .ReceivedLogs!
+                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .Count() == 1);
+
+                IsTrue(parser
+                        .LogHandler!
+                        .ReceivedLogs!
+                        .Where(entry => entry.level == LogLevel.Error)
+                        .Count() == 1);
+            }
+        }
+
+        [TestMethod]
         public void InvalidTokenGrammar_CreateParser_ExpectException()
         {
             var parser = new ScriptParser();
@@ -129,7 +171,6 @@ namespace gg.parse.script.tests.integration
             {
                 // first rule has no terminating ;
                 // second rule is fine
-                // xxx assignment missing is not explicitely caught yet
                 // third rule has no assignment, =
                 parser.InitializeFromDefinition("rule1 = 'foo' rule2 = 'bar'; rule3 'qaz';");
                 Fail();

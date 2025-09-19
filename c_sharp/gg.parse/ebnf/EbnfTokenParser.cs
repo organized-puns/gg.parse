@@ -58,6 +58,8 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int> TryMatchOperator { get; private set; }
 
+        public MatchFunctionSequence<int> MatchRuleHeader{ get; private set; }
+
         public MatchFunctionSequence<int> MatchLog { get; private set; }
 
         public MatchFunctionSequence<int> Include { get; private set; }
@@ -77,6 +79,8 @@ namespace gg.parse.ebnf
         public LogRule<int> InvalidProductInHeaderError { get; private set; }
 
         public LogRule<int> MissingAssignmentError { get; private set; }
+
+        public LogRule<int> InvalidPrecedenceError { get; private set; }
 
         public Dictionary<string, LogRule<int>> MissingOperatorError { get; init; } = [];
 
@@ -105,7 +109,6 @@ namespace gg.parse.ebnf
             : this(new EbnfTokenizer())
         {
         }
-
         
 
         public EbnfTokenParser(EbnfTokenizer tokenizer)
@@ -272,15 +275,29 @@ namespace gg.parse.ebnf
                 Token(CommonTokenNames.EndStatement)
             );
 
-            MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
-            MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
+            MatchRuleName = token("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
+            MatchPrecedence = token("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
 
-            var ruleHeader = this.Sequence(
+            
+            InvalidPrecedenceError = error(
+                "PrecedenceNotFoundError", 
+                "Expecting precedence number.",
+                // xxx this is rather weak test as it will fail rule () = .; because () are two tokens
+                sequence(any(), ifMatches(AssignmentToken))
+            );
+
+            MatchRuleHeader = sequence(
                 "#RuleDeclaration",
-                AnnotationProduct.Transitive,
                 CreateMatchHeaderAnnotationProduction(),
                 MatchRuleName,
-                this.ZeroOrOne("#RulePrecedence", AnnotationProduct.Transitive, MatchPrecedence)
+                zeroOrOne("#Precedence",
+                    oneOf("#RulePrecedenceOptions",
+                        // ie no a precedence
+                        ifMatches(AssignmentToken),
+                        MatchPrecedence,
+                        InvalidPrecedenceError
+                    )
+                )
             );           
 
             RuleBodyError = error(
@@ -298,7 +315,7 @@ namespace gg.parse.ebnf
                 AnnotationProduct.Annotation,
                 "Missing end of rule (;) at the given position.",
                 // skip until the start of the next rule, if any
-                skip("~skipUntilNextHeaderOrEof", ruleHeader, failOnEoF: false)
+                skip("~skipUntilNextHeaderOrEof", MatchRuleHeader, failOnEoF: false)
             );
 
             var endStatementOptions = this.OneOf(
@@ -312,8 +329,8 @@ namespace gg.parse.ebnf
 
             MatchRule = sequence(
                 "Rule",
-                ruleHeader,
-                oneOf("#=", AssignmentToken, MissingAssignmentError),
+                MatchRuleHeader,
+                oneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,
                 endStatementOptions
             );
@@ -619,7 +636,6 @@ namespace gg.parse.ebnf
                 $"Expected either '{AnnotationProduct.None.GetPrefix()}' or '{AnnotationProduct.Transitive.GetPrefix()}' but found something else entirely.",
                 any()
             );
-
 
             return oneOf(
                 "#RuleProduction",
