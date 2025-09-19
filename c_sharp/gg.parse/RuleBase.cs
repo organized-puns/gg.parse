@@ -20,8 +20,11 @@
     }
 
 
-    public abstract class RuleBase<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, int precedence = 0)
-        where T : IComparable<T>
+    public abstract class RuleBase<T>(
+        string name, 
+        AnnotationProduct production = AnnotationProduct.Annotation, 
+        int precedence = 0) 
+        : IRule<T> where T : IComparable<T>
     {
         public string Name { get; init; } = name;
 
