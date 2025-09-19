@@ -1,6 +1,7 @@
 ﻿
 using gg.parse.ebnf;
 using gg.parse.rulefunctions;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.ebnf
@@ -85,7 +86,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
                     tokenizerParser => tokenizerParser.MatchLiteral.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -102,7 +103,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
                     tokenizerParser => tokenizerParser.MatchCharacterRange.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -119,7 +120,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
                     tokenizerParser => tokenizerParser.MatchCharacterSet.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -136,7 +137,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
                     tokenizerParser => tokenizerParser.MatchAnyToken.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -154,7 +155,7 @@ namespace gg.parse.tests.ebnf
                     tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
                     // group is transitive
                     tokenizerParser => tokenizerParser.MatchLiteral.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -171,7 +172,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
                     tokenizerParser => tokenizerParser.MatchNotOperator.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -188,7 +189,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchTransitiveSelector.Id,
                     tokenizerParser => tokenizerParser.MatchZeroOrMoreOperator.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
 
@@ -198,7 +199,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
                     tokenizerParser => tokenizerParser.MatchZeroOrOneOperator.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
 
@@ -208,7 +209,7 @@ namespace gg.parse.tests.ebnf
                 [
                     tokenizerParser => tokenizerParser.MatchNoProductSelector.Id,
                     tokenizerParser => tokenizerParser.MatchOneOrMoreOperator.Id,
-                    tokenizerParser => tokenizerParser.UnexpectedProductError.Id
+                    tokenizerParser => tokenizerParser.UnexpectedProductInBodyError.Id
                 ]
             );
         }
@@ -226,7 +227,7 @@ namespace gg.parse.tests.ebnf
             IsTrue(tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count == expectedTokenCount);
 
             var tokenizerParser = new EbnfTokenParser(tokenizer);
-            var errorParseResult = tokenizerParser.MatchUnexpectedProductError.Parse(tokenizeResult.Annotations.Select(a => a.RuleId).ToArray(), 0);
+            var errorParseResult = tokenizerParser.MatchUnexpectedProductInBodyError.Parse(tokenizeResult.Annotations.Select(a => a.RuleId).ToArray(), 0);
 
             IsTrue(errorParseResult.FoundMatch);
             IsTrue(errorParseResult.MatchedLength == expectedTokenCount);
@@ -234,7 +235,7 @@ namespace gg.parse.tests.ebnf
                     && errorParseResult.Annotations.Count == 1
                     && errorParseResult.Annotations[0].Children != null
                     && errorParseResult.Annotations[0].Children!.Count == 3
-                    && errorParseResult.Annotations[0].RuleId == tokenizerParser.MatchUnexpectedProductError.Id);
+                    && errorParseResult.Annotations[0].RuleId == tokenizerParser.MatchUnexpectedProductInBodyError.Id);
 
             for (var i = 0; i < expectedFunctionIds.Length; i++)
             {
@@ -266,8 +267,8 @@ namespace gg.parse.tests.ebnf
             var sequence = parseResult[0]![1];
             IsTrue(sequence!.Children != null && sequence!.Children!.Count == 3);
             IsTrue(sequence[0]!.RuleId == tokenizerParser.MatchIdentifier.Id);
-            IsTrue(sequence[1]!.RuleId == tokenizerParser.MatchUnexpectedProductError.Id);
-            IsTrue(sequence[2]!.RuleId == tokenizerParser.MatchUnexpectedProductError.Id);
+            IsTrue(sequence[1]!.RuleId == tokenizerParser.MatchUnexpectedProductInBodyError.Id);
+            IsTrue(sequence[2]!.RuleId == tokenizerParser.MatchUnexpectedProductInBodyError.Id);
         }
 
         [TestMethod]
@@ -287,8 +288,10 @@ namespace gg.parse.tests.ebnf
             IsTrue(parseResult.Annotations[0] != null 
                     && parseResult.Annotations[0]!.Children != null
                     && parseResult.Annotations[0]!.Children!.Count == 2);
-            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.RuleBodyError.Id);
+            IsTrue(parseResult.Annotations[0]!.Children![1].RuleId == tokenizerParser.MatchZeroOrMoreOperator.Id);
             IsTrue(parseResult.Annotations[0]!.Children![1].Range.Equals(new Range(2, 1)));
+
+            IsTrue(parseResult[0]![1]![0]!.RuleId == tokenizerParser.MissingUnaryOperatorTerm.Id);
         }
 
         [TestMethod]

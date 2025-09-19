@@ -19,8 +19,8 @@ namespace gg.parse
 
         public RuleGraph<T> Merge(RuleGraph<T> other)
         {
-            Contract.RequiresNotNull(other);
-            Contract.Requires(other != this);
+            Assertions.RequiresNotNull(other);
+            Assertions.Requires(other != this);
 
             foreach (var rule in other)
             {
@@ -37,11 +37,11 @@ namespace gg.parse
 
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
-            Contract.RequiresNotNull(rule);
-            Contract.RequiresNotNullOrEmpty(rule.Name);
-            Contract.Requires(!_nameRuleLookup.ContainsKey(rule.Name), 
+            Assertions.RequiresNotNull(rule);
+            Assertions.RequiresNotNullOrEmpty(rule.Name);
+            Assertions.Requires(!_nameRuleLookup.ContainsKey(rule.Name), 
                 $"Rule with name '{rule.Name}' already exists in the rule table.");
-            Contract.Requires(!_idRuleLookup.ContainsKey(rule.Id),
+            Assertions.Requires(!_idRuleLookup.ContainsKey(rule.Id),
                 $"Rule with id '{rule.Id}' already exists in the rule table.");
 
             _nameRuleLookup[rule.Name] = rule;
@@ -112,7 +112,7 @@ namespace gg.parse
                     {
                         var referredRule = FindRule(referenceRule.Reference);
 
-                        Contract.Requires(referredRule != null, $"Cannot find reference {referenceRule.Reference}.");
+                        Assertions.Requires(referredRule != null, $"Cannot find reference {referenceRule.Reference}.");
 
                         // note: we don't replace the rule we just set the reference. This allows
                         // these subrules to have their own annotation production. If we replace these 
@@ -125,7 +125,7 @@ namespace gg.parse
                 {
                     var referredRule = FindRule(reference.Reference);
 
-                    Contract.Requires(referredRule != null, $"Cannot find reference {reference.Reference}.");
+                    Assertions.Requires(referredRule != null, $"Cannot find reference {reference.Reference}.");
 
                     reference.Rule = referredRule;
                     

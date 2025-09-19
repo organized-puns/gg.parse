@@ -123,7 +123,8 @@ Good to remember (FAQ?):
 -   Data functions, eg {'a'..'b'} ALWAYS have production `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
     IT SHOULD have a clear error though, something like "found production rule without identifier".
 - DO NOT DO THIS: Remove condition from log, it can be replaced with sequence(condition, log). No it can't because the log RANGE will NOT cover the preceding sequence.
-  
+- ScriptPipeline should also work without a script tokenizer ? No because the input of the parser are tokens
+-   
 Todo (for mvp)
 ---------------
 
@@ -132,20 +133,7 @@ Todo (for mvp)
   - Add some more documentation, extend readme.
   - address all xxx
 
-- Error handling, 
         
-    Implement logger
-    Map tokens to line & column numbers 
-    Allow for certain tokes in the error message, eg {line}, {column}, {filename}
-
-    
-    Deal with the following cases:
-      var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= ,;"); <- ',' should be a '.', this should be immediately clear
-      wrong token for production var (_, _, _, table) = SetupTokenizeParseCompile("rule1 100= .;#rule2 200 = .; *rule_three -1 = .;"); <- '*' should be a '~'
-      missing assignment
-      wrong token for rule precedence
-      missing term after unary operation
-
     Rename try match by if match and remove the short hand >  
 
     Add skip_until >> skip_until_eof_or >>> 
@@ -153,15 +141,15 @@ Todo (for mvp)
         - add rule to parser
         - add rule to compiler
 - 
-    Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c)
- 
-
+    Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c) 
 
     Move ebnf to its own project and rename ebnf to something else, script ? -> consider it a pipeline
 
-    Map error range to row/column in source file
+    Remove "Function" notion in favor of Rule in names across the project
 
-    Rename try to 'if' remove '>' token 
+    Check if we can replace RuleId with the actual rule in annotation so we don't have do the look up and make everything simpler
+
+    Figure out if we really need all sub rules in the rulegraph id/name
 
 
 alpha (featured complete, buggy, ugly mess)

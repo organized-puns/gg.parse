@@ -13,8 +13,8 @@ namespace gg.parse.rulefunctions.rulefunctions
             get => _options!;
             set
             {
-                Contract.Requires(value != null);
-                Contract.Requires(value!.Any(v => v != null));
+                Assertions.Requires(value != null);
+                Assertions.Requires(value!.Any(v => v != null));
 
                 _options = value!;
             }
@@ -25,8 +25,8 @@ namespace gg.parse.rulefunctions.rulefunctions
         public MatchEvaluation(string name, params RuleBase<T>[] options)
             : base(name, AnnotationProduct.Annotation)
         {
-            Contract.Requires(options != null);
-            Contract.Requires(options!.Any(v => v != null));
+            Assertions.Requires(options != null);
+            Assertions.Requires(options!.Any(v => v != null));
 
             RuleOptions = options!;
         }
@@ -34,8 +34,8 @@ namespace gg.parse.rulefunctions.rulefunctions
         public MatchEvaluation(string name, AnnotationProduct production, int precedence, params RuleBase<T>[] options)
             : base(name, production, precedence)
         {
-            Contract.Requires(options != null);
-            Contract.Requires(options!.Any(v => v != null));
+            Assertions.Requires(options != null);
+            Assertions.Requires(options!.Any(v => v != null));
 
             RuleOptions = options!;
         }
@@ -156,10 +156,10 @@ namespace gg.parse.rulefunctions.rulefunctions
                     // xxx note this can / should be checked when the options are set ?
 
                     // match should have the form of a root (ast node) with no, or one or more children
-                    Contract.Requires(result.Annotations != null
+                    Assertions.Requires(result.Annotations != null
                                     && result.Annotations.Count > 0
                                     && result.Annotations[0] != null, "No annotations found in result. Evaluation result must have exactly 1 annotation.");
-                    Contract.Requires(result.Annotations!.Count == 1, "Multiple annotations found. Evaluation result must have exactly 1 annotation.");
+                    Assertions.Requires(result.Annotations!.Count == 1, "Multiple annotations found. Evaluation result must have exactly 1 annotation.");
 
                     return result;
                 }

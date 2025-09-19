@@ -1,8 +1,9 @@
-﻿using gg.parse.rulefunctions;
+﻿using gg.core.util;
+using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 using gg.parse.rules;
-using System.ComponentModel.DataAnnotations;
+
 using static gg.parse.rulefunctions.CommonRules;
 
 namespace gg.parse.ebnf
@@ -57,13 +58,15 @@ namespace gg.parse.ebnf
 
         public MatchFunctionSequence<int> TryMatchOperator { get; private set; }
 
+        public MatchFunctionSequence<int> MatchRuleHeader{ get; private set; }
+
         public MatchFunctionSequence<int> MatchLog { get; private set; }
 
         public MatchFunctionSequence<int> Include { get; private set; }
 
-        public MatchFunctionSequence<int> MatchUnexpectedProductError { get; private set; }
+        public MatchFunctionSequence<int> MatchUnexpectedProductInBodyError { get; private set; }
 
-        public LogRule<int> UnexpectedProductError { get; private set; }
+        public LogRule<int> UnexpectedProductInBodyError { get; private set; }
 
         public LogRule<int> RuleBodyError { get; private set; }
 
@@ -72,6 +75,14 @@ namespace gg.parse.ebnf
         public LogRule<int> ExpectedOperatorError { get; private set; }
 
         public LogRule<int> MissingRuleEndError { get; private set; }
+
+        public LogRule<int> InvalidProductInHeaderError { get; private set; }
+
+        public LogRule<int> MissingAssignmentError { get; private set; }
+
+        public LogRule<int> InvalidPrecedenceError { get; private set; }
+
+        public LogRule<int> MissingUnaryOperatorTerm { get; private set; }
 
         public Dictionary<string, LogRule<int>> MissingOperatorError { get; init; } = [];
 
@@ -91,32 +102,34 @@ namespace gg.parse.ebnf
 
         private MatchSingleData<int> RuleEndToken { get; set; }
 
+        private MatchSingleData<int> IdentifierToken { get; set; }
+
+        private MatchSingleData<int> AssignmentToken { get; set; }
 
 
         public EbnfTokenParser()
             : this(new EbnfTokenizer())
         {
         }
+        
 
         public EbnfTokenParser(EbnfTokenizer tokenizer)
         {
             Tokenizer = tokenizer;
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
-
+            
             RuleEndToken = Token(CommonTokenNames.EndStatement);
             GroupStartToken = Token(CommonTokenNames.GroupStart);
             GroupEndToken = Token(CommonTokenNames.GroupEnd);
+            AssignmentToken = Token(CommonTokenNames.Assignment);
             MatchAny = new MatchAnyData<int>("Any");
             Eof = new MatchNotFunction<int>("~EOF", MatchAny);
+            IdentifierToken = Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
 
-            var ruleProduction = this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
-                this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
-                    MatchTransitiveSelector,
-                    MatchNoProductSelector
-                )
-            );
+            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
+
+            var ruleProduction = CreateMatchAnnotationProduction();
 
             // "abc" or 'abc'
             MatchLiteral = this.OneOf("Literal", AnnotationProduct.Annotation,
@@ -147,7 +160,7 @@ namespace gg.parse.ebnf
                 "Identifier",
                 AnnotationProduct.Annotation,
                 ruleProduction,
-                Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier)
+                IdentifierToken
             );
 
             var matchDataRules = new RuleBase<int>[] {
@@ -190,30 +203,42 @@ namespace gg.parse.ebnf
                 ruleBody,
                 GroupEndToken);
 
+            MissingUnaryOperatorTerm = error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
+
+            var unaryDataTermsOptions =
+                oneOf(
+                    "#UnaryDataTermsOptions",
+                    unaryAndDataTerms,
+                    MissingUnaryOperatorTerm
+                );
+
             // *(a | b | c)
             MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.ZeroOrMoreOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
 
             // ?(a | b | c)
             MatchZeroOrOneOperator = this.Sequence("ZeroOrOne", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.ZeroOrOneOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
 
             // +(a | b | c)
             MatchOneOrMoreOperator = this.Sequence("OneOrMore", AnnotationProduct.Annotation,
                 Token(CommonTokenNames.OneOrMoreOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
+
 
             // !(a | b | c)
-            MatchNotOperator = this.Sequence("Not", AnnotationProduct.Annotation,
+            MatchNotOperator = sequence(
+                "Not", 
                 Token(CommonTokenNames.NotOperator),
-                unaryAndDataTerms);
+                unaryDataTermsOptions
+            );
 
             // >(a | b | c) / try ( a | b | c)
             TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
                 this.OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
-                unaryAndDataTerms);
+                unaryDataTermsOptions);
 
             var unaryOperators = new RuleBase<int>[]
             {
@@ -228,13 +253,13 @@ namespace gg.parse.ebnf
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
             // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
             // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductError = this.LogError(
+            UnexpectedProductInBodyError = this.LogError(
                     "UnexpectedProductionModifier",
                     AnnotationProduct.Annotation,
                     "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
             );
 
-            MatchUnexpectedProductError = this.Sequence(
+            MatchUnexpectedProductInBodyError = this.Sequence(
                 "UnexpectedProductErrorMatch",
                 AnnotationProduct.Annotation,
                 ruleProduction,
@@ -243,7 +268,7 @@ namespace gg.parse.ebnf
                     AnnotationProduct.Transitive,
                     [.. matchDataRules, .. unaryOperators, MatchGroup]
                 ),
-                UnexpectedProductError
+                UnexpectedProductInBodyError
             );
 
             MatchLog = CreateMatchLog(ruleBody);
@@ -253,7 +278,7 @@ namespace gg.parse.ebnf
                 ..unaryOperators,
                 MatchGroup,
                 MatchLog,
-                MatchUnexpectedProductError
+                MatchUnexpectedProductInBodyError
             ];
 
             Include = this.Sequence(
@@ -264,20 +289,33 @@ namespace gg.parse.ebnf
                 Token(CommonTokenNames.EndStatement)
             );
 
-            MatchRuleName = Token("RuleName", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
-            MatchPrecedence = Token("RulePrecedence", AnnotationProduct.Annotation, CommonTokenNames.Integer);
+            MatchRuleName = token("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
+            MatchPrecedence = token("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
 
-            var ruleHeader = this.Sequence(
-                "#RuleDeclaration",
-                AnnotationProduct.Transitive,
-                ruleProduction,
-                MatchRuleName,
-                this.ZeroOrOne("#RulePrecedence", AnnotationProduct.Transitive, MatchPrecedence)
+            InvalidPrecedenceError = error(
+                "PrecedenceNotFoundError", 
+                "Expecting precedence number.",
+                // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
+                sequence(any(), ifMatches(AssignmentToken))
             );
+
+            MatchRuleHeader = sequence(
+                "#RuleDeclaration",
+                CreateMatchHeaderAnnotationProduction(),
+                MatchRuleName,
+                zeroOrOne("#Precedence",
+                    oneOf("#RulePrecedenceOptions",
+                        // ie no a precedence
+                        ifMatches(AssignmentToken),
+                        MatchPrecedence,
+                        InvalidPrecedenceError
+                    )
+                )
+            );           
 
             RuleBodyError = error(
                 "RuleBodyError",
-                "Unable to parse the rule body, please check the definition for mistakes.",
+                "Unexpected token(s) in the rule's body.",
                 this.Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
@@ -290,7 +328,7 @@ namespace gg.parse.ebnf
                 AnnotationProduct.Annotation,
                 "Missing end of rule (;) at the given position.",
                 // skip until the start of the next rule, if any
-                skip("~skipUntilNextHeaderOrEof", ruleHeader, failOnEoF: false)
+                skip("~skipUntilNextHeaderOrEof", MatchRuleHeader, failOnEoF: false)
             );
 
             var endStatementOptions = this.OneOf(
@@ -300,11 +338,12 @@ namespace gg.parse.ebnf
                 MissingRuleEndError
             );
 
-            MatchRule = this.Sequence(
+            MissingAssignmentError = error("MissingAssignmentError", "Assignment token '=', expected but encountered something different.");
+
+            MatchRule = sequence(
                 "Rule",
-                AnnotationProduct.Annotation,
-                ruleHeader,
-                Token(CommonTokenNames.Assignment),
+                MatchRuleHeader,
+                oneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,
                 endStatementOptions
             );
@@ -348,23 +387,13 @@ namespace gg.parse.ebnf
 
         private List<Annotation> TokenizeText(string text)
         {
+            Assertions.RequiresNotNullOrEmpty(text, nameof(text));
+
             var tokenizationResult = Tokenizer.Tokenize(text);
 
             if (tokenizationResult.FoundMatch && tokenizationResult.Annotations != null)
             {
-                var tokenizerTokens = tokenizationResult.Annotations;
-
-                var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
-
-                var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
-                var tokenizerErrors = new List<Annotation>();
-
-                foreach (var annotation in tokenizationResult.Annotations)
-                {
-                    annotation.Collect(errorPredicate, tokenizerErrors);
-                }
-
-                if (tokenizerErrors.Count > 0)
+                if (ContainsTokenErrors(tokenizationResult.Annotations,out var tokenizerErrors))
                 {
                     throw new TokenizeException(
                         "input contains characters which could not be mapped to a token.",
@@ -373,10 +402,21 @@ namespace gg.parse.ebnf
                     );
                 }
 
-                return tokenizerTokens!;
+                return tokenizationResult.Annotations!;
             }
 
             throw new TokenizeException("input contains no valid tokens.");
+        }
+
+        private Func<Annotation, bool> SetupErrorPredicate(bool failOnWarning)
+        {
+            var errorLevel = FailOnWarning
+                    ? LogLevel.Warning | LogLevel.Error
+                    : LogLevel.Error;
+
+            return new Func<Annotation, bool>(
+                a => FindRule(a.RuleId) is LogRule<int> logRule && (logRule.Level & errorLevel) > 0
+            );
         }
 
         private (List<Annotation> tokens, List<Annotation> astNodes) ParseGrammar(string text, List<Annotation> tokens)
@@ -392,27 +432,7 @@ namespace gg.parse.ebnf
                     throw new ParseException("input contains no valid grammar.");
                 }
 
-                var errorLevel = FailOnWarning 
-                    ? LogLevel.Warning | LogLevel.Error 
-                    : LogLevel.Error;
-
-                var errorPredicate = new Func<Annotation, bool>(
-                    a => {
-                        var rule = FindRule(a.RuleId);
-
-                        // only need to capture errors, fatals will throw an exception
-                        // so no need to capture them
-                        return (rule is LogRule<int> logRule && (logRule.Level & errorLevel) == errorLevel);
-                    }
-                );
-                var grammarErrors = new List<Annotation>();
-
-                foreach (var annotation in astNodes)
-                {
-                    annotation.Collect(errorPredicate, grammarErrors);
-                }
-
-                if (grammarErrors.Count > 0)
+                if (ContainsParseErrors(astNodes, FailOnWarning, out var grammarErrors))
                 {
                     throw new ParseException(
                             "Parsing encountered some errors (or warnings which are treated as errors).",
@@ -428,6 +448,35 @@ namespace gg.parse.ebnf
             {
                 return (tokens, []);
             }
+        }
+
+        private bool ContainsTokenErrors(List<Annotation> annotations, out List<Annotation> errors)
+        {
+            var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
+
+            var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
+
+            errors = [];
+
+            foreach (var annotation in annotations)
+            {
+                annotation.Collect(errorPredicate, errors);
+            }
+
+            return errors.Count > 0;
+        }
+
+        private bool ContainsParseErrors(List<Annotation> annotations, bool failOnWarning, out List<Annotation> errors)
+        {
+            var errorPredicate = SetupErrorPredicate(FailOnWarning);
+            errors = new List<Annotation>();
+
+            foreach (var annotation in annotations)
+            {
+                annotation.Collect(errorPredicate, errors);
+            }
+
+            return errors.Count > 0;
         }
 
         private MatchSingleData<int> Token(string tokenName)
@@ -587,6 +636,37 @@ namespace gg.parse.ebnf
                 matchLogLevel,
                 matchText,
                 matchOptionalCondition
+            );
+        }
+
+        private MatchOneOfFunction<int>/*MatchFunctionCount<int>*/ CreateMatchHeaderAnnotationProduction()
+        {
+            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
+
+            InvalidProductInHeaderError = error(
+                "InvalidProductInHeaderError",
+                $"Expected either '{AnnotationProduct.None.GetPrefix()}' or '{AnnotationProduct.Transitive.GetPrefix()}' but found something else entirely.",
+                any()
+            );
+
+            return oneOf(
+                "#RuleProduction",
+                // meaning no production
+                ifMatches(IdentifierToken),
+                MatchTransitiveSelector,
+                MatchNoProductSelector,
+                InvalidProductInHeaderError
+            );
+        }
+
+        private MatchFunctionCount<int> CreateMatchAnnotationProduction()
+        {
+            return this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
+                this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
+                    MatchTransitiveSelector,
+                    MatchNoProductSelector
+                )
             );
         }
     }

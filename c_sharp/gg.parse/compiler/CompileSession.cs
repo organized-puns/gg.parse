@@ -28,7 +28,7 @@ namespace gg.parse.compiler
 
         public Range GetTextRange(Range tokenRange)
         {
-            Contract.RequiresNotNull(Tokens);
+            Assertions.RequiresNotNull(Tokens);
 
             var start = Tokens[tokenRange.Start].Start;
             var length = 0;

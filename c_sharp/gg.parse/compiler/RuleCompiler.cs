@@ -36,7 +36,7 @@ namespace gg.parse.compiler
 
         public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function, string? name = null)
         {
-            Contract.Requires(function != null);
+            Assertions.Requires(function != null);
 
             Functions.Add(parseFunctionId, (function!, name ?? $"function_id:{parseFunctionId}"));
             return this;

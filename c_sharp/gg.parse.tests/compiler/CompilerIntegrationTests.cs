@@ -10,7 +10,7 @@ namespace gg.parse.tests.compiler
         [TestMethod]
         public void CreateEmptyRule_Compile_ExpectNopToShowUp()
         {
-            var parser = new EbnfParser("token = 't1';", "empty_rule=;");
+            var parser = new ScriptPipeline("token = 't1';", "empty_rule=;");
             var emptyRule = parser.FindParserRule("empty_rule") as NopRule<int>;
             
             IsTrue(emptyRule != null);

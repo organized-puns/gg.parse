@@ -1,13 +1,13 @@
 ﻿
 namespace gg.core.util
 {
-    public class ContractException : Exception
+    public class AssertionException : Exception
     {
-        public ContractException()
+        public AssertionException()
         {
         }
 
-        public ContractException(string message) : base(message)
+        public AssertionException(string message) : base(message)
         {
         }
     }
@@ -15,7 +15,7 @@ namespace gg.core.util
     /// <summary>
     /// Lightweight implementation of contracts
     /// </summary>
-    public static class Contract
+    public static class Assertions
     {
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Fail(string message)
@@ -26,7 +26,7 @@ namespace gg.core.util
         [System.Diagnostics.Conditional("DEBUG")]
         public static void Fail()
         {
-            throw new ContractException("[Program error] Failed contract.");
+            throw new AssertionException("[Program error] Failed contract.");
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -40,7 +40,7 @@ namespace gg.core.util
         {
             if (!b)
             {
-                throw new ContractException(message);
+                throw new AssertionException(message);
             }
         }
 
@@ -49,7 +49,7 @@ namespace gg.core.util
         {
             if (o == null)
             {
-                throw new ContractException(message);
+                throw new AssertionException(message);
             }
         }
 
@@ -64,7 +64,7 @@ namespace gg.core.util
         {
             if (string.IsNullOrEmpty(s))
             {
-                throw new ContractException(message);
+                throw new AssertionException(message);
             }
         }
 
@@ -116,7 +116,7 @@ namespace gg.core.util
 
             if (enumeration.Any(o => !predicate(o)))
             {
-                throw new ContractException(message);
+                throw new AssertionException(message);
             }
         }
 
