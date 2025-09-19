@@ -1,8 +1,7 @@
 ﻿using gg.parse.ebnf;
-
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.integration
 {
     /// <summary>
     /// See if include statements work as intended
@@ -18,7 +17,7 @@ namespace gg.parse.script.tests
         public void CreateEbnfParser_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/string.tokens'; /*dummy main rule */ main=.;";
-            var parser = new ScriptParser().CreateFromDefinition(includeCommand);
+            var parser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
             IsTrue(parser.Tokenizer.FindRule("string") != null);
@@ -32,7 +31,7 @@ namespace gg.parse.script.tests
         public void CreateEbnfParserUsingAFileContainingAnInclude_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/include_test.tokens'; /*dummy main rule */ grammar_root=.;";
-            var parser = new ScriptParser().CreateFromDefinition(includeCommand);
+            var parser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
             IsTrue(parser.Tokenizer.FindRule("string") != null);
@@ -45,7 +44,7 @@ namespace gg.parse.script.tests
         public void CreateEbnfParser_ParseCompiledRule_ExpectRuleToFindMatch()
         {
             var includeCommand = "include 'assets/string.tokens'; string_ref = string;";
-            var parser = new ScriptParser().CreateFromDefinition(includeCommand);
+            var parser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
             IsTrue(parser.Tokenizer.FindRule("string") != null);
@@ -69,7 +68,7 @@ namespace gg.parse.script.tests
         public void CreateEbnfParser_ParseCompiledRule_ExpectDuplicateIncludesToBeIgnored()
         {
             var includeCommand = "include 'assets/string.tokens'; include 'assets/string.tokens'; string_ref = string;";
-            var parser = new ScriptParser().CreateFromDefinition(includeCommand);
+            var parser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have one include message, despite two includes
             IsTrue(parser.LogHandler!.ReceivedLogs
@@ -98,7 +97,7 @@ namespace gg.parse.script.tests
         {
             var includeCommand = "include 'assets/include_circular_1.tokens';";
             // this should throw and exception
-            new ScriptParser().CreateFromDefinition(includeCommand);
+            new ScriptParser().InitializeFromDefinition(includeCommand);
         }
 
         
@@ -109,7 +108,7 @@ namespace gg.parse.script.tests
         public void CreateEbnfParserIncludeJsonGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
             var jsonParser = new ScriptParser()
-                                .CreateFromDefinition(
+                                .InitializeFromDefinition(
                                     File.ReadAllText("assets/json.tokens"), 
                                     "include 'assets/json.grammar';#main=json;"
                                 );
@@ -142,7 +141,7 @@ namespace gg.parse.script.tests
         public void CreateEbnfParserIncludeJsonTokensAndGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
             var jsonParser = new ScriptParser()
-                                .CreateFromDefinition(
+                                .InitializeFromDefinition(
                                     "include 'assets/json.tokens';#token_main = json_tokens;",
                                     "include 'assets/json.grammar'; # main = json;"
                                 );

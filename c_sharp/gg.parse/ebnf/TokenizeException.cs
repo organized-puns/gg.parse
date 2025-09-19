@@ -2,7 +2,7 @@
 {
     public class TokenizeException : Exception
     {
-        public IEnumerable<Annotation>? Errors { get; init; }
+        public List<Annotation>? Errors { get; init; }
 
         public string? Text { get; init; }
 
@@ -14,7 +14,7 @@
         public TokenizeException(string message, IEnumerable<Annotation> errors, string? text)
             : base(message)
         {
-            Errors = errors;
+            Errors = errors.ToList();
             Text = text;
         }
 

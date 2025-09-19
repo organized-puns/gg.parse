@@ -11,7 +11,7 @@ namespace gg.parse.script
 
         public PipelineLog? LogHandler { get; set; }
 
-        public ScriptParser CreateFromDefinition(string tokenDefinition, string? grammarDefinition = null, PipelineLog? logger = null)
+        public ScriptParser InitializeFromDefinition(string tokenDefinition, string? grammarDefinition = null, PipelineLog? logger = null)
         {
             LogHandler = logger ?? new PipelineLog();
             

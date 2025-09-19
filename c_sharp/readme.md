@@ -137,8 +137,6 @@ Todo (for mvp)
 - Error handling, 
         
     Implement logger
-        refactor pipelines
-        in pipeline scriptx create EbfnException equivalent
        Capture & process exceptions in logger
     
     Deal with the following cases:

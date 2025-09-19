@@ -42,13 +42,13 @@ namespace gg.parse.script
             RequiresNotNull(session.Compiler!);
             RequiresNotNullOrEmpty(session.Text!);
 
-            (session.Tokens, session.AstNodes) = ParseText(session);
+            (session.Tokens, session.AstNodes) = ParseSessionText(session);
 
             // merge the sessions' rulegraph with all the included files
             MergeIncludes(session);
 
             // send logs created by parsing to handler.out in a curated format
-            session.LogHandler!.ProcessAstLogs(session.Text!, session.Tokens, session.AstNodes);
+            session.LogHandler!.ProcessAstAnnotations(session.Text!, session.Tokens, session.AstNodes);
             
             // remove logs from the annotations
             session.AstNodes = session.AstNodes.Filter(a => session.Parser.FindRule(a.RuleId) is not LogRule<int>);
@@ -72,6 +72,7 @@ namespace gg.parse.script
             };
 
             pipelineLogger.FindAstRule = id => parser.FindRule(id);
+            pipelineLogger.FindTokenRule = id => tokenizer.FindRule(id);
 
             var tokenizerSession = new PipelineSessionX<T>()
             {
@@ -134,25 +135,27 @@ namespace gg.parse.script
         }
 
 
-        private static (List<Annotation> tokens, List<Annotation> astNodes) ParseText<T>(PipelineSessionX<T> session)
+        private static (List<Annotation> tokens, List<Annotation> astNodes) ParseSessionText<T>(PipelineSessionX<T> session)
             where T : IComparable<T>
         {
             RequiresNotNull(session.Tokenizer!);
             RequiresNotNull(session.Parser!);
+            RequiresNotNull(session.LogHandler!);
             RequiresNotNullOrEmpty(session.Text!);
 
             try
             {
                 return session.Parser!.Parse(session.Text!);
             }
-            // xxx not necessary to wrap these ?
             catch (TokenizeException te)
             {
-                throw new ScriptPipelineException("Exception in token. Failed to build tokenizer. See inner exception for details.", te);
+                session.LogHandler!.ProcessException(te);
+                throw new ScriptPipelineException("Exception in tokens while tokenizing text.", te);
             }
             catch (ParseException pe)
             {
-                throw new ScriptPipelineException("Exception in grammar. Failed to build tokenizer. See inner exception for details.", pe);
+                session.LogHandler!.ProcessException(pe);
+                throw new ScriptPipelineException("Exception in grammar while parsing tokens.", pe);
             } 
         }
 

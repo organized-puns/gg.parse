@@ -31,18 +31,25 @@ namespace gg.parse
         /// <returns></returns>
         public static Range UnionOfRanges(this List<Annotation> tokens, Range tokensRange)
         {
-            var startIndex = tokens[tokensRange.Start].Start;
-            var start = startIndex;
-            var length = 0;
-
-            for (var i = 0; i < tokensRange.Length; i++)
+            // tokenRange is allowed to start above the max count as it signals a token
+            // at the eof.
+            if (tokensRange.Start < tokens.Count)
             {
-                // need to take in account possible white space
-                var token = tokens[tokensRange.Start + i];
-                length += (token.Start - (startIndex + length)) + token.Length;
+                var startIndex = tokens[tokensRange.Start].Start;
+                var start = startIndex;
+                var length = 0;
+
+                for (var i = 0; i < tokensRange.Length; i++)
+                {
+                    // need to take in account possible white space
+                    var token = tokens[tokensRange.Start + i];
+                    length += (token.Start - (startIndex + length)) + token.Length;
+                }
+
+                return new Range(start, length);
             }
 
-            return new Range(start, length);
+            return new(tokens[^1].End, 0);
         }
 
         /// <summary>

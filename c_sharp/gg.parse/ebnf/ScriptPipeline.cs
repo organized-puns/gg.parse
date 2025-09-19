@@ -189,7 +189,7 @@ namespace gg.parse.ebnf
                                     paths,
                                     (text, includePaths) => CreateTokenizerFromEbnfFile(text, tokenizer, cache, includePaths, logHandler));
 
-            logHandler?.ProcessAstLogs(tokenizerText, tokenizerTokens, tokenizerAstNodes);
+            logHandler?.ProcessAstAnnotations(tokenizerText, tokenizerTokens, tokenizerAstNodes);
 
             // remove logs from the annotations
             var filteredNodes = tokenizerAstNodes.Filter(a => tokenizerParser.FindRule(a.RuleId) is not LogRule<int>);
@@ -289,7 +289,7 @@ namespace gg.parse.ebnf
             if (logHandler != null)
             {
                 logHandler.FindAstRule = id => grammarParser.FindRule(id);
-                logHandler.ProcessAstLogs(grammarText, grammarTokens, grammarAstNodes);
+                logHandler.ProcessAstAnnotations(grammarText, grammarTokens, grammarAstNodes);
             }
 
             // remove logs from the annotations

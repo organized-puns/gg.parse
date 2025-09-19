@@ -2,11 +2,16 @@
 
 using gg.parse.rulefunctions;
 
+using static gg.core.util.Assertions;
+
 namespace gg.parse.ebnf
 {
     public class PipelineLog
     {
-        public List<(LogLevel level, string message)> ReceivedLogs { get; set; } = [];
+        // Note: not thread safe, application will need to deal with this
+        public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
+
+        public int MaxStoredLogs { get; set; } = -1;
 
         /// <summary>
         /// If set to true an exception will be thrown when a warning is encountered
@@ -17,28 +22,47 @@ namespace gg.parse.ebnf
 
         public Func<int, RuleBase<int>?>? FindAstRule { get; set; } = null;
 
-        public Func<int, RuleBase<int>>? FindTokenRule { get; set; } = null;
+        public Func<int, RuleBase<char>?>? FindTokenRule { get; set; } = null;
+
+        public PipelineLog(bool storeLogs = true, int maxStoredLogs = -1)
+        {
+            if (storeLogs)
+            {
+                ReceivedLogs = [];
+            }
+
+            MaxStoredLogs = maxStoredLogs;
+        }
 
         public void Log(LogLevel level, string message)
         {
-            ReceivedLogs.Add((level, message));
+            if (ReceivedLogs != null)
+            {
+                ReceivedLogs.Add((level, message));
+
+                if (MaxStoredLogs > 0 && ReceivedLogs.Count > MaxStoredLogs)
+                {
+                    ReceivedLogs.RemoveRange(0, ReceivedLogs.Count - MaxStoredLogs);
+                }
+            }
+
             Out?.Invoke(level, message);
+
+            
         }
 
-        public void ProcessTokenLogs(string text, List<Annotation> tokens)
+        public void ProcessTokenAnnotations(string text, List<Annotation> tokens)
         {
-            Assertions.Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
+            Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
 
             var logAnnotations = tokens.Select(a =>
                                     a!.SelectNotNull(ax =>
-                                        FindTokenRule(ax.RuleId) is LogRule<int> rule
-                                            ? new Tuple<Annotation, LogRule<int>>(ax, rule)
+                                        FindTokenRule(ax.RuleId) is LogRule<char> rule
+                                            ? new Tuple<Annotation, LogRule<char>>(ax, rule)
                                             : null
                                     ));
 
             var lineRanges = CollectLineRanges(text);
-
-            ReceivedLogs = [];
 
             foreach (var logList in logAnnotations)
             {
@@ -47,16 +71,14 @@ namespace gg.parse.ebnf
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation.Range, text, lineRanges);
                     var message = $"({line}, {column}) {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
 
-                    ReceivedLogs.Add((log.Level, message));
-                    Out?.Invoke(log.Level, message);
+                    Log(log.Level, message);
                 }
             }
         }
 
-
-        public void ProcessAstLogs(string text, List<Annotation> tokens, List<Annotation> astNodes) 
+        public void ProcessAstAnnotations(string text, List<Annotation> tokens, List<Annotation> astNodes) 
         {
-            Assertions.Requires(FindAstRule != null, "No method to locate ast rules defined, cannot process logs.");
+            Requires(FindAstRule != null, "No method to locate ast rules defined, cannot process logs.");
 
             var logAnnotations = astNodes.Select(a => 
                                     a!.SelectNotNull( ax =>
@@ -74,10 +96,50 @@ namespace gg.parse.ebnf
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation, text, tokens, lineRanges);
                     var message = $"({line}, {column}) {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
 
-                    ReceivedLogs.Add((log.Level, message));
-
-                    Out?.Invoke(log.Level, message);
+                    Log(log.Level, message);
                 }
+            }
+        }
+
+        public void ProcessException(TokenizeException exception)
+        {
+            Log(LogLevel.Fatal, $"Exception: {exception}");
+
+            if (exception.Errors != null && exception.Text != null)
+            {
+                ProcessTokenAnnotations(exception.Text, exception.Errors);
+            }
+            else
+            {
+                Log(LogLevel.Fatal, "No further details on the underlying error.");
+            }
+        }
+
+        public void ProcessException(ParseException exception)
+        {
+            Log(LogLevel.Fatal, $"Exception: {exception}");
+
+            if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
+            {
+                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+            }
+            else
+            {
+                Log(LogLevel.Fatal, "No further details on the underlying error.");
+            }
+        }
+
+        public void ProcessExceptions(ParseException exception)
+        {
+            Log(LogLevel.Fatal, $"Exception: {exception}");
+
+            if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
+            {
+                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+            }
+            else
+            {
+                Log(LogLevel.Fatal, "No further details on the underlying error.");
             }
         }
 
