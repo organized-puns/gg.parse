@@ -22,8 +22,6 @@ namespace gg.parse.compiler
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
-        public List<int> IgnoredRules { get; private set; } = [];
-
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
