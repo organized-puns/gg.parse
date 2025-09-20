@@ -1,5 +1,6 @@
 ﻿using gg.parse.ebnf;
 using gg.parse.rulefunctions;
+using gg.parse.script;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.compiler
@@ -15,12 +16,12 @@ namespace gg.parse.tests.compiler
         public void CreateEmptyRule_Compile_ExpectNopToShowUp()
         {
             // xxx turn this into a more unit-y test
-            var parser = new ScriptPipeline("token = 't1';", "empty_rule=;");
-            var emptyRule = parser.FindParserRule("empty_rule") as NopRule<int>;
+            var parser = new ScriptParser().InitializeFromDefinition("token = 't1';", "empty_rule=;");
+            var emptyRule = parser.AstBuilder.FindRule("empty_rule") as NopRule<int>;
             
             IsTrue(emptyRule != null);
 
-            var outcome = parser.Parse("t1");
+            var (_, outcome) = parser.Parse("t1");
 
             // nop doesn't do match
             IsTrue(outcome.FoundMatch && outcome.MatchedLength == 0);

@@ -1,4 +1,7 @@
-﻿using gg.parse.ebnf;
+﻿#nullable disable
+
+using gg.parse.ebnf;
+using gg.parse.script;
 using System.Diagnostics;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -17,7 +20,7 @@ namespace gg.parse.instances.tests.calculator
         [TestMethod]
         public void CreateTokenizer_FindTokens_ExpectAllTokensFound()
         {
-            var calculatorParser = new ScriptPipeline(_tokenizerSpec, null);
+            var calculatorParser = CreateParser();
 
             IsNotNull(calculatorParser);
 
@@ -39,7 +42,7 @@ namespace gg.parse.instances.tests.calculator
 
             foreach (var token in expectedTokens)
             {
-                IsNotNull(calculatorParser.EbnfTokenizer.FindRule(token), $"Token '{token}' not found.");
+                IsNotNull(calculatorParser.Tokenizer.FindRule(token), $"Token '{token}' not found.");
             }
         }
 
@@ -47,12 +50,9 @@ namespace gg.parse.instances.tests.calculator
         /// Basic test to ensure that all grammar rules in the calculator example are found.
         /// </summary>
         [TestMethod]
-        public void CreateTokenizerAndGrammar_FindTokens_ExpectAllTokensFound()
+        public void CreateTokenizerAndGrammar_FindRules_ExpectAllRulesFound()
         {
             var calculatorParser = CreateParser();
-
-            IsNotNull(calculatorParser);
-            IsNotNull(calculatorParser.EbnfGrammarParser!.Root);
 
             var expectedRules = new[]
             {
@@ -71,7 +71,7 @@ namespace gg.parse.instances.tests.calculator
 
             foreach (var ruleName in expectedRules)
             {
-                IsNotNull(calculatorParser.EbnfGrammarParser.FindRule(ruleName), $"Rule '{ruleName}' not found.");
+                IsNotNull(calculatorParser.AstBuilder!.FindRule(ruleName), $"Rule '{ruleName}' not found.");
             }
         }
 
@@ -81,15 +81,15 @@ namespace gg.parse.instances.tests.calculator
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParsePositiveNumber_ExpectCorrectTypeFound()
         {
-            var calculatorParser = new ScriptPipeline(_tokenizerSpec, _grammarSpec);
+            var calculatorParser = CreateParser();
 
-            var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse("1".ToCharArray(), 0);
+            var tokens = calculatorParser.Tokenizer.Root.Parse("1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 1);
-            IsTrue(tokens[0]!.Rule == calculatorParser.EbnfTokenizer.FindRule("number"));
+            IsTrue(tokens[0].Rule == calculatorParser.Tokenizer.FindRule("number"));
 
-            var astTree = calculatorParser.Parse("1");
+            var (_, astTree) = calculatorParser.Parse("1");
 
             IsTrue(astTree.FoundMatch);
             IsNotNull(astTree.Annotations);
@@ -109,14 +109,14 @@ namespace gg.parse.instances.tests.calculator
         {
             var calculatorParser = CreateParser();
 
-            var tokens = calculatorParser.EbnfTokenizer!.Root!.Parse("-1".ToCharArray(), 0);
+            var tokens = calculatorParser.Tokenizer!.Root!.Parse("-1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 2);
-            IsTrue(tokens[0]!.Rule == calculatorParser.EbnfTokenizer.FindRule("minus"));
-            IsTrue(tokens[1]!.Rule == calculatorParser.EbnfTokenizer.FindRule("number"));
+            IsTrue(tokens[0]!.Rule == calculatorParser.Tokenizer.FindRule("minus"));
+            IsTrue(tokens[1]!.Rule == calculatorParser.Tokenizer.FindRule("number"));
 
-            var astTree = calculatorParser.Parse("-1");
+            var (_, astTree) = calculatorParser.Parse("-1");
 
             IsTrue(astTree.FoundMatch);
             IsNotNull(astTree.Annotations);
@@ -134,7 +134,7 @@ namespace gg.parse.instances.tests.calculator
         public void CreateTokenizerAndGrammar_ParseSubtraction_ExpectCorrectTypeFound()
         {
             var calculatorParser = CreateParser();
-            var astTree = calculatorParser.Parse("2-1");
+            var (_, astTree) = calculatorParser.Parse("2-1");
 
             IsTrue(astTree.FoundMatch);
             IsNotNull(astTree.Annotations);
@@ -155,7 +155,7 @@ namespace gg.parse.instances.tests.calculator
         {
             var calculatorParser = CreateParser();
             var testText = "-1.01 + -2";
-            var astTree = calculatorParser.Parse(testText);
+            var (_, astTree) = calculatorParser.Parse(testText);
 
             IsTrue(astTree.FoundMatch);
             IsNotNull(astTree.Annotations);
@@ -188,7 +188,7 @@ namespace gg.parse.instances.tests.calculator
         {
             var calculatorParser = CreateParser();
             var testText = "1 * 2 + 3";
-            var astTree = calculatorParser.Parse(testText);
+            var (_, astTree) = calculatorParser.Parse(testText);
 
             IsTrue(astTree.FoundMatch);
 
@@ -224,7 +224,7 @@ namespace gg.parse.instances.tests.calculator
             var calculatorParser = CreateParser();
 
             var testText = "1 * (2 + 3)";
-            var astTree = calculatorParser.Parse(testText);
+            var (_, astTree) = calculatorParser.Parse(testText);
 
             IsTrue(astTree.FoundMatch);
 
@@ -256,7 +256,7 @@ namespace gg.parse.instances.tests.calculator
         {
             var calculatorParser = CreateParser();
             var testText = "1 - (2 + 3) * 4";
-            var astTree = calculatorParser.Parse(testText);
+            var (_, astTree) = calculatorParser.Parse(testText);
 
             IsTrue(astTree.FoundMatch);
 
@@ -290,7 +290,9 @@ namespace gg.parse.instances.tests.calculator
             var calculatorParser = CreateParser();
             var testText = "(2 + (3)) + 4";
 
-            IsTrue(calculatorParser.TryBuildAstTree(testText, out var tokens, out var astTree));
+            var (tokensResult, astResult) = calculatorParser.Parse(testText);
+
+            IsTrue(tokensResult.FoundMatch && astResult.FoundMatch);
 
             var expectedTokenTypes = new[]
             {
@@ -305,61 +307,56 @@ namespace gg.parse.instances.tests.calculator
                 "number"
             };
 
-            IsTrue(tokens!.Annotations!.Count == expectedTokenTypes.Length, $"Expected {expectedTokenTypes.Length} tokens but found {tokens.Annotations.Count} tokens.");
+            IsTrue(tokensResult!.Annotations!.Count == expectedTokenTypes.Length, $"Expected {expectedTokenTypes.Length} tokens but found {tokensResult.Annotations.Count} tokens.");
 
             for (int i = 0; i < expectedTokenTypes.Length; i++)
             {
                 var expectedType = expectedTokenTypes[i];
-                var actualType = tokens![i]!.Rule!.Name;
+                var actualType = tokensResult![i]!.Rule!.Name;
 
                 IsTrue(expectedType == actualType, $"Token {i} expected to be '{expectedType}' but found '{actualType}'");
             }
 
 
-            IsTrue(astTree.FoundMatch);
-            IsTrue(astTree.MatchedLength == expectedTokenTypes.Length);
+            IsTrue(astResult.FoundMatch);
+            IsTrue(astResult.MatchedLength == expectedTokenTypes.Length);
 
             // root
-            IsTrue(astTree![0]!.Rule!.Name == "addition");
+            IsTrue(astResult![0]!.Rule!.Name == "addition");
 
             // left
-            IsTrue(astTree[0]![0]!.Rule!.Name == "group");
+            IsTrue(astResult[0]![0]!.Rule!.Name == "group");
 
-            IsTrue(astTree[0][0][0].Rule.Name == "addition");
+            IsTrue(astResult[0][0][0].Rule.Name == "addition");
 
-            IsTrue(astTree[0][0][0][0].Rule.Name == "number");
-            IsTrue(astTree[0][0][0][1].Rule.Name == "plus");
-            IsTrue(astTree[0][0][0][2].Rule.Name == "group");
+            IsTrue(astResult[0][0][0][0].Rule.Name == "number");
+            IsTrue(astResult[0][0][0][1].Rule.Name == "plus");
+            IsTrue(astResult[0][0][0][2].Rule.Name == "group");
 
-            IsTrue(astTree[0][0][0][2][0].Rule.Name == "number");
+            IsTrue(astResult[0][0][0][2][0].Rule.Name == "number");
 
             // op
-            IsTrue(astTree[0][1].Rule.Name == "plus");
+            IsTrue(astResult[0][1].Rule.Name == "plus");
 
             // right
-            IsTrue(astTree[0][2].Rule.Name == "number");
+            IsTrue(astResult[0][2].Rule.Name == "number");
         }
 
-        private ScriptPipeline CreateParser()
+        private ScriptParser CreateParser()
         {
+            var parser = new ScriptParser();
+            
             try
             {
-                return new ScriptPipeline(_tokenizerSpec, _grammarSpec);
+                return parser.InitializeFromDefinition(_tokenizerSpec, _grammarSpec);
             }
-            catch (EbnfException e)
+            catch (Exception e)
             {
-                if (e.InnerException is ParseException ex)
+                foreach (var message in parser.LogHandler.ReceivedLogs)
                 {
-                    if (ex.Errors != null && ex.Text != null && ex.Tokens != null)
-                    {
-                        var errorMessages = ex.Errors.Select(annotation => $"Error: {annotation.GetText(ex.Text, ex.Tokens)}.");
-                        foreach (var errorMessage in errorMessages)
-                        {
-                            Console.WriteLine(errorMessage);
-                            Debug.WriteLine(errorMessage);
-                        }
-                    }
-                }
+                    Console.WriteLine(message);
+                    Debug.WriteLine(message);
+                }          
 
                 throw;
             }

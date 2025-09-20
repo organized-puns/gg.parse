@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace gg.parse.ebnf
+﻿namespace gg.parse.ebnf
 {
     public class ParseException : Exception
     {

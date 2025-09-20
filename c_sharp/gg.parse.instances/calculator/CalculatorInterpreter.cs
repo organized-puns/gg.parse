@@ -1,4 +1,5 @@
 ﻿using gg.parse.ebnf;
+using gg.parse.script;
 using System.Globalization;
 
 namespace gg.parse.instances.calculator
@@ -48,13 +49,14 @@ namespace gg.parse.instances.calculator
         }
 
         private Ids _graphIds;
-        private ScriptPipeline _parser; 
+        private ScriptParser _parser; 
 
 
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
-            _parser = new ScriptPipeline(tokenizerSpec, grammarSpec);
-            SetIds(_parser.EbnfGrammarParser);
+            _parser = new ScriptParser().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            //SetIds(_parser.EbnfGrammarParser);
+            SetIds(_parser.AstBuilder!);
         }
 
         private CalculatorInterpreter SetIds(RuleGraph<int> graph)
@@ -90,9 +92,11 @@ namespace gg.parse.instances.calculator
 
         public double Interpret(string text)
         {
-            if (_parser.TryBuildAstTree(text, out var tokens, out var tree))
+            var (tokensResult, treeResult) = _parser.Parse(text);
+
+            if (tokensResult.FoundMatch && treeResult.FoundMatch)
             {
-                return Interpret(text, tree!.Annotations![0], tokens!.Annotations!);
+                return Interpret(text, treeResult!.Annotations![0], tokensResult!.Annotations!);
             }
 
             throw new ArgumentException("Failed to parse text.");

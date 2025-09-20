@@ -7,7 +7,7 @@ namespace gg.parse.script
     {
         public RuleGraph<char>? Tokenizer {get;set;}
 
-        public RuleGraph<int>? Parser { get; set; }
+        public RuleGraph<int>? AstBuilder { get; set; }
 
         public PipelineLog? LogHandler { get; set; }
 
@@ -26,7 +26,7 @@ namespace gg.parse.script
             if (grammarDefinition != null)
             {
                 GrammarSession = ScriptPipelineX.RunGrammarPipeline(grammarDefinition, TokenSession);
-                Parser = GrammarSession.RuleGraph;
+                AstBuilder = GrammarSession.RuleGraph;
             }
 
             return this;
@@ -42,12 +42,12 @@ namespace gg.parse.script
             if (tokenizeResult.FoundMatch)
             {
                 // xxx to do handle potential errors in the token annotations
-                if (Parser != null)
+                if (AstBuilder != null)
                 {
                     if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)
                     {
                         // xxx to do handle potential errors in the annotations
-                        return (tokenizeResult, Parser!.Root!.Parse(tokenizeResult.Annotations));
+                        return (tokenizeResult, AstBuilder!.Root!.Parse(tokenizeResult.Annotations));
                     }
                 }
 

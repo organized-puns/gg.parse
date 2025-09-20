@@ -1,6 +1,6 @@
 ﻿
 using gg.parse.ebnf;
-
+using gg.parse.script;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.ebnf
@@ -19,7 +19,8 @@ namespace gg.parse.tests.ebnf
             };
 
             // this should trigger a warning (because the rule is empty)
-            var pipeline = new ScriptPipeline("foo='bar';", "trigger_warning=;\ntrigger_warning_2=;", logger);
+            var pipeline = new ScriptParser()
+                            .InitializeFromDefinition("foo='bar';", "trigger_warning=;\ntrigger_warning_2=;", logger);
 
             // logger should have written two warnings to the output
             IsTrue(result.Count == 2);
@@ -36,7 +37,8 @@ namespace gg.parse.tests.ebnf
             };
 
             // this should trigger a warning (because the rule is empty)
-            var pipeline = new ScriptPipeline("\n\r\nfoo=;", null, logger);
+            var pipeline = new ScriptParser()
+                            .InitializeFromDefinition("\n\r\nfoo=;", null, logger);
 
             // logger should have written two warnings to the output
             IsTrue(result.Count == 1);
@@ -44,7 +46,7 @@ namespace gg.parse.tests.ebnf
 
 
         [TestMethod]
-        [ExpectedException(typeof(EbnfException))]
+        [ExpectedException(typeof(ScriptPipelineException))]
         public void SetupPipelineLogWithFailOnWarning_CreatePipeline_ExpectException()
         {
             var result = new List<string>();
@@ -56,7 +58,8 @@ namespace gg.parse.tests.ebnf
             };
 
             // this should trigger an exception
-            new ScriptPipeline("foo='bar';", "trigger_warning=;", logger);
+            new ScriptParser()
+                    .InitializeFromDefinition("foo='bar';", "trigger_warning=;", logger);
         }
     }
 }

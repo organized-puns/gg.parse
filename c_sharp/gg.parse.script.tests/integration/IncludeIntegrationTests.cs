@@ -122,19 +122,19 @@ namespace gg.parse.script.tests.integration
             // spot check to see if this rule is in the token rule graph
             IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
 
-            IsTrue(jsonParser.Parser != null);
-            IsTrue(jsonParser.Parser.Root != null);
+            IsTrue(jsonParser.AstBuilder != null);
+            IsTrue(jsonParser.AstBuilder.Root != null);
 
             // spot check to see if these rules are in the grammar rule graph
-            IsTrue(jsonParser.Parser.FindRule("string") != null);
-            IsTrue(jsonParser.Parser.FindRule("object") != null);
+            IsTrue(jsonParser.AstBuilder.FindRule("string") != null);
+            IsTrue(jsonParser.AstBuilder.FindRule("object") != null);
 
             // check if it compiles json
             var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations![0].Children![0].Rule == jsonParser.Parser!.FindRule("object"));
-            IsTrue(result.Annotations![0].Children![0].Children![0].Rule == jsonParser.Parser!.FindRule("key_value_pair"));
+            IsTrue(result.Annotations![0].Children![0].Rule == jsonParser.AstBuilder!.FindRule("object"));
+            IsTrue(result.Annotations![0].Children![0].Children![0].Rule == jsonParser.AstBuilder!.FindRule("key_value_pair"));
         }
 
         
@@ -152,11 +152,11 @@ namespace gg.parse.script.tests.integration
 
             IsTrue(jsonParser.Tokenizer != null);
             IsTrue(jsonParser.Tokenizer.Root != null);
-            IsTrue(jsonParser.Parser != null);
-            IsTrue(jsonParser.Parser.Root != null);
+            IsTrue(jsonParser.AstBuilder != null);
+            IsTrue(jsonParser.AstBuilder.Root != null);
 
             // spot check to see if object is in the grammar rule graph
-            var objectRule = jsonParser.Parser.FindRule("object") as MatchFunctionSequence<int>;
+            var objectRule = jsonParser.AstBuilder.FindRule("object") as MatchFunctionSequence<int>;
             
             IsNotNull(objectRule);
             IsTrue(objectRule.Rules.Count() == 3);
@@ -176,11 +176,11 @@ namespace gg.parse.script.tests.integration
 
             var objectAnnotation = result.astNodes[0][0];
 
-            IsTrue(objectAnnotation.Rule == jsonParser.Parser.FindRule("object"));
+            IsTrue(objectAnnotation.Rule == jsonParser.AstBuilder.FindRule("object"));
 
             var keyValueRuleAnnotation = objectAnnotation[0];
 
-            IsTrue(keyValueRuleAnnotation.Rule == jsonParser.Parser.FindRule("key_value_pair"));
+            IsTrue(keyValueRuleAnnotation.Rule == jsonParser.AstBuilder.FindRule("key_value_pair"));
         }
     }
 }
