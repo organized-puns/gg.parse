@@ -53,7 +53,7 @@
                         case AnnotationProduct.Annotation:
 
                             return new ParseResult(true, result.MatchedLength,
-                                               [new Annotation(Id, new Range(start, result.MatchedLength), result.Annotations)]);
+                                               [new Annotation(this, new Range(start, result.MatchedLength), result.Annotations)]);
 
                         case AnnotationProduct.Transitive:
 

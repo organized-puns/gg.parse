@@ -2,7 +2,7 @@
 
 namespace gg.parse.compiler
 {
-    public class CompileSession<T> where T : IComparable<T>
+    public class CompileSession
     {
         public string? Text { get; set; }
 
@@ -48,26 +48,17 @@ namespace gg.parse.compiler
             return Text.Substring(range.Start, range.Length);
         }
 
-        public CompileSession<T> WithText(string text)
+        public CompileSession WithText(string text)
         {
             Text = text;
             return this;
-        }
+        }        
 
-        public CompileSession<T> WithTokens(params Annotation[] tokens) => 
-            WithTokens(tokens.ToList());
-        
-
-        public CompileSession<T> WithTokens(List<Annotation> tokens)
+        public CompileSession WithTokens(List<Annotation> tokens)
         {
             Tokens = tokens;
             return this;
         }
 
-        public CompileSession<T> WithAstNodes(List<Annotation> nodes)
-        {
-            AstNodes = nodes;
-            return this;
-        }
     }
 }

@@ -104,7 +104,7 @@ namespace gg.parse.script.tests.integration
 
                 IsTrue(error.Start == 0);
                 IsTrue(error.Length == 1);
-                IsTrue(error.RuleId == scriptParser.InvalidProductInHeaderError.Id);
+                IsTrue(error.Rule.Id == scriptParser.InvalidProductInHeaderError.Id);
 
                 IsTrue(parser
                         .LogHandler!
@@ -146,7 +146,7 @@ namespace gg.parse.script.tests.integration
 
                 IsTrue(error.Start == 1);
                 IsTrue(error.Length == 1);
-                IsTrue(error.RuleId == scriptParser.InvalidPrecedenceError.Id);
+                IsTrue(error.Rule.Id == scriptParser.InvalidPrecedenceError.Id);
 
                 IsTrue(parser
                         .LogHandler!

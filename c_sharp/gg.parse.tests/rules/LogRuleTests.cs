@@ -1,4 +1,6 @@
-﻿using gg.parse.rulefunctions;
+﻿#nullable disable
+
+using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -24,7 +26,7 @@ namespace gg.parse.tests.rules
             IsTrue(parseFooResult.FoundMatch);
             IsTrue(parseFooResult.MatchedLength == 0);
             IsTrue(parseFooResult.Annotations != null && parseFooResult.Annotations.Count == 1);
-            IsTrue(parseFooResult.Annotations[0].RuleId == logRule.Id);
+            IsTrue(parseFooResult.Annotations[0].Rule == logRule);
             
             IsTrue(logRule.Parse("".ToCharArray(), 0).FoundMatch);
             IsTrue(logRule.Parse("".ToCharArray(), 0).MatchedLength == 0);
@@ -48,7 +50,7 @@ namespace gg.parse.tests.rules
             IsTrue(parseFooResult.FoundMatch);
             IsTrue(parseFooResult.MatchedLength == 3);
             IsTrue(parseFooResult.Annotations != null && parseFooResult.Annotations.Count == 1);
-            IsTrue(parseFooResult.Annotations[0].RuleId == logRule.Id);
+            IsTrue(parseFooResult.Annotations[0].Rule == logRule);
             IsTrue(parseFooResult.Annotations[0].Children == null);
 
             // negative cases

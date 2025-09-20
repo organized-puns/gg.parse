@@ -20,7 +20,7 @@ namespace gg.parse.tests.rules
 
             IsTrue(result.FoundMatch);
             IsTrue(result.MatchedLength == 3);
-            IsTrue(result[0]!.RuleId == skipRule.Id);
+            IsTrue(result[0]!.Rule == skipRule);
             IsTrue(result[0]!.Range.Equals(new Range(0, 3)));
         }
 
@@ -49,7 +49,7 @@ namespace gg.parse.tests.rules
 
             IsTrue(result.FoundMatch);
             IsTrue(result.MatchedLength == 5);
-            IsTrue(result[0]!.RuleId == skipRule.Id);
+            IsTrue(result[0]!.Rule == skipRule);
             IsTrue(result[0]!.Range.Equals(new Range(0, 5)));
         }
     }

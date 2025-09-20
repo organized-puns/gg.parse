@@ -133,6 +133,9 @@ Todo (for mvp)
   - Add some more documentation, extend readme.
   - address all xxx
 
+   Move ebnf to its own project and rename ebnf to something else, script ? -> consider it a pipeline
+
+    Replace CommonRules with CommonGraphWrapper
         
     Rename try match by if match and remove the short hand >  
 
@@ -142,8 +145,6 @@ Todo (for mvp)
         - add rule to compiler
 - 
     Add short hand sequence method which parses the name without the need for a production, eg seq("#name", a, b, c) 
-
-    Move ebnf to its own project and rename ebnf to something else, script ? -> consider it a pipeline
 
     Remove "Function" notion in favor of Rule in names across the project
 

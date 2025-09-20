@@ -47,14 +47,14 @@ namespace gg.parse.tests
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
-            Assert.IsTrue(result.Annotations[0].RuleId != parser.UnknownInputError.Id);
+            Assert.IsTrue(result.Annotations[0].Rule != parser.UnknownInputError);
 
             var astNodes = result.Annotations;
 
             var table = compiler
                         .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                         .RegisterTokenizerCompilerFunctions(parser)
-                        .Compile(new CompileSession<char>(text, tokens, astNodes));
+                        .Compile(new CompileSession(text, tokens, astNodes));
 
             return (text, tokens, astNodes, table);
         }
@@ -79,7 +79,7 @@ namespace gg.parse.tests
 
             var astNodes = result.Annotations;
 
-            var session = new CompileSession<char>(text, tokens, astNodes);
+            var session = new CompileSession(text, tokens, astNodes);
 
             var table = compiler
                         .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())

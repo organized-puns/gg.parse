@@ -11,24 +11,28 @@ namespace gg.parse.script
 
         public PipelineLog? LogHandler { get; set; }
 
+        public PipelineSessionX<char>? TokenSession { get; private set; }
+
+        public PipelineSessionX<int>? GrammarSession { get; private set; }
+
         public ScriptParser InitializeFromDefinition(string tokenDefinition, string? grammarDefinition = null, PipelineLog? logger = null)
         {
             LogHandler = logger ?? new PipelineLog();
-            
-            var tokenSession = ScriptPipelineX.RunTokenPipeline(tokenDefinition, LogHandler);
 
-            Tokenizer = tokenSession.RuleGraph!;
+            TokenSession = ScriptPipelineX.RunTokenPipeline(tokenDefinition, LogHandler);
+
+            Tokenizer = TokenSession.RuleGraph!;
 
             if (grammarDefinition != null)
             {
-                var grammarSession = ScriptPipelineX.RunGrammarPipeline(grammarDefinition, tokenSession);
-                Parser = grammarSession.RuleGraph;
+                GrammarSession = ScriptPipelineX.RunGrammarPipeline(grammarDefinition, TokenSession);
+                Parser = GrammarSession.RuleGraph;
             }
 
             return this;
         }
 
-        public ParseResult Parse(string input)
+        public (ParseResult tokens, ParseResult astNodes) Parse(string input)
         {
             Assertions.RequiresNotNull(Tokenizer!);
             Assertions.RequiresNotNull(Tokenizer!.Root!);
@@ -43,18 +47,15 @@ namespace gg.parse.script
                     if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)
                     {
                         // xxx to do handle potential errors in the annotations
-                        return Parser!.Root!.Parse(tokenizeResult.Annotations);
+                        return (tokenizeResult, Parser!.Root!.Parse(tokenizeResult.Annotations));
                     }
-
-                    // no tokens found, so return empty
-                    return new ParseResult(true, 0, []);
                 }
 
-                return tokenizeResult;
-                
+                // no tokens found, so return empty
+                return (tokenizeResult, new ParseResult(true, 0, []));
             }
 
-            return ParseResult.Failure;
+            return (ParseResult.Failure, ParseResult.Failure);
         }
     }
 }

@@ -87,7 +87,7 @@ namespace gg.parse.instances.tests.calculator
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 1);
-            IsTrue(tokens[0]!.RuleId == calculatorParser.EbnfTokenizer.FindRule("number")!.Id);
+            IsTrue(tokens[0]!.Rule == calculatorParser.EbnfTokenizer.FindRule("number"));
 
             var astTree = calculatorParser.Parse("1");
 
@@ -95,7 +95,7 @@ namespace gg.parse.instances.tests.calculator
             IsNotNull(astTree.Annotations);
             IsTrue(astTree.Annotations.Count == 1);
 
-            var numberRule = calculatorParser.FindParserRule(astTree[0]!.RuleId);
+            var numberRule = astTree[0]!.Rule;
 
             IsNotNull(numberRule);
             IsTrue(numberRule.Name == "number");
@@ -113,8 +113,8 @@ namespace gg.parse.instances.tests.calculator
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 2);
-            IsTrue(tokens[0]!.RuleId == calculatorParser.EbnfTokenizer.FindRule("minus")!.Id);
-            IsTrue(tokens[1]!.RuleId == calculatorParser.EbnfTokenizer.FindRule("number")!.Id);
+            IsTrue(tokens[0]!.Rule == calculatorParser.EbnfTokenizer.FindRule("minus"));
+            IsTrue(tokens[1]!.Rule == calculatorParser.EbnfTokenizer.FindRule("number"));
 
             var astTree = calculatorParser.Parse("-1");
 
@@ -122,9 +122,9 @@ namespace gg.parse.instances.tests.calculator
             IsNotNull(astTree.Annotations);
             IsTrue(astTree.Annotations.Count == 1);
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0]!.RuleId)!.Name == "unary_operation");
-            IsTrue(calculatorParser.FindParserRule(astTree[0]![0]!.RuleId)!.Name == "minus");
-            IsTrue(calculatorParser.FindParserRule(astTree[0]![1]!.RuleId)!.Name == "number");
+            IsTrue(astTree[0]!.Rule!.Name == "unary_operation");
+            IsTrue(astTree[0]![0]!.Rule!.Name == "minus");
+            IsTrue(astTree[0]![1]!.Rule!.Name == "number");
         }
 
         /// <summary>
@@ -140,10 +140,10 @@ namespace gg.parse.instances.tests.calculator
             IsNotNull(astTree.Annotations);
             IsTrue(astTree.Annotations.Count == 1);
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0]!.RuleId)!.Name == "subtraction");
-            IsTrue(calculatorParser.FindParserRule(astTree[0]![0]!.RuleId)!.Name == "number");
-            IsTrue(calculatorParser.FindParserRule(astTree[0]![1]!.RuleId)!.Name == "minus");
-            IsTrue(calculatorParser.FindParserRule(astTree[0]![2]!.RuleId)!.Name == "number");
+            IsTrue(astTree[0]!.Rule!.Name == "subtraction");
+            IsTrue(astTree[0]![0]!.Rule!.Name == "number");
+            IsTrue(astTree[0]![1]!.Rule!.Name == "minus");
+            IsTrue(astTree[0]![2]!.Rule!.Name == "number");
         }
 
 
@@ -165,18 +165,18 @@ namespace gg.parse.instances.tests.calculator
 
             IsNotNull(addition);
 
-            var additionRule = calculatorParser.FindParserRule(addition.RuleId);
+            var additionRule = addition.Rule;
 
             IsNotNull(additionRule);
             IsTrue(additionRule.Name == "addition");
             IsTrue(additionRule.Precedence == 50);
 
-            IsTrue(calculatorParser.FindParserRule(addition[0]!.RuleId)!.Name == "unary_operation");
-            IsTrue(calculatorParser.FindParserRule(addition[0]![0]!.RuleId)!.Name == "minus");
-            IsTrue(calculatorParser.FindParserRule(addition[0]![1]!.RuleId)!.Name == "number");
+            IsTrue(addition[0]!.Rule!.Name == "unary_operation");
+            IsTrue(addition[0]![0]!.Rule!.Name == "minus");
+            IsTrue(addition[0]![1]!.Rule!.Name == "number");
 
-            IsTrue(calculatorParser.FindParserRule(addition[1]!.RuleId)!.Name == "plus");
-            IsTrue(calculatorParser.FindParserRule(addition[2]!.RuleId)!.Name == "unary_operation");
+            IsTrue(addition[1]!.Rule!.Name == "plus");
+            IsTrue(addition[2]!.Rule!.Name == "unary_operation");
         }
 
         
@@ -193,25 +193,25 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(astTree.FoundMatch);
 
             // root
-            IsTrue(calculatorParser.FindParserRule(astTree[0].RuleId).Name == "addition");
+            IsTrue(astTree[0].Rule.Name == "addition");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0].RuleId).Name == "multiplication");
+            IsTrue(astTree[0][0].Rule.Name == "multiplication");
 
             // left.left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0].RuleId).Name == "number");
+            IsTrue(astTree[0][0][0].Rule.Name == "number");
 
             // left.op
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][1].RuleId).Name == "mult");
+            IsTrue(astTree[0][0][1].Rule.Name == "mult");
 
             // left.right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][2].RuleId).Name == "number");
+            IsTrue(astTree[0][0][2].Rule.Name == "number");
 
             // op
-            IsTrue(calculatorParser.FindParserRule(astTree[0][1].RuleId).Name == "plus");
+            IsTrue(astTree[0][1].Rule.Name == "plus");
 
             // right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2].RuleId).Name == "number");
+            IsTrue(astTree[0][2].Rule.Name == "number");
         }
 
         
@@ -229,25 +229,25 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(astTree.FoundMatch);
 
             // root
-            var f = calculatorParser.FindParserRule(astTree[0].RuleId);
+            var f = astTree[0].Rule;
             IsTrue(f.Name == "multiplication");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0].RuleId).Name == "number");
+            IsTrue(astTree[0][0].Rule.Name == "number");
 
             // op
-            IsTrue(calculatorParser.FindParserRule(astTree[0][1].RuleId).Name == "mult");
+            IsTrue(astTree[0][1].Rule.Name == "mult");
 
             // right
             var group = astTree[0][2];
-            IsTrue(calculatorParser.FindParserRule(group.RuleId).Name == "group");
+            IsTrue(group.Rule.Name == "group");
 
             // group contents
-            IsTrue(calculatorParser.FindParserRule(group[0].RuleId).Name == "addition");
+            IsTrue(group[0].Rule.Name == "addition");
 
-            IsTrue(calculatorParser.FindParserRule(group[0][0].RuleId).Name == "number");
-            IsTrue(calculatorParser.FindParserRule(group[0][1].RuleId).Name == "plus");
-            IsTrue(calculatorParser.FindParserRule(group[0][2].RuleId).Name == "number");
+            IsTrue(group[0][0].Rule.Name == "number");
+            IsTrue(group[0][1].Rule.Name == "plus");
+            IsTrue(group[0][2].Rule.Name == "number");
         }
 
         
@@ -261,26 +261,26 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(astTree.FoundMatch);
 
             // root
-            IsTrue(calculatorParser.FindParserRule(astTree[0].RuleId).Name == "subtraction");
+            IsTrue(astTree[0].Rule.Name == "subtraction");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0].RuleId).Name == "number");
+            IsTrue(astTree[0][0].Rule.Name == "number");
 
             // op
-            IsTrue(calculatorParser.FindParserRule(astTree[0][1].RuleId).Name == "minus");
+            IsTrue(astTree[0][1].Rule.Name == "minus");
 
             // right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2].RuleId).Name == "multiplication");
+            IsTrue(astTree[0][2].Rule.Name == "multiplication");
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0].RuleId).Name == "group");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][1].RuleId).Name == "mult");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][2].RuleId).Name == "number");
+            IsTrue(astTree[0][2][0].Rule.Name == "group");
+            IsTrue(astTree[0][2][1].Rule.Name == "mult");
+            IsTrue(astTree[0][2][2].Rule.Name == "number");
 
             // group
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0].RuleId).Name == "addition");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0][0].RuleId).Name == "number");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0][1].RuleId).Name == "plus");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2][0][0][2].RuleId).Name == "number");
+            IsTrue(astTree[0][2][0][0].Rule.Name == "addition");
+            IsTrue(astTree[0][2][0][0][0].Rule.Name == "number");
+            IsTrue(astTree[0][2][0][0][1].Rule.Name == "plus");
+            IsTrue(astTree[0][2][0][0][2].Rule.Name == "number");
         }
 
 
@@ -310,7 +310,7 @@ namespace gg.parse.instances.tests.calculator
             for (int i = 0; i < expectedTokenTypes.Length; i++)
             {
                 var expectedType = expectedTokenTypes[i];
-                var actualType = calculatorParser.EbnfTokenizer.FindRule(tokens![i]!.RuleId)!.Name;
+                var actualType = tokens![i]!.Rule!.Name;
 
                 IsTrue(expectedType == actualType, $"Token {i} expected to be '{expectedType}' but found '{actualType}'");
             }
@@ -320,24 +320,24 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(astTree.MatchedLength == expectedTokenTypes.Length);
 
             // root
-            IsTrue(calculatorParser.FindParserRule(astTree![0]!.RuleId)!.Name == "addition");
+            IsTrue(astTree![0]!.Rule!.Name == "addition");
 
             // left
-            IsTrue(calculatorParser.FindParserRule(astTree[0]![0]!.RuleId)!.Name == "group");
+            IsTrue(astTree[0]![0]!.Rule!.Name == "group");
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0].RuleId).Name == "addition");
+            IsTrue(astTree[0][0][0].Rule.Name == "addition");
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][0].RuleId).Name == "number");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][1].RuleId).Name == "plus");
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2].RuleId).Name == "group");
+            IsTrue(astTree[0][0][0][0].Rule.Name == "number");
+            IsTrue(astTree[0][0][0][1].Rule.Name == "plus");
+            IsTrue(astTree[0][0][0][2].Rule.Name == "group");
 
-            IsTrue(calculatorParser.FindParserRule(astTree[0][0][0][2][0].RuleId).Name == "number");
+            IsTrue(astTree[0][0][0][2][0].Rule.Name == "number");
 
             // op
-            IsTrue(calculatorParser.FindParserRule(astTree[0][1].RuleId).Name == "plus");
+            IsTrue(astTree[0][1].Rule.Name == "plus");
 
             // right
-            IsTrue(calculatorParser.FindParserRule(astTree[0][2].RuleId).Name == "number");
+            IsTrue(astTree[0][2].Rule.Name == "number");
         }
 
         private ScriptPipeline CreateParser()

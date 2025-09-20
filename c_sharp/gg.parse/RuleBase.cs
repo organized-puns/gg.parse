@@ -20,8 +20,11 @@
     }
 
 
-    public abstract class RuleBase<T>(string name, AnnotationProduct production = AnnotationProduct.Annotation, int precedence = 0)
-        where T : IComparable<T>
+    public abstract class RuleBase<T>(
+        string name, 
+        AnnotationProduct production = AnnotationProduct.Annotation, 
+        int precedence = 0) 
+        : IRule
     {
         public string Name { get; init; } = name;
 
@@ -41,10 +44,10 @@
             return Production switch
             {
                 AnnotationProduct.Annotation =>
-                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) { DebugName = Name }]),
+                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange) { DebugName = Name }]),
 
                 AnnotationProduct.Transitive =>
-                    new ParseResult(true, dataRange.Length, [new Annotation(Id, dataRange) { DebugName = Name }]),
+                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange) { DebugName = Name }]),
 
                 AnnotationProduct.None =>
                     new ParseResult(true, dataRange.Length),
@@ -74,7 +77,7 @@
             return Production switch
             {
                 AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
-                                        [new Annotation(Id, dataRange, children) { DebugName = Name }]),
+                                        [new Annotation(this, dataRange, children) { DebugName = Name }]),
 
                 AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
                 

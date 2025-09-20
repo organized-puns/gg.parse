@@ -22,9 +22,9 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].RuleId == rule.Id);
+            Assert.IsTrue(result.Annotations![0].Rule == rule);
             Assert.IsTrue(result.Annotations![0].Children!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].Children![0].RuleId == function1.Id);
+            Assert.IsTrue(result.Annotations![0].Children![0].Rule == function1);
 
 
             result = rule.Parse(input, 2);
@@ -32,9 +32,9 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].RuleId == rule.Id);
+            Assert.IsTrue(result.Annotations![0].Rule == rule);
             Assert.IsTrue(result.Annotations![0].Children!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].Children![0].RuleId == function2.Id);
+            Assert.IsTrue(result.Annotations![0].Children![0].Rule == function2);
 
             result = rule.Parse(input, 3);
 
@@ -57,7 +57,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].RuleId == function1.Id);
+            Assert.IsTrue(result.Annotations![0].Rule == function1);
             Assert.IsTrue(result.Annotations![0].Children == null);
 
             result = rule.Parse(input, 2);
@@ -65,7 +65,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(2, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations![0].RuleId == function2.Id);
+            Assert.IsTrue(result.Annotations![0].Rule == function2);
             Assert.IsTrue(result.Annotations![0].Children == null);
 
             result = rule.Parse(input, 3);

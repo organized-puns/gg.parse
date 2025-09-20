@@ -1,11 +1,5 @@
 ﻿using gg.parse.ebnf;
 using gg.parse.rulefunctions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.Marshalling;
-using System.Text;
-using System.Threading.Tasks;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -35,7 +29,7 @@ namespace gg.parse.tests.ebnf
 
             for (var i = 0; i < expectedNames.Length; i++)
             {
-                var name = tokenizer.FindRule(result.Annotations![i].RuleId)!.Name;
+                var name = result.Annotations![i].Rule!.Name;
                 IsTrue(name == expectedNames[i]);
             }
         }
@@ -57,7 +51,7 @@ namespace gg.parse.tests.ebnf
 
             for (var i = 0; i < expectedNames.Length; i++)
             {
-                var name = tokenizer.FindRule(result.Annotations![i].RuleId)!.Name;
+                var name = result.Annotations![i].Rule!.Name;
                 IsTrue(name == expectedNames[i]);
             }
         }
@@ -80,7 +74,7 @@ namespace gg.parse.tests.ebnf
 
             for (var i = 0; i < expectedNames.Length; i++)
             {
-                var name = tokenizer.FindRule(result.Annotations![i].RuleId)!.Name;
+                var name = result.Annotations![i].Rule!.Name;
                 IsTrue(name == expectedNames[i]);
             }
         }      

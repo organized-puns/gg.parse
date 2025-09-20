@@ -53,7 +53,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(3, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == digitSequenceRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == digitSequenceRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             // Check if the rule fails for a non-digit character
@@ -81,7 +81,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(3, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == intRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == intRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = [.. "-1234"];
@@ -89,7 +89,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(5, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == intRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == intRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = [.. "+56789"];
@@ -97,7 +97,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(6, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == intRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == intRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             // Check if the rule fails for a non-digit character
@@ -123,7 +123,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(7, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == floatRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == floatRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = "-123.345e2".ToArray();
@@ -131,7 +131,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(10, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == floatRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == floatRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = "0.345E-43".ToArray();
@@ -139,7 +139,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(9, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == floatRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == floatRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             Assert.IsFalse(floatRule.Parse("123".ToArray(), 0).FoundMatch);
@@ -170,7 +170,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(3, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == fooRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == fooRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             Assert.IsFalse(fooRule.Parse(input, 1).FoundMatch);
@@ -181,7 +181,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(3, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == barRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == barRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             Assert.IsFalse(fooRule.Parse(input, 1).FoundMatch);
@@ -207,7 +207,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(4, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == booleanRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == booleanRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = "false".ToArray();
@@ -215,7 +215,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(5, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == booleanRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == booleanRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = "False".ToArray();
@@ -243,7 +243,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(6, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == quoteStringRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == quoteStringRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             Assert.IsFalse(quoteStringRule.Parse(input, 1).FoundMatch);
@@ -255,7 +255,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(6, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == doubleQuoteStringRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == doubleQuoteStringRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             Assert.IsFalse(doubleQuoteStringRule.Parse(input, 1).FoundMatch);
@@ -268,7 +268,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(11, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == doubleQuoteStringRule.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == doubleQuoteStringRule);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             Assert.IsFalse(doubleQuoteStringRule.Parse(input, 1).FoundMatch);
@@ -293,7 +293,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(4, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == identifier.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == identifier);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = "Bar123".ToArray();
@@ -301,7 +301,7 @@ namespace gg.parse.tests.rulefunctions
             Assert.IsTrue(result.FoundMatch);
             Assert.AreEqual(6, result.MatchedLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
-            Assert.IsTrue(result.Annotations[0].RuleId == identifier.Id);
+            Assert.IsTrue(result.Annotations[0].Rule == identifier);
             Assert.IsTrue(result.Annotations[0].Children == null);
 
             input = "1a2b3".ToArray();

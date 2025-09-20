@@ -20,10 +20,6 @@ namespace gg.parse.ebnf
 
         public Action<LogLevel, string>? Out { get; set; } = null;
 
-        public Func<int, RuleBase<int>?>? FindAstRule { get; set; } = null;
-
-        public Func<int, RuleBase<char>?>? FindTokenRule { get; set; } = null;
-
         public PipelineLog(bool storeLogs = true, int maxStoredLogs = -1)
         {
             if (storeLogs)
@@ -47,17 +43,13 @@ namespace gg.parse.ebnf
             }
 
             Out?.Invoke(level, message);
-
-            
         }
 
         public void ProcessTokenAnnotations(string text, List<Annotation> tokens)
         {
-            Requires(FindTokenRule != null, "No method to locate token rules defined, cannot process logs.");
-
             var logAnnotations = tokens.Select(a =>
                                     a!.SelectNotNull(ax =>
-                                        FindTokenRule(ax.RuleId) is LogRule<char> rule
+                                        ax.Rule is LogRule<char> rule
                                             ? new Tuple<Annotation, LogRule<char>>(ax, rule)
                                             : null
                                     ));
@@ -78,11 +70,9 @@ namespace gg.parse.ebnf
 
         public void ProcessAstAnnotations(string text, List<Annotation> tokens, List<Annotation> astNodes) 
         {
-            Requires(FindAstRule != null, "No method to locate ast rules defined, cannot process logs.");
-
             var logAnnotations = astNodes.Select(a => 
                                     a!.SelectNotNull( ax =>
-                                        FindAstRule(ax.RuleId) is LogRule<int> rule 
+                                        ax.Rule is LogRule<int> rule 
                                             ? new Tuple<Annotation, LogRule<int>>(ax, rule)
                                             : null
                                     ));

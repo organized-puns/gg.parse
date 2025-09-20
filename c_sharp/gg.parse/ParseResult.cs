@@ -20,7 +20,7 @@
             annotations = Annotations;
         }
 
-        public int[] CollectRuleIds() => Annotations == null ? [] : [.. Annotations.Select(a => a.RuleId)];
+        public int[] CollectRuleIds() => Annotations == null ? [] : [.. Annotations.Select(a => a.Rule.Id)];
 
         public override string ToString()
         {

@@ -1,8 +1,7 @@
 ﻿namespace gg.parse
 {
-    public class Annotation : IComparable
-    {
-        
+    public class Annotation 
+    {        
         public Range Range { get; set; }
         
         public int Start => Range.Start;
@@ -12,9 +11,9 @@
         public int Length => Range.Length;
 
         /// <summary>
-        /// Function which produced this annotation.
+        /// Rule which produced this annotation.
         /// </summary>
-        public int RuleId { get; init; }
+        public IRule Rule { get; init; }
 
         public List<Annotation>? Children { get; init; }
 
@@ -32,9 +31,9 @@
         public string DebugName { get; set; } = nameof(Annotation);
 #endif
 
-        public Annotation(int functionId, Range range, List<Annotation>? children = null, Annotation? parent = null)
+        public Annotation(IRule rule, Range range, List<Annotation>? children = null, Annotation? parent = null)
         {
-            RuleId = functionId;
+            Rule = rule;
             Range = range;
             Children = children;
             Parent = parent;
@@ -45,20 +44,10 @@
             }
         }
 
-        public int CompareTo(object? obj)
-        {
-            if (obj is Annotation other)
-            {
-                return RuleId.CompareTo(other.Range.Start);
-            }
-
-            return 0;
-        }
-
         public override string ToString() =>
         
 #if DEBUG
-            $"{DebugName}({RuleId}, {Range})";
+            $"{DebugName}({Rule}, {Range})";
 #else
             $"Annotation(Id: {FunctionId}, Range: {Range})";
 #endif

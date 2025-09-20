@@ -18,12 +18,10 @@ namespace gg.parse.compiler
     public delegate RuleBase<T> CompileFunction<T>(
         RuleCompiler<T> compiler,
         RuleDeclaration declaration, 
-        CompileSession<T> context) where T : IComparable<T>;
+        CompileSession context) where T : IComparable<T>;
 
     public class RuleCompiler<T> where T : IComparable<T>
     {
-        public List<int> IgnoredRules { get; private set; } = [];
-
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
@@ -52,12 +50,12 @@ namespace gg.parse.compiler
             throw new NoCompilationFunctionException(parseFunctionId);
         }
 
-        public RuleGraph<T> Compile(CompileSession<T> context)
+        public RuleGraph<T> Compile(CompileSession context)
         {
             return Compile(context, new RuleGraph<T>());
         }
 
-        public RuleGraph<T> Compile(CompileSession<T> session, RuleGraph<T> resultGraph)
+        public RuleGraph<T> Compile(CompileSession session, RuleGraph<T> resultGraph)
         {
             foreach (var node in session.AstNodes)
             {
@@ -75,7 +73,7 @@ namespace gg.parse.compiler
                 }
                 else
                 {
-                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.RuleId);
+                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.Rule.Id);
 
                     if (resultGraph.FindRule(declaration.Name) == null)
                     {
@@ -133,12 +131,12 @@ namespace gg.parse.compiler
         /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private RuleDeclaration GetRuleDeclaration(CompileSession<T> context, List<Annotation> ruleNodes, int index)
+        private RuleDeclaration GetRuleDeclaration(CompileSession context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
             // annotation product is optional, (will default to Annotation)
-            if (TryGetProduct(ruleNodes[idx].RuleId, out var product))
+            if (TryGetProduct(ruleNodes[idx].Rule.Id, out var product))
             {
                 idx++;
             }

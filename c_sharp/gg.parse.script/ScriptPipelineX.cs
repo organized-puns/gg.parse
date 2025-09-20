@@ -51,11 +51,11 @@ namespace gg.parse.script
             session.LogHandler!.ProcessAstAnnotations(session.Text!, session.Tokens, session.AstNodes);
             
             // remove logs from the annotations
-            session.AstNodes = session.AstNodes.Filter(a => session.Parser.FindRule(a.RuleId) is not LogRule<int>);
+            session.AstNodes = session.AstNodes.Filter(a => a.Rule is not LogRule<int>);
 
             // combine the rule graph from the includes with the rulegraph with the one based on the current
             // parse results
-            var compileSession = new CompileSession<T>(session.Text, session.Tokens, session.AstNodes);
+            var compileSession = new CompileSession(session.Text, session.Tokens, session.AstNodes);
             session.RuleGraph = session.Compiler!.Compile(compileSession, session.RuleGraph);
             
             return session;
@@ -70,9 +70,6 @@ namespace gg.parse.script
             {
                 FailOnWarning = pipelineLogger.FailOnWarning
             };
-
-            pipelineLogger.FindAstRule = id => parser.FindRule(id);
-            pipelineLogger.FindTokenRule = id => tokenizer.FindRule(id);
 
             var tokenizerSession = new PipelineSessionX<T>()
             {
@@ -173,7 +170,7 @@ namespace gg.parse.script
             {
                 var statement = session.AstNodes[i];
 
-                if (statement.RuleId == session.Parser!.Include.Id)
+                if (statement.Rule == session.Parser!.Include)
                 {
                     Requires(statement.Children != null && statement.Children.Count > 0);
 

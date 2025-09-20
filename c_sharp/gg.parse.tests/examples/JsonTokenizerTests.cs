@@ -1,4 +1,6 @@
-﻿using gg.parse.instances.json;
+﻿#nullable disable
+
+using gg.parse.instances.json;
 using gg.parse.rulefunctions;
 
 namespace gg.parse.tests.examples
@@ -17,8 +19,8 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(isSuccess);
             Assert.IsTrue(charactersRead == 3);
             Assert.IsTrue(annotations!.Count == 2);
-            Assert.IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.ScopeStart).Id);
-            Assert.IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.ScopeEnd).Id);
+            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.ScopeStart));
+            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.ScopeEnd));
         }
 
         [TestMethod]

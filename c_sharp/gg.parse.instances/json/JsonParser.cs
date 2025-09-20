@@ -168,7 +168,7 @@ namespace gg.parse.instances.json
 
         public ParseResult Parse(List<Annotation> tokens)
         {
-            return Root.Parse(tokens.Select(t => t.RuleId).ToArray(), 0);
+            return Root.Parse(tokens.Select(t => t.Rule.Id).ToArray(), 0);
         }
 
         public string AnnotateTextUsingHtml(
@@ -216,7 +216,7 @@ namespace gg.parse.instances.json
                 writePosition = textStart;
             }
 
-            builder.Append($"<div class=\"{FindRule(annotation.RuleId).Name}\">");
+            builder.Append($"<div class=\"{annotation.Rule.Name}\">");
 
             if (annotation.Children == null || annotation.Children.Count == 0)
             {
