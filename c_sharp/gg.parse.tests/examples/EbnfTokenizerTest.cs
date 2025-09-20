@@ -20,11 +20,11 @@ namespace gg.parse.tests.examples
             IsTrue(isSuccess);
             IsTrue(charactersRead == rule.Length);
             IsTrue(annotations!.Count == 5);
-            IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-            IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-            IsTrue(annotations[2].RuleId == tokenizer.FindRule(CommonTokenNames.ZeroOrMoreOperator).Id);
-            IsTrue(annotations[3].RuleId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            IsTrue(annotations[4].RuleId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.ZeroOrMoreOperator));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
 
         [TestMethod]
@@ -38,14 +38,14 @@ namespace gg.parse.tests.examples
             IsTrue(isSuccess);
             IsTrue(charactersRead == rule.Length);
             IsTrue(annotations!.Count == 8);
-            IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-            IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-            IsTrue(annotations[2].RuleId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            IsTrue(annotations[3].RuleId == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence).Id);
-            IsTrue(annotations[4].RuleId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            IsTrue(annotations[5].RuleId == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence).Id);
-            IsTrue(annotations[6].RuleId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            IsTrue(annotations[7].RuleId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence));
+            IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[5].Rule == tokenizer.FindRule(CommonTokenNames.OptionWithPrecedence));
+            IsTrue(annotations[6].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[7].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
 
         [TestMethod]
@@ -60,11 +60,11 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(isSuccess);
             Assert.IsTrue(charactersRead == rule.Length);
             Assert.IsTrue(annotations!.Count == 5);
-            Assert.IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-            Assert.IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-            Assert.IsTrue(annotations[2].RuleId == tokenizer.FindRule(CommonTokenNames.TryMatchOperatorShortHand).Id);
-            Assert.IsTrue(annotations[3].RuleId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            Assert.IsTrue(annotations[4].RuleId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.TryMatchOperatorShortHand));
+            Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            Assert.IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
 
             // try full operator
             rule = "rule_name = try 'literal';";
@@ -74,13 +74,13 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(isSuccess);
             Assert.IsTrue(charactersRead == rule.Length);
             Assert.IsTrue(annotations!.Count == 5);
-            Assert.IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-            Assert.IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-            Assert.IsTrue(annotations[2].RuleId == tokenizer.FindRule(CommonTokenNames.TryMatchOperator).Id);
+            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.TryMatchOperator));
             Assert.IsTrue(annotations[2].Start == 12);
             Assert.IsTrue(annotations[2].Length == 4);
-            Assert.IsTrue(annotations[3].RuleId == tokenizer.FindRule(CommonTokenNames.SingleQuotedString).Id);
-            Assert.IsTrue(annotations[4].RuleId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            Assert.IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
 
         [TestMethod]
@@ -96,10 +96,10 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(isSuccess);
             Assert.IsTrue(charactersRead == rule.Length);
             Assert.IsTrue(annotations!.Count == 4);
-            Assert.IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-            Assert.IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-            Assert.IsTrue(annotations[2].RuleId == tokenizer.FindRule(CommonTokenNames.AnyCharacter).Id);
-            Assert.IsTrue(annotations[3].RuleId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.AnyCharacter));
+            Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
 
         [TestMethod]
@@ -125,16 +125,16 @@ namespace gg.parse.tests.examples
                 IsTrue(isSuccess);
                 IsTrue(charactersRead == rule.Length);
                 IsTrue(annotations!.Count == 5);
-                IsTrue(annotations[0].RuleId == tokenizer.FindRule(CommonTokenNames.Identifier).Id);
-                IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Integer).Id);
+                IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+                IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Integer));
 
-                IsTrue(annotations[1].RuleId == tokenizer.FindRule(CommonTokenNames.Integer).Id);
+                IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Integer));
                 var value = ruleDefinitions[i].AsSpan(annotations[1].Range.Start, annotations[1].Range.Length).ToString();
                 IsTrue(int.Parse(value) == expectedPrecedences[i]);
 
-                IsTrue(annotations[2].RuleId == tokenizer.FindRule(CommonTokenNames.Assignment).Id);
-                IsTrue(annotations[3].RuleId == tokenizer.FindRule(CommonTokenNames.AnyCharacter).Id);
-                IsTrue(annotations[4].RuleId == tokenizer.FindRule(CommonTokenNames.EndStatement).Id);
+                IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+                IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.AnyCharacter));
+                IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
             }
         }
 

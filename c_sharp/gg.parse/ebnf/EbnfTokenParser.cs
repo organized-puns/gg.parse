@@ -102,7 +102,7 @@ namespace gg.parse.ebnf
 
         private MatchSingleData<int> RuleEndToken { get; set; }
 
-        private MatchSingleData<int> IdentifierToken { get; set; }
+        public MatchSingleData<int> IdentifierToken { get; set; }
 
         private MatchSingleData<int> AssignmentToken { get; set; }
 
@@ -382,7 +382,6 @@ namespace gg.parse.ebnf
             }
 
             return ([], []);
-
         }
 
         private List<Annotation> TokenizeText(string text)
@@ -415,7 +414,7 @@ namespace gg.parse.ebnf
                     : LogLevel.Error;
 
             return new Func<Annotation, bool>(
-                a => FindRule(a.RuleId) is LogRule<int> logRule && (logRule.Level & errorLevel) > 0
+                a => a.Rule is LogRule<int> logRule && (logRule.Level & errorLevel) > 0
             );
         }
 
@@ -452,9 +451,9 @@ namespace gg.parse.ebnf
 
         private bool ContainsTokenErrors(List<Annotation> annotations, out List<Annotation> errors)
         {
-            var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken).Id;
+            var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken);
 
-            var errorPredicate = new Func<Annotation, bool>(a => a.RuleId == unknownTokenId);
+            var errorPredicate = new Func<Annotation, bool>(a => a.Rule == unknownTokenId);
 
             errors = [];
 

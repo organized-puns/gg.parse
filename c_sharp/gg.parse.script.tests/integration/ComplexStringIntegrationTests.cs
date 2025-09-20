@@ -26,11 +26,11 @@ namespace gg.parse.script.tests.integration
 
             foreach (var validString in validStrings)
             {
-                var result = parser.Parse(validString);
+                var (result, _) = parser.Parse(validString);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations[0].RuleId == stringRule!.Id);
+                Assert.IsTrue(result.Annotations[0].Rule == stringRule);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].End == validString.Length);
                 Assert.IsTrue(result.Annotations[0].Length == validString.Length);
@@ -56,11 +56,11 @@ namespace gg.parse.script.tests.integration
 
             foreach (var testString in invalidStrings)
             {
-                var result = parser.Parse(testString);
+                var (result, _) = parser.Parse(testString);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations[0].RuleId == errEOF.Id);
+                Assert.IsTrue(result.Annotations[0].Rule == errEOF);
                 Assert.IsTrue(result.Annotations[0].Start == 0);
                 Assert.IsTrue(result.Annotations[0].End == testString.Length);
                 Assert.IsTrue(result.Annotations[0].Children == null);
@@ -86,11 +86,11 @@ namespace gg.parse.script.tests.integration
 
             foreach (var testConfig in testConfigurations)
             {
-                var result = parser.Parse(testConfig.input);
+                var (result, _) = parser.Parse(testConfig.input);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations[0].RuleId == errEOLN.Id);
+                Assert.IsTrue(result.Annotations[0].Rule == errEOLN);
                 Assert.IsTrue(result.Annotations[0].Start == testConfig.expectedPosition);
                 Assert.IsTrue(result.Annotations[0].Length == testConfig.expectedLength);
                 Assert.IsTrue(result.Annotations[0].Children == null);
@@ -129,13 +129,13 @@ namespace gg.parse.script.tests.integration
 
             foreach (var testConfig in testConfigurations)
             {
-                var result = parser.Parse(testConfig.input);
+                var (result, _) = parser.Parse(testConfig.input);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations.Count == testConfig.functionIds.Length);
 
-                Assert.IsTrue(result.Annotations.Select(a => a.RuleId)
+                Assert.IsTrue(result.Annotations.Select(a => a.Rule.Id)
                                 .SequenceEqual(testConfig.functionIds));
             }
         }

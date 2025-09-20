@@ -11,10 +11,10 @@ namespace gg.parse.script.tests.integration
             var token = "bar";
             var parser = new ScriptParser().InitializeFromDefinition($"foo='{token}';", "root=foo;");
 
-            var barParseResult = parser.Parse(token);
+            var (_, barParseResult) = parser.Parse(token);
 
             IsTrue(barParseResult.FoundMatch);
-            IsTrue(parser.Parser.FindRule(barParseResult[0]!.RuleId)!.Name == "root");
+            IsTrue(barParseResult[0]!.Rule!.Name == "root");
         }
     }
 }

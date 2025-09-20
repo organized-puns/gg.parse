@@ -73,7 +73,7 @@ namespace gg.parse.compiler
                 }
                 else
                 {
-                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.RuleId);
+                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.Rule.Id);
 
                     if (resultGraph.FindRule(declaration.Name) == null)
                     {
@@ -136,7 +136,7 @@ namespace gg.parse.compiler
             var idx = index;
 
             // annotation product is optional, (will default to Annotation)
-            if (TryGetProduct(ruleNodes[idx].RuleId, out var product))
+            if (TryGetProduct(ruleNodes[idx].Rule.Id, out var product))
             {
                 idx++;
             }

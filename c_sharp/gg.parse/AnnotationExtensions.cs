@@ -9,7 +9,7 @@ namespace gg.parse
         /// <param name="annotations"></param>
         /// <returns></returns>
         public static int[] SelectRuleIds(this IEnumerable<Annotation> annotations) =>
-            annotations.Select(t => t.RuleId).ToArray();
+            annotations.Select(t => t.Rule.Id).ToArray();
 
 
         public static string GetText(this Annotation annotation, string text)
@@ -68,7 +68,7 @@ namespace gg.parse
             annotation.Children == null
                 ? annotation
                 : new Annotation(
-                    annotation.RuleId,
+                    annotation.Rule,
                     annotation.Range,
                     [..annotation
                         .Children

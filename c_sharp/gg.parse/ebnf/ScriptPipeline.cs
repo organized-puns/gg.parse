@@ -87,7 +87,7 @@ namespace gg.parse.ebnf
             {
                 if (tokens.Annotations != null && tokens.Annotations.Count > 0)
                 {
-                    astTree = _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.RuleId).ToArray(), 0);
+                    astTree = _ebnfParser!.Root!.Parse(tokens.Annotations.Select(t => t.Rule.Id).ToArray(), 0);
                 }
                 else
                 {
@@ -119,7 +119,7 @@ namespace gg.parse.ebnf
 
         public void Dump(StringBuilder builder, int indentCount, string indentStr, Annotation node, string text, List<Annotation> tokens)
         {
-            var function = FindParserRule(node.RuleId);
+            var rule = node.Rule;
 
             for (var i = 0; i < indentCount; i++)
             {
@@ -133,7 +133,7 @@ namespace gg.parse.ebnf
                 nodeText = $"{nodeText.Substring(0, 17)}...";
             }
 
-            builder.AppendLine($"[{node.Range.Start},{node.Range.End}]{function.Name}({function.Id}): {nodeText}");
+            builder.AppendLine($"[{node.Range.Start},{node.Range.End}]{rule.Name}({rule.Id}): {nodeText}");
 
             if (node.Children != null && node.Children.Count > 0)
             {
@@ -159,11 +159,6 @@ namespace gg.parse.ebnf
             {
                 FailOnWarning = logHandler != null && logHandler.FailOnWarning
             };
-
-            if (logHandler != null)
-            {
-                logHandler.FindAstRule = id => tokenizerParser.FindRule(id);
-            }
 
             try
             {
@@ -192,7 +187,7 @@ namespace gg.parse.ebnf
             logHandler?.ProcessAstAnnotations(tokenizerText, tokenizerTokens, tokenizerAstNodes);
 
             // remove logs from the annotations
-            var filteredNodes = tokenizerAstNodes.Filter(a => tokenizerParser.FindRule(a.RuleId) is not LogRule<int>);
+            var filteredNodes = tokenizerAstNodes.Filter(a => a.Rule is not LogRule<int>);
 
             var session = new CompileSession(tokenizerText, tokenizerTokens, filteredNodes);
 
@@ -288,12 +283,11 @@ namespace gg.parse.ebnf
             // redirect rule lookup if a logger is set
             if (logHandler != null)
             {
-                logHandler.FindAstRule = id => grammarParser.FindRule(id);
                 logHandler.ProcessAstAnnotations(grammarText, grammarTokens, grammarAstNodes);
             }
 
             // remove logs from the annotations
-            var filteredNodes = grammarAstNodes.Filter(a => grammarParser.FindRule(a.RuleId) is not LogRule<int>);
+            var filteredNodes = grammarAstNodes.Filter(a => a.Rule is not LogRule<int>);
 
             var session = new CompileSession(grammarText, grammarTokens, filteredNodes);
 
@@ -345,7 +339,7 @@ namespace gg.parse.ebnf
             {
                 var statement = astTree[i];
 
-                if (statement.RuleId == includeId)
+                if (statement.Rule.Id == includeId)
                 {
                     var fileName = ResolveFile(statement.Children[0].GetText(inputText, tokens), paths);
                     

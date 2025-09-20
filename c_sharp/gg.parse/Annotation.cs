@@ -13,7 +13,7 @@
         /// <summary>
         /// Rule which produced this annotation.
         /// </summary>
-        public int RuleId { get; init; }
+        public IRule Rule { get; init; }
 
         public List<Annotation>? Children { get; init; }
 
@@ -31,9 +31,9 @@
         public string DebugName { get; set; } = nameof(Annotation);
 #endif
 
-        public Annotation(int functionId, Range range, List<Annotation>? children = null, Annotation? parent = null)
+        public Annotation(IRule rule, Range range, List<Annotation>? children = null, Annotation? parent = null)
         {
-            RuleId = functionId;
+            Rule = rule;
             Range = range;
             Children = children;
             Parent = parent;
@@ -47,7 +47,7 @@
         public override string ToString() =>
         
 #if DEBUG
-            $"{DebugName}({RuleId}, {Range})";
+            $"{DebugName}({Rule}, {Range})";
 #else
             $"Annotation(Id: {FunctionId}, Range: {Range})";
 #endif

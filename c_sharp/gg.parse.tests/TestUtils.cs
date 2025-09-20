@@ -5,6 +5,8 @@ using static gg.parse.ebnf.CompilerUtils;
 
 namespace gg.parse.tests
 {
+    
+
     public class TokenTestContext
     {
         public string Text { get; set; }
@@ -47,7 +49,7 @@ namespace gg.parse.tests
 
             Assert.IsTrue(result.FoundMatch);
             Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
-            Assert.IsTrue(result.Annotations[0].RuleId != parser.UnknownInputError.Id);
+            Assert.IsTrue(result.Annotations[0].Rule != parser.UnknownInputError);
 
             var astNodes = result.Annotations;
 

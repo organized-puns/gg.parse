@@ -62,7 +62,7 @@ namespace gg.parse.compiler
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasProductionOperator)
             {
-                compiler.TryGetProduct(ruleDefinition.Children[0].RuleId, out product);
+                compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
             }
 
             return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
@@ -142,7 +142,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
 
                     var elementDeclaration = 
                         new RuleDeclaration(
@@ -181,7 +181,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.RuleId);
+                    var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.Rule.Id);
                     var elementDeclaration = 
                         new RuleDeclaration(
                             AnnotationProduct.Annotation, 
@@ -220,7 +220,7 @@ namespace gg.parse.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
+                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
 
                     var elementDeclaration = 
                         new RuleDeclaration(
@@ -252,7 +252,7 @@ namespace gg.parse.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction,_) = compiler.Functions[elementAnnotation.RuleId];
+            var (compilationFunction,_) = compiler.Functions[elementAnnotation.Rule.Id];
             var groupDeclaration = new RuleDeclaration(declaration.Product, declaration.Name, elementAnnotation);
 
             return compilationFunction(compiler, groupDeclaration, context);
@@ -293,7 +293,7 @@ namespace gg.parse.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{declaration.Name} of {elementName}", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
@@ -319,7 +319,7 @@ namespace gg.parse.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}, type: Not({elementName})", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
@@ -346,7 +346,7 @@ namespace gg.parse.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.RuleId];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{elementName}, type: {declaration.Name}", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
@@ -401,7 +401,7 @@ namespace gg.parse.compiler
             if (ruleDefinition.Children.Count == 3)
             {
                 var conditionDefinition = ruleDefinition.Children[2];
-                var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.RuleId];
+                var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.Rule.Id];
                 var conditionDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name} condition: {elementName}", conditionDefinition);
                 condition = compilationFunction(compiler, conditionDeclaration, context);
 

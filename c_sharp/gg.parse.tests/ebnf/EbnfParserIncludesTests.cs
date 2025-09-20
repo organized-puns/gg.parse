@@ -31,7 +31,7 @@ namespace gg.parse.tests.ebnf
                                 tokenizer.FindRule(CommonTokenNames.Identifier).Id,
                                 tokenizer.FindRule(CommonTokenNames.EndStatement).Id
             };
-            var tokenIds = tokenizerTokens.Select(t => t.RuleId).ToArray();
+            var tokenIds = tokenizerTokens.Select(t => t.Rule.Id).ToArray();
 
             Assert.IsTrue(tokenIds.SequenceEqual(expectedIds));
 
@@ -43,7 +43,7 @@ namespace gg.parse.tests.ebnf
                 tokenizerParser.MatchRule.Id
             };
 
-            var astNodeIds = tokenizerAstTree.Select(t => t.RuleId).ToArray();
+            var astNodeIds = tokenizerAstTree.Select(t => t.Rule.Id).ToArray();
 
             Assert.IsTrue(astNodeIds.SequenceEqual(expectedAstNodes));
         }
@@ -93,7 +93,7 @@ namespace gg.parse.tests.ebnf
             var parseResult = stringRef.Parse("\"this is a string\"".ToCharArray(), 0);
             Assert.IsTrue(parseResult.FoundMatch);
             Assert.IsTrue(parseResult.Annotations != null);
-            Assert.IsTrue(parseResult.Annotations[0].RuleId == stringRef.Id);
+            Assert.IsTrue(parseResult.Annotations[0].Rule == stringRef);
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace gg.parse.tests.ebnf
             var parseResult = stringRef.Parse("\"this is a string\"".ToCharArray(), 0);
             Assert.IsTrue(parseResult.FoundMatch);
             Assert.IsTrue(parseResult.Annotations != null);
-            Assert.IsTrue(parseResult.Annotations[0].RuleId == stringRef.Id);
+            Assert.IsTrue(parseResult.Annotations[0].Rule == stringRef);
         }
 
         /// <summary>
@@ -153,8 +153,8 @@ namespace gg.parse.tests.ebnf
             var result = jsonParser.Parse("{ \"key\": 123 }");
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations[0].Children[0].RuleId == jsonParser.FindParserRule("object").Id);
-            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].RuleId == jsonParser.FindParserRule("key_value_pair").Id);
+            Assert.IsTrue(result.Annotations[0].Children[0].Rule == jsonParser.FindParserRule("object"));
+            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].Rule == jsonParser.FindParserRule("key_value_pair"));
         }
 
         /// <summary>
@@ -187,15 +187,15 @@ namespace gg.parse.tests.ebnf
                 jsonParser.EbnfTokenizer.FindRule("scope_end").Id,
             };
 
-            var tokenIds = tokens.Annotations.Select(t => t.RuleId).ToArray();
+            var tokenIds = tokens.Annotations.Select(t => t.Rule.Id).ToArray();
 
             Assert.IsTrue(tokenIds.SequenceEqual(expectedTokens));
 
             var result = jsonParser.Parse("{ \"key\": 123 }");
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations[0].Children[0].RuleId == jsonParser.FindParserRule("object").Id);
-            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].RuleId == jsonParser.FindParserRule("key_value_pair").Id);
+            Assert.IsTrue(result.Annotations[0].Children[0].Rule == jsonParser.FindParserRule("object"));
+            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].Rule == jsonParser.FindParserRule("key_value_pair"));
         }
     }
 }

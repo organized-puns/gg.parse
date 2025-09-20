@@ -92,9 +92,9 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(generatedTokenizer.FindRule("scope_start") != null);
             Assert.IsTrue(generatedTokenizer.FindRule("scope_end") != null);
             Assert.IsTrue(generatedTokenizer.FindRule("unknown_token") != null);
-            Assert.IsTrue(tokens.Annotations[0].RuleId == generatedTokenizer.FindRule("scope_start")!.Id);
-            Assert.IsTrue(tokens.Annotations[1].RuleId == generatedTokenizer.FindRule("scope_end")!.Id);
-            Assert.IsTrue(tokens.Annotations[12].RuleId == generatedTokenizer.FindRule("unknown_token")!.Id);
+            Assert.IsTrue(tokens.Annotations[0].Rule == generatedTokenizer.FindRule("scope_start"));
+            Assert.IsTrue(tokens.Annotations[1].Rule == generatedTokenizer.FindRule("scope_end"));
+            Assert.IsTrue(tokens.Annotations[12].Rule == generatedTokenizer.FindRule("unknown_token"));
         }
 
         
@@ -137,7 +137,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(astTree.Annotations != null);
             Assert.IsTrue(astTree.Annotations.Count == 1);
             Assert.IsTrue(jsonParser.FindParserRule("json") != null);
-            Assert.IsTrue(astTree.Annotations[0].RuleId == jsonParser.FindParserRule("json")!.Id);
+            Assert.IsTrue(astTree.Annotations[0].Rule == jsonParser.FindParserRule("json"));
 
             var jsonNode = astTree.Annotations[0];
             var jsonNodeText = jsonNode.GetText(keyStrValue, tokens.Annotations!);
@@ -146,7 +146,7 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(jsonNode.Children != null);
             Assert.IsTrue(jsonNode.Children.Count == 1);
             Assert.IsTrue(jsonParser.FindParserRule("object") != null);
-            Assert.IsTrue(jsonNode.Children[0].RuleId == jsonParser.FindParserRule("object")!.Id);
+            Assert.IsTrue(jsonNode.Children[0].Rule == jsonParser.FindParserRule("object"));
 
             var objectNode = jsonNode.Children[0];
             var objectNodeText = objectNode.GetText(keyStrValue, tokens.Annotations!);
@@ -157,10 +157,10 @@ namespace gg.parse.tests.examples
             Assert.IsTrue(objectNode.Children.Count == 3);
 
             Assert.IsTrue(jsonParser.FindParserRule("scope_start") != null);
-            Assert.IsTrue(objectNode.Children[0].RuleId == jsonParser.FindParserRule("scope_start")!.Id);
+            Assert.IsTrue(objectNode.Children[0].Rule == jsonParser.FindParserRule("scope_start"));
 
             Assert.IsTrue(jsonParser.FindParserRule("scope_end") != null);
-            Assert.IsTrue(objectNode.Children[2].RuleId == jsonParser.FindParserRule("scope_end")!.Id);
+            Assert.IsTrue(objectNode.Children[2].Rule == jsonParser.FindParserRule("scope_end"));
 
             var keyValueListNode = objectNode.Children[1];
             var keyValueListText = keyValueListNode.GetText(keyStrValue, tokens.Annotations!);
