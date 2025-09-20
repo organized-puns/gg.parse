@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rules
+﻿namespace gg.parse.tests
 {
     public class EmptyRule : IRule
     {

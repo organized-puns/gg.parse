@@ -5,8 +5,6 @@ using static gg.parse.ebnf.CompilerUtils;
 
 namespace gg.parse.tests
 {
-    
-
     public class TokenTestContext
     {
         public string Text { get; set; }
