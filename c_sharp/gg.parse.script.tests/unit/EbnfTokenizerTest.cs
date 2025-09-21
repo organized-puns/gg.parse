@@ -1,10 +1,11 @@
-﻿using gg.parse.ebnf;
-using gg.parse.instances.json;
+﻿#nullable disable
+
 using gg.parse.rulefunctions;
+using gg.parse.script.parsing;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.examples
+namespace gg.parse.script.tests.unit
 {
     [TestClass]
     public class EbnfTokenizerTests
@@ -136,22 +137,6 @@ namespace gg.parse.tests.examples
                 IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.AnyCharacter));
                 IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
             }
-        }
-
-
-        [TestMethod]
-        public void TestJsonFileWithErrors_ExpectLotsOfAnnotationsAndErrors()
-        {
-            var tokenizer = new EbnfTokenizer(dropComments: true);
-            var text = File.ReadAllText("assets/ebnf_tokenizer_example.ebnf");
-            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(text);
-
-            Assert.IsTrue(isSuccess);
-
-            Directory.CreateDirectory("output");
-
-            File.WriteAllText("output/ebnf_tokenizer_example_with_errors_annotations.html",
-                tokenizer.AnnotateTextUsingHtml(text, annotations, AnnotationMarkup.CreateTokenStyleLookup()));
         }
     }
 }

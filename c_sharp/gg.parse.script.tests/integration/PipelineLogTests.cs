@@ -1,10 +1,10 @@
-﻿
-using gg.parse.ebnf;
-using gg.parse.script;
+﻿#nullable disable
+
 using gg.parse.script.pipeline;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.ebnf
+namespace gg.parse.script.tests.integration
 {
     [TestClass]
     public class PipelineLogTests

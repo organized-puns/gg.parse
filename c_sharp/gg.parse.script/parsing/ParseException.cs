@@ -1,4 +1,4 @@
-﻿namespace gg.parse.ebnf
+﻿namespace gg.parse.script.parsing
 {
     public class ParseException : Exception
     {

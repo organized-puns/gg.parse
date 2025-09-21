@@ -1,7 +1,4 @@
-﻿using gg.parse.compiler;
-using gg.parse.ebnf;
-
-using static gg.parse.ebnf.CompilerUtils;
+﻿/*using gg.parse.compiler;
 
 namespace gg.parse.tests
 {
@@ -99,3 +96,4 @@ namespace gg.parse.tests
         }
     }
 }
+*/

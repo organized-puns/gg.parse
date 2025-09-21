@@ -1,6 +1,8 @@
-﻿using gg.parse.ebnf;
+﻿#nullable disable
+
 using gg.parse.rulefunctions;
 using gg.parse.script;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.compiler

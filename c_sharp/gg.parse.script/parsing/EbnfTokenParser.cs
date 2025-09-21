@@ -6,7 +6,7 @@ using gg.parse.rules;
 
 using static gg.parse.rulefunctions.CommonRules;
 
-namespace gg.parse.ebnf
+namespace gg.parse.script.parsing
 {
     /// <summary>
     /// Turns a list of tokens into an abstract syntax tree according to EBNF(like) grammar.

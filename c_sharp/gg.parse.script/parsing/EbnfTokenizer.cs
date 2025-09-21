@@ -4,9 +4,8 @@ using gg.parse.rulefunctions;
 using static gg.parse.rulefunctions.CommonTokenNames;
 using static gg.parse.rulefunctions.CommonRules;
 
-namespace gg.parse.ebnf
+namespace gg.parse.script.parsing
 {
-
     public class EbnfTokenizer : RuleGraph<char>
     {
         public EbnfTokenizer(bool dropComments = true)

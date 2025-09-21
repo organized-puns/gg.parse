@@ -1,4 +1,6 @@
-﻿using gg.parse.rulefunctions.rulefunctions;
+﻿#nullable disable
+
+using gg.parse.rulefunctions.rulefunctions;
 
 namespace gg.parse.script.tests.integration
 {

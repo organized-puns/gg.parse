@@ -1,9 +1,11 @@
-﻿using gg.parse.ebnf;
+﻿#nullable disable
+
 using gg.parse.rulefunctions;
+using gg.parse.script.parsing;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.ebnf
+namespace gg.parse.script.tests.integration
 {
     [TestClass]
     public class EbnfTokenizerTests

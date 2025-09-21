@@ -1,14 +1,14 @@
 ﻿#nullable disable
 
-using gg.parse.ebnf;
 using gg.parse.rulefunctions;
+using gg.parse.script.parsing;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.ebnf
+namespace gg.parse.script.tests.integration
 {
     [TestClass]
-    public class EbnfTokenParserTests
+    public class AstBuilderParserTests
     {
         [TestMethod]
         public void CreateRuleWithPrecedence_ParseRule_ExpectRuleToHaveCorrectPrecedence()

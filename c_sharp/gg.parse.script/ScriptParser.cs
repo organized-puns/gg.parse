@@ -1,5 +1,4 @@
 ﻿using gg.core.util;
-using gg.parse.ebnf;
 using gg.parse.script.pipeline;
 
 namespace gg.parse.script

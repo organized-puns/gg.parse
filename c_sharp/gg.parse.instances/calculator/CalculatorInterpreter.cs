@@ -1,5 +1,5 @@
-﻿using gg.parse.ebnf;
-using gg.parse.script;
+﻿using gg.parse.script;
+
 using System.Globalization;
 
 namespace gg.parse.instances.calculator

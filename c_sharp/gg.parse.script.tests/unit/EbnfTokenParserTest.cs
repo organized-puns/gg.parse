@@ -1,6 +1,5 @@
 ﻿#nullable disable
 
-using gg.parse.instances.json;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
@@ -8,7 +7,7 @@ using gg.parse.script.parsing;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.examples
+namespace gg.parse.script.tests.unit
 {
     [TestClass]
     public class EbnfTokenParserTest
@@ -158,6 +157,77 @@ namespace gg.parse.tests.examples
             IsTrue(name == "TryMatch");
         }
 
+        /*
+            xxx move to json example
+
+        [TestMethod]
+        public void TokenizeParseCompileFile_ExpectSuccess()
+        {
+            var (text,tokens,astNodes,table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
+
+            // write the tokens to insepct (debug)
+            Directory.CreateDirectory("output");
+            File.WriteAllText("output/tpc_json_tokenizer_tokens.html",
+                new EbnfTokenizer().AnnotateTextUsingHtml(text, tokens, AnnotationMarkup.CreateTokenStyleLookup()));
+
+            IsTrue(table.Root != null);
+            IsTrue(table.Root.Name == "json_tokens");
+
+            var stringRule = table.FindRule("string");
+
+            IsNotNull(stringRule);
+
+            // test single quote
+            var result = stringRule.Parse("'foo'".ToArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations[0].Range.Start == 0);
+            IsTrue(result.Annotations[0].Range.Length == "'foo'".Length);
+
+            // test double quote
+            result = stringRule.Parse("\"foo\"".ToArray(), 0);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations[0].Range.Start == 0);
+            IsTrue(result.Annotations[0].Range.Length == "\"foo\"".Length);
+
+            // test if whitespace is there
+            var whiteSpace = table.FindRule("white_space");
+            IsNotNull(whiteSpace);
+            IsTrue(whiteSpace.Production == AnnotationProduct.None);
+
+            // test parsing
+            result = table.Root.Parse("{\"key\": 123, \"key\": null }".ToArray(), 0);
+            IsTrue(result.FoundMatch);
+            var expectedTokens = new[] {
+                "scope_start", "string", "kv_separator", "int", "item_separator",
+                "string", "kv_separator", "null", "scope_end" };
+
+            IsTrue(result.Annotations.Count == expectedTokens.Length);
+
+            for (var i = 0; i < expectedTokens.Length; i++)
+            {
+                IsTrue(result.Annotations[i].Rule == table.FindRule(expectedTokens[i]));
+            }
+        }
+
+
+        [TestMethod]
+        public void TestEbnfSpecificationError_Handling()
+        {
+            var (text, tokens, astNodes, table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
+
+            var result = table.Root.Parse("{\"key\": <bunch of errors> 123 }".ToArray(), 0);
+            IsTrue(result.FoundMatch);
+            var expectedTokens = new[] {
+                "scope_start", "string", "kv_separator", "unknown_token", "int", "scope_end" };
+            IsTrue(result.Annotations.Count == expectedTokens.Length);
+
+            for (var i = 0; i < expectedTokens.Length; i++)
+            {
+                IsTrue(result.Annotations[i].Rule == table.FindRule(expectedTokens[i]));
+            }
+        }*/
     }
 }
 

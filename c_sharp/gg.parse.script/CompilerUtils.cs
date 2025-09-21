@@ -1,8 +1,9 @@
 ﻿using gg.parse.compiler;
+using gg.parse.script.parsing;
 
 using static gg.parse.compiler.CompilerFunctions;
 
-namespace gg.parse.ebnf
+namespace gg.parse.script
 {
     public static class CompilerUtils
     {

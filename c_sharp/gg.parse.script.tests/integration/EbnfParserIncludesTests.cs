@@ -1,10 +1,9 @@
 ﻿#nullable disable
-using gg.parse.ebnf;
 using gg.parse.rulefunctions;
-using gg.parse.script;
+using gg.parse.script.parsing;
 using gg.parse.script.pipeline;
 
-namespace gg.parse.tests.ebnf
+namespace gg.parse.script.tests.integration
 {
     /// <summary>
     /// See if include statements work as intended
@@ -57,7 +56,7 @@ namespace gg.parse.tests.ebnf
         [TestMethod]
         public void CreateEbnfParser_FindRule_ExpectIncludedRulesToExist()
         {
-            var includeCommand = "include 'assets/string_tokenization.ebnf'; /*dummy main rule */ main=.;";
+            var includeCommand = "include 'assets/string.tokens'; /*dummy main rule */ main=.;";
             var jsonParser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
@@ -71,7 +70,7 @@ namespace gg.parse.tests.ebnf
         [TestMethod]
         public void CreateEbnfParserUsingAFileContainingAnInclude_FindRule_ExpectIncludedRulesToExist()
         {
-            var includeCommand = "include 'assets/include_test.ebnf'; /*dummy main rule */ grammar_root=.;";
+            var includeCommand = "include 'assets/include_test.tokens'; /*dummy main rule */ grammar_root=.;";
             var jsonParser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
@@ -84,7 +83,7 @@ namespace gg.parse.tests.ebnf
         [TestMethod]
         public void CreateEbnfParser_ParseCompiledRule_ExpectRuleToFindMatch()
         {
-            var includeCommand = "include 'assets/string_tokenization.ebnf'; string_ref = string;";
+            var includeCommand = "include 'assets/string.tokens'; string_ref = string;";
             var jsonParser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
@@ -108,7 +107,7 @@ namespace gg.parse.tests.ebnf
         [TestMethod]
         public void CreateEbnfParser_ParseCompiledRule_ExpectDuplicateIncludesToBeIgnored()
         {
-            var includeCommand = "include 'assets/string_tokenization.ebnf'; include 'assets/string_tokenization.ebnf'; string_ref = string;";
+            var includeCommand = "include 'assets/string.tokens'; include 'assets/string.tokens'; string_ref = string;";
             var jsonParser = new ScriptParser().InitializeFromDefinition(includeCommand);
 
             // should have loaded the string rule from the included file
@@ -131,7 +130,7 @@ namespace gg.parse.tests.ebnf
         public void CreateEbnfParser_ParseCompiledRule_ExpectExceptionBecauseOfCircularDependencies()
         {
             // this should throw and exception
-            new ScriptParser().InitializeFromDefinition("include 'assets/include_circular_1.ebnf';");
+            new ScriptParser().InitializeFromDefinition("include 'assets/include_circular_1.tokens';");
         }
 
         /// <summary>
@@ -142,8 +141,8 @@ namespace gg.parse.tests.ebnf
         {
             var jsonParser = new ScriptParser()
                 .InitializeFromDefinition(
-                    File.ReadAllText("assets/json_tokens.ebnf"), 
-                    "include 'assets/json_grammar.ebnf';#main=json;"
+                    File.ReadAllText("assets/json.tokens"), 
+                    "include 'assets/json.grammar';#main=json;"
             );
 
             Assert.IsTrue(jsonParser.Tokenizer != null);
@@ -170,8 +169,8 @@ namespace gg.parse.tests.ebnf
         {
             var jsonParser = new ScriptParser()
                 .InitializeFromDefinition(
-                    "include 'assets/json_tokens.ebnf';#token_main = json_tokens;",
-                    "include 'assets/json_grammar.ebnf'; # main = json;"
+                    "include 'assets/json.tokens';#token_main = json_tokens;",
+                    "include 'assets/json.grammar'; # main = json;"
                 );
 
             Assert.IsTrue(jsonParser.Tokenizer != null);
