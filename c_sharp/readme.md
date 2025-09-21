@@ -133,7 +133,7 @@ Todo (for mvp)
   - Add some more documentation, extend readme.
   - address all xxx
 
-   Move ebnf to its own project and rename ebnf to something else, script ? -> consider it a pipeline
+    Figure out if we really need all sub rules in the rulegraph id/name
 
     Replace CommonRules with CommonGraphWrapper
         
@@ -146,7 +146,7 @@ Todo (for mvp)
 
     Remove "Function" notion in favor of Rule in names across the project
 
-    Figure out if we really need all sub rules in the rulegraph id/name
+   Move instances to their own project 
 
 
 alpha (featured complete, buggy, ugly mess)

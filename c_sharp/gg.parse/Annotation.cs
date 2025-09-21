@@ -25,12 +25,6 @@
             : Children![index];
 
 
-#if DEBUG
-        // Defaults to the annotation's name. Generally will be overwritten by a rule
-        // with the rule name during parsing and constructing of the parse results.
-        public string DebugName { get; set; } = nameof(Annotation);
-#endif
-
         public Annotation(IRule rule, Range range, List<Annotation>? children = null, Annotation? parent = null)
         {
             Rule = rule;
@@ -45,13 +39,7 @@
         }
 
         public override string ToString() =>
-        
-#if DEBUG
-            $"{DebugName}({Rule}, {Range})";
-#else
-            $"Annotation(Id: {FunctionId}, Range: {Range})";
-#endif
-
+            $"Annotation(Rule:{Rule}, Range: {Range})";
         /// <summary>
         /// Checks if this annotation matches the predicate, if so adds it to the target. Then
         /// does the same for all its children (if any)

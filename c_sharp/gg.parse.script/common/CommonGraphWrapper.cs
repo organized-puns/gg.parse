@@ -43,10 +43,10 @@ namespace gg.parse.script.common
             return this.LogError(ruleName.Substring(start + length), product, message, condition);
         }
 
-        public TryMatchFunction<T> ifMatches(RuleBase<T> stopCondition) =>
+        public TryMatchRule<T> ifMatches(RuleBase<T> stopCondition) =>
             this.TryMatch(stopCondition);
 
-        public TryMatchFunction<T> ifMatches(string ruleName, RuleBase<T> condition)
+        public TryMatchRule<T> ifMatches(string ruleName, RuleBase<T> condition)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
 

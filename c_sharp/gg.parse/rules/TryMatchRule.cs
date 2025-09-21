@@ -1,12 +1,12 @@
 ﻿namespace gg.parse.rules
 {
-    public class TryMatchFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public class TryMatchRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         public RuleBase<T> Rule { get; private set; }
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
-        public TryMatchFunction(
+        public TryMatchRule(
             string name, 
             AnnotationProduct production, 
             RuleBase<T> rule, 
@@ -18,7 +18,7 @@
             Rule = rule;
         }
 
-        public TryMatchFunction(string name, RuleBase<T> rule)
+        public TryMatchRule(string name, RuleBase<T> rule)
             : base(name, AnnotationProduct.Annotation)
         {
             Assertions.RequiresNotNull(rule);

@@ -354,7 +354,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Try match.", elementAnnotation.Range, null);
             }
 
-            return new TryMatchFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
+            return new TryMatchRule<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileAny<T>(

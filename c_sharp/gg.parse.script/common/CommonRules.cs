@@ -396,19 +396,19 @@ namespace gg.parse.script.common
                 ? existingRule!
                 : graph.RegisterRule(new MatchDataSet<char>(ruleName, product, set));
 
-        public static TryMatchFunction<T> TryMatch<T>(
+        public static TryMatchRule<T> TryMatch<T>(
             this RuleGraph<T> graph, 
             string ruleName, 
             AnnotationProduct product, 
             RuleBase<T> function
         ) where T : IComparable<T> =>
 
-            graph.TryFindRule(ruleName, out TryMatchFunction<T>? existingRule)
+            graph.TryFindRule(ruleName, out TryMatchRule<T>? existingRule)
                 ? existingRule!
-                : graph.RegisterRule(new TryMatchFunction<T>(ruleName, product, function));
+                : graph.RegisterRule(new TryMatchRule<T>(ruleName, product, function));
 
 
-        public static TryMatchFunction<T> TryMatch<T>(this RuleGraph<T> graph, RuleBase<T> function) where T : IComparable<T> =>
+        public static TryMatchRule<T> TryMatch<T>(this RuleGraph<T> graph, RuleBase<T> function) where T : IComparable<T> =>
 
             TryMatch(
                 graph,
