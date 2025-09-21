@@ -71,7 +71,7 @@ namespace gg.parse.instances.tests.calculator
 
             foreach (var ruleName in expectedRules)
             {
-                IsNotNull(calculatorParser.AstBuilder!.FindRule(ruleName), $"Rule '{ruleName}' not found.");
+                IsNotNull(calculatorParser.Parser!.FindRule(ruleName), $"Rule '{ruleName}' not found.");
             }
         }
 
@@ -342,9 +342,9 @@ namespace gg.parse.instances.tests.calculator
             IsTrue(astResult[0][2].Rule.Name == "number");
         }
 
-        private ScriptParser CreateParser()
+        private RuleGraphBuilder CreateParser()
         {
-            var parser = new ScriptParser();
+            var parser = new RuleGraphBuilder();
             
             try
             {

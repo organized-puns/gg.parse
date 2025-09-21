@@ -6,14 +6,14 @@ using gg.parse.rules;
 
 using static gg.parse.rulefunctions.CommonRules;
 
-namespace gg.parse.script.parsing
+namespace gg.parse.script.parser
 {
     /// <summary>
     /// Turns a list of tokens into an abstract syntax tree according to EBNF(like) grammar.
     /// </summary>
-    public class EbnfTokenParser : CommonGraphWrapper<int>
+    public class ScriptParser : CommonGraphWrapper<int>
     {
-        public EbnfTokenizer Tokenizer { get; init; }
+        public ScriptTokenizer Tokenizer { get; init; }
 
         /// <summary>
         /// If set to true an exception will be thrown when a warning is encountered
@@ -107,13 +107,13 @@ namespace gg.parse.script.parsing
         private MatchSingleData<int> AssignmentToken { get; set; }
 
 
-        public EbnfTokenParser()
-            : this(new EbnfTokenizer())
+        public ScriptParser()
+            : this(new ScriptTokenizer())
         {
         }
         
 
-        public EbnfTokenParser(EbnfTokenizer tokenizer)
+        public ScriptParser(ScriptTokenizer tokenizer)
         {
             Tokenizer = tokenizer;
 

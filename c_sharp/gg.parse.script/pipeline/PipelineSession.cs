@@ -1,5 +1,5 @@
 ﻿using gg.parse.compiler;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 namespace gg.parse.script.pipeline
 {
@@ -15,9 +15,9 @@ namespace gg.parse.script.pipeline
         public Dictionary<string, RuleGraph<T>?> IncludedFiles { get; set; } = [];
 
         // -- services -----------------------------------------------
-        public EbnfTokenizer? Tokenizer { get; set; }
+        public ScriptTokenizer? Tokenizer { get; set; }
 
-        public EbnfTokenParser? Parser { get; set; }
+        public ScriptParser? Parser { get; set; }
 
         public PipelineLog? LogHandler { get; set; }
 

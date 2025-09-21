@@ -18,8 +18,8 @@ namespace gg.parse.tests.compiler
         public void CreateEmptyRule_Compile_ExpectNopToShowUp()
         {
             // xxx turn this into a more unit-y test
-            var parser = new ScriptParser().InitializeFromDefinition("token = 't1';", "empty_rule=;");
-            var emptyRule = parser.AstBuilder.FindRule("empty_rule") as NopRule<int>;
+            var parser = new RuleGraphBuilder().InitializeFromDefinition("token = 't1';", "empty_rule=;");
+            var emptyRule = parser.Parser.FindRule("empty_rule") as NopRule<int>;
             
             IsTrue(emptyRule != null);
 

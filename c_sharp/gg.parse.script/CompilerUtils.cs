@@ -1,5 +1,5 @@
 ﻿using gg.parse.compiler;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 using static gg.parse.compiler.CompilerFunctions;
 
@@ -10,7 +10,7 @@ namespace gg.parse.script
         private static RuleCompiler<T> RegisterFunction<T>(this RuleCompiler<T> compiler, RuleBase<int> rule, CompileFunction<T> function) where T : IComparable<T> =>
             compiler.RegisterFunction(rule.Id, function, rule.Name);
 
-        public static RuleCompiler<char> RegisterTokenizerCompilerFunctions(this RuleCompiler<char> compiler, EbnfTokenParser parser)
+        public static RuleCompiler<char> RegisterTokenizerCompilerFunctions(this RuleCompiler<char> compiler, ScriptParser parser)
         {
             return compiler
                     .RegisterFunction(parser.MatchAnyToken, CompileAny)
@@ -29,7 +29,7 @@ namespace gg.parse.script
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne);
         }
 
-        public static RuleCompiler<int> RegisterGrammarCompilerFunctions(this RuleCompiler<int> compiler, EbnfTokenParser parser)
+        public static RuleCompiler<int> RegisterGrammarCompilerFunctions(this RuleCompiler<int> compiler, ScriptParser parser)
         {
             return compiler
                     .RegisterFunction(parser.MatchAnyToken, CompileAny)
@@ -47,7 +47,7 @@ namespace gg.parse.script
         }
 
         // xxx needs to move out of compiler utils
-        public static (int functionId, AnnotationProduct product)[] CreateAnnotationProductMapping(this EbnfTokenParser parser) =>
+        public static (int functionId, AnnotationProduct product)[] CreateAnnotationProductMapping(this ScriptParser parser) =>
             [
                 (parser.MatchTransitiveSelector.Id, AnnotationProduct.Transitive),
                 (parser.MatchNoProductSelector.Id, AnnotationProduct.None),

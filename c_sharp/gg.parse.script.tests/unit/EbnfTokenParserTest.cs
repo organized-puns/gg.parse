@@ -1,9 +1,6 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
-using gg.parse.rulefunctions.rulefunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -15,7 +12,7 @@ namespace gg.parse.script.tests.unit
         [TestMethod]
         public void ParseRule_ExpectSucess()
         {
-            var parser = new EbnfTokenParser();
+            var parser = new ScriptParser();
 
             // try parsing a literal
             var (tokens, nodes) = parser.Parse("rule = 'foo';");

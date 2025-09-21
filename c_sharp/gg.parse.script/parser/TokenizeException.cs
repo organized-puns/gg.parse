@@ -1,4 +1,4 @@
-﻿namespace gg.parse.script.parsing
+﻿namespace gg.parse.script.parser
 {
     public class TokenizeException : Exception
     {

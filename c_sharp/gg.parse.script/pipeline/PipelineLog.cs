@@ -1,6 +1,7 @@
 ﻿
 using gg.parse.rulefunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
+
 using static gg.core.util.Assertions;
 
 namespace gg.parse.script.pipeline

@@ -1,7 +1,7 @@
 ﻿#nullable disable
 
 using gg.parse.rulefunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -13,8 +13,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithPrecedence_ParseRule_ExpectRuleToHaveCorrectPrecedence()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var expectedPrecedence = 100;
             var tokenizeResult = tokenizer.Tokenize($"rule {expectedPrecedence} = .;");
 
@@ -43,8 +43,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateEvalRule_ParseRule_ExpectEvalRuleAnnotations()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"rule = 'foo' / 'bar' / 'baz';");
 
             IsNotNull(tokenizeResult);
@@ -218,16 +218,16 @@ namespace gg.parse.script.tests.integration
         private static void TestParseUnexpectedProductError(
             string testData,
             int expectedTokenCount,
-            Func<EbnfTokenParser, int>[] expectedFunctionIds
+            Func<ScriptParser, int>[] expectedFunctionIds
         )
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var tokenizeResult = tokenizer.Tokenize(testData);
 
             IsTrue(tokenizeResult.FoundMatch);
             IsTrue(tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count == expectedTokenCount);
 
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizerParser = new ScriptParser(tokenizer);
             var errorParseResult = tokenizerParser.MatchUnexpectedProductInBodyError.Parse(tokenizeResult.Annotations.Select(a => a.Rule.Id).ToArray(), 0);
 
             IsTrue(errorParseResult.FoundMatch);
@@ -250,8 +250,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithProductionModifiersInElements_ParseRule_ExpectErrorsInAnnotations()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"rule = ~foo, #'bar', ~{{'a'..'z'}};");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -275,8 +275,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithInvalidRuleDefinition_Parse_ExpectDefintionMarkedWithError()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"rule = *; rule2 = 'foo';");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -298,8 +298,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithMissingEndRule_Parse_ExpectErrorRaised()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"rule = 'bar' rule2 = 'foo'");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -323,8 +323,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithMissingRemainderOperator_Parse_ExpectErrorRaised()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"rule = a, b c;");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -344,8 +344,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithDifferentRemainderOperator_Parse_ExpectErrorRaised()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"r1 = a, b |c; r2 = d;");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -372,8 +372,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithMissingTermsAfterOperatorInRemainder_Parse_ExpectErrorRaised()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"r1 = a, b,; r2 = d;");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -398,8 +398,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithMissingTermsAfterOperator_Parse_ExpectErrorRaised()
         {
-            var tokenizer = new EbnfTokenizer();
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
             var tokenizeResult = tokenizer.Tokenize($"r1 = a,; r2 = d;");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -424,7 +424,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateLogErrorRuleWithText_ParseWithMatchLog_ExpectMatchFound()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var tokenizeResult = tokenizer.Tokenize($"error 'text'");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -432,7 +432,7 @@ namespace gg.parse.script.tests.integration
 
             var tokens = tokenizeResult.CollectRuleIds();
             
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizerParser = new ScriptParser(tokenizer);
             var parseResult = tokenizerParser.MatchLog.Parse(tokens, 0);
 
             IsTrue(parseResult.FoundMatch);
@@ -442,7 +442,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateLogErrorRuleWithTextAndCondition_ParseWithMatchLog_ExpectMatchFound()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var tokenizeResult = tokenizer.Tokenize($"warning 'text' if !'foo'");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -450,7 +450,7 @@ namespace gg.parse.script.tests.integration
 
             var tokens = tokenizeResult.CollectRuleIds();
 
-            var tokenizerParser = new EbnfTokenParser(tokenizer);
+            var tokenizerParser = new ScriptParser(tokenizer);
             var parseResult = tokenizerParser.MatchLog.Parse(tokens, 0);
 
             IsTrue(parseResult.FoundMatch);
@@ -460,7 +460,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithNoBody_ParseWithMatchRule_ExpectWarning()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var tokenizeResult = tokenizer.Tokenize($"rule = ;");
 
             IsTrue(tokenizeResult.FoundMatch);
@@ -468,7 +468,7 @@ namespace gg.parse.script.tests.integration
 
             var tokens = tokenizeResult.CollectRuleIds();
 
-            var parser = new EbnfTokenParser(tokenizer);
+            var parser = new ScriptParser(tokenizer);
             var ruleMatcher = parser.MatchRule;
             var parseResult = ruleMatcher.Parse(tokens, 0);
 
@@ -482,8 +482,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithReferenceAndProduction_ParseWithMatchRule_ExpectCorrectProductionModifiers()
         {
-            var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var parser = new ScriptParser(tokenizer);
             var (_, astNodes) = parser.Parse("foo='foo';sequence = ~foo, #foo, foo;");
 
             // expect two rules

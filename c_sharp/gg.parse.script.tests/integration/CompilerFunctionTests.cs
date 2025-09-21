@@ -4,7 +4,7 @@ using gg.parse.compiler;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -15,8 +15,8 @@ namespace gg.parse.script.tests.integration
     {
         private static RuleGraph<char> Compile(string text)
         {
-            var tokenizer = new EbnfTokenizer();
-            var parser = new EbnfTokenParser(tokenizer);
+            var tokenizer = new ScriptTokenizer();
+            var parser = new ScriptParser(tokenizer);
             var compiler = new RuleCompiler<char>();
 
             var result = tokenizer.Tokenize(text);

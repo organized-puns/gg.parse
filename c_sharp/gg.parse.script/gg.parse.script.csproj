@@ -10,4 +10,8 @@
     <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="compiler\" />
+  </ItemGroup>
+
 </Project>

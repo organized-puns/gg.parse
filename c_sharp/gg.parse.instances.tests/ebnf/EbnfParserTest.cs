@@ -16,7 +16,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new ScriptParser()
+            var jsonParser = new RuleGraphBuilder()
                             .InitializeFromDefinition(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.Tokenizer;
@@ -45,7 +45,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new ScriptParser().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.Tokenizer;
 
@@ -80,7 +80,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new ScriptParser().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.Tokenizer;
          
@@ -107,7 +107,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new ScriptParser().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
 
             var tokenizer = jsonParser.Tokenizer;
             var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
@@ -123,7 +123,7 @@ namespace gg.parse.tests.examples
         {
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
-            var jsonParser = new ScriptParser().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
 
             // try parsing an object with two kvp
             var keyStrValue = "{\r\n\"key1\": \"value\", \n \"key2\": 123}";

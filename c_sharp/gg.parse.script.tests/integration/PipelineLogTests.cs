@@ -20,7 +20,7 @@ namespace gg.parse.script.tests.integration
             };
 
             // this should trigger a warning (because the rule is empty)
-            var pipeline = new ScriptParser()
+            var pipeline = new RuleGraphBuilder()
                             .InitializeFromDefinition("foo='bar';", "trigger_warning=;\ntrigger_warning_2=;", logger);
 
             // logger should have written two warnings to the output
@@ -38,7 +38,7 @@ namespace gg.parse.script.tests.integration
             };
 
             // this should trigger a warning (because the rule is empty)
-            var pipeline = new ScriptParser()
+            var pipeline = new RuleGraphBuilder()
                             .InitializeFromDefinition("\n\r\nfoo=;", null, logger);
 
             // logger should have written two warnings to the output
@@ -59,7 +59,7 @@ namespace gg.parse.script.tests.integration
             };
 
             // this should trigger an exception
-            new ScriptParser()
+            new RuleGraphBuilder()
                     .InitializeFromDefinition("foo='bar';", "trigger_warning=;", logger);
         }
     }

@@ -1,7 +1,7 @@
 ﻿#nullable disable
 
 using gg.parse.rulefunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -13,7 +13,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateLogLevelTokens_Parse_ExpectLogLevelsFound()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var testText = "fatal error warning info debug";
             var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
 
@@ -39,7 +39,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateIfTokens_Parse_ExpectLogIfFound()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var testText = "if";
             var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
 
@@ -61,7 +61,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateInputWithUnknownToken_Parse_ExpectError()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var testText = "^ valid_token";
             var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
 

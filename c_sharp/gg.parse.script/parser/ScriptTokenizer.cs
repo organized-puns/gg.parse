@@ -4,11 +4,11 @@ using gg.parse.rulefunctions;
 using static gg.parse.rulefunctions.CommonTokenNames;
 using static gg.parse.rulefunctions.CommonRules;
 
-namespace gg.parse.script.parsing
+namespace gg.parse.script.parser
 {
-    public class EbnfTokenizer : RuleGraph<char>
+    public class ScriptTokenizer : RuleGraph<char>
     {
-        public EbnfTokenizer(bool dropComments = true)
+        public ScriptTokenizer(bool dropComments = true)
         {
             var endOfKeyword = this.OneOf(
                 this.Whitespace(),

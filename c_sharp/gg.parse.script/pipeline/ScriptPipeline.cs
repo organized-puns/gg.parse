@@ -1,7 +1,8 @@
 ﻿using gg.parse.compiler;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
+
 using static gg.core.util.Assertions;
 
 namespace gg.parse.script.pipeline
@@ -63,9 +64,9 @@ namespace gg.parse.script.pipeline
         public static PipelineSession<T> InitializeSession<T>(string script, PipelineLog? logger = null)
             where T : IComparable<T>
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var pipelineLogger = logger ?? new PipelineLog();
-            var parser = new EbnfTokenParser(tokenizer)
+            var parser = new ScriptParser(tokenizer)
             {
                 FailOnWarning = pipelineLogger.FailOnWarning
             };
@@ -82,7 +83,7 @@ namespace gg.parse.script.pipeline
             return tokenizerSession;
         }
 
-        public static RuleCompiler<char> CreateTokenizerCompiler(EbnfTokenParser parser)
+        public static RuleCompiler<char> CreateTokenizerCompiler(ScriptParser parser)
         {
             try
             {
@@ -106,7 +107,7 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public static RuleCompiler<int> CreateParserCompiler(EbnfTokenParser parser)
+        public static RuleCompiler<int> CreateParserCompiler(ScriptParser parser)
         {
             try
             {

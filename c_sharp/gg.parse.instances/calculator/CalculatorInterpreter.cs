@@ -49,14 +49,14 @@ namespace gg.parse.instances.calculator
         }
 
         private Ids _graphIds;
-        private ScriptParser _parser; 
+        private RuleGraphBuilder _parser; 
 
 
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
-            _parser = new ScriptParser().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            _parser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
             //SetIds(_parser.EbnfGrammarParser);
-            SetIds(_parser.AstBuilder!);
+            SetIds(_parser.Parser!);
         }
 
         private CalculatorInterpreter SetIds(RuleGraph<int> graph)

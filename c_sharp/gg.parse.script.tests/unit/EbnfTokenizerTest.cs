@@ -1,7 +1,7 @@
 ﻿#nullable disable
 
 using gg.parse.rulefunctions;
-using gg.parse.script.parsing;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -13,7 +13,7 @@ namespace gg.parse.script.tests.unit
         [TestMethod]
         public void TestEmptyObject_ExpectTwoAnnotations()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var rule = "rule_name = *'literal';";
 
             var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
@@ -31,7 +31,7 @@ namespace gg.parse.script.tests.unit
         [TestMethod]
         public void CreateEvalRule_Tokenize_ExpectOptionWithPrecedenceTokens()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             var rule = "rule_name = 'foo' / 'bar' / 'baz';";
 
             var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
@@ -52,7 +52,7 @@ namespace gg.parse.script.tests.unit
         [TestMethod]
         public void DefineTryMatchRule_Tokenize_ExpectValidMatchAnyTokens()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             // try shorthand first
             var rule = "rule_name = >'literal';";
 
@@ -87,7 +87,7 @@ namespace gg.parse.script.tests.unit
         [TestMethod]
         public void DefineRuleWithoutPrecedence_Tokenize_ExpectValidRuleDeclarations()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
             
             // no precedence defined
             var rule = "rule_name = .;";
@@ -106,7 +106,7 @@ namespace gg.parse.script.tests.unit
         [TestMethod]
         public void DefineRuleWithPrecedence_Tokenize_ExpectValidRuleDeclarations()
         {
-            var tokenizer = new EbnfTokenizer();
+            var tokenizer = new ScriptTokenizer();
 
             // simple precedence defined
             var ruleDefinitions = new string[] {
