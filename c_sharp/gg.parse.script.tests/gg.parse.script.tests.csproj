@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\gg.parse.script\gg.parse.script.csproj" />
+    <ProjectReference Include="..\gg.parse.tests\gg.parse.tests.csproj" />
     <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
   </ItemGroup>
 

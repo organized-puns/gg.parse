@@ -1,16 +1,11 @@
-﻿using gg.core.util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace gg.parse.script
 {
     public static class ScriptUtils
     {
-        public static string AstToString(ScriptParser parser)
+        public static string AstToString(RuleGraphBuilder parser)
         {
             Assertions.RequiresNotNull(parser);
             Assertions.RequiresNotNull(parser!.GrammarSession!);

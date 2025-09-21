@@ -1,0 +1,198 @@
+﻿
+using gg.parse.rules;
+using gg.parse.script.parser;
+
+using static gg.parse.Assertions;
+
+namespace gg.parse.script.pipeline
+{
+    public class PipelineLog
+    {
+        // Note: not thread safe, application will need to deal with this
+        public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
+
+        public int MaxStoredLogs { get; set; } = -1;
+
+        /// <summary>
+        /// If set to true an exception will be thrown when a warning is encountered
+        /// </summary>
+        public bool FailOnWarning { get; set; } = false;
+
+        public Action<LogLevel, string>? Out { get; set; } = null;
+
+        public PipelineLog(bool storeLogs = true, int maxStoredLogs = -1)
+        {
+            if (storeLogs)
+            {
+                ReceivedLogs = [];
+            }
+
+            MaxStoredLogs = maxStoredLogs;
+        }
+
+        public void Log(LogLevel level, string message)
+        {
+            if (ReceivedLogs != null)
+            {
+                ReceivedLogs.Add((level, message));
+
+                if (MaxStoredLogs > 0 && ReceivedLogs.Count > MaxStoredLogs)
+                {
+                    ReceivedLogs.RemoveRange(0, ReceivedLogs.Count - MaxStoredLogs);
+                }
+            }
+
+            Out?.Invoke(level, message);
+        }
+
+        public void ProcessTokenAnnotations(string text, List<Annotation> tokens)
+        {
+            var logAnnotations = tokens.Select(a =>
+                                    a!.SelectNotNull(ax =>
+                                        ax.Rule is LogRule<char> rule
+                                            ? new Tuple<Annotation, LogRule<char>>(ax, rule)
+                                            : null
+                                    ));
+
+            var lineRanges = CollectLineRanges(text);
+
+            foreach (var logList in logAnnotations)
+            {
+                foreach (var (annotation, log) in logList)
+                {
+                    var (line, column) = MapAnnotationRangeToLineColumn(annotation.Range, text, lineRanges);
+                    var message = $"({line}, {column}) {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
+
+                    Log(log.Level, message);
+                }
+            }
+        }
+
+        public void ProcessAstAnnotations(string text, List<Annotation> tokens, List<Annotation> astNodes) 
+        {
+            var logAnnotations = astNodes.Select(a => 
+                                    a!.SelectNotNull( ax =>
+                                        ax.Rule is LogRule<int> rule 
+                                            ? new Tuple<Annotation, LogRule<int>>(ax, rule)
+                                            : null
+                                    ));
+
+            var lineRanges = CollectLineRanges(text);
+
+            foreach (var logList in logAnnotations) 
+            {
+                foreach (var (annotation, log) in logList)
+                {
+                    var (line, column) = MapAnnotationRangeToLineColumn(annotation, text, tokens, lineRanges);
+                    var message = $"({line}, {column}) {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
+
+                    Log(log.Level, message);
+                }
+            }
+        }
+
+        public void ProcessException(TokenizeException exception)
+        {
+            Log(LogLevel.Fatal, $"Exception: {exception}");
+
+            if (exception.Errors != null && exception.Text != null)
+            {
+                ProcessTokenAnnotations(exception.Text, exception.Errors);
+            }
+            else
+            {
+                Log(LogLevel.Fatal, "No further details on the underlying error.");
+            }
+        }
+
+        public void ProcessException(ParseException exception)
+        {
+            Log(LogLevel.Fatal, $"Exception: {exception}");
+
+            if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
+            {
+                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+            }
+            else
+            {
+                Log(LogLevel.Fatal, "No further details on the underlying error.");
+            }
+        }
+
+        public void ProcessExceptions(ParseException exception)
+        {
+            Log(LogLevel.Fatal, $"Exception: {exception}");
+
+            if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
+            {
+                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+            }
+            else
+            {
+                Log(LogLevel.Fatal, "No further details on the underlying error.");
+            }
+        }
+
+        private string GetAnnotationText(Annotation annotation, string text, List<Annotation> tokens, int minStringLength = 8, int maxStringLength = 60)
+        {
+            Requires(minStringLength < maxStringLength);
+            Requires(maxStringLength > 4);
+
+            var annotationText = annotation.GetText(text, tokens);
+
+            if (annotationText.Length < minStringLength)
+            {
+                if (annotation.Parent != null)
+                {
+                    return GetAnnotationText(annotation.Parent, text, tokens, minStringLength, maxStringLength);
+                }
+
+                return annotationText;
+            }
+
+            if (annotation.Length >= maxStringLength)
+            {
+                return annotationText.Substring(maxStringLength - 4) + " ...";
+            }
+
+            return annotationText;
+        }
+
+        private List<Range> CollectLineRanges(string text)
+        {
+            var result = new List<Range>();
+            var start = 0;
+
+            for (var i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '\n')
+                {
+                    result.Add(new Range(start, i - start));
+                    start = i + 1;
+                }
+            }
+
+            result.Add(new(start, text.Length - start));
+
+            return result;
+        }
+
+        private static (int line, int column) MapAnnotationRangeToLineColumn(Range textRange, string text, List<Range> lineRanges)
+        {
+            var line = 0;
+
+            for (line = 0; line < lineRanges.Count; line++)
+            {
+                if (textRange.Start >= lineRanges[line].Start && textRange.Start <= lineRanges[line].End)
+                {
+                    break;
+                }
+            }
+
+            return (line + 1, textRange.Start - lineRanges[line].Start + 1);
+        }
+
+        private static (int line, int column) MapAnnotationRangeToLineColumn(Annotation annotation, string text, List<Annotation> tokens, List<Range> lineRanges) =>
+           MapAnnotationRangeToLineColumn(tokens.UnionOfRanges(annotation.Range), text, lineRanges);         
+    }
+}

@@ -1,5 +1,5 @@
-﻿using gg.parse.rulefunctions.datafunctions;
-using gg.parse.rulefunctions.rulefunctions;
+﻿
+using gg.parse.rules;
 
 namespace gg.parse.tests.rulefunctions
 {

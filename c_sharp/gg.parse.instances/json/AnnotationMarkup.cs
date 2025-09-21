@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-using gg.parse.rulefunctions;
+using gg.parse.script.common;
 
 namespace gg.parse.instances.json
 {

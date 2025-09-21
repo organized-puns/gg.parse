@@ -1,7 +1,7 @@
 ﻿
 
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rules
 {
     [Flags]
     public enum LogLevel
