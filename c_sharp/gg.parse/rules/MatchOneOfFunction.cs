@@ -1,7 +1,4 @@
-﻿using gg.core.util;
-using gg.parse.rulefunctions;
-
-namespace gg.parse.rulefunctions.rulefunctions
+﻿namespace gg.parse.rules
 {
     public class MatchOneOfFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
@@ -44,7 +41,7 @@ namespace gg.parse.rulefunctions.rulefunctions
                             ? null 
                             : [..result.Annotations!];
 
-                    return this.BuildFunctionRuleResult(new(start, result.MatchedLength), children);
+                    return BuildFunctionRuleResult(new(start, result.MatchedLength), children);
                 }
             }
             return ParseResult.Failure;

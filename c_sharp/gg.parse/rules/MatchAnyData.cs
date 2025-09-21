@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions.datafunctions
+﻿namespace gg.parse.rules
 {
     public class MatchAnyData<T>(
         string name, 

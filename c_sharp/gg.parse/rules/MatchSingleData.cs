@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions.datafunctions
+﻿namespace gg.parse.rules
 {
     public class MatchSingleData<T>(string name, T data, AnnotationProduct production = AnnotationProduct.Annotation)
         : RuleBase<T>(name, production)
@@ -15,7 +15,7 @@
                     return ParseResult.Failure;
                 }
 
-                return this.BuildDataRuleResult(new Range(start, 1));
+                return BuildDataRuleResult(new Range(start, 1));
             }
 
             return ParseResult.Failure;

@@ -1,7 +1,6 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions.datafunctions;
-using gg.parse.rulefunctions.rulefunctions;
+using gg.parse.rules;
 using gg.parse.script;
 
 namespace gg.parse.tests.examples

@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions.datafunctions
+﻿namespace gg.parse.rules
 {
     public class MatchDataSequence<T>(
         string name, 
@@ -24,7 +24,7 @@
                 index++;
             }
 
-            return this.BuildDataRuleResult(new(start, index - start));
+            return BuildDataRuleResult(new(start, index - start));
         }
     }
 }

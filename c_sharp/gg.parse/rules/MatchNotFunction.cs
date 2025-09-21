@@ -1,7 +1,4 @@
-﻿using gg.core.util;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace gg.parse.rulefunctions.rulefunctions
+﻿namespace gg.parse.rules
 {
     public class MatchNotFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
@@ -27,7 +24,7 @@ namespace gg.parse.rulefunctions.rulefunctions
 
             if (!result.FoundMatch)
             {
-                return this.BuildFunctionRuleResult(new Range(start, 0));
+                return BuildFunctionRuleResult(new Range(start, 0));
             }
 
             return ParseResult.Failure;

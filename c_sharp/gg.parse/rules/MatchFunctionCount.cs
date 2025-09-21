@@ -1,5 +1,4 @@
-﻿
-namespace gg.parse.rulefunctions.rulefunctions
+﻿namespace gg.parse.rules
 {
     public class MatchFunctionCount<T>(
         string name, 
@@ -49,7 +48,7 @@ namespace gg.parse.rulefunctions.rulefunctions
             }
 
             return Min <= 0 || count >= Min
-                ? this.BuildFunctionRuleResult(new Range(start, index - start), children)
+                ? BuildFunctionRuleResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
         }
     }

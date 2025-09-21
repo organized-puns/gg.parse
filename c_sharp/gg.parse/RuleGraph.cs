@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using System.Data;
 
-using gg.core.util;
-using gg.parse.rulefunctions.rulefunctions;
+using gg.parse.rules;
 
 namespace gg.parse
 {

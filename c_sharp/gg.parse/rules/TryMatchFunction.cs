@@ -1,7 +1,4 @@
-﻿
-using gg.core.util;
-
-namespace gg.parse.rulefunctions.rulefunctions
+﻿namespace gg.parse.rules
 {
     public class TryMatchFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {

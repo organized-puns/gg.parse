@@ -1,6 +1,6 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions.rulefunctions;
+using gg.parse.rules;
 
 namespace gg.parse.script.tests.integration
 {

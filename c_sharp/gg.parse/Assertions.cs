@@ -1,5 +1,5 @@
 ﻿
-namespace gg.core.util
+namespace gg.parse
 {
     public class AssertionException : Exception
     {

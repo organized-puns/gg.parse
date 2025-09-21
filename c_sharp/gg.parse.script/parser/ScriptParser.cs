@@ -1,9 +1,4 @@
-﻿using gg.core.util;
-
-using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
-using gg.parse.rulefunctions.rulefunctions;
-
+﻿using gg.parse.rules;
 using gg.parse.script.common;
 
 using static gg.parse.script.common.CommonRules;

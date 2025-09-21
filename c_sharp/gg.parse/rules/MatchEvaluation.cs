@@ -1,7 +1,6 @@
-﻿using gg.core.util;
-using gg.parse.rulefunctions;
+﻿using gg.parse;
 
-namespace gg.parse.rulefunctions.rulefunctions
+namespace gg.parse.rules
 {
     public class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
@@ -80,7 +79,7 @@ namespace gg.parse.rulefunctions.rulefunctions
                     var nextMatch = nextMatchResult.Annotations![0];
                     var nextPrecedence = nextMatch.Rule.Precedence;
 
-                    tokensRead += (nextMatchResult.MatchedLength - 1);
+                    tokensRead += nextMatchResult.MatchedLength - 1;
 
                     // move up the right hand side of the tree until we reach the root of the tree
                     // or until we find a node with a lower precedence
@@ -139,7 +138,7 @@ namespace gg.parse.rulefunctions.rulefunctions
 
         private Range UpdateRanges(Annotation node)
         {
-            return (node.Children == null || node.Children.Count == 0)
+            return node.Children == null || node.Children.Count == 0
                 ? node.Range
                 : node.Range = Range.Union(node.Children!.Select(c => UpdateRanges(c)));
         }

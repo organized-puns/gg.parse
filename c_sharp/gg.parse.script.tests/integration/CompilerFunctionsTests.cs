@@ -1,6 +1,6 @@
-﻿using gg.parse.rulefunctions.datafunctions;
-using gg.parse.rulefunctions.rulefunctions;
-using gg.parse.rulefunctions;
+﻿#nullable disable
+
+using gg.parse.rules;
 
 using gg.parse.script.compiler;
 
@@ -9,6 +9,7 @@ using gg.parse.tests;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using static gg.parse.script.compiler.CompilerFunctions;
+
 
 namespace gg.parse.script.tests.integration
 {

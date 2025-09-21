@@ -1,11 +1,10 @@
 ﻿
-using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
+using gg.parse.rules;
 
 using gg.parse.script.parser;
 using gg.parse.script.compiler;
 
-using static gg.core.util.Assertions;
+using static gg.parse.Assertions;
 
 namespace gg.parse.script.pipeline
 {

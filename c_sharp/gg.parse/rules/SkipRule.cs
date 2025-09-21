@@ -1,7 +1,7 @@
 ﻿
 
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rules
 {
     /// <summary>
     /// Rule which skips data until some EndCondition is met or EoF is encountered. 

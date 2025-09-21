@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions.datafunctions
+﻿namespace gg.parse.rules
 {
     public class MatchDataRange<T>(
         string name, 
@@ -19,7 +19,7 @@
             {
                 if (input[start].CompareTo(MinDataValue) >= 0 && input[start].CompareTo(MaxDataValue) <= 0)
                 {
-                    return this.BuildDataRuleResult(new(start, 1));
+                    return BuildDataRuleResult(new(start, 1));
                 }
             }
 

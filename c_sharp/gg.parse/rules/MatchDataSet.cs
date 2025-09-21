@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions.datafunctions
+﻿namespace gg.parse.rules
 {
     public class MatchDataSet<T> : RuleBase<T> where T : IComparable<T>
     {
@@ -22,7 +22,7 @@
             {
                 if (MatchingValues.Contains(input[start]))
                 {
-                    return this.BuildDataRuleResult(new Range(start, 1));
+                    return BuildDataRuleResult(new Range(start, 1));
                 }
             }
 

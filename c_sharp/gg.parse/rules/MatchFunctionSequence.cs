@@ -1,7 +1,4 @@
-﻿using gg.core.util;
-using gg.parse.rulefunctions;
-
-namespace gg.parse.rulefunctions.rulefunctions
+﻿namespace gg.parse.rules
 {
     public class MatchFunctionSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {
@@ -56,7 +53,7 @@ namespace gg.parse.rulefunctions.rulefunctions
                 index += result.MatchedLength;
             }
 
-            return this.BuildFunctionRuleResult(new Range(start, index - start), children);
+            return BuildFunctionRuleResult(new Range(start, index - start), children);
         }
     }
 }

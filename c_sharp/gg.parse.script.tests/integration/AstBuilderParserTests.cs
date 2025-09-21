@@ -1,6 +1,7 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions;
+using gg.parse.rules;
+
 using gg.parse.script.common;
 using gg.parse.script.parser;
 

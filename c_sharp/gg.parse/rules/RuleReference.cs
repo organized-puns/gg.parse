@@ -1,4 +1,4 @@
-﻿namespace gg.parse.rulefunctions.rulefunctions
+﻿namespace gg.parse.rules
 {
     public class RuleReference<T> : RuleBase<T> where T : IComparable<T>
     {

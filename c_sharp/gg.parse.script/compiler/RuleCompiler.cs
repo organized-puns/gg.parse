@@ -1,5 +1,4 @@
 ﻿
-using gg.core.util;
 using gg.parse.rulefunctions;
 
 namespace gg.parse.script.compiler

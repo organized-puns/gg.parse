@@ -1,4 +1,4 @@
-﻿using gg.core.util;
+﻿using gg.parse;
 
 namespace gg.parse.script.compiler
 {

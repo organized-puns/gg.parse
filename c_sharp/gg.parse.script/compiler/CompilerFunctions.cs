@@ -1,11 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-using gg.core.util;
-using gg.parse.rulefunctions;
-using gg.parse.rulefunctions.datafunctions;
-using gg.parse.rulefunctions.rulefunctions;
-
-using static gg.parse.script.common.CommonRules;
+using gg.parse.rules;
 
 namespace gg.parse.script.compiler
 {
