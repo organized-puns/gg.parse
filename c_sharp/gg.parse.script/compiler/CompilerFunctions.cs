@@ -4,7 +4,8 @@ using gg.core.util;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
-using static gg.parse.rulefunctions.CommonRules;
+
+using static gg.parse.script.common.CommonRules;
 
 namespace gg.parse.script.compiler
 {

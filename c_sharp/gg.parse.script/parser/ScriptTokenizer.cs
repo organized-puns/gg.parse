@@ -1,8 +1,6 @@
 ﻿
-using gg.parse.rulefunctions;
-
-using static gg.parse.rulefunctions.CommonTokenNames;
-using static gg.parse.rulefunctions.CommonRules;
+using static gg.parse.script.common.CommonTokenNames;
+using static gg.parse.script.common.CommonRules;
 
 namespace gg.parse.script.parser
 {

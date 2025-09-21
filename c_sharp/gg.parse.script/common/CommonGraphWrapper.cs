@@ -2,9 +2,9 @@
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 
-using static gg.parse.rulefunctions.CommonRules;
+using static gg.parse.script.common.CommonRules;
 
-namespace gg.parse.rules
+namespace gg.parse.script.common
 {
     /// <summary>
     /// Convenience base class to make the rule declarations shorter / easier to read.

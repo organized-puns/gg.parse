@@ -1,7 +1,8 @@
 ﻿#nullable disable
 
+using gg.parse.script.common;
+
 using gg.parse.instances.json;
-using gg.parse.rulefunctions;
 
 namespace gg.parse.tests.examples
 {

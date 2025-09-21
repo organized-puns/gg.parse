@@ -1,6 +1,6 @@
-﻿using gg.parse.rulefunctions;
-
-using static gg.parse.rulefunctions.CommonTokenNames;
+﻿
+using gg.parse.script.common;
+using static gg.parse.script.common.CommonTokenNames;
 
 namespace gg.parse.instances.json
 {

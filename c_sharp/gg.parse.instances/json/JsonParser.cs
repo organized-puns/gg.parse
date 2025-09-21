@@ -1,7 +1,7 @@
-﻿using System.Text;
-using gg.parse.rulefunctions;
+﻿using gg.parse.script.common;
+using System.Text;
 
-using static gg.parse.rulefunctions.CommonRules;
+using static gg.parse.script.common.CommonRules;
 
 namespace gg.parse.instances.json
 {
