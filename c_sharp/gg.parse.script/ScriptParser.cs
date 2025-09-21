@@ -1,5 +1,6 @@
 ﻿using gg.core.util;
 using gg.parse.ebnf;
+using gg.parse.script.pipeline;
 
 namespace gg.parse.script
 {
@@ -11,21 +12,21 @@ namespace gg.parse.script
 
         public PipelineLog? LogHandler { get; set; }
 
-        public PipelineSessionX<char>? TokenSession { get; private set; }
+        public PipelineSession<char>? TokenSession { get; private set; }
 
-        public PipelineSessionX<int>? GrammarSession { get; private set; }
+        public PipelineSession<int>? GrammarSession { get; private set; }
 
         public ScriptParser InitializeFromDefinition(string tokenDefinition, string? grammarDefinition = null, PipelineLog? logger = null)
         {
             LogHandler = logger ?? new PipelineLog();
 
-            TokenSession = ScriptPipelineX.RunTokenPipeline(tokenDefinition, LogHandler);
+            TokenSession = ScriptPipeline.RunTokenPipeline(tokenDefinition, LogHandler);
 
             Tokenizer = TokenSession.RuleGraph!;
 
             if (grammarDefinition != null)
             {
-                GrammarSession = ScriptPipelineX.RunGrammarPipeline(grammarDefinition, TokenSession);
+                GrammarSession = ScriptPipeline.RunGrammarPipeline(grammarDefinition, TokenSession);
                 AstBuilder = GrammarSession.RuleGraph;
             }
 

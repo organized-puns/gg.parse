@@ -1,4 +1,4 @@
-﻿namespace gg.parse.script
+﻿namespace gg.parse.script.pipeline
 {
     public class ScriptPipelineException : Exception
     {

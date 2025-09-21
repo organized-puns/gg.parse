@@ -1,10 +1,8 @@
-﻿using gg.core.util;
-
+﻿using gg.parse.ebnf;
 using gg.parse.rulefunctions;
-
 using static gg.core.util.Assertions;
 
-namespace gg.parse.ebnf
+namespace gg.parse.script.pipeline
 {
     public class PipelineLog
     {
@@ -135,8 +133,8 @@ namespace gg.parse.ebnf
 
         private string GetAnnotationText(Annotation annotation, string text, List<Annotation> tokens, int minStringLength = 8, int maxStringLength = 60)
         {
-            Assertions.Requires(minStringLength < maxStringLength);
-            Assertions.Requires(maxStringLength > 4);
+            Requires(minStringLength < maxStringLength);
+            Requires(maxStringLength > 4);
 
             var annotationText = annotation.GetText(text, tokens);
 
@@ -189,7 +187,7 @@ namespace gg.parse.ebnf
                 }
             }
 
-            return (line + 1, (textRange.Start - lineRanges[line].Start) + 1);
+            return (line + 1, textRange.Start - lineRanges[line].Start + 1);
         }
 
         private static (int line, int column) MapAnnotationRangeToLineColumn(Annotation annotation, string text, List<Annotation> tokens, List<Range> lineRanges) =>

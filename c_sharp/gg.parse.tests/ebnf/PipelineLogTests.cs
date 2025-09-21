@@ -1,6 +1,7 @@
 ﻿
 using gg.parse.ebnf;
 using gg.parse.script;
+using gg.parse.script.pipeline;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.ebnf

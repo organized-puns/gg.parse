@@ -2,14 +2,13 @@
 using gg.parse.ebnf;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
-
 using static gg.core.util.Assertions;
 
-namespace gg.parse.script
+namespace gg.parse.script.pipeline
 {
-    public static class ScriptPipelineX
+    public static class ScriptPipeline
     {
-        public static PipelineSessionX<char> RunTokenPipeline(string tokenizerDefinition, PipelineLog? logger = null)
+        public static PipelineSession<char> RunTokenPipeline(string tokenizerDefinition, PipelineLog? logger = null)
         {
             RequiresNotNullOrEmpty(tokenizerDefinition);
 
@@ -20,7 +19,7 @@ namespace gg.parse.script
             return RunPipeline(session);
         }
 
-        public static PipelineSessionX<int> RunGrammarPipeline(string grammarDefinition, PipelineSessionX<char> tokenSession)
+        public static PipelineSession<int> RunGrammarPipeline(string grammarDefinition, PipelineSession<char> tokenSession)
         {
             RequiresNotNullOrEmpty(grammarDefinition);
             RequiresNotNull(tokenSession);
@@ -34,7 +33,7 @@ namespace gg.parse.script
             return RunPipeline(session);
         }
 
-        public static PipelineSessionX<T> RunPipeline<T>(PipelineSessionX<T> session)
+        public static PipelineSession<T> RunPipeline<T>(PipelineSession<T> session)
             where T : IComparable<T>
         {
             RequiresNotNull(session);
@@ -61,7 +60,7 @@ namespace gg.parse.script
             return session;
         }
 
-        public static PipelineSessionX<T> InitializeSession<T>(string script, PipelineLog? logger = null)
+        public static PipelineSession<T> InitializeSession<T>(string script, PipelineLog? logger = null)
             where T : IComparable<T>
         {
             var tokenizer = new EbnfTokenizer();
@@ -71,7 +70,7 @@ namespace gg.parse.script
                 FailOnWarning = pipelineLogger.FailOnWarning
             };
 
-            var tokenizerSession = new PipelineSessionX<T>()
+            var tokenizerSession = new PipelineSession<T>()
             {
                 Tokenizer = tokenizer,
                 Parser = parser,
@@ -132,7 +131,7 @@ namespace gg.parse.script
         }
 
 
-        private static (List<Annotation> tokens, List<Annotation> astNodes) ParseSessionText<T>(PipelineSessionX<T> session)
+        private static (List<Annotation> tokens, List<Annotation> astNodes) ParseSessionText<T>(PipelineSession<T> session)
             where T : IComparable<T>
         {
             RequiresNotNull(session.Tokenizer!);
@@ -156,7 +155,7 @@ namespace gg.parse.script
             } 
         }
 
-        private static void MergeIncludes<T>(PipelineSessionX<T> session)
+        private static void MergeIncludes<T>(PipelineSession<T> session)
             where T : IComparable<T>
         {
             RequiresNotNull(session);
@@ -194,7 +193,7 @@ namespace gg.parse.script
 
                         session.LogHandler!.Log(LogLevel.Debug, $"including: {filename}({filePath}).");
 
-                        var includeSession = RunPipeline(new PipelineSessionX<T>()
+                        var includeSession = RunPipeline(new PipelineSession<T>()
                         {
                            Text = File.ReadAllText(filePath),
                            IncludePaths = [Path.GetDirectoryName(filePath), AppContext.BaseDirectory],

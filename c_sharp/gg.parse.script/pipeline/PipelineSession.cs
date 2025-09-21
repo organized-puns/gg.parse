@@ -1,9 +1,9 @@
 ﻿using gg.parse.compiler;
 using gg.parse.ebnf;
 
-namespace gg.parse.script
+namespace gg.parse.script.pipeline
 {
-    public class PipelineSessionX<T> where T : IComparable<T>
+    public class PipelineSession<T> where T : IComparable<T>
     {
         // -- config -------------------------------------------------
         public string? WorkingFile { get; set; }

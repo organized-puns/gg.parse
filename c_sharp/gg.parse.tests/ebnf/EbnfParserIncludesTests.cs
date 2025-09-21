@@ -2,6 +2,7 @@
 using gg.parse.ebnf;
 using gg.parse.rulefunctions;
 using gg.parse.script;
+using gg.parse.script.pipeline;
 
 namespace gg.parse.tests.ebnf
 {
