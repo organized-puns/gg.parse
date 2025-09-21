@@ -1,13 +1,16 @@
-﻿using gg.parse.compiler;
-using gg.parse.rules;
-using gg.parse.rulefunctions.datafunctions;
+﻿using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 using gg.parse.rulefunctions;
 
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-using static gg.parse.compiler.CompilerFunctions;
+using gg.parse.script.compiler;
 
-namespace gg.parse.tests.compiler
+using gg.parse.tests;
+
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
+using static gg.parse.script.compiler.CompilerFunctions;
+
+namespace gg.parse.script.tests.integration
 {
     /// <summary>
     /// Test the various compiler functions.

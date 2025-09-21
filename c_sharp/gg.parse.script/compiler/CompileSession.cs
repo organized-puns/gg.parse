@@ -1,6 +1,6 @@
 ﻿using gg.core.util;
 
-namespace gg.parse.compiler
+namespace gg.parse.script.compiler
 {
     public class CompileSession
     {

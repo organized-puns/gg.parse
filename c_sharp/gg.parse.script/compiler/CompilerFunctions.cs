@@ -6,7 +6,7 @@ using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 using static gg.parse.rulefunctions.CommonRules;
 
-namespace gg.parse.compiler
+namespace gg.parse.script.compiler
 {
     /// <summary>
     /// Functions used by the compiler which produce a rule either specifically for

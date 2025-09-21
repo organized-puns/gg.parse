@@ -1,4 +1,4 @@
-﻿using gg.parse.compiler;
+﻿using gg.parse.script.compiler;
 using gg.parse.script.parser;
 
 namespace gg.parse.script.pipeline

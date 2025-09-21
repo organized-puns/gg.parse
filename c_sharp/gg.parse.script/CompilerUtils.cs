@@ -1,7 +1,7 @@
-﻿using gg.parse.compiler;
+﻿using gg.parse.script.compiler;
 using gg.parse.script.parser;
 
-using static gg.parse.compiler.CompilerFunctions;
+using static gg.parse.script.compiler.CompilerFunctions;
 
 namespace gg.parse.script
 {

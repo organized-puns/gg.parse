@@ -1,4 +1,4 @@
-﻿namespace gg.parse.compiler
+﻿namespace gg.parse.script.compiler
 {
     /// <summary>
     /// Name + Production of a rule 

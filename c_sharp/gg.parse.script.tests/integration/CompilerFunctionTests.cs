@@ -1,10 +1,10 @@
 ﻿#nullable disable
 
-using gg.parse.compiler;
 using gg.parse.rulefunctions;
 using gg.parse.rulefunctions.datafunctions;
 using gg.parse.rulefunctions.rulefunctions;
 using gg.parse.script.parser;
+using gg.parse.script.compiler;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 

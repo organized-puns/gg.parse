@@ -1,4 +1,4 @@
-﻿namespace gg.parse.compiler
+﻿namespace gg.parse.script.compiler
 {
     public class CompilationException<T> : Exception where T : IComparable<T>
     {

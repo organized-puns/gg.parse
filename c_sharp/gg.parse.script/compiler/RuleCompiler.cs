@@ -2,7 +2,7 @@
 using gg.core.util;
 using gg.parse.rulefunctions;
 
-namespace gg.parse.compiler
+namespace gg.parse.script.compiler
 {
     public class NoCompilationFunctionException : Exception
     {

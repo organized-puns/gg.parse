@@ -5,7 +5,7 @@ using gg.parse.script;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.compiler
+namespace gg.parse.script.tests.integration
 {
     /// <summary>
     /// High level integration tests targeting compiler execution.

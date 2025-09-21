@@ -1,11 +1,14 @@
-﻿using gg.parse.compiler;
+﻿#nullable disable
+
+using gg.parse.script.compiler;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-using static gg.parse.compiler.CompilerFunctions;
-using gg.parse.rules;
 
+using gg.parse.tests;
 
-namespace gg.parse.tests.compiler
+using static gg.parse.script.compiler.CompilerFunctions;
+
+namespace gg.parse.script.tests.integration
 {
     [TestClass]
     public class RuleCompilerTest
