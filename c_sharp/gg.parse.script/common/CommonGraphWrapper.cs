@@ -1,4 +1,5 @@
 ﻿using gg.parse.rules;
+using System.Data;
 using System.Xml.Linq;
 
 namespace gg.parse.script.common
@@ -9,7 +10,6 @@ namespace gg.parse.script.common
     /// <typeparam name="T"></typeparam>
     public class CommonGraphWrapper<T> : RuleGraph<T> where T : IComparable<T>
     {
-
         // -- Utility methods -----------------------------------------------------------------------------------------
         
         public static (string name, AnnotationProduct product) CreateRuleNameAndProduct(string? name, string fallback) =>
@@ -36,32 +36,14 @@ namespace gg.parse.script.common
 
         // -- Rule short hands ----------------------------------------------------------------------------------------
 
-        public MatchAnyData<T> any() =>
-            this.Any();
+        public MatchAnyData<T> Any() =>
+            Any(null);
 
-        public MatchAnyData<T> any(string ruleName)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-            return this.Any(ruleName, product);
-        }
-
-        public MatchFunctionCount<T> between(int min, int max, RuleBase<T> rule)
-        {
-            var ruleName = $"{AnnotationProduct.None.GetPrefix()}between({min},{max},{rule.Name})";
-            return between(ruleName, min, max, rule);   
-        }
-
-        public MatchFunctionCount<T> between(string ruleName, int min, int max, RuleBase<T> rule)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-
-            var name = ruleName.Substring(start + length);
-
-            return TryFindRule(name, out MatchFunctionCount<T>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchFunctionCount<T>(name, rule, product, min, max));
-        }
-
+        public MatchAnyData<T> Any(string? name) =>
+            FindOrRegister(name, $"{CommonTokenNames.AnyCharacter}",
+                        (ruleName, product) => RegisterRule(
+                            new MatchAnyData<T>(ruleName, product)));
+        
         public LogRule<T> error(string ruleName, string message, RuleBase<T>? condition = null)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
@@ -158,23 +140,23 @@ namespace gg.parse.script.common
                  : RegisterRule(new LogRule<T>(name, product, message, condition, LogLevel.Warning));
         }
 
-        public MatchFunctionCount<T> zeroOrOne(string ruleName, RuleBase<T> rule)
+        /*public MatchFunctionCount<T> zeroOrOne(string ruleName, RuleBase<T> rule)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
 
             return this.ZeroOrOne(ruleName.Substring(start + length), product, rule);
-        }
+        }*/
 
-        public MatchFunctionCount<T> ZeroOrOne(RuleBase<T> rule) =>
-            FindOrRegister(null,
+        public MatchFunctionCount<T> ZeroOrOne(string? name, RuleBase<T> rule) =>
+            FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrOne}({rule.Name})",
                 (ruleName, product) => RegisterRule(
                     new MatchFunctionCount<T>(ruleName, rule, product, 0, 1)
                 )
             );
 
-        public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> rule) =>
-            ZeroOrMore(null, rule);
+        public MatchFunctionCount<T> ZeroOrOne(RuleBase<T> rule) =>
+            ZeroOrOne(null, rule);
 
         public MatchFunctionCount<T> ZeroOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
@@ -182,6 +164,9 @@ namespace gg.parse.script.common
                 (ruleName, product) => RegisterRule(
                     new MatchFunctionCount<T>(ruleName, rule, product, 0, 0)
                 )
-            ); 
+            );
+
+        public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> rule) =>
+            ZeroOrMore(null, rule);
     }
 }

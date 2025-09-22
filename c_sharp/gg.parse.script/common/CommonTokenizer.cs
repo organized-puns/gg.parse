@@ -96,7 +96,7 @@ namespace gg.parse.script.common
                                         // escaped delimiter
                                         Literal(['\\', delimiter]),
                                         // string character that is NOT a delimiter
-                                        sequence(Not(MatchSingle(delimiter)), any())
+                                        sequence(Not(MatchSingle(delimiter)), Any())
                                     )
                                 ),
                                 MatchSingle(delimiter))
@@ -112,7 +112,7 @@ namespace gg.parse.script.common
                                     product,
                                     0,
                                     Literal(startComment),
-                                    ZeroOrMore(sequence(Not(Literal(endComment)), any())),
+                                    ZeroOrMore(sequence(Not(Literal(endComment)), Any())),
                                     Literal(endComment)
                                 )
                             )
@@ -131,7 +131,7 @@ namespace gg.parse.script.common
                             product,
                             0,
                             Literal(startComment),
-                            ZeroOrMore(sequence(Not(MatchSingle('\n')), any()))
+                            ZeroOrMore(sequence(Not(MatchSingle('\n')), Any()))
                         )
                     )
                 );        

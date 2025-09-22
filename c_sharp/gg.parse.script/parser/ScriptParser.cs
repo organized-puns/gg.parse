@@ -293,14 +293,14 @@ namespace gg.parse.script.parser
                 "PrecedenceNotFoundError", 
                 "Expecting precedence number.",
                 // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
-                sequence(any(), ifMatches(AssignmentToken))
+                sequence(Any(), ifMatches(AssignmentToken))
             );
 
             MatchRuleHeader = Sequence(
                 "#RuleDeclaration",
                 CreateMatchHeaderAnnotationProduction(),
                 MatchRuleName,
-                zeroOrOne("#Precedence",
+                ZeroOrOne("#Precedence",
                     OneOf("#RulePrecedenceOptions",
                         // ie no a precedence
                         ifMatches(AssignmentToken),
@@ -635,7 +635,7 @@ namespace gg.parse.script.parser
             );
         }
 
-        private MatchOneOfFunction<int>/*MatchFunctionCount<int>*/ CreateMatchHeaderAnnotationProduction()
+        private MatchOneOfFunction<int> CreateMatchHeaderAnnotationProduction()
         {
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
@@ -643,7 +643,7 @@ namespace gg.parse.script.parser
             InvalidProductInHeaderError = error(
                 "InvalidProductInHeaderError",
                 $"Expected either '{AnnotationProduct.None.GetPrefix()}' or '{AnnotationProduct.Transitive.GetPrefix()}' but found something else entirely.",
-                any()
+                Any()
             );
 
             return OneOf(

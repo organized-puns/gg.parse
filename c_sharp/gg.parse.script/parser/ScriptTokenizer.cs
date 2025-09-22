@@ -7,7 +7,7 @@ using static gg.parse.script.common.CommonTokenNames;
 namespace gg.parse.script.parser
 {
     public class ScriptTokenizer : CommonTokenizer
-    {
+    {        
         public ScriptTokenizer(bool dropComments = true)
         {
             var scriptTokens =
@@ -52,8 +52,10 @@ namespace gg.parse.script.parser
                     )
             );
         }
-        
-        public ParseResult Tokenize(string text) => Root!.Parse(text.ToCharArray(), 0);
+
+        public ParseResult Tokenize(string text) => Root!.Parse(text);
+
+        // -- private methods -----------------------------------------------------------------------------------------
 
         private MatchFunctionSequence<char> MatchScriptKeyword() =>
             Sequence(
