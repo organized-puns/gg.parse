@@ -86,7 +86,7 @@ namespace gg.parse.script.tests.unit
             name = nodes[0].Children[0].Rule.Name;
 
             name = nodes[0].Children[0].Rule.Name;
-            IsTrue(name == "TransitiveSelector");
+            IsTrue(name == "Token(TransitiveSelector)");
 
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == "RuleName");
@@ -98,7 +98,7 @@ namespace gg.parse.script.tests.unit
             (tokens, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
 
             name = nodes[0].Children[0].Rule.Name;
-            IsTrue(name == "NoProductSelector");
+            IsTrue(name == "Token(NoProductSelector)");
 
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == "RuleName");

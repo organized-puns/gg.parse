@@ -1,7 +1,7 @@
 ﻿
 
 
-namespace gg.parse.rulefunctions
+namespace gg.parse.rules
 {
     /// <summary>
     /// Rule used in compilation where the rule body is empty. Can be (out) optimized later

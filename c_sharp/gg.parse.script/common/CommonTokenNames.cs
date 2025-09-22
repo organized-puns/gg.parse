@@ -32,6 +32,8 @@
 
         public static readonly string KeyValueSeparator = "KeyValueSeparator";
 
+        public static readonly string Keyword = "Keyword";
+
         public static readonly string Literal = "Literal";
 
         public static readonly string Not = "Not";
@@ -50,6 +52,8 @@
 
         public static readonly string Sign = "Sign";
 
+        public static readonly string SingleData = "SingleData";
+
         public static readonly string String = "String";
 
         public static readonly string UnknownToken = "UnknownToken";
@@ -62,9 +66,13 @@
 
         public static readonly string LowerCaseLetter = "LowerCaseLetter";
 
+        public static readonly string Underscore = "UnderscoreLetter";
         public static readonly string UpperCaseLetter = "UpperCaseLetter";
         
         public static readonly string Identifier = "Identifier";
+        public static readonly string IdentifierStartingCharacter = "IdentifierStartingCharacter";
+        public static readonly string IdentifierCharacter = "IdentifierCharacter";
+
         public static readonly string DoubleQuotedString = "DoubleQuotedString";
         public static readonly string SingleQuotedString = "SingleQuotedString";
         public static readonly string Assignment = "Assignment";
@@ -80,6 +88,7 @@
         public static readonly string NotOperator = "NotOperator";
         public static readonly string TryMatchOperatorShortHand = "TryMatchOperator(ShortHand)";
         public static readonly string TryMatchOperator = "TryMatchOperator";
+        public static readonly string TryMatchKeyword = "TryMatchKeyword";
 
         public static readonly string Include = "include";
 
@@ -88,13 +97,13 @@
         public static readonly string SingleLineComment = "SingleLineComment";
         public static readonly string MultiLineComment = "MultiLineComment";
 
-        public static readonly string LogFatal   = "fatal";
-        public static readonly string LogError   = "error";
-        public static readonly string LogWarning = "warning";
-        public static readonly string LogInfo    = "info";
-        public static readonly string LogDebug   = "debug";
+        public static readonly string LogFatal   = "Keyword(fatal)";
+        public static readonly string LogError   = "Keyword(error)";
+        public static readonly string LogWarning = "Keyword(warning)";
+        public static readonly string LogInfo    = "Keyword(info)";
+        public static readonly string LogDebug   = "Keyword(debug)";
         
-        public static readonly string If         = "if";
+        public static readonly string If         = "Keyword(if)";
         public static readonly string Skip       = "SkipUntil";
 
         public static string GetPrefix(this AnnotationProduct production)
@@ -107,6 +116,28 @@
                 _ => throw new NotImplementedException(),
             };
         }
+
+        public static (string outputName, AnnotationProduct product) SplitNameAndProduct(this string name)
+        {
+            var product = AnnotationProduct.Annotation;
+            var start = name.IndexOf(TransitiveProductPrefix);
+            var length = 0;
+
+            if (start == 0)
+            {
+                product = AnnotationProduct.Transitive;
+                length = TransitiveProductPrefix.Length;
+            }
+            else if ((start = name.IndexOf(NoProductPrefix)) == 0)
+            {  
+                product = AnnotationProduct.None;
+                length = NoProductPrefix.Length;
+            }
+
+            // take the substring of the name minus the annotation product prefix
+            return (name.Substring(Math.Max(0, start) + length).Trim(), product);
+        }
+
 
         /// Note: this will only return true because of the current assumption that the product character
         /// will always start at 0 and defaults to AnnotationProduct.Annotation. Should this change in the future

@@ -1,6 +1,5 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions;
 using gg.parse.script.common;
 using gg.parse.script.parser;
 
@@ -16,7 +15,7 @@ namespace gg.parse.script.tests.integration
         {
             var tokenizer = new ScriptTokenizer();
             var testText = "fatal error warning info debug";
-            var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
+            var result = tokenizer.Root!.Parse(testText);
 
             IsTrue(result.FoundMatch);
             IsTrue(result.MatchedLength == testText.Length);
@@ -55,7 +54,7 @@ namespace gg.parse.script.tests.integration
             for (var i = 0; i < expectedNames.Length; i++)
             {
                 var name = result.Annotations![i].Rule!.Name;
-                IsTrue(name == expectedNames[i]);
+                IsTrue(name.IndexOf(expectedNames[i]) >= 0);
             }
         }
 

@@ -16,6 +16,11 @@ namespace gg.parse
 
         public IEnumerable<string> FunctionNames => _nameRuleLookup.Keys;
 
+        /// <summary>
+        /// Number of registered rules.
+        /// </summary>
+        public int Count => _nameRuleLookup.Count;
+
         public RuleGraph<T> Merge(RuleGraph<T> other)
         {
             Assertions.RequiresNotNull(other);
@@ -134,5 +139,16 @@ namespace gg.parse
                 }
             }
         }
+
+        public TRule FindOrRegister<TRule>(
+            string ruleName,
+            AnnotationProduct product,
+            Func<string, AnnotationProduct, TRule> factoryMethod)
+            where TRule : RuleBase<T> =>
+
+            TryFindRule(ruleName, out TRule? existingRule)
+                     ? existingRule!
+                     : factoryMethod(ruleName, product);
+
     }
 }

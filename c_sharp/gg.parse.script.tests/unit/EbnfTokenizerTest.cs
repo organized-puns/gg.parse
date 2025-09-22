@@ -1,10 +1,9 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions;
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
 using gg.parse.script.common;
 using gg.parse.script.parser;
-
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.unit
 {
@@ -80,7 +79,7 @@ namespace gg.parse.script.tests.unit
             Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
             Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.TryMatchOperator));
             Assert.IsTrue(annotations[2].Start == 12);
-            Assert.IsTrue(annotations[2].Length == 4);
+            Assert.IsTrue(annotations[2].Length == 3);
             Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
             Assert.IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }

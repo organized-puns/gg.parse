@@ -1,9 +1,8 @@
 ﻿#nullable disable
 
-using gg.parse.rulefunctions;
-using gg.parse.script;
-
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
+using gg.parse.rules;
 
 namespace gg.parse.script.tests.integration
 {
