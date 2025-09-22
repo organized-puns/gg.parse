@@ -132,13 +132,7 @@ Todo (for mvp)
   - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
   - address all xxx
-    
-    Replace CommonRules with CommonGraphWrapper
-  
-        Figure out if we really need all sub rules in the rulegraph id/name. 
-   Yes because a = 'foo'; and b = 'foo', 'bar'; should NOT generate two 'foo-rules. a ='foo'; and b = ~'foo'; are different though
-    (I'm sure this doesn't work as of yet - it actually does, probably not so much for the compile stage though)
-            
+     
     Rename try match by if match and remove the short hand >  
 
     Add skip_until >> skip_until_eof_or >>> 
@@ -153,6 +147,10 @@ Todo (for mvp)
 
 alpha (featured complete, buggy, ugly mess)
 -------------------------------------------
+
+-  Figure out if we really need all sub rules in the rulegraph id/name. 
+   Yes because a = 'foo'; and b = 'foo', 'bar'; should NOT generate two 'foo-rules. a ='foo'; and b = ~'foo'; are different though
+   (I'm sure this doesn't work as of yet - it actually does, probably not so much for the compile stage though)   
 
 - Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
 
