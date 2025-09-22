@@ -1,6 +1,4 @@
 ﻿using gg.parse.rules;
-using System.Data;
-using System.Xml.Linq;
 
 namespace gg.parse.script.common
 {
@@ -44,24 +42,19 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchAnyData<T>(ruleName, product)));
         
-        public LogRule<T> error(string ruleName, string message, RuleBase<T>? condition = null)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
+        public LogRule<T> Error(string name, string message, RuleBase<T>? condition = null) =>
+            FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
+                        (ruleName, product) => RegisterRule(
+                            new LogRule<T>(ruleName, product, message, condition, LogLevel.Error)));
 
-            return this.LogError(ruleName.Substring(start + length), product, message, condition);
-        }
-       
+        public TryMatchRule<T> TryMatch(RuleBase<T> condition) =>
+            TryMatch(null, condition);
 
-        public TryMatchRule<T> ifMatches(RuleBase<T> stopCondition) =>
-            this.TryMatch(stopCondition);
-
-        public TryMatchRule<T> ifMatches(string ruleName, RuleBase<T> condition)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-
-            return this.TryMatch(ruleName.Substring(start + length), product, condition);
-        }
-
+        public TryMatchRule<T> TryMatch(string? name, RuleBase<T> condition) =>
+            FindOrRegister(name, $"{CommonTokenNames.TryMatchOperator}({condition.Name})",
+                        (ruleName, product) => RegisterRule(
+                            new TryMatchRule<T>(ruleName, product, condition)));
+        
         public MatchDataSequence<T> Literal(T[] sequence) =>
             Literal(null, sequence);
 
@@ -78,25 +71,21 @@ namespace gg.parse.script.common
         public MatchNotFunction<T> Not(RuleBase<T> rule) =>
             Not(null, rule);
 
-        public MatchOneOfFunction<T> OneOf(string ruleName, params RuleBase<T>[] rules)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
+        public MatchOneOfFunction<T> OneOf(string? name, params RuleBase<T>[] rules) =>
+            FindOrRegister(name, $"{CommonTokenNames.OneOf}({string.Join(", ", rules.Select(r => r.Name))})",
+                        (ruleName, product) => RegisterRule(
+                            new MatchOneOfFunction<T>(ruleName, product, 0, rules)));
 
-            return this.OneOf(ruleName.Substring(start + length), product, rules);
-        }
+        public MatchOneOfFunction<T> OneOf(params RuleBase<T>[] rules) =>
+            OneOf(null, rules);
 
-        public MatchOneOfFunction<T> oneOf(params RuleBase<T>[] rules) =>
-            this.OneOf(rules);
+        public MatchFunctionSequence<T> Sequence(string? name, params RuleBase<T>[] rules) =>
+            FindOrRegister(name, $"{CommonTokenNames.FunctionSequence}({string.Join(", ", rules.Select(r => r.Name))})",
+                        (ruleName, product) => RegisterRule(
+                            new MatchFunctionSequence<T>(ruleName, product, 0, rules)));
 
-        public MatchFunctionSequence<T> Sequence(string ruleName, params RuleBase<T>[] rules)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-
-            return this.Sequence(ruleName.Substring(start + length), product, rules);
-        }
-
-        public MatchFunctionSequence<T> sequence(params RuleBase<T>[] rules) =>
-            this.Sequence(rules);
+        public MatchFunctionSequence<T> Sequence(params RuleBase<T>[] rules) =>
+            Sequence(null, rules);
 
         public MatchSingleData<T> MatchSingle(T data) =>
             MatchSingle(null, data);
@@ -106,46 +95,18 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchSingleData<T>(ruleName, data, product)));
 
-        public SkipRule<T> skip(string ruleName, RuleBase<T> stopCondition, bool failOnEoF = true)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
+        public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
+            FindOrRegister(name, $"{CommonTokenNames.Skip}({stopCondition.ToString()}, {failOnEoF})",
+                        (ruleName, product) => RegisterRule(
+                            new SkipRule<T>(ruleName, product, stopCondition, failOnEoF)));
 
-            return this.Skip(ruleName.Substring(start + length), product, stopCondition, failOnEoF);
-        }
+        public SkipRule<T> Skip(RuleBase<T> stopCondition, bool failOnEoF = true) =>
+            Skip(null, stopCondition, failOnEoF);
 
-        public SkipRule<T> skip(RuleBase<T> stopCondition, bool failOnEoF = true) =>
-            this.Skip(stopCondition, failOnEoF);
-
-
-        public MatchSingleData<T> token(string ruleName, T tokenId)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-
-            var name = ruleName.Substring(start + length);
-
-            return TryFindRule(name, out MatchSingleData<T>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new MatchSingleData<T>(name, tokenId, product));
-        }
-
-
-        public LogRule<T> warning(string ruleName, string message, RuleBase<T>? condition = null)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-
-            var name = ruleName.Substring(start + length);
-
-            return TryFindRule(name, out LogRule<T>? existingRule)
-                 ? existingRule!
-                 : RegisterRule(new LogRule<T>(name, product, message, condition, LogLevel.Warning));
-        }
-
-        /*public MatchFunctionCount<T> zeroOrOne(string ruleName, RuleBase<T> rule)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
-
-            return this.ZeroOrOne(ruleName.Substring(start + length), product, rule);
-        }*/
+        public LogRule<T> Warning(string name, string message, RuleBase<T>? condition = null) =>
+            FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
+                        (ruleName, product) => RegisterRule(
+                            new LogRule<T>(ruleName, product, message, condition, LogLevel.Warning)));
 
         public MatchFunctionCount<T> ZeroOrOne(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,

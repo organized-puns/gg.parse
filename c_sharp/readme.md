@@ -137,7 +137,7 @@ Todo (for mvp)
   
         Figure out if we really need all sub rules in the rulegraph id/name. 
    Yes because a = 'foo'; and b = 'foo', 'bar'; should NOT generate two 'foo-rules. a ='foo'; and b = ~'foo'; are different though
-    (I'm sure this doesn't work as of yet)
+    (I'm sure this doesn't work as of yet - it actually does, probably not so much for the compile stage though)
             
     Rename try match by if match and remove the short hand >  
 

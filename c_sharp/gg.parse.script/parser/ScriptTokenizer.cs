@@ -31,23 +31,23 @@ namespace gg.parse.script.parser
                 );
 
             Root = ZeroOrMore(
-                    "#root", 
+                    "#root",
 
                     OneOf(
                         "#rootOptions", 
 
-                        scriptTokens, 
+                        scriptTokens,
 
                         // Whitespace should not be in the tokens as the following error
                         // will have to ignore it as well.
                         Whitespace(),
-                        
+
                         // else we found a token we can't handle, raise an error and skip
                         // characters until we find another valid script token or the eof.
-                        error(
+                        Error(
                             UnknownToken,
                             "Can't match the character at the given position to a token.",
-                            this.Skip(stopCondition: scriptTokens, failOnEoF: false)
+                            CommonRules.Skip(this, stopCondition: scriptTokens, failOnEoF: false)
                         )
                     )
             );
@@ -60,7 +60,7 @@ namespace gg.parse.script.parser
         private MatchFunctionSequence<char> MatchScriptKeyword() =>
             Sequence(
                     "#matchKeyword",
-                    ifMatches(LowerCaseLetter()),
+                    TryMatch(LowerCaseLetter()),
                     OneOf(
                         "#keywordList",
 

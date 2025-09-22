@@ -200,7 +200,7 @@ namespace gg.parse.script.parser
                 ruleBody,
                 GroupEndToken);
 
-            MissingUnaryOperatorTerm = error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
+            MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
 
             var unaryDataTermsOptions =
                 OneOf(
@@ -234,7 +234,7 @@ namespace gg.parse.script.parser
 
             // >(a | b | c) / try ( a | b | c)
             TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
-                this.OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
+                CommonRules.OneOf(this, Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
                 unaryDataTermsOptions);
 
             var unaryOperators = new RuleBase<int>[]
@@ -286,14 +286,14 @@ namespace gg.parse.script.parser
                 Token(CommonTokenNames.EndStatement)
             );
 
-            MatchRuleName = token("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
-            MatchPrecedence = token("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
+            MatchRuleName = MatchSingle("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
+            MatchPrecedence = MatchSingle("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
 
-            InvalidPrecedenceError = error(
+            InvalidPrecedenceError = Error(
                 "PrecedenceNotFoundError", 
                 "Expecting precedence number.",
                 // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
-                sequence(Any(), ifMatches(AssignmentToken))
+                Sequence(Any(), TryMatch(AssignmentToken))
             );
 
             MatchRuleHeader = Sequence(
@@ -303,20 +303,20 @@ namespace gg.parse.script.parser
                 ZeroOrOne("#Precedence",
                     OneOf("#RulePrecedenceOptions",
                         // ie no a precedence
-                        ifMatches(AssignmentToken),
+                        TryMatch(AssignmentToken),
                         MatchPrecedence,
                         InvalidPrecedenceError
                     )
                 )
-            );           
-
-            RuleBodyError = error(
-                "RuleBodyError",
-                "Unexpected token(s) in the rule's body.",
-                this.Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
-            var emptyBodyWarning = warning("NoRuleBodyWarning", "Rule has no body.", ifMatches(RuleEndToken));
+            RuleBodyError = Error(
+                "RuleBodyError",
+                "Unexpected token(s) in the rule's body.",
+                CommonRules.Skip(this, stopCondition: RuleEndToken, failOnEoF: false)
+            );
+
+            var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", TryMatch(RuleEndToken));
 
             var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
 
@@ -325,7 +325,7 @@ namespace gg.parse.script.parser
                 AnnotationProduct.Annotation,
                 "Missing end of rule (;) at the given position.",
                 // skip until the start of the next rule, if any
-                skip("~skipUntilNextHeaderOrEof", MatchRuleHeader, failOnEoF: false)
+                Skip("~skipUntilNextHeaderOrEof", MatchRuleHeader, failOnEoF: false)
             );
 
             var endStatementOptions = this.OneOf(
@@ -335,7 +335,7 @@ namespace gg.parse.script.parser
                 MissingRuleEndError
             );
 
-            MissingAssignmentError = error("MissingAssignmentError", "Assignment token '=', expected but encountered something different.");
+            MissingAssignmentError = Error("MissingAssignmentError", "Assignment token '=', expected but encountered something different.");
 
             MatchRule = Sequence(
                 "Rule",
@@ -352,7 +352,7 @@ namespace gg.parse.script.parser
                 "UnknownInput",
                 AnnotationProduct.Annotation,
                 "Can't match the token at the given position to a astNode.",
-                skip("~skipUntilNextValidStatement", stopCondition: validStatement, failOnEoF: false)
+                Skip("~skipUntilNextValidStatement", stopCondition: validStatement, failOnEoF: false)
             );            
 
             Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive,
@@ -519,7 +519,7 @@ namespace gg.parse.script.parser
                     Token(operatorTokenName),
                     ruleTerms);
 
-            var notEndOfOperator = CommonRules.Not(this, this.OneOf(Eof, RuleEndToken, GroupEndToken));
+            var notEndOfOperator = CommonRules.Not(this, CommonRules.OneOf(this, Eof, RuleEndToken, GroupEndToken));
 
             // user forgot an operator eg: a, b  c;
             var matchMissingOperatorError = this.LogError(
@@ -536,7 +536,7 @@ namespace gg.parse.script.parser
                 $"MissingTermError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
-                this.Sequence(Token(operatorTokenName), CommonRules.Not(this, ruleTerms))
+                CommonRules.Sequence(this, Token(operatorTokenName), CommonRules.Not(this, ruleTerms))
             );
 
             MissingTermAfterOperatorInRemainderError[operatorTokenName] = matchMissingTermError;
@@ -547,7 +547,7 @@ namespace gg.parse.script.parser
                 $"WrongOperatorError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an operator ({operatorTokenName}) but found something else.",
-                this.Sequence(CommonRules.Not(this, operatorToken), MatchAny, ruleTerms)
+                CommonRules.Sequence(this, CommonRules.Not(this, operatorToken), MatchAny, ruleTerms)
             );
 
             WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;
@@ -585,7 +585,7 @@ namespace gg.parse.script.parser
                 $"MatchOperatorSequenceError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected a rule term after operator ({operatorTokenName}) but found something else.",
-                this.Sequence(ruleTerms, operatorToken, CommonRules.Not(this, ruleTerms))
+                CommonRules.Sequence(this, ruleTerms, operatorToken, CommonRules.Not(this, ruleTerms))
             );
 
             MissingTermAfterOperatorError[operatorTokenName] = matchOperatorSequenceError;
@@ -640,7 +640,7 @@ namespace gg.parse.script.parser
             MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
             MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
 
-            InvalidProductInHeaderError = error(
+            InvalidProductInHeaderError = Error(
                 "InvalidProductInHeaderError",
                 $"Expected either '{AnnotationProduct.None.GetPrefix()}' or '{AnnotationProduct.Transitive.GetPrefix()}' but found something else entirely.",
                 Any()
@@ -649,7 +649,7 @@ namespace gg.parse.script.parser
             return OneOf(
                 "#RuleProduction",
                 // meaning no production
-                ifMatches(IdentifierToken),
+                TryMatch(IdentifierToken),
                 MatchTransitiveSelector,
                 MatchNoProductSelector,
                 InvalidProductInHeaderError
