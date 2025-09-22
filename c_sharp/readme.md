@@ -133,8 +133,6 @@ Todo (for mvp)
   - Add some more documentation, extend readme.
   - address all xxx
      
-    Rename try match by if match and remove the short hand >  
-
     Add skip_until >> skip_until_eof_or >>> 
         - add rule to tokenizer
         - add rule to parser

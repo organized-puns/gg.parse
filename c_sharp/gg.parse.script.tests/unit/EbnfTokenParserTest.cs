@@ -123,35 +123,28 @@ namespace gg.parse.script.tests.unit
 
             
             // try parsing a try match 
-            (tokens, nodes) = parser.Parse("rule = try \"lit\";");
+            (tokens, nodes) = parser.Parse("rule = if \"lit\";");
 
             IsTrue(nodes != null);
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "TryMatch");
+            IsTrue(name == "IfMatch");
 
             // try parsing a try match with eoln
-            (tokens, nodes) = parser.Parse("rule = try\n\"lit\";");
+            (tokens, nodes) = parser.Parse("rule = if\n\"lit\";");
 
             IsTrue(nodes != null);
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "TryMatch");
+            IsTrue(name == "IfMatch");
 
             // try parsing a try match with out space, should result in an unknown error
             try
             {
-                (tokens, nodes) = parser.Parse("rule = tryy \"lit\";");
+                (tokens, nodes) = parser.Parse("rule = iff \"lit\";");
                 Fail();
             }
             catch (ParseException)
             {
             }
-
-            // try parsing a try match shorthand
-            (tokens, nodes) = parser.Parse("rule = >\"lit\";");
-
-            IsTrue(nodes != null);
-            name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "TryMatch");
         }
 
         /*
