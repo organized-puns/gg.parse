@@ -1,8 +1,6 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.common;
 
-using static gg.parse.script.common.CommonRules;
-
 namespace gg.parse.script.parser
 {
     /// <summary>
@@ -114,38 +112,40 @@ namespace gg.parse.script.parser
         {
             Tokenizer = tokenizer;
 
-            
             RuleEndToken = Token(CommonTokenNames.EndStatement);
             GroupStartToken = Token(CommonTokenNames.GroupStart);
             GroupEndToken = Token(CommonTokenNames.GroupEnd);
             AssignmentToken = Token(CommonTokenNames.Assignment);
             MatchAny = new MatchAnyData<int>("Any");
             Eof = new MatchNotFunction<int>("~EOF", MatchAny);
-            IdentifierToken = Token("IdentifierToken", AnnotationProduct.Annotation, CommonTokenNames.Identifier);
+            IdentifierToken = Token("IdentifierToken", CommonTokenNames.Identifier);
 
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
+            MatchTransitiveSelector = Token("TransitiveSelector", CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", CommonTokenNames.NoProductSelector);
 
             var ruleProduction = CreateMatchAnnotationProduction();
 
             // "abc" or 'abc'
-            MatchLiteral = this.OneOf("Literal", AnnotationProduct.Annotation,
-                    Token(CommonTokenNames.SingleQuotedString),
-                    Token(CommonTokenNames.DoubleQuotedString)
+            MatchLiteral = OneOf(
+                "Literal",
+                Token(CommonTokenNames.SingleQuotedString),
+                Token(CommonTokenNames.DoubleQuotedString)
             );
 
             // .
-            MatchAnyToken = Token("AnyToken", AnnotationProduct.Annotation, CommonTokenNames.AnyCharacter);
+            MatchAnyToken = Token("AnyToken", CommonTokenNames.AnyCharacter);
 
             // { "abcf" }
-            MatchCharacterSet = this.Sequence("CharacterSet", AnnotationProduct.Annotation,
-                    Token(CommonTokenNames.ScopeStart),
-                    MatchLiteral,
-                    Token(CommonTokenNames.ScopeEnd)
+            MatchCharacterSet = Sequence(
+                "CharacterSet",
+                Token(CommonTokenNames.ScopeStart),
+                MatchLiteral,
+                Token(CommonTokenNames.ScopeEnd)
             );
 
             // { 'a' .. 'z' }
-            MatchCharacterRange = this.Sequence("CharacterRange", AnnotationProduct.Annotation,
+            MatchCharacterRange = Sequence(
+                    "CharacterRange",
                     Token(CommonTokenNames.ScopeStart),
                     MatchLiteral,
                     Token(CommonTokenNames.Elipsis),
@@ -153,9 +153,8 @@ namespace gg.parse.script.parser
                     Token(CommonTokenNames.ScopeEnd)
             );
 
-            MatchIdentifier = this.Sequence(
+            MatchIdentifier = Sequence(
                 "Identifier",
-                AnnotationProduct.Annotation,
                 ruleProduction,
                 IdentifierToken
             );
@@ -168,11 +167,7 @@ namespace gg.parse.script.parser
                 MatchIdentifier
             };
 
-            var unaryAndDataTerms = this.OneOf(
-                "#DataMatchers",
-                AnnotationProduct.Transitive,
-                [.. matchDataRules]
-            );
+            var unaryAndDataTerms = OneOf("#DataMatchers", [.. matchDataRules]);
 
             // a, b, c
             // mainSequence contains both the match and error handling
@@ -186,19 +181,20 @@ namespace gg.parse.script.parser
             // mainEval contains both the match and error handling
             (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
 
-            var ruleBody = this.OneOf(
+            var ruleBody = OneOf(
                 "#RuleBody",
-                AnnotationProduct.Transitive,
                 // match this before unary terms
-                this.OneOf("#BinaryRuleTerms", AnnotationProduct.Transitive, mainSequence, mainOption, mainEval),
+                OneOf("#BinaryRuleTerms", mainSequence, mainOption, mainEval),
                 unaryAndDataTerms
             );
 
             // ( a, b, c )
-            MatchGroup = this.Sequence("#Group", AnnotationProduct.Transitive,
+            MatchGroup = Sequence(
+                "#Group", 
                 GroupStartToken,
                 ruleBody,
-                GroupEndToken);
+                GroupEndToken
+            );
 
             MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
 
@@ -210,20 +206,25 @@ namespace gg.parse.script.parser
                 );
 
             // *(a | b | c)
-            MatchZeroOrMoreOperator = this.Sequence("ZeroOrMore", AnnotationProduct.Annotation,
+            MatchZeroOrMoreOperator = Sequence(
+                "ZeroOrMore", 
                 Token(CommonTokenNames.ZeroOrMoreOperator),
-                unaryDataTermsOptions);
+                unaryDataTermsOptions
+            );
 
             // ?(a | b | c)
-            MatchZeroOrOneOperator = this.Sequence("ZeroOrOne", AnnotationProduct.Annotation,
+            MatchZeroOrOneOperator = Sequence(
+                "ZeroOrOne", 
                 Token(CommonTokenNames.ZeroOrOneOperator),
-                unaryDataTermsOptions);
+                unaryDataTermsOptions
+            );
 
             // +(a | b | c)
-            MatchOneOrMoreOperator = this.Sequence("OneOrMore", AnnotationProduct.Annotation,
+            MatchOneOrMoreOperator = Sequence(
+                "OneOrMore",
                 Token(CommonTokenNames.OneOrMoreOperator),
-                unaryDataTermsOptions);
-
+                unaryDataTermsOptions
+            );
 
             // !(a | b | c)
             MatchNotOperator = Sequence(
@@ -233,9 +234,11 @@ namespace gg.parse.script.parser
             );
 
             // >(a | b | c) / try ( a | b | c)
-            TryMatchOperator = this.Sequence("TryMatch", AnnotationProduct.Annotation,
-                CommonRules.OneOf(this, Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
-                unaryDataTermsOptions);
+            TryMatchOperator = Sequence(
+                "TryMatch", 
+                OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
+                unaryDataTermsOptions
+            );
 
             var unaryOperators = new RuleBase<int>[]
             {
@@ -250,21 +253,15 @@ namespace gg.parse.script.parser
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
             // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
             // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductInBodyError = this.LogError(
+            UnexpectedProductInBodyError = Error(
                     "UnexpectedProductionModifier",
-                    AnnotationProduct.Annotation,
                     "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
             );
 
-            MatchUnexpectedProductInBodyError = this.Sequence(
+            MatchUnexpectedProductInBodyError = Sequence(
                 "UnexpectedProductErrorMatch",
-                AnnotationProduct.Annotation,
                 ruleProduction,
-                this.OneOf(
-                    "#UnexpectedProductErrorMatchTerm",
-                    AnnotationProduct.Transitive,
-                    [.. matchDataRules, .. unaryOperators, MatchGroup]
-                ),
+                OneOf("#UnexpectedProductErrorMatchTerm", [.. matchDataRules, .. unaryOperators, MatchGroup]),
                 UnexpectedProductInBodyError
             );
 
@@ -278,9 +275,8 @@ namespace gg.parse.script.parser
                 MatchUnexpectedProductInBodyError
             ];
 
-            Include = this.Sequence(
+            Include = Sequence(
                 "Include",
-                AnnotationProduct.Annotation,
                 Token(CommonTokenNames.Include),
                 MatchLiteral,
                 Token(CommonTokenNames.EndStatement)
@@ -313,29 +309,30 @@ namespace gg.parse.script.parser
             RuleBodyError = Error(
                 "RuleBodyError",
                 "Unexpected token(s) in the rule's body.",
-                CommonRules.Skip(this, stopCondition: RuleEndToken, failOnEoF: false)
+                Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
             var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", TryMatch(RuleEndToken));
 
             var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
 
-            MissingRuleEndError = this.LogError(
+            MissingRuleEndError = Error(
                 "MissingEndRule",
-                AnnotationProduct.Annotation,
                 "Missing end of rule (;) at the given position.",
                 // skip until the start of the next rule, if any
                 Skip("~skipUntilNextHeaderOrEof", MatchRuleHeader, failOnEoF: false)
             );
 
-            var endStatementOptions = this.OneOf(
+            var endStatementOptions = OneOf(
                 "#EndStatementOptions",
-                AnnotationProduct.Transitive,
                 RuleEndToken,
                 MissingRuleEndError
             );
 
-            MissingAssignmentError = Error("MissingAssignmentError", "Assignment token '=', expected but encountered something different.");
+            MissingAssignmentError = Error(
+                "MissingAssignmentError", 
+                "Assignment token '=', expected but encountered something different."
+            );
 
             MatchRule = Sequence(
                 "Rule",
@@ -345,18 +342,16 @@ namespace gg.parse.script.parser
                 endStatementOptions
             );
 
-            var validStatement = this.OneOf("#ValidStatement", AnnotationProduct.Transitive, Include, MatchRule);
+            var validStatement = OneOf("#ValidStatement", Include, MatchRule);
 
             // fallback in case nothing matches
-            UnknownInputError = this.LogError(
+            UnknownInputError = Error(
                 "UnknownInput",
-                AnnotationProduct.Annotation,
                 "Can't match the token at the given position to a astNode.",
                 Skip("~skipUntilNextValidStatement", stopCondition: validStatement, failOnEoF: false)
             );            
 
-            Root = this.ZeroOrMore("#Root", AnnotationProduct.Transitive,
-                this.OneOf("#Statement", AnnotationProduct.Transitive, validStatement, UnknownInputError));
+            Root = ZeroOrMore("#Root", OneOf("#Statement", validStatement, UnknownInputError));
         }
 
         /// <summary>
@@ -475,17 +470,12 @@ namespace gg.parse.script.parser
             return errors.Count > 0;
         }
 
-        private MatchSingleData<int> Token(string tokenName)
-        {
-            var rule = Tokenizer.FindRule(tokenName);
-            return this.Single($"{AnnotationProduct.None.GetPrefix()}Token({tokenName})", AnnotationProduct.None, rule.Id);
-        }
+        private MatchSingleData<int> Token(string tokenName) =>
+            MatchSingle($"{AnnotationProduct.None.GetPrefix()}Token({tokenName})", Tokenizer.FindRule(tokenName)!.Id);
 
-        private MatchSingleData<int> Token(string ruleName, AnnotationProduct product, string tokenName)
-        {
-            var rule = Tokenizer.FindRule(tokenName);
-            return this.Single(ruleName, product, rule.Id);
-        }
+        private MatchSingleData<int> Token(string ruleName, string tokenName) =>
+            MatchSingle($"Token({ruleName})", Tokenizer.FindRule(tokenName)!.Id);
+        
 
         /// <summary>
         /// Create a rule to match a binary operator such as "a | b | c". Also takes in account
@@ -513,18 +503,16 @@ namespace gg.parse.script.parser
 
             var operatorToken = Token(operatorTokenName);
 
-            var nextElement = this.Sequence(
+            var nextElement = Sequence(
                     $"#Next{name}Element",
-                    AnnotationProduct.Transitive,
                     Token(operatorTokenName),
                     ruleTerms);
 
             var notEndOfOperator = CommonRules.Not(this, CommonRules.OneOf(this, Eof, RuleEndToken, GroupEndToken));
 
             // user forgot an operator eg: a, b  c;
-            var matchMissingOperatorError = this.LogError(
+            var matchMissingOperatorError = Error(
                 $"MissingOperatorError({operatorTokenName})",
-                AnnotationProduct.Annotation,
                 $"Expected an operator ({operatorTokenName}) but did not find any.",
                 ruleTerms
             );
@@ -532,9 +520,8 @@ namespace gg.parse.script.parser
             MissingOperatorError[operatorTokenName] = matchMissingOperatorError;
 
             // user forgot an term after the operator eg: a, b, ;
-            var matchMissingTermError = this.LogError(
+            var matchMissingTermError = Error(
                 $"MissingTermError({operatorTokenName})",
-                AnnotationProduct.Annotation,
                 $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
                 CommonRules.Sequence(this, Token(operatorTokenName), CommonRules.Not(this, ruleTerms))
             );
@@ -543,57 +530,50 @@ namespace gg.parse.script.parser
 
             // user used a different operator by mistake (?) eg: a, b | c, d or a wrong token altogether
             // eg a, b, . c
-            var matchWrongOperatorError = this.LogError(
+            var matchWrongOperatorError = Error(
                 $"WrongOperatorError({operatorTokenName})",
-                AnnotationProduct.Annotation,
                 $"Expected an operator ({operatorTokenName}) but found something else.",
                 CommonRules.Sequence(this, CommonRules.Not(this, operatorToken), MatchAny, ruleTerms)
             );
 
             WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;
 
-            var matchOperatorError = this.Sequence(
+            var matchOperatorError = Sequence(
                 $"#MatchOperatorErrors({operatorTokenName})",
-                AnnotationProduct.Transitive,
                 notEndOfOperator,
-                this.OneOf(
+                OneOf(
                     $"#OneOfOperatorError({operatorTokenName})",
-                    AnnotationProduct.Transitive,
                     matchMissingTermError,
                     matchMissingOperatorError,
                     matchWrongOperatorError
                 )
             );
 
-            var remainder = this.OneOf(
+            var remainder = OneOf(
                 $"#OperatorRemainder({operatorTokenName})",
-                AnnotationProduct.Transitive,
                 nextElement,
                 matchOperatorError
             );
 
-            var matchOperatorSequence = this.Sequence(
+            var matchOperatorSequence = Sequence(
                 name,
-                AnnotationProduct.Annotation,
                 ruleTerms,
                 operatorToken,
                 ruleTerms,
-                this.ZeroOrMore($"#{name}Remainder", AnnotationProduct.Transitive, remainder)
+                ZeroOrMore($"#{name}Remainder", remainder)
             );
 
-            var matchOperatorSequenceError = this.LogError(
+            var matchOperatorSequenceError = Error(
                 $"MatchOperatorSequenceError({operatorTokenName})",
-                AnnotationProduct.Annotation,
                 $"Expected a rule term after operator ({operatorTokenName}) but found something else.",
-                CommonRules.Sequence(this, ruleTerms, operatorToken, CommonRules.Not(this, ruleTerms))
+                Sequence(ruleTerms, operatorToken, Not(ruleTerms))
             );
 
             MissingTermAfterOperatorError[operatorTokenName] = matchOperatorSequenceError;
 
             return (
-                this.OneOf(
+                OneOf(
                     $"#OneOfBinaryOperator(({operatorTokenName})",
-                    AnnotationProduct.Transitive,
                     matchOperatorSequence,
                     matchOperatorSequenceError
                 ),
@@ -603,32 +583,28 @@ namespace gg.parse.script.parser
 
         private MatchFunctionSequence<int> CreateMatchLog(MatchOneOfFunction<int> condition)
         {
-            var matchLogLevel = this.OneOf(
+            var matchLogLevel = OneOf(
                 "LogLevel",
-                AnnotationProduct.Annotation,
-                Token(CommonTokenNames.LogFatal, AnnotationProduct.Annotation, CommonTokenNames.LogFatal),
-                Token(CommonTokenNames.LogError, AnnotationProduct.Annotation, CommonTokenNames.LogError),
-                Token(CommonTokenNames.LogWarning, AnnotationProduct.Annotation, CommonTokenNames.LogWarning),
-                Token(CommonTokenNames.LogInfo, AnnotationProduct.Annotation, CommonTokenNames.LogInfo),
-                Token(CommonTokenNames.LogDebug, AnnotationProduct.Annotation, CommonTokenNames.LogDebug)
+                Token(CommonTokenNames.LogFatal, CommonTokenNames.LogFatal),
+                Token(CommonTokenNames.LogError, CommonTokenNames.LogError),
+                Token(CommonTokenNames.LogWarning, CommonTokenNames.LogWarning),
+                Token(CommonTokenNames.LogInfo, CommonTokenNames.LogInfo),
+                Token(CommonTokenNames.LogDebug, CommonTokenNames.LogDebug)
             );
 
             var matchText = MatchLiteral;
 
-            var matchOptionalCondition = this.ZeroOrOne(
+            var matchOptionalCondition = ZeroOrOne(
                 "#OptionalLogCondition", 
-                AnnotationProduct.Transitive, 
-                this.Sequence(
-                    "LogCondition",
-                    AnnotationProduct.Transitive,
+                Sequence(
+                    "#LogCondition",
                     Token(CommonTokenNames.If),
                     condition
                 )
             );
 
-            return this.Sequence(
+            return Sequence(
                 "MatchLog",
-                AnnotationProduct.Annotation,
                 matchLogLevel,
                 matchText,
                 matchOptionalCondition
@@ -637,8 +613,8 @@ namespace gg.parse.script.parser
 
         private MatchOneOfFunction<int> CreateMatchHeaderAnnotationProduction()
         {
-            MatchTransitiveSelector = Token("TransitiveSelector", AnnotationProduct.Annotation, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", AnnotationProduct.Annotation, CommonTokenNames.NoProductSelector);
+            MatchTransitiveSelector = Token("TransitiveSelector", CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token("NoProductSelector", CommonTokenNames.NoProductSelector);
 
             InvalidProductInHeaderError = Error(
                 "InvalidProductInHeaderError",
@@ -647,8 +623,8 @@ namespace gg.parse.script.parser
             );
 
             return OneOf(
-                "#RuleProduction",
-                // meaning no production
+                "#HeaderRuleProduction",
+                // if an indentifier token is found, it means there is no production
                 TryMatch(IdentifierToken),
                 MatchTransitiveSelector,
                 MatchNoProductSelector,
@@ -658,8 +634,10 @@ namespace gg.parse.script.parser
 
         private MatchFunctionCount<int> CreateMatchAnnotationProduction()
         {
-            return this.ZeroOrOne("#RuleProduction", AnnotationProduct.Transitive,
-                this.OneOf("ProductionSelection", AnnotationProduct.Transitive,
+            return ZeroOrOne(
+                "#RuleProduction", 
+                OneOf(
+                    "#ProductionSelection", 
                     MatchTransitiveSelector,
                     MatchNoProductSelector
                 )
