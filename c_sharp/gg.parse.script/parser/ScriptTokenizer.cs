@@ -1,75 +1,34 @@
 ﻿
+using gg.parse.rules;
+using gg.parse.script.common;
+
 using static gg.parse.script.common.CommonTokenNames;
 using static gg.parse.script.common.CommonRules;
 
 namespace gg.parse.script.parser
 {
-    public class ScriptTokenizer : RuleGraph<char>
+    public class ScriptTokenizer : CommonTokenizer
     {
         public ScriptTokenizer(bool dropComments = true)
         {
-            var endOfKeyword = this.OneOf(
-                this.Whitespace(),
-                this.Not(this.IdentifierCharacter()),
-                this.Not(this.Any())
-            );
+            var scriptTokens =
+                oneOf(
+                    "#scriptTokens",
 
-            var ebnfTokens =
-                this.OneOf("#EbnfTokens", AnnotationProduct.Transitive,
-                    this.EndOfLine(product: AnnotationProduct.None),
-                    
-                    // make sure keywords are before the identifier
-                    this.Keyword(LogFatal, AnnotationProduct.Annotation, LogFatal),
-                    this.Keyword(LogError, AnnotationProduct.Annotation, LogError),
-                    this.Keyword(LogWarning, AnnotationProduct.Annotation, LogWarning),
-                    this.Keyword(LogInfo, AnnotationProduct.Annotation, LogInfo),
-                    this.Keyword(LogDebug, AnnotationProduct.Annotation, LogDebug),
-                    this.Keyword(If, AnnotationProduct.Annotation, If),
+                    // make sure keywords are matched before the Identifier
+                    // otherwise no keywords will be found as Identifier will also match them
+                    MatchScriptKeyword(),                  
 
-                    // try match and shorthand
-                    MapNameToToken(TryMatchOperatorShortHand, ">"),
-                    this.Sequence(TryMatchOperator, AnnotationProduct.Annotation,
-                        this.Literal("TryMatchKeyword", AnnotationProduct.Transitive, "try".ToArray()),
-                        endOfKeyword
-                    ),
+                    Identifier(CommonTokenNames.Identifier),
+                    Integer(CommonTokenNames.Integer),
 
-                    // include
-                    this.Sequence(Include, AnnotationProduct.Annotation,
-                        this.Literal("IncludeKeyword", AnnotationProduct.Transitive, "include".ToArray()),
-                        endOfKeyword
-                    ),
+                    MatchString(CommonTokenNames.DoubleQuotedString, '"'),
+                    MatchString(CommonTokenNames.SingleQuotedString, '\''),
 
-                    this.Identifier(),
-                    this.Integer(),
-                    this.String(DoubleQuotedString, AnnotationProduct.Annotation, '"'),
-                    this.String(SingleQuotedString, AnnotationProduct.Annotation, '\''),
-                    MapNameToToken(Assignment, "="),
-                    MapNameToToken(ScopeStart, "{"),
-                    MapNameToToken(ScopeEnd, "}"),
-                    MapNameToToken(EndStatement, ";"),
-                    MapNameToToken(Elipsis, ".."),
-                    // needs to be behind elipsis, elipsis being the more specific one
-                    MapNameToToken(AnyCharacter, "."),
-                    MapNameToToken(Option, "|"),
-                    MapNameToToken(GroupStart, "("),
-                    MapNameToToken(GroupEnd, ")"),
-                    MapNameToToken(CollectionSeparator, ","),
-                    MapNameToToken(ZeroOrOneOperator, "?"),
-                    MapNameToToken(ZeroOrMoreOperator, "*"),
-                    MapNameToToken(OneOrMoreOperator, "+"),
-                    MapNameToToken(ArrayStart, "["),
-                    MapNameToToken(ArrayEnd, "]"),
-                    
-                    MapNameToToken(NotOperator, "!"),
-                    
-                    MapNameToToken(TransitiveSelector, "#"),
-                    MapNameToToken(NoProductSelector, "~"),
-                    
-                    this.SingleLineComment(product: dropComments? AnnotationProduct.None : AnnotationProduct.Annotation),
+                    this.SingleLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
                     this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
 
-                    // should be below comments, because conflicts with /* or //
-                    MapNameToToken(OptionWithPrecedence, "/")
+                    MatchScriptLiteral()  
                 );
 
             var noMatchFallback = 
@@ -77,7 +36,7 @@ namespace gg.parse.script.parser
                     UnknownToken,
                     AnnotationProduct.Annotation,
                     "Can't match the character at the given position to a token.",
-                    this.Skip(stopCondition: ebnfTokens, failOnEoF: false)
+                    this.Skip(stopCondition: scriptTokens, failOnEoF: false)
                 );
 
             Root = this.ZeroOrMore(
@@ -86,7 +45,7 @@ namespace gg.parse.script.parser
                     this.OneOf(
                         "#TokenWhiteSpaceOrNoMatchFallback", 
                         AnnotationProduct.Transitive, 
-                        ebnfTokens, 
+                        scriptTokens, 
                         this.Whitespace(), 
                         noMatchFallback
                     )
@@ -95,8 +54,49 @@ namespace gg.parse.script.parser
         
         public ParseResult Tokenize(string text) => Root!.Parse(text.ToCharArray(), 0);
 
-        private RuleBase<char> MapNameToToken(string name, string token) =>
-            this.Literal(name, AnnotationProduct.Annotation, token.ToCharArray());
-    }
+        private MatchFunctionSequence<char> MatchScriptKeyword() =>
+            sequence(
+                    "#matchKeyword",
+                    ifMatches(LowerCaseLetter()),
+                    oneOf(
+                        "#keywordList",
+
+                        Keyword(CommonTokenNames.LogFatal, "fatal"),
+                        Keyword(CommonTokenNames.LogError, "error"),
+                        Keyword(CommonTokenNames.LogWarning, "warning"),
+                        Keyword(CommonTokenNames.LogInfo, "info"),
+                        Keyword(CommonTokenNames.LogDebug, "debug"),
+                        Keyword(CommonTokenNames.If, "if"),
+                        Keyword(CommonTokenNames.TryMatchOperator, "try"),
+                        Keyword(CommonTokenNames.Include, "include")
+                    )
+                );
+
+        private MatchOneOfFunction<char> MatchScriptLiteral() =>
+            oneOf(
+                "#matchToken",
+                Literal(CommonTokenNames.TryMatchOperatorShortHand, ">"),
+                Literal(CommonTokenNames.Assignment, "="),
+                Literal(CommonTokenNames.ScopeStart, "{"),
+                Literal(CommonTokenNames.ScopeEnd, "}"),
+                Literal(CommonTokenNames.EndStatement, ";"),
+                Literal(CommonTokenNames.Elipsis, ".."),
+                // needs to be behind elipsis, elipsis being the more specific one
+                Literal(CommonTokenNames.AnyCharacter, "."),
+                Literal(CommonTokenNames.Option, "|"),
+                Literal(CommonTokenNames.GroupStart, "("),
+                Literal(CommonTokenNames.GroupEnd, ")"),
+                Literal(CommonTokenNames.CollectionSeparator, ","),
+                Literal(CommonTokenNames.ZeroOrOneOperator, "?"),
+                Literal(CommonTokenNames.ZeroOrMoreOperator, "*"),
+                Literal(CommonTokenNames.OneOrMoreOperator, "+"),
+                Literal(CommonTokenNames.ArrayStart, "["),
+                Literal(CommonTokenNames.ArrayEnd, "]"),
+                Literal(CommonTokenNames.NotOperator, "!"),
+                Literal(CommonTokenNames.TransitiveSelector, "#"),
+                Literal(CommonTokenNames.NoProductSelector, "~"),
+                Literal(CommonTokenNames.OptionWithPrecedence, "/")
+            );
+     }
 }
 

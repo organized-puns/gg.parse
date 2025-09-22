@@ -1,5 +1,5 @@
 ﻿
-using gg.parse.rulefunctions;
+using gg.parse.rules;
 
 namespace gg.parse.script.compiler
 {

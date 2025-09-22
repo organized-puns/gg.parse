@@ -1,5 +1,4 @@
-﻿using gg.parse.rulefunctions;
-using gg.parse.rules;
+﻿using gg.parse.rules;
 
 namespace gg.parse.script.common
 {
@@ -24,12 +23,12 @@ namespace gg.parse.script.common
                 ? existingRule!
                 : table.RegisterRule(new MatchDataSequence<T>(name, sequence, product));
 
-        public static RuleBase<T> Sequence<T>(this RuleGraph<T> table, params T[] data)
+        /*public static RuleBase<T> Sequence<T>(this RuleGraph<T> table, params T[] data)
             where T : IComparable<T> =>
 
             table.Sequence($"{AnnotationProduct.None.GetPrefix()}{CommonTokenNames.DataSequence}({string.Join(", ", data)})", 
                         AnnotationProduct.None, 
-                        data);
+                        data);*/
 
         public static RuleBase<T> Sequence<T>(this RuleGraph<T> table, string ruleName, AnnotationProduct product, params T[] data)
             where T : IComparable<T> =>

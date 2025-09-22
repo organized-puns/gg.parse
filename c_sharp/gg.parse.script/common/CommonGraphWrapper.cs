@@ -1,6 +1,4 @@
-﻿using gg.parse.rulefunctions;
-using gg.parse.rules;
-using static gg.parse.script.common.CommonRules;
+﻿using gg.parse.rules;
 
 namespace gg.parse.script.common
 {
@@ -10,6 +8,33 @@ namespace gg.parse.script.common
     /// <typeparam name="T"></typeparam>
     public class CommonGraphWrapper<T> : RuleGraph<T> where T : IComparable<T>
     {
+
+        // -- Utility methods -----------------------------------------------------------------------------------------
+        
+        public static (string name, AnnotationProduct product) CreateRuleNameAndProduct(string? name, string fallback) =>
+            string.IsNullOrEmpty(name)
+                ? ($"{AnnotationProduct.None.GetPrefix()}{fallback}", AnnotationProduct.None)
+                : name.SplitNameAndProduct();
+
+        private static string JoinDataArray(T[] array) =>
+            array is char[] charArray
+                ? new string(charArray)
+                : string.Join(", ", array);
+
+        public TRule FindOrRegister<TRule>(
+            string? name, string fallback,
+            Func<string, AnnotationProduct, TRule> factoryMethod)
+            where TRule : RuleBase<T>
+        {
+            var (ruleName, product) = CreateRuleNameAndProduct(name, fallback);
+            return TryFindRule(ruleName, out TRule? existingRule)
+                     ? existingRule!
+                     : factoryMethod(ruleName, product);
+        }
+
+
+        // -- Rule short hands ----------------------------------------------------------------------------------------
+
         public MatchAnyData<T> any() =>
             this.Any();
 
@@ -42,6 +67,7 @@ namespace gg.parse.script.common
 
             return this.LogError(ruleName.Substring(start + length), product, message, condition);
         }
+       
 
         public TryMatchRule<T> ifMatches(RuleBase<T> stopCondition) =>
             this.TryMatch(stopCondition);
@@ -52,6 +78,14 @@ namespace gg.parse.script.common
 
             return this.TryMatch(ruleName.Substring(start + length), product, condition);
         }
+
+        public MatchDataSequence<T> Literal(T[] sequence) =>
+            Literal(null, sequence);
+
+        public MatchDataSequence<T> Literal(string? name, T[] sequence) =>
+            FindOrRegister(name, $"{CommonTokenNames.Literal}({JoinDataArray(sequence)})",
+                        (ruleName, product) => RegisterRule(
+                            new MatchDataSequence<T>(ruleName, sequence, product)));
 
         public MatchNotFunction<T> not(string ruleName, RuleBase<T> rule)
         {
@@ -82,6 +116,14 @@ namespace gg.parse.script.common
 
         public MatchFunctionSequence<T> sequence(params RuleBase<T>[] rules) =>
             this.Sequence(rules);
+
+        public MatchSingleData<T> MatchSingle(T data) =>
+            MatchSingle(null, data);
+
+        public MatchSingleData<T> MatchSingle(string? name, T data) =>
+            FindOrRegister(name, $"{CommonTokenNames.SingleData}({data.ToString()})",
+                        (ruleName, product) => RegisterRule(
+                            new MatchSingleData<T>(ruleName, data, product)));
 
         public SkipRule<T> skip(string ruleName, RuleBase<T> stopCondition, bool failOnEoF = true)
         {
@@ -124,7 +166,20 @@ namespace gg.parse.script.common
             return this.ZeroOrOne(ruleName.Substring(start + length), product, rule);
         }
 
-        public MatchFunctionSequence<T> zeroOrOne(RuleBase<T> rule) =>
-            this.Sequence(rule);
+        public MatchFunctionCount<T> ZeroOrOne(RuleBase<T> rule) =>
+            FindOrRegister(null,
+                $"{CommonTokenNames.ZeroOrOne}({rule.Name})",
+                (ruleName, product) => RegisterRule(
+                    new MatchFunctionCount<T>(ruleName, rule, product, 0, 1)
+                )
+            );
+
+        public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> rule) =>
+            FindOrRegister(null,
+                $"{CommonTokenNames.ZeroOrMore}({rule.Name})",
+                (ruleName, product) => RegisterRule(
+                    new MatchFunctionCount<T>(ruleName, rule, product, 0, 0)
+                )
+            );
     }
 }
