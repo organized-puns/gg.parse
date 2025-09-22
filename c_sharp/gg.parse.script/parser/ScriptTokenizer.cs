@@ -47,7 +47,7 @@ namespace gg.parse.script.parser
                         Error(
                             UnknownToken,
                             "Can't match the character at the given position to a token.",
-                            CommonRules.Skip(this, stopCondition: scriptTokens, failOnEoF: false)
+                            Skip(stopCondition: scriptTokens, failOnEoF: false)
                         )
                     )
             );

@@ -1,7 +1,6 @@
 ﻿using gg.parse.script.common;
+using gg.parse.script.parser;
 using System.Text;
-
-using static gg.parse.script.common.CommonRules;
 
 namespace gg.parse.instances.json
 {
@@ -19,7 +18,7 @@ namespace gg.parse.instances.json
         internal static readonly string Array = "Array";
     }
 
-    public class JsonParser : RuleGraph<int>
+    public class JsonParser : CommonGraphWrapper<int>
     {
         
         public JsonTokenizer Tokenizer { get; init; }
@@ -38,15 +37,15 @@ namespace gg.parse.instances.json
 
             _defaultProduct = AnnotationProduct.Annotation;
 
-            var key = Token(JsonNodeNames.Key, TokenId(CommonTokenNames.String));
-            var stringValue = Token(JsonNodeNames.String, TokenId(CommonTokenNames.String));
-            var intValue = Token(JsonNodeNames.Integer, TokenId(CommonTokenNames.Integer));
-            var floatValue = Token(JsonNodeNames.Float, TokenId(CommonTokenNames.Float));
-            var boolValue = Token(JsonNodeNames.Boolean, TokenId(CommonTokenNames.Boolean));
-            var nullValue = Token(JsonNodeNames.Null, TokenId(CommonTokenNames.Null));
+            var key = MatchSingle(JsonNodeNames.Key, TokenId(CommonTokenNames.String));
+            var stringValue = MatchSingle(JsonNodeNames.String, TokenId(CommonTokenNames.String));
+            var intValue = MatchSingle(JsonNodeNames.Integer, TokenId(CommonTokenNames.Integer));
+            var floatValue = MatchSingle(JsonNodeNames.Float, TokenId(CommonTokenNames.Float));
+            var boolValue = MatchSingle(JsonNodeNames.Boolean, TokenId(CommonTokenNames.Boolean));
+            var nullValue = MatchSingle(JsonNodeNames.Null, TokenId(CommonTokenNames.Null));
 
             // value = string | int | float | bool | null
-            var value = this.OneOf(JsonNodeNames.Value, AnnotationProduct.Annotation, stringValue, intValue, floatValue, boolValue, nullValue);
+            var value = OneOf(JsonNodeNames.Value, stringValue, intValue, floatValue, boolValue, nullValue);
 
             _defaultProduct = AnnotationProduct.None;
             
@@ -61,39 +60,43 @@ namespace gg.parse.instances.json
             // kv = string kv_separator value
             // kv_list = kv *(collection_separator kv)
             // example of recovery
-            var keyValueMatch = this.Sequence(JsonNodeNames.KeyValuePair, AnnotationProduct.Annotation, key, keyValueSeparator, value);
+            var keyValueMatch = Sequence(JsonNodeNames.KeyValuePair, key, keyValueSeparator, value);
             var objRecovery = this.OneOf(value, comma, objectEnd);
-            var errorValueMissing =
-                this.LogError(
+            var errorValueMissing = Error(
                     "err_missing_value",
-                    AnnotationProduct.Annotation,
                     "missing json value",
-                    this.Skip(stopCondition: objRecovery, failOnEoF: false)
+                    Skip(stopCondition: objRecovery, failOnEoF: false)
                 );
-            var valueMissingMatch = this.Sequence("#value_missing", AnnotationProduct.Transitive, key, keyValueSeparator, errorValueMissing);
-            var separatorMissingMatch = this.Sequence("#kv_sep_missing", AnnotationProduct.Transitive, key, errorValueMissing);
-            var keyValue = this.OneOf("#kvp_with_recovery", AnnotationProduct.Transitive, keyValueMatch, valueMissingMatch, separatorMissingMatch);
+            var valueMissingMatch = Sequence("#value_missing", key, keyValueSeparator, errorValueMissing);
+            var separatorMissingMatch = Sequence("#kv_sep_missing", key, errorValueMissing);
+            var keyValue = OneOf("#kvp_with_recovery", keyValueMatch, valueMissingMatch, separatorMissingMatch);
 
-            var nextKeyValue = this.Sequence("#NextKeyValue", AnnotationProduct.Transitive, comma, keyValue);
-            var keyValueList = this.Sequence("#KeyValueList", AnnotationProduct.Transitive, keyValue,
-                this.ZeroOrMore("#KeyValueListRest", AnnotationProduct.Transitive, nextKeyValue));
+            var nextKeyValue = Sequence("#NextKeyValue", comma, keyValue);
+            var keyValueList = Sequence("#KeyValueList", keyValue, ZeroOrMore("#KeyValueListRest", nextKeyValue));
             
             // jsonObj = scope_start ?(kv_list) scope_end
-            var jsonObject = this.Sequence(JsonNodeNames.Object, AnnotationProduct.Annotation,
-                objectStart, this.ZeroOrOne("#ObjectProperties", AnnotationProduct.Transitive, keyValueList), objectEnd);
+            var jsonObject = Sequence(
+                JsonNodeNames.Object, 
+                objectStart, 
+                ZeroOrOne("#ObjectProperties", keyValueList), 
+                objectEnd
+            );
 
             // jsonArray = array_start ?(value *(collection_separator value)) array_end
-            var nextValue = this.Sequence("#NextValue", AnnotationProduct.Transitive, comma, value);
-            var valueList = this.Sequence("#ValueList", AnnotationProduct.Transitive, value,
-                this.ZeroOrMore("#ValueListRest", AnnotationProduct.Transitive, nextValue));
-            var jsonArray = this.Sequence(JsonNodeNames.Array, AnnotationProduct.Annotation,
-                arrayStart, this.ZeroOrOne("#ArrayValues", AnnotationProduct.Transitive, valueList), arrayEnd);
+            var nextValue = Sequence("#NextValue", comma, value);
+            var valueList = Sequence("#ValueList", value, ZeroOrMore("#ValueListRest", nextValue));
+            var jsonArray = Sequence(
+                JsonNodeNames.Array,                 
+                arrayStart, 
+                ZeroOrOne("#ArrayValues", valueList), 
+                arrayEnd
+            );
 
             value.RuleOptions = [.. value.RuleOptions, jsonObject, jsonArray];
 
             // todo error(s)
 
-            Root = this.OneOf("~JsonRoot", AnnotationProduct.Transitive, jsonObject, jsonArray);
+            Root = OneOf("#JsonRoot", jsonObject, jsonArray);
         }
 
         public int TokenId(string name) => Tokenizer.FindRule(name).Id;
@@ -103,10 +106,11 @@ namespace gg.parse.instances.json
         public RuleBase<int> Token(string tokenName, AnnotationProduct product)
         {
             var rule = Tokenizer.FindRule(tokenName);
-            return this.Single($"{product.GetPrefix()}Token({rule.Name})", product, rule.Id);
+            return MatchSingle($"{product.GetPrefix()}Token({rule.Name})", rule.Id);
         }
 
-        public RuleBase<int> Token(string name, int tokenId) => this.Single(name, _defaultProduct, tokenId);
+        //public RuleBase<int> Token(string name, int tokenId) => 
+          //  MatchSingle(name, _defaultProduct, tokenId);
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);
 

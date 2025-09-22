@@ -1,4 +1,6 @@
 ﻿using gg.parse.rules;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace gg.parse.script.common
 {
@@ -46,6 +48,14 @@ namespace gg.parse.script.common
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
                         (ruleName, product) => RegisterRule(
                             new LogRule<T>(ruleName, product, message, condition, LogLevel.Error)));
+
+        public MatchDataSet<T> InSet(params T[] set) =>
+            InSet(null, set);   
+
+        public MatchDataSet<T> InSet(string? name, params T[] set) =>
+            FindOrRegister(name, $"{CommonTokenNames.Set}({JoinDataArray(set)})",
+                        (ruleName, product) => RegisterRule(
+                            new MatchDataSet<T>(ruleName, product, set)));
 
         public TryMatchRule<T> TryMatch(RuleBase<T> condition) =>
             TryMatch(null, condition);

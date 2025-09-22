@@ -508,7 +508,7 @@ namespace gg.parse.script.parser
                     Token(operatorTokenName),
                     ruleTerms);
 
-            var notEndOfOperator = CommonRules.Not(this, CommonRules.OneOf(this, Eof, RuleEndToken, GroupEndToken));
+            var notEndOfOperator = Not(OneOf(Eof, RuleEndToken, GroupEndToken));
 
             // user forgot an operator eg: a, b  c;
             var matchMissingOperatorError = Error(
@@ -523,7 +523,7 @@ namespace gg.parse.script.parser
             var matchMissingTermError = Error(
                 $"MissingTermError({operatorTokenName})",
                 $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
-                CommonRules.Sequence(this, Token(operatorTokenName), CommonRules.Not(this, ruleTerms))
+                Sequence(Token(operatorTokenName), Not(ruleTerms))
             );
 
             MissingTermAfterOperatorInRemainderError[operatorTokenName] = matchMissingTermError;
@@ -533,7 +533,7 @@ namespace gg.parse.script.parser
             var matchWrongOperatorError = Error(
                 $"WrongOperatorError({operatorTokenName})",
                 $"Expected an operator ({operatorTokenName}) but found something else.",
-                CommonRules.Sequence(this, CommonRules.Not(this, operatorToken), MatchAny, ruleTerms)
+                Sequence(Not(operatorToken), MatchAny, ruleTerms)
             );
 
             WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;

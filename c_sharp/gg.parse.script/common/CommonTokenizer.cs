@@ -1,10 +1,27 @@
 ﻿using gg.parse.rules;
-using System.Xml.Linq;
+using System.Linq;
 
 namespace gg.parse.script.common
 {
     public class CommonTokenizer : CommonGraphWrapper<char>
     {
+        public RuleBase<char> Boolean() =>
+            Boolean(null);
+
+        public RuleBase<char> Boolean(string? name) =>
+                FindOrRegister(name, CommonTokenNames.Boolean,
+                        (ruleName, product) =>
+                            RegisterRule(
+                                new MatchOneOfFunction<char>(
+                                    ruleName,
+                                    product,
+                                    0,
+                                    Literal("true"),
+                                    Literal("false")
+                                )
+                            )
+                        );
+
         public MatchDataRange<char> Digit(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.Digit,
                         (ruleName, product) => RegisterRule(new MatchDataRange<char>(ruleName, '0', '9', product)));
@@ -14,6 +31,28 @@ namespace gg.parse.script.common
                 CommonTokenNames.DigitSequence,
                 (ruleName, product) => 
                     RegisterRule(new MatchFunctionCount<char>(ruleName, Digit(), product, min: 1, max: 0)));
+
+        public MatchFunctionSequence<char> Float() =>
+            Float(null);
+
+        public MatchFunctionSequence<char> Float(string? name) =>
+            FindOrRegister(name,
+                CommonTokenNames.Float,
+                (ruleName, product) =>
+                    RegisterRule(new MatchFunctionSequence<char>(
+                        ruleName,
+                        product,
+                        precedence: 0,
+                        ZeroOrOne(Sign()),
+                        DigitSequence(),
+                        MatchSingle('.'),
+                        DigitSequence(),
+                        ZeroOrOne(
+                            Sequence(InSet(['e', 'E']), ZeroOrOne(Sign()), DigitSequence())
+                        )
+                    )
+                )
+            );
 
         public MatchFunctionSequence<char> Identifier(string? name = null) =>
             FindOrRegister(name, 

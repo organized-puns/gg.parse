@@ -1,44 +1,44 @@
 ﻿
 using gg.parse.script.common;
+
 using static gg.parse.script.common.CommonTokenNames;
 
 namespace gg.parse.instances.json
 {
-    public class JsonTokenizer : RuleGraph<char>
+    public class JsonTokenizer : CommonTokenizer
     {     
         public JsonTokenizer()
         {
-            var jsonTokens =
-                this.OneOf("#JsonTokens", AnnotationProduct.Transitive,
-                    this.Float(),
-                    this.Integer(),
+            var jsonTokens = OneOf(
+                    "#jsonTokens",
+
+                    Float(CommonTokenNames.Float),
+                    Integer(CommonTokenNames.Integer),
                     // need to override otherwise the name will hold the delimiter which
                     // will interfere with the style lookup in html
-                    this.String(CommonTokenNames.String, AnnotationProduct.Annotation),
-                    this.Boolean(),
-                    Literal("{", ScopeStart),
-                    Literal("}", ScopeEnd),
-                    Literal("[", ArrayStart),
-                    Literal("]", ArrayEnd),
-                    Literal("null", Null),
-                    Literal(",", CollectionSeparator),
-                    Literal(":", KeyValueSeparator)
+                    MatchString(CommonTokenNames.String),
+                    Boolean(CommonTokenNames.Boolean),
+                    Literal(CommonTokenNames.ScopeStart, "{"),
+                    Literal(CommonTokenNames.ScopeEnd, "}"),
+                    Literal(CommonTokenNames.ArrayStart, "["),
+                    Literal(CommonTokenNames.ArrayEnd, "]"),
+                    Literal(CommonTokenNames.Null, "null"),
+                    Literal(CommonTokenNames.CollectionSeparator, ","),
+                    Literal(CommonTokenNames.KeyValueSeparator, ":")
                 );
 
             var error = 
-                this.LogError(
+                Error(
                     UnknownToken, 
-                    AnnotationProduct.Annotation,
                     "Can't match the character at the given position to a token.", 
-                    this.Skip(jsonTokens, failOnEoF: false)
+                    Skip(jsonTokens, failOnEoF: false)
                 );
 
-            Root = this.ZeroOrMore("#JsonTokenizer", AnnotationProduct.Transitive,
-                                this.OneOf("#WhiteSpaceTokenOrError", AnnotationProduct.Transitive, this.Whitespace(), jsonTokens, error));
+            Root = ZeroOrMore("#jsonTokenizer", OneOf("#whiteSpaceTokenOrError", Whitespace(), jsonTokens, error));
         }
 
-        public RuleBase<char> Literal(string token, string name) =>
-            CommonRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
+        //public RuleBase<char> Literal(string token, string name) =>
+          //  CommonRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
 
         public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
 
