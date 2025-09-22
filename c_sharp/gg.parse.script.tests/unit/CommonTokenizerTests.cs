@@ -62,6 +62,28 @@ namespace gg.parse.script.tests.unit
             );
         }
 
+        [TestMethod]
+        public void MultiLineCommentTests()
+        {
+            RunTokenizerTest(
+                ruleFactory: (tokenizer, name) => tokenizer.MultiLineComment(name),
+                testNames: [null, "comment", "#comment", "~comment"],
+                validSamples: ["/* foo */", "/**/", "/** // */", "/** */"],
+                invalidSamples: ["", "/*", "/*/"]
+            );
+        }
+
+        [TestMethod]
+        public void SingleLineCommentTests()
+        {
+            RunTokenizerTest(
+                ruleFactory: (tokenizer, name) => tokenizer.SingleLineComment(name),
+                testNames: [null, "comment", "#comment", "~comment"],
+                validSamples: ["// foo", "//bar\n", "//"],
+                invalidSamples: ["", "/foo", "/"]
+            );
+        }
+
         // -- private / utility functions -----------------------------------------------------------------------------
 
         private void RunTokenizerTest(

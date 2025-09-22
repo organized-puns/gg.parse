@@ -203,7 +203,7 @@ namespace gg.parse.script.parser
             MissingUnaryOperatorTerm = error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
 
             var unaryDataTermsOptions =
-                oneOf(
+                OneOf(
                     "#UnaryDataTermsOptions",
                     unaryAndDataTerms,
                     MissingUnaryOperatorTerm
@@ -226,7 +226,7 @@ namespace gg.parse.script.parser
 
 
             // !(a | b | c)
-            MatchNotOperator = sequence(
+            MatchNotOperator = Sequence(
                 "Not", 
                 Token(CommonTokenNames.NotOperator),
                 unaryDataTermsOptions
@@ -296,12 +296,12 @@ namespace gg.parse.script.parser
                 sequence(any(), ifMatches(AssignmentToken))
             );
 
-            MatchRuleHeader = sequence(
+            MatchRuleHeader = Sequence(
                 "#RuleDeclaration",
                 CreateMatchHeaderAnnotationProduction(),
                 MatchRuleName,
                 zeroOrOne("#Precedence",
-                    oneOf("#RulePrecedenceOptions",
+                    OneOf("#RulePrecedenceOptions",
                         // ie no a precedence
                         ifMatches(AssignmentToken),
                         MatchPrecedence,
@@ -318,7 +318,7 @@ namespace gg.parse.script.parser
 
             var emptyBodyWarning = warning("NoRuleBodyWarning", "Rule has no body.", ifMatches(RuleEndToken));
 
-            var ruleBodyOptions = oneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
+            var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
 
             MissingRuleEndError = this.LogError(
                 "MissingEndRule",
@@ -337,10 +337,10 @@ namespace gg.parse.script.parser
 
             MissingAssignmentError = error("MissingAssignmentError", "Assignment token '=', expected but encountered something different.");
 
-            MatchRule = sequence(
+            MatchRule = Sequence(
                 "Rule",
                 MatchRuleHeader,
-                oneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
+                OneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,
                 endStatementOptions
             );
@@ -519,7 +519,7 @@ namespace gg.parse.script.parser
                     Token(operatorTokenName),
                     ruleTerms);
 
-            var notEndOfOperator = this.Not(this.OneOf(Eof, RuleEndToken, GroupEndToken));
+            var notEndOfOperator = CommonRules.Not(this, this.OneOf(Eof, RuleEndToken, GroupEndToken));
 
             // user forgot an operator eg: a, b  c;
             var matchMissingOperatorError = this.LogError(
@@ -536,7 +536,7 @@ namespace gg.parse.script.parser
                 $"MissingTermError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
-                this.Sequence(Token(operatorTokenName), this.Not(ruleTerms))
+                this.Sequence(Token(operatorTokenName), CommonRules.Not(this, ruleTerms))
             );
 
             MissingTermAfterOperatorInRemainderError[operatorTokenName] = matchMissingTermError;
@@ -547,7 +547,7 @@ namespace gg.parse.script.parser
                 $"WrongOperatorError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected an operator ({operatorTokenName}) but found something else.",
-                this.Sequence(this.Not(operatorToken), MatchAny, ruleTerms)
+                this.Sequence(CommonRules.Not(this, operatorToken), MatchAny, ruleTerms)
             );
 
             WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;
@@ -585,7 +585,7 @@ namespace gg.parse.script.parser
                 $"MatchOperatorSequenceError({operatorTokenName})",
                 AnnotationProduct.Annotation,
                 $"Expected a rule term after operator ({operatorTokenName}) but found something else.",
-                this.Sequence(ruleTerms, operatorToken, this.Not(ruleTerms))
+                this.Sequence(ruleTerms, operatorToken, CommonRules.Not(this, ruleTerms))
             );
 
             MissingTermAfterOperatorError[operatorTokenName] = matchOperatorSequenceError;
@@ -646,7 +646,7 @@ namespace gg.parse.script.parser
                 any()
             );
 
-            return oneOf(
+            return OneOf(
                 "#RuleProduction",
                 // meaning no production
                 ifMatches(IdentifierToken),

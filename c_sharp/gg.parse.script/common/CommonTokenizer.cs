@@ -1,4 +1,5 @@
 ﻿using gg.parse.rules;
+using System.Xml.Linq;
 
 namespace gg.parse.script.common
 {
@@ -65,7 +66,7 @@ namespace gg.parse.script.common
                                     product,
                                     precedence: 0,
                                     Literal(keyword.ToCharArray()),
-                                    not(IdentifierCharacter())
+                                    Not(IdentifierCharacter())
                                 )
                             )
             );
@@ -80,13 +81,9 @@ namespace gg.parse.script.common
             FindOrRegister(name, CommonTokenNames.LowerCaseLetter, 
                         (ruleName, product) => RegisterRule(new MatchDataRange<char>(ruleName, 'a', 'z', product)));
 
-        public MatchDataSet<char> Sign(string? name = null) =>
-            FindOrRegister(name, CommonTokenNames.Sign,
-                        (ruleName, product) => RegisterRule(new MatchDataSet<char>(ruleName, product, ['+', '-'])));
-
         public MatchFunctionSequence<char> MatchString(string? name = null, char delimiter = '"') =>
             FindOrRegister(name, CommonTokenNames.String,
-                        (ruleName, product) => 
+                        (ruleName, product) =>
                             RegisterRule(new MatchFunctionSequence<char>(
                                 ruleName,
                                 product,
@@ -99,12 +96,45 @@ namespace gg.parse.script.common
                                         // escaped delimiter
                                         Literal(['\\', delimiter]),
                                         // string character that is NOT a delimiter
-                                        sequence(not(MatchSingle(delimiter)), any())
+                                        sequence(Not(MatchSingle(delimiter)), any())
                                     )
                                 ),
                                 MatchSingle(delimiter))
                             )
                         );
+
+        public RuleBase<char> MultiLineComment(string? name = null, string startComment = "/*", string endComment = "*/") =>
+            FindOrRegister(name, CommonTokenNames.MultiLineComment,
+                        (ruleName, product) =>
+                            RegisterRule(
+                                new MatchFunctionSequence<char>(
+                                    ruleName,
+                                    product,
+                                    0,
+                                    Literal(startComment),
+                                    ZeroOrMore(sequence(Not(Literal(endComment)), any())),
+                                    Literal(endComment)
+                                )
+                            )
+                        );
+
+        public MatchDataSet<char> Sign(string? name = null) =>
+            FindOrRegister(name, CommonTokenNames.Sign,
+                        (ruleName, product) => RegisterRule(new MatchDataSet<char>(ruleName, product, ['+', '-'])));
+
+        public MatchFunctionSequence<char> SingleLineComment(string? name = null, string startComment = "//") =>
+        FindOrRegister(name, CommonTokenNames.SingleLineComment,
+                (ruleName, product) =>
+                    RegisterRule(
+                        new MatchFunctionSequence<char>(
+                            ruleName,
+                            product,
+                            0,
+                            Literal(startComment),
+                            ZeroOrMore(sequence(Not(MatchSingle('\n')), any()))
+                        )
+                    )
+                );        
 
         public MatchSingleData<char> UnderscoreCharacter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.Underscore,
@@ -113,5 +143,10 @@ namespace gg.parse.script.common
         public MatchDataRange<char> UpperCaseLetter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.UpperCaseLetter,
                         (ruleName, product) => RegisterRule(new MatchDataRange<char>(ruleName, 'A', 'Z', product)));
+
+        public MatchDataSet<char> Whitespace(string? name = null) =>
+            FindOrRegister(name, CommonTokenNames.Whitespace,
+                        (ruleName, product) =>
+                            RegisterRule(new MatchDataSet<char>(ruleName, product, [' ', '\r', '\n', '\t'])));
     }
 }

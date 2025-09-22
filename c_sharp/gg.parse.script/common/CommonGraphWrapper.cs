@@ -1,4 +1,5 @@
 ﻿using gg.parse.rules;
+using System.Xml.Linq;
 
 namespace gg.parse.script.common
 {
@@ -87,17 +88,15 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchDataSequence<T>(ruleName, sequence, product)));
 
-        public MatchNotFunction<T> not(string ruleName, RuleBase<T> rule)
-        {
-            ruleName.TryGetProduct(out var product, out var start, out var length);
+        public MatchNotFunction<T> Not(string? name, RuleBase<T> rule) =>
+            FindOrRegister(name, $"{CommonTokenNames.Literal}({rule.Name})",
+                        (ruleName, product) => RegisterRule(
+                            new MatchNotFunction<T>(ruleName, product, rule)));
 
-            return this.Not(ruleName.Substring(start + length), product, rule);
-        }
+        public MatchNotFunction<T> Not(RuleBase<T> rule) =>
+            Not(null, rule);
 
-        public MatchNotFunction<T> not(RuleBase<T> rule) =>
-            this.Not(rule);
-
-        public MatchOneOfFunction<T> oneOf(string ruleName, params RuleBase<T>[] rules)
+        public MatchOneOfFunction<T> OneOf(string ruleName, params RuleBase<T>[] rules)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
 
@@ -107,7 +106,7 @@ namespace gg.parse.script.common
         public MatchOneOfFunction<T> oneOf(params RuleBase<T>[] rules) =>
             this.OneOf(rules);
 
-        public MatchFunctionSequence<T> sequence(string ruleName, params RuleBase<T>[] rules)
+        public MatchFunctionSequence<T> Sequence(string ruleName, params RuleBase<T>[] rules)
         {
             ruleName.TryGetProduct(out var product, out var start, out var length);
 
@@ -175,11 +174,14 @@ namespace gg.parse.script.common
             );
 
         public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> rule) =>
-            FindOrRegister(null,
+            ZeroOrMore(null, rule);
+
+        public MatchFunctionCount<T> ZeroOrMore(string? name, RuleBase<T> rule) =>
+            FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrMore}({rule.Name})",
                 (ruleName, product) => RegisterRule(
                     new MatchFunctionCount<T>(ruleName, rule, product, 0, 0)
                 )
-            );
+            ); 
     }
 }

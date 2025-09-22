@@ -3,7 +3,6 @@ using gg.parse.rules;
 using gg.parse.script.common;
 
 using static gg.parse.script.common.CommonTokenNames;
-using static gg.parse.script.common.CommonRules;
 
 namespace gg.parse.script.parser
 {
@@ -12,7 +11,7 @@ namespace gg.parse.script.parser
         public ScriptTokenizer(bool dropComments = true)
         {
             var scriptTokens =
-                oneOf(
+                OneOf(
                     "#scriptTokens",
 
                     // make sure keywords are matched before the Identifier
@@ -25,29 +24,31 @@ namespace gg.parse.script.parser
                     MatchString(CommonTokenNames.DoubleQuotedString, '"'),
                     MatchString(CommonTokenNames.SingleQuotedString, '\''),
 
-                    this.SingleLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
-                    this.MultiLineComment(product: dropComments ? AnnotationProduct.None : AnnotationProduct.Annotation),
+                    SingleLineComment(dropComments ? null : CommonTokenNames.SingleLineComment),
+                    MultiLineComment(dropComments ? null : CommonTokenNames.MultiLineComment),
 
                     MatchScriptLiteral()  
                 );
 
-            var noMatchFallback = 
-                this.LogError(
-                    UnknownToken,
-                    AnnotationProduct.Annotation,
-                    "Can't match the character at the given position to a token.",
-                    this.Skip(stopCondition: scriptTokens, failOnEoF: false)
-                );
+            Root = ZeroOrMore(
+                    "#root", 
 
-            Root = this.ZeroOrMore(
-                    "#EbnfTokenizer", 
-                    AnnotationProduct.Transitive,
-                    this.OneOf(
-                        "#TokenWhiteSpaceOrNoMatchFallback", 
-                        AnnotationProduct.Transitive, 
+                    OneOf(
+                        "#rootOptions", 
+
                         scriptTokens, 
-                        this.Whitespace(), 
-                        noMatchFallback
+
+                        // Whitespace should not be in the tokens as the following error
+                        // will have to ignore it as well.
+                        Whitespace(),
+                        
+                        // else we found a token we can't handle, raise an error and skip
+                        // characters until we find another valid script token or the eof.
+                        error(
+                            UnknownToken,
+                            "Can't match the character at the given position to a token.",
+                            this.Skip(stopCondition: scriptTokens, failOnEoF: false)
+                        )
                     )
             );
         }
@@ -55,10 +56,10 @@ namespace gg.parse.script.parser
         public ParseResult Tokenize(string text) => Root!.Parse(text.ToCharArray(), 0);
 
         private MatchFunctionSequence<char> MatchScriptKeyword() =>
-            sequence(
+            Sequence(
                     "#matchKeyword",
                     ifMatches(LowerCaseLetter()),
-                    oneOf(
+                    OneOf(
                         "#keywordList",
 
                         Keyword(CommonTokenNames.LogFatal, "fatal"),
@@ -73,8 +74,9 @@ namespace gg.parse.script.parser
                 );
 
         private MatchOneOfFunction<char> MatchScriptLiteral() =>
-            oneOf(
+            OneOf(
                 "#matchToken",
+
                 Literal(CommonTokenNames.TryMatchOperatorShortHand, ">"),
                 Literal(CommonTokenNames.Assignment, "="),
                 Literal(CommonTokenNames.ScopeStart, "{"),
