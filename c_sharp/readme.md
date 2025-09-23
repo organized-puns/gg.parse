@@ -133,12 +133,7 @@ Todo (for mvp)
   - Add some more documentation, extend readme.
   - address all xxx
      
-    Add find >> skip >>> 
-        - add rule to tokenizer
-        - add rule to parser
-        - add rule to compiler
-
-    Remove "Function" notion in favor of Rule in names across the project
+   Remove "Function" notion in favor of Rule in names across the project
 
    Move instances to their own project 
 
