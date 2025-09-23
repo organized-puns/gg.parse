@@ -53,6 +53,10 @@ namespace gg.parse.script.parser
 
         public MatchFunctionSequence<int> IfMatchOperator { get; private set; }
 
+        public MatchFunctionSequence<int> MatchSkipOperator { get; private set; }
+
+        public MatchFunctionSequence<int> MatchFindOperator { get; private set; }
+
         public MatchOneOfFunction<int> MatchRuleBody { get; private set; }
 
         public MatchFunctionSequence<int> MatchRuleHeader{ get; private set; }
@@ -473,13 +477,29 @@ namespace gg.parse.script.parser
                 unaryDataTermsOptions
             );
 
+            // >> a
+            MatchFindOperator = Sequence(
+                "findOperator",
+                Token(CommonTokenNames.Find),
+                unaryDataTermsOptions
+            );
+
+            // >>> a
+            MatchSkipOperator = Sequence(
+                "skipOperator",
+                Token(CommonTokenNames.Skip),
+                unaryDataTermsOptions
+            );
+
             return
             [
                 MatchZeroOrMoreOperator,
                 MatchZeroOrOneOperator,
                 MatchOneOrMoreOperator,
                 MatchNotOperator,
-                IfMatchOperator
+                IfMatchOperator,
+                MatchFindOperator,
+                MatchSkipOperator
             ];
         }
 

@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+using gg.parse.rules;
+using gg.parse.script.common;
 using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -9,6 +11,47 @@ namespace gg.parse.script.tests.unit
     [TestClass]
     public class ScriptParserTest
     {
+        [TestMethod]
+        public void CreateSkipScript_Parse_ExpectSkipNodes()
+        {
+            var parser = new ScriptParser();
+
+            var (tokens, nodes) = parser.Parse("rule = >>> 'foo';");
+
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
+
+            var ruleNameRule = nodes[0][0].Rule;
+            IsTrue(ruleNameRule == parser.MatchRuleName);
+
+            var skipRule = nodes[0][1].Rule;
+            IsTrue(skipRule == parser.MatchSkipOperator);
+
+            var fooLiteral = nodes[0][1][0].Rule;
+            IsTrue(fooLiteral.Name == CommonTokenNames.Literal);
+        }
+
+        [TestMethod]
+        public void CreateFindScript_Parse_ExpectFindNodes()
+        {
+            var parser = new ScriptParser();
+
+            var (tokens, nodes) = parser.Parse("rule = >> 'foo';");
+
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
+
+            var ruleNameRule = nodes[0][0].Rule;
+            IsTrue(ruleNameRule == parser.MatchRuleName);
+
+            var skipRule = nodes[0][1].Rule;
+            IsTrue(skipRule == parser.MatchFindOperator);
+
+            var fooLiteral = nodes[0][1][0].Rule;
+            IsTrue(fooLiteral.Name == CommonTokenNames.Literal);
+        }
+
+
         [TestMethod]
         public void ParseRule_ExpectSucess()
         {
