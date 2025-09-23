@@ -256,45 +256,43 @@ namespace gg.parse.script.parser
 
         private MatchFunctionSequence<int> RegisterRuleHeader()
         {
-            MatchRuleName = MatchSingle("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
-            MatchPrecedence = MatchSingle("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
+            MatchRuleName = MatchSingle("ruleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
+            MatchPrecedence = MatchSingle("rulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
 
             InvalidPrecedenceError = Error(
-                "PrecedenceNotFoundError",
+                "precedenceNotFoundError",
                 "Expecting precedence number.",
                 // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
                 Sequence(Any(), IfMatch(AssignmentToken))
             );
 
-            MatchRuleHeader = Sequence(
-                "#RuleDeclaration",
+            return Sequence(
+                "#ruleHeader",
                 CreateMatchHeaderAnnotationProduction(),
+                // xxx should handle incorrect rulename / error
                 MatchRuleName,
-                ZeroOrOne("#Precedence",
-                    OneOf("#RulePrecedenceOptions",
-                        // ie no a precedence
+                ZeroOrOne("#precedence",
+                    OneOf("#rulePrecedenceOptions",
+                        // if we match an assingment there's no a precedence value
                         IfMatch(AssignmentToken),
+                        // handle the precedence value
                         MatchPrecedence,
+                        // didn't find a precedence or assignment (ie the start of the rulebody), so 
+                        // log an error
                         InvalidPrecedenceError
                     )
                 )
-                );
-
-            return MatchRuleHeader;
+            );
         }
 
         private MatchOneOfFunction<int> RegisterRuleBody()
         {
-            var dataMatchers = OneOf("#DataMatchers", RegisterDataMatchers());
+            var unaryTerms = OneOf("#unaryTerms", RegisterDataMatchers());
+            var binaryOperators = OneOf("#BinaryRuleTerms", RegisterBinaryOperators(unaryTerms));
+
+            var ruleBody = OneOf("#RuleBody", binaryOperators, unaryTerms);
             
-            var ruleBody = OneOf(
-                "#RuleBody",
-                // match this before unary terms
-                OneOf("#BinaryRuleTerms", RegisterBinaryOperators(dataMatchers)),
-                dataMatchers
-            );
-            
-            var unaryOperators = RegisterUnaryOperators(dataMatchers);
+            var unaryOperators = RegisterUnaryOperators(unaryTerms);
 
             // ( a, b, c )
             MatchGroup = Sequence("#Group", GroupStartToken!, ruleBody, GroupEndToken!);
@@ -319,8 +317,8 @@ namespace gg.parse.script.parser
             // create all various instances of logs (errors,warnings,infos...)
             MatchLog = CreateMatchLog(ruleBody);
 
-            dataMatchers.RuleOptions = [
-                ..dataMatchers.RuleOptions,
+            unaryTerms.RuleOptions = [
+                ..unaryTerms.RuleOptions,
                 ..unaryOperators,
                 MatchGroup,
                 MatchLog,

@@ -7,7 +7,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 namespace gg.parse.script.tests.unit
 {
     [TestClass]
-    public class EbnfTokenParserTest
+    public class ScriptParserTest
     {
         [TestMethod]
         public void ParseRule_ExpectSucess()
@@ -21,7 +21,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
 
             var name = nodes[0].Children![0].Rule!.Name;
-            IsTrue(name == "RuleName");
+            IsTrue(name == "ruleName");
             name = nodes[0].Children[1].Rule!.Name;
             IsTrue(name == "Literal");
 
@@ -89,7 +89,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(name == "Token(TransitiveSelector)");
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "RuleName");
+            IsTrue(name == "ruleName");
 
             name = nodes[0].Children[2].Rule.Name;
             IsTrue(name == "Not");
@@ -101,7 +101,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(name == "Token(NoProductSelector)");
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "RuleName");
+            IsTrue(name == "ruleName");
 
             name = nodes[0].Children[2].Rule.Name;
             IsTrue(name == "ZeroOrOne");
