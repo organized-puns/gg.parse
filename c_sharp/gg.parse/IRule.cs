@@ -1,6 +1,6 @@
 ﻿namespace gg.parse
 {
-    public interface IRule 
+    public interface IRule : ICloneable
     {
         string Name { get; init; }
 

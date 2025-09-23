@@ -861,7 +861,6 @@ namespace gg.parse.script.tests.integration
         {
             var compiler = new RuleCompiler<char>();
 
-            var conditionId = 42;
             var logId = 64;
             var literalId  = 128;
             var logLevelId = 256;

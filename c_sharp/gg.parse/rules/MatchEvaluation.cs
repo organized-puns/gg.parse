@@ -164,26 +164,6 @@ namespace gg.parse.rules
                 }
             }
             return ParseResult.Failure;
-        }
-
-        private RuleBase<T>? FindRule(int id)
-        {
-            foreach (var option in _options!)
-            {
-                if (option is RuleReference<T> ruleReference)
-                {
-                    if (ruleReference.Rule!.Id == id)
-                    {
-                        return ruleReference.Rule;
-                    }
-                }
-                else if (option.Id == id)
-                {
-                    return option;
-                }
-            }
-
-            throw new ArgumentException($"Cant find rule with id {id } in the options ({string.Join(",", _options.Select(o => o.Id))}).");
-        }
+        }       
     }
 }
