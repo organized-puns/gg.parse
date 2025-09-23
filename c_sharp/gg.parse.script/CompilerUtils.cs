@@ -26,7 +26,9 @@ namespace gg.parse.script
                     .RegisterFunction(parser.MatchOption, CompileOption)
                     .RegisterFunction(parser.MatchSequence, CompileSequence)
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne);
+                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne)
+                    .RegisterFunction(parser.MatchFindOperator, CompileFind)
+                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip);
         }
 
         public static RuleCompiler<int> RegisterGrammarCompilerFunctions(this RuleCompiler<int> compiler, ScriptParser parser)
@@ -43,7 +45,9 @@ namespace gg.parse.script
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne)
                     .RegisterFunction(parser.MatchEval, CompileEvaluation)
-                    .RegisterFunction(parser.MatchLog, CompileLog);
+                    .RegisterFunction(parser.MatchLog, CompileLog)
+                    .RegisterFunction(parser.MatchFindOperator, CompileFind)
+                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip);
         }
 
         // xxx needs to move out of compiler utils

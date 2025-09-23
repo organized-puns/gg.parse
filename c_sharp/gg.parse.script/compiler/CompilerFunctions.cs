@@ -330,6 +330,61 @@ namespace gg.parse.script.compiler
             return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
+        // xxx unary functions are copy/pasting code, could roll these up
+        public static RuleBase<T> CompileSkip<T>(
+            RuleCompiler<T> compiler,
+            RuleDeclaration declaration,
+            CompileSession session) where T : IComparable<T>
+        {
+            var ruleDefinition = declaration.RuleBodyAnnotation;
+
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
+
+            var elementAnnotation = ruleDefinition.Children[0];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            // xxx add human understandable name instead of subfunction
+            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}, type: Skip({elementName})", elementAnnotation);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+
+            if (subFunction == null)
+            {
+                // xxx add errors
+                // xxx resolve rule
+                throw new CompilationException<char>("Cannot compile subFunction definition for Skip.", elementAnnotation.Range, null);
+            }
+
+            return new SkipRule<T>(declaration.Name, declaration.Product, subFunction, failOnEof: false);
+        }
+
+        public static RuleBase<T> CompileFind<T>(
+            RuleCompiler<T> compiler,
+            RuleDeclaration declaration,
+            CompileSession session) where T : IComparable<T>
+        {
+            var ruleDefinition = declaration.RuleBodyAnnotation;
+
+            Assertions.Requires(ruleDefinition != null);
+            Assertions.Requires(ruleDefinition!.Children != null);
+            Assertions.Requires(ruleDefinition.Children!.Count > 0);
+
+            var elementAnnotation = ruleDefinition.Children[0];
+            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            // xxx add human understandable name instead of subfunction
+            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}, type: Find({elementName})", elementAnnotation);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+
+            if (subFunction == null)
+            {
+                // xxx add errors
+                // xxx resolve rule
+                throw new CompilationException<char>("Cannot compile subFunction definition for Find.", elementAnnotation.Range, null);
+            }
+
+            return new SkipRule<T>(declaration.Name, declaration.Product, subFunction, failOnEof: true);
+        }
+
         public static RuleBase<T> CompileTryMatch<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,

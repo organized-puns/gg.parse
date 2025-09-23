@@ -10,7 +10,7 @@ namespace gg.parse.script.tests.integration
     /// See if include statements work as intended
     /// </summary>
     [TestClass]
-    public class EbnfParserIncludesTests
+    public class IncludesTests
     {
         /// <summary>
         /// See if the tokenizer / parser breaks the include command down correctly in tokens

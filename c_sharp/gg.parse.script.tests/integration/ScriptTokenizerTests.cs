@@ -1,14 +1,13 @@
-﻿#nullable disable
-
-using gg.parse.script.common;
+﻿using gg.parse.script.common;
 using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.integration
 {
+    // xxx create common test function / currently contains a lot of copy paste
     [TestClass]
-    public class EbnfTokenizerTests
+    public class ScriptTokenizerTests
     {
         [TestMethod]
         public void CreateLogLevelTokens_Parse_ExpectLogLevelsFound()
@@ -79,6 +78,29 @@ namespace gg.parse.script.tests.integration
                 var name = result.Annotations![i].Rule!.Name;
                 IsTrue(name == expectedNames[i]);
             }
-        }      
+        }
+
+        [TestMethod]
+        public void CreateInputWithFindToken_Parse_ExpectFindSkipFound()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var testText = ">> >>>";
+            var result = tokenizer.Root!.Parse(testText);
+
+            IsTrue(result.FoundMatch);
+            IsTrue(result.MatchedLength == testText.Length);
+
+            var expectedNames = new string[]
+            {
+                CommonTokenNames.Find,
+                CommonTokenNames.Skip
+            };
+
+            for (var i = 0; i < expectedNames.Length; i++)
+            {
+                var name = result.Annotations![i].Rule!.Name;
+                IsTrue(name == expectedNames[i]);
+            }
+        }
     }
 }
