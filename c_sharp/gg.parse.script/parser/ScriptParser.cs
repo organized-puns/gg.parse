@@ -287,42 +287,29 @@ namespace gg.parse.script.parser
 
         private MatchOneOfFunction<int> RegisterRuleBody()
         {
-            var unaryTerms = OneOf("#unaryTerms", RegisterDataMatchers());
-            var binaryOperators = OneOf("#BinaryRuleTerms", RegisterBinaryOperators(unaryTerms));
+            var dataMatchers = RegisterDataMatchers();
+            var unaryTerms = OneOf("#unaryTerms", dataMatchers);
 
-            var ruleBody = OneOf("#RuleBody", binaryOperators, unaryTerms);
-            
             var unaryOperators = RegisterUnaryOperators(unaryTerms);
+            var binaryOperators = OneOf("#BinaryRuleTerms", RegisterBinaryOperators(unaryTerms));
+            
+            var ruleBody = OneOf("#RuleBody", binaryOperators, unaryTerms);
 
             // ( a, b, c )
             MatchGroup = Sequence("#Group", GroupStartToken!, ruleBody, GroupEndToken!);
 
-            // A stray production modifier found, production modifier can only appear in front of references
-            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
-            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
-            // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductInBodyError = Error(
-                    "UnexpectedProductionModifier",
-                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
-            );
-
-            // error for cases where a product is not followed by a valid term, eg #&, ~; or # followed by EOF
-            MatchUnexpectedProductInBodyError = Sequence(
-                "UnexpectedProductErrorMatch",
-                CreateMatchBodyAnnotationProduction(),
-                OneOf("#UnexpectedProductErrorMatchTerm", [.. RegisterDataMatchers(), .. unaryOperators, MatchGroup]),
-                UnexpectedProductInBodyError
-            );
-
             // create all various instances of logs (errors,warnings,infos...)
             MatchLog = CreateMatchLog(ruleBody);
+
+            RuleBase<int>[] recoveryRules = [.. dataMatchers, .. unaryOperators, MatchGroup];
+            var ruleBodyErrorHandler = RegisterRuleBodyErrorHandlers(recoveryRules);
 
             unaryTerms.RuleOptions = [
                 ..unaryTerms.RuleOptions,
                 ..unaryOperators,
                 MatchGroup,
                 MatchLog,
-                MatchUnexpectedProductInBodyError
+                ruleBodyErrorHandler
             ];
 
             return ruleBody;
@@ -369,6 +356,30 @@ namespace gg.parse.script.parser
             return MatchRule;
         }
 
+        private MatchOneOfFunction<int> RegisterRuleBodyErrorHandlers(RuleBase<int>[] recoveryRules)
+        {
+            // A stray production modifier found, production modifier can only appear in front of references
+            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
+            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
+            // in script: (~|#), error "unexpected product modifier" .
+            UnexpectedProductInBodyError = Error(
+                    "UnexpectedProductionModifier",
+                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
+            );
+
+            // error for cases where a product is not followed by a valid term, eg #&, ~; or # followed by EOF
+            MatchUnexpectedProductInBodyError = Sequence(
+                "UnexpectedProductErrorMatch",
+                CreateMatchBodyAnnotationProduction(),
+                OneOf("#UnexpectedProductErrorMatchTerm", recoveryRules),
+                UnexpectedProductInBodyError
+            );
+
+            // xxx add more error conditions here
+
+
+            return OneOf("#ruleBodyErrorHandler", MatchUnexpectedProductInBodyError);
+        }
 
         private RuleBase<int>[] RegisterDataMatchers()
         {
