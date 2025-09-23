@@ -53,6 +53,8 @@ namespace gg.parse.script.parser
 
         public MatchFunctionSequence<int> IfMatchOperator { get; private set; }
 
+        public MatchOneOfFunction<int> MatchRuleBody { get; private set; }
+
         public MatchFunctionSequence<int> MatchRuleHeader{ get; private set; }
 
         public MatchFunctionSequence<int> MatchLog { get; private set; }
@@ -87,271 +89,46 @@ namespace gg.parse.script.parser
 
         public Dictionary<string, LogRule<int>> WrongOperatorTokenError { get; init; } = [];
 
-        private MatchNotFunction<int> Eof { get; set; }
+        public MatchSingleData<int> AssignmentToken { get; set; }
 
-        private MatchAnyData<int> MatchAny { get; set; }
+        public MatchSingleData<int> GroupStartToken { get; set; }
 
-        private MatchSingleData<int> GroupStartToken { get; set; }
-
-        private MatchSingleData<int> GroupEndToken { get; set; }
-
-        private MatchSingleData<int> RuleEndToken { get; set; }
+        public MatchSingleData<int> GroupEndToken { get; set; }
 
         public MatchSingleData<int> IdentifierToken { get; set; }
 
-        private MatchSingleData<int> AssignmentToken { get; set; }
+        public MatchSingleData<int> IncludeToken { get; set; }
 
+        public MatchSingleData<int> RuleEndToken { get; set; }
 
         public ScriptParser()
             : this(new ScriptTokenizer())
         {
         }
         
-
         public ScriptParser(ScriptTokenizer tokenizer)
         {
             Tokenizer = tokenizer;
 
-            RuleEndToken = Token(CommonTokenNames.EndStatement);
-            GroupStartToken = Token(CommonTokenNames.GroupStart);
-            GroupEndToken = Token(CommonTokenNames.GroupEnd);
-            AssignmentToken = Token(CommonTokenNames.Assignment);
-            MatchAny = new MatchAnyData<int>("Any");
-            Eof = new MatchNotFunction<int>("~EOF", MatchAny);
-            IdentifierToken = Token("IdentifierToken", CommonTokenNames.Identifier);
+            RegisterTokens();
 
-            MatchTransitiveSelector = Token("TransitiveSelector", CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", CommonTokenNames.NoProductSelector);
+            MatchRuleHeader = RegisterRuleHeader();
+            MatchRuleBody = RegisterRuleBody();
 
-            var ruleProduction = CreateMatchAnnotationProduction();
+            MatchRule = RegisterRule(MatchRuleHeader, MatchRuleBody);
 
-            // "abc" or 'abc'
-            MatchLiteral = OneOf(
-                "Literal",
-                Token(CommonTokenNames.SingleQuotedString),
-                Token(CommonTokenNames.DoubleQuotedString)
-            );
+            Include = Sequence("include", IncludeToken!, MatchLiteral!, RuleEndToken!);
 
-            // .
-            MatchAnyToken = Token("AnyToken", CommonTokenNames.AnyCharacter);
-
-            // { "abcf" }
-            MatchCharacterSet = Sequence(
-                "CharacterSet",
-                Token(CommonTokenNames.ScopeStart),
-                MatchLiteral,
-                Token(CommonTokenNames.ScopeEnd)
-            );
-
-            // { 'a' .. 'z' }
-            MatchCharacterRange = Sequence(
-                    "CharacterRange",
-                    Token(CommonTokenNames.ScopeStart),
-                    MatchLiteral,
-                    Token(CommonTokenNames.Elipsis),
-                    MatchLiteral,
-                    Token(CommonTokenNames.ScopeEnd)
-            );
-
-            MatchIdentifier = Sequence(
-                "Identifier",
-                ruleProduction,
-                IdentifierToken
-            );
-
-            var matchDataRules = new RuleBase<int>[] {
-                MatchLiteral,
-                MatchAnyToken,
-                MatchCharacterSet,
-                MatchCharacterRange,
-                MatchIdentifier
-            };
-
-            var unaryAndDataTerms = OneOf("#DataMatchers", [.. matchDataRules]);
-
-            // a, b, c
-            // mainSequence contains both the match and error handling
-            (var mainSequence, MatchSequence) = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryAndDataTerms);
-
-            // a | b | c
-            // mainOption contains both the match and error handling
-            (var mainOption, MatchOption) = CreateBinaryOperator("Option", CommonTokenNames.Option, unaryAndDataTerms);
-
-            // a / b / c
-            // mainEval contains both the match and error handling
-            (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryAndDataTerms);
-
-            var ruleBody = OneOf(
-                "#RuleBody",
-                // match this before unary terms
-                OneOf("#BinaryRuleTerms", mainSequence, mainOption, mainEval),
-                unaryAndDataTerms
-            );
-
-            // ( a, b, c )
-            MatchGroup = Sequence(
-                "#Group", 
-                GroupStartToken,
-                ruleBody,
-                GroupEndToken
-            );
-
-            MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
-
-            var unaryDataTermsOptions =
-                OneOf(
-                    "#UnaryDataTermsOptions",
-                    unaryAndDataTerms,
-                    MissingUnaryOperatorTerm
-                );
-
-            // *(a | b | c)
-            MatchZeroOrMoreOperator = Sequence(
-                "ZeroOrMore", 
-                Token(CommonTokenNames.ZeroOrMoreOperator),
-                unaryDataTermsOptions
-            );
-
-            // ?(a | b | c)
-            MatchZeroOrOneOperator = Sequence(
-                "ZeroOrOne", 
-                Token(CommonTokenNames.ZeroOrOneOperator),
-                unaryDataTermsOptions
-            );
-
-            // +(a | b | c)
-            MatchOneOrMoreOperator = Sequence(
-                "OneOrMore",
-                Token(CommonTokenNames.OneOrMoreOperator),
-                unaryDataTermsOptions
-            );
-
-            // !(a | b | c)
-            MatchNotOperator = Sequence(
-                "Not", 
-                Token(CommonTokenNames.NotOperator),
-                unaryDataTermsOptions
-            );
-
-            // if ( a | b | c)
-            IfMatchOperator = Sequence(
-                "IfMatch", 
-                Token(CommonTokenNames.If),
-                unaryDataTermsOptions
-            );
-
-            var unaryOperators = new RuleBase<int>[]
-            {
-                MatchZeroOrMoreOperator,
-                MatchZeroOrOneOperator,
-                MatchOneOrMoreOperator,
-                MatchNotOperator,
-                IfMatchOperator
-            };
-
-            // A stray production modifier found, production modifier can only appear in front of references
-            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
-            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
-            // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductInBodyError = Error(
-                    "UnexpectedProductionModifier",
-                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
-            );
-
-            MatchUnexpectedProductInBodyError = Sequence(
-                "UnexpectedProductErrorMatch",
-                ruleProduction,
-                OneOf("#UnexpectedProductErrorMatchTerm", [.. matchDataRules, .. unaryOperators, MatchGroup]),
-                UnexpectedProductInBodyError
-            );
-
-            MatchLog = CreateMatchLog(ruleBody);
-
-            unaryAndDataTerms.RuleOptions = [
-                ..unaryAndDataTerms.RuleOptions,
-                ..unaryOperators,
-                MatchGroup,
-                MatchLog,
-                MatchUnexpectedProductInBodyError
-            ];
-
-            Include = Sequence(
-                "Include",
-                Token(CommonTokenNames.Include),
-                MatchLiteral,
-                Token(CommonTokenNames.EndStatement)
-            );
-
-            MatchRuleName = MatchSingle("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
-            MatchPrecedence = MatchSingle("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
-
-            InvalidPrecedenceError = Error(
-                "PrecedenceNotFoundError", 
-                "Expecting precedence number.",
-                // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
-                Sequence(Any(), IfMatch(AssignmentToken))
-            );
-
-            MatchRuleHeader = Sequence(
-                "#RuleDeclaration",
-                CreateMatchHeaderAnnotationProduction(),
-                MatchRuleName,
-                ZeroOrOne("#Precedence",
-                    OneOf("#RulePrecedenceOptions",
-                        // ie no a precedence
-                        IfMatch(AssignmentToken),
-                        MatchPrecedence,
-                        InvalidPrecedenceError
-                    )
-                )
-            );
-
-            RuleBodyError = Error(
-                "RuleBodyError",
-                "Unexpected token(s) in the rule's body.",
-                Skip(stopCondition: RuleEndToken, failOnEoF: false)
-            );
-
-            var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", IfMatch(RuleEndToken));
-
-            var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
-
-            MissingRuleEndError = Error(
-                "MissingEndRule",
-                "Missing end of rule (;) at the given position.",
-                // skip until the start of the next rule, if any
-                Skip("~skipUntilNextHeaderOrEof", MatchRuleHeader, failOnEoF: false)
-            );
-
-            var endStatementOptions = OneOf(
-                "#EndStatementOptions",
-                RuleEndToken,
-                MissingRuleEndError
-            );
-
-            MissingAssignmentError = Error(
-                "MissingAssignmentError", 
-                "Assignment token '=', expected but encountered something different."
-            );
-
-            MatchRule = Sequence(
-                "Rule",
-                MatchRuleHeader,
-                OneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
-                ruleBodyOptions,
-                endStatementOptions
-            );
-
-            var validStatement = OneOf("#ValidStatement", Include, MatchRule);
+            var validStatement = OneOf("#validStatement", Include, MatchRule);
 
             // fallback in case nothing matches
             UnknownInputError = Error(
                 "UnknownInput",
-                "Can't match the token at the given position to a astNode.",
+                "Can't match token(s) to a grammar expression.",
                 Skip("~skipUntilNextValidStatement", stopCondition: validStatement, failOnEoF: false)
             );            
 
-            Root = ZeroOrMore("#Root", OneOf("#Statement", validStatement, UnknownInputError));
+            Root = ZeroOrMore("#root", OneOf("#statement", validStatement, UnknownInputError));
         }
 
         /// <summary>
@@ -475,7 +252,257 @@ namespace gg.parse.script.parser
 
         private MatchSingleData<int> Token(string ruleName, string tokenName) =>
             MatchSingle($"Token({ruleName})", Tokenizer.FindRule(tokenName)!.Id);
-        
+
+
+        private MatchFunctionSequence<int> RegisterRuleHeader()
+        {
+            MatchRuleName = MatchSingle("RuleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
+            MatchPrecedence = MatchSingle("RulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
+
+            InvalidPrecedenceError = Error(
+                "PrecedenceNotFoundError",
+                "Expecting precedence number.",
+                // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
+                Sequence(Any(), IfMatch(AssignmentToken))
+            );
+
+            MatchRuleHeader = Sequence(
+                "#RuleDeclaration",
+                CreateMatchHeaderAnnotationProduction(),
+                MatchRuleName,
+                ZeroOrOne("#Precedence",
+                    OneOf("#RulePrecedenceOptions",
+                        // ie no a precedence
+                        IfMatch(AssignmentToken),
+                        MatchPrecedence,
+                        InvalidPrecedenceError
+                    )
+                )
+                );
+
+            return MatchRuleHeader;
+        }
+
+        private MatchOneOfFunction<int> RegisterRuleBody()
+        {
+            var dataMatchers = OneOf("#DataMatchers", RegisterDataMatchers());
+            
+            var ruleBody = OneOf(
+                "#RuleBody",
+                // match this before unary terms
+                OneOf("#BinaryRuleTerms", RegisterBinaryOperators(dataMatchers)),
+                dataMatchers
+            );
+            
+            var unaryOperators = RegisterUnaryOperators(dataMatchers);
+
+            // ( a, b, c )
+            MatchGroup = Sequence("#Group", GroupStartToken!, ruleBody, GroupEndToken!);
+
+            // A stray production modifier found, production modifier can only appear in front of references
+            // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
+            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
+            // in script: (~|#), error "unexpected product modifier" .
+            UnexpectedProductInBodyError = Error(
+                    "UnexpectedProductionModifier",
+                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
+            );
+
+            // error for cases where a product is not followed by a valid term, eg #&, ~; or # followed by EOF
+            MatchUnexpectedProductInBodyError = Sequence(
+                "UnexpectedProductErrorMatch",
+                CreateMatchBodyAnnotationProduction(),
+                OneOf("#UnexpectedProductErrorMatchTerm", [.. RegisterDataMatchers(), .. unaryOperators, MatchGroup]),
+                UnexpectedProductInBodyError
+            );
+
+            // create all various instances of logs (errors,warnings,infos...)
+            MatchLog = CreateMatchLog(ruleBody);
+
+            dataMatchers.RuleOptions = [
+                ..dataMatchers.RuleOptions,
+                ..unaryOperators,
+                MatchGroup,
+                MatchLog,
+                MatchUnexpectedProductInBodyError
+            ];
+
+            return ruleBody;
+        }
+
+        private MatchFunctionSequence<int> RegisterRule(RuleBase<int> ruleHeader, RuleBase<int> ruleBody)
+        {
+            RuleBodyError = Error(
+                "RuleBodyError",
+                "Unexpected token(s) in the rule's body.",
+                Skip(stopCondition: RuleEndToken, failOnEoF: false)
+            );
+
+            var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", IfMatch(RuleEndToken));
+
+            var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
+
+            MissingRuleEndError = Error(
+                "MissingEndRule",
+                "Missing end of rule (;) at the given position.",
+                // skip until the start of the next rule, if any
+                Skip("~skipUntilNextHeaderOrEof", ruleHeader, failOnEoF: false)
+            );
+
+            var endStatementOptions = OneOf(
+                "#EndStatementOptions",
+                RuleEndToken,
+                MissingRuleEndError
+            );
+
+            MissingAssignmentError = Error(
+                "MissingAssignmentError",
+                "Assignment token '=', expected but encountered something different."
+            );
+
+            MatchRule = Sequence(
+                "Rule",
+                ruleHeader,
+                OneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
+                ruleBodyOptions,
+                endStatementOptions
+            );
+
+            return MatchRule;
+        }
+
+
+        private RuleBase<int>[] RegisterDataMatchers()
+        {
+            // .
+            MatchAnyToken = Token(CommonTokenNames.AnyCharacter, CommonTokenNames.AnyCharacter);
+
+            // "abc" or 'abc'
+            MatchLiteral = OneOf(
+                "Literal",
+                Token(CommonTokenNames.SingleQuotedString),
+                Token(CommonTokenNames.DoubleQuotedString)
+            );
+
+            // { "abcf" }
+            MatchCharacterSet = Sequence(
+                "CharacterSet",
+                Token(CommonTokenNames.ScopeStart),
+                MatchLiteral,
+                Token(CommonTokenNames.ScopeEnd)
+            );
+
+            // { 'a' .. 'z' }
+            MatchCharacterRange = Sequence(
+                    "CharacterRange",
+                    Token(CommonTokenNames.ScopeStart),
+                    MatchLiteral,
+                    Token(CommonTokenNames.Elipsis),
+                    MatchLiteral,
+                    Token(CommonTokenNames.ScopeEnd)
+            );
+
+            // foo or bar
+            MatchIdentifier = Sequence(
+                "Identifier",
+                CreateMatchBodyAnnotationProduction(),
+                IdentifierToken!
+            );
+
+            return [
+                MatchLiteral,
+                MatchAnyToken!,
+                MatchCharacterSet,
+                MatchCharacterRange,
+                MatchIdentifier
+            ];
+        }
+
+        private RuleBase<int>[] RegisterUnaryOperators(MatchOneOfFunction<int> unaryTerms)
+        {
+            MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
+
+            var unaryDataTermsOptions =
+                OneOf(
+                    "#UnaryDataTermsOptions",
+                    unaryTerms,
+                    MissingUnaryOperatorTerm
+                );
+
+            // *(a | b | c)
+            MatchZeroOrMoreOperator = Sequence(
+                "ZeroOrMore",
+                Token(CommonTokenNames.ZeroOrMoreOperator),
+                unaryDataTermsOptions
+            );
+
+            // ?(a | b | c)
+            MatchZeroOrOneOperator = Sequence(
+                "ZeroOrOne",
+                Token(CommonTokenNames.ZeroOrOneOperator),
+                unaryDataTermsOptions
+            );
+
+            // +(a | b | c)
+            MatchOneOrMoreOperator = Sequence(
+                "OneOrMore",
+                Token(CommonTokenNames.OneOrMoreOperator),
+                unaryDataTermsOptions
+            );
+
+            // !(a | b | c)
+            MatchNotOperator = Sequence(
+                "Not",
+                Token(CommonTokenNames.NotOperator),
+                unaryDataTermsOptions
+            );
+
+            // if ( a | b | c)
+            IfMatchOperator = Sequence(
+                "IfMatch",
+                Token(CommonTokenNames.If),
+                unaryDataTermsOptions
+            );
+
+            return
+            [
+                MatchZeroOrMoreOperator,
+                MatchZeroOrOneOperator,
+                MatchOneOrMoreOperator,
+                MatchNotOperator,
+                IfMatchOperator
+            ];
+        }
+
+        private void RegisterTokens()
+        {
+            RuleEndToken = Token(CommonTokenNames.EndStatement);
+            GroupStartToken = Token(CommonTokenNames.GroupStart);
+            GroupEndToken = Token(CommonTokenNames.GroupEnd);
+            AssignmentToken = Token(CommonTokenNames.Assignment);
+            IncludeToken = Token(CommonTokenNames.Include);
+
+            IdentifierToken = Token(CommonTokenNames.Identifier, CommonTokenNames.Identifier);
+            MatchTransitiveSelector = Token(CommonTokenNames.TransitiveSelector, CommonTokenNames.TransitiveSelector);
+            MatchNoProductSelector = Token(CommonTokenNames.NoProductSelector, CommonTokenNames.NoProductSelector);
+        }
+
+        private RuleBase<int>[] RegisterBinaryOperators(MatchOneOfFunction<int> unaryTerms)
+        {
+            // mainSequence contains both the match and error handling
+            (var mainSequence, MatchSequence) = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryTerms);
+
+            // a | b | c
+            // mainOption contains both the match and error handling
+            (var mainOption, MatchOption) = CreateBinaryOperator("Option", CommonTokenNames.Option, unaryTerms);
+
+            // a / b / c
+            // mainEval contains both the match and error handling
+            (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryTerms);
+
+            return [mainSequence, mainOption, mainEval];
+        }
+
 
         /// <summary>
         /// Create a rule to match a binary operator such as "a | b | c". Also takes in account
@@ -508,7 +535,8 @@ namespace gg.parse.script.parser
                     Token(operatorTokenName),
                     ruleTerms);
 
-            var notEndOfOperator = Not(OneOf(Eof, RuleEndToken, GroupEndToken));
+            var eof = Not(Any());
+            var notEndOfOperator = Not(OneOf(eof, RuleEndToken, GroupEndToken));
 
             // user forgot an operator eg: a, b  c;
             var matchMissingOperatorError = Error(
@@ -533,7 +561,7 @@ namespace gg.parse.script.parser
             var matchWrongOperatorError = Error(
                 $"WrongOperatorError({operatorTokenName})",
                 $"Expected an operator ({operatorTokenName}) but found something else.",
-                Sequence(Not(operatorToken), MatchAny, ruleTerms)
+                Sequence(Not(operatorToken), Any(), ruleTerms)
             );
 
             WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;
@@ -613,9 +641,6 @@ namespace gg.parse.script.parser
 
         private MatchOneOfFunction<int> CreateMatchHeaderAnnotationProduction()
         {
-            MatchTransitiveSelector = Token("TransitiveSelector", CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token("NoProductSelector", CommonTokenNames.NoProductSelector);
-
             InvalidProductInHeaderError = Error(
                 "InvalidProductInHeaderError",
                 $"Expected either '{AnnotationProduct.None.GetPrefix()}' or '{AnnotationProduct.Transitive.GetPrefix()}' but found something else entirely.",
@@ -632,12 +657,16 @@ namespace gg.parse.script.parser
             );
         }
 
-        private MatchFunctionCount<int> CreateMatchAnnotationProduction()
+        /// <summary>
+        /// Annotation production matching for references in the rule's body
+        /// </summary>
+        /// <returns></returns>
+        private MatchFunctionCount<int> CreateMatchBodyAnnotationProduction()
         {
             return ZeroOrOne(
-                "#RuleProduction", 
+                "#ruleBodyProduction", 
                 OneOf(
-                    "#ProductionSelection", 
+                    "#productionSelection", 
                     MatchTransitiveSelector,
                     MatchNoProductSelector
                 )

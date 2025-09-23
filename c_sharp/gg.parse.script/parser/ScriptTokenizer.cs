@@ -1,9 +1,6 @@
 ﻿
 using gg.parse.rules;
 using gg.parse.script.common;
-
-using static gg.parse.script.common.CommonTokenNames;
-
 namespace gg.parse.script.parser
 {
     public class ScriptTokenizer : CommonTokenizer
@@ -45,7 +42,7 @@ namespace gg.parse.script.parser
                         // else we found a token we can't handle, raise an error and skip
                         // characters until we find another valid script token or the eof.
                         Error(
-                            UnknownToken,
+                            CommonTokenNames.UnknownToken,
                             "Can't match the character at the given position to a token.",
                             Skip(stopCondition: scriptTokens, failOnEoF: false)
                         )
@@ -99,7 +96,9 @@ namespace gg.parse.script.parser
                 Literal(CommonTokenNames.NotOperator, "!"),
                 Literal(CommonTokenNames.TransitiveSelector, "#"),
                 Literal(CommonTokenNames.NoProductSelector, "~"),
-                Literal(CommonTokenNames.OptionWithPrecedence, "/")
+                Literal(CommonTokenNames.OptionWithPrecedence, "/"),
+                Literal(CommonTokenNames.Skip, ">>>"),
+                Literal(CommonTokenNames.Find, ">>")
             );
      }
 }
