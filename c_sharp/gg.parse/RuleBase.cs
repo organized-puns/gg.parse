@@ -1,24 +1,6 @@
 ﻿namespace gg.parse
 {
 
-    public enum AnnotationProduct
-    {
-        /// <summary>
-        /// Returns an annotation for the matched item.
-        /// </summary>
-        Annotation,
-
-        /// <summary>
-        /// Returns the annotation produced by any child rules.
-        /// </summary>
-        Transitive,
-
-        /// <summary>
-        /// Does not produce an annotation (eg whitespace).
-        /// </summary>
-        None
-    }
-
     public abstract class RuleBase<T>(
         string name, 
         AnnotationProduct production = AnnotationProduct.Annotation, 

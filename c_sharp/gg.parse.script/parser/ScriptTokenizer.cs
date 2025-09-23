@@ -60,7 +60,7 @@ namespace gg.parse.script.parser
         private MatchFunctionSequence<char> MatchScriptKeyword() =>
             Sequence(
                     "#matchKeyword",
-                    TryMatch(LowerCaseLetter()),
+                    IfMatch(LowerCaseLetter()),
                     OneOf(
                         "#keywordList",
 
@@ -70,7 +70,7 @@ namespace gg.parse.script.parser
                         Keyword(CommonTokenNames.LogInfo, "info"),
                         Keyword(CommonTokenNames.LogDebug, "debug"),
                         Keyword(CommonTokenNames.If, "if"),
-                        Keyword(CommonTokenNames.TryMatchOperator, "try"),
+                        //Keyword(CommonTokenNames.TryMatchOperator, "try"),
                         Keyword(CommonTokenNames.Include, "include")
                     )
                 );
@@ -79,7 +79,7 @@ namespace gg.parse.script.parser
             OneOf(
                 "#matchToken",
 
-                Literal(CommonTokenNames.TryMatchOperatorShortHand, ">"),
+                //Literal(CommonTokenNames.TryMatchOperatorShortHand, ">"),
                 Literal(CommonTokenNames.Assignment, "="),
                 Literal(CommonTokenNames.ScopeStart, "{"),
                 Literal(CommonTokenNames.ScopeEnd, "}"),

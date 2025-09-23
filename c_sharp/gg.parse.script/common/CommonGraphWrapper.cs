@@ -1,6 +1,4 @@
 ﻿using gg.parse.rules;
-using System.Linq;
-using System.Xml.Linq;
 
 namespace gg.parse.script.common
 {
@@ -57,13 +55,13 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchDataSet<T>(ruleName, product, set)));
 
-        public TryMatchRule<T> TryMatch(RuleBase<T> condition) =>
-            TryMatch(null, condition);
+        public IfMatchRule<T> IfMatch(RuleBase<T> condition) =>
+            IfMatch(null, condition);
 
-        public TryMatchRule<T> TryMatch(string? name, RuleBase<T> condition) =>
-            FindOrRegister(name, $"{CommonTokenNames.TryMatchOperator}({condition.Name})",
+        public IfMatchRule<T> IfMatch(string? name, RuleBase<T> condition) =>
+            FindOrRegister(name, $"{CommonTokenNames.If}({condition.Name})",
                         (ruleName, product) => RegisterRule(
-                            new TryMatchRule<T>(ruleName, product, condition)));
+                            new IfMatchRule<T>(ruleName, product, condition)));
         
         public MatchDataSequence<T> Literal(T[] sequence) =>
             Literal(null, sequence);

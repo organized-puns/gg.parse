@@ -8,7 +8,7 @@ using gg.parse.script.parser;
 namespace gg.parse.script.tests.unit
 {
     [TestClass]
-    public class EbnfTokenizerTests
+    public class ScriptTokenizerTests
     {
         [TestMethod]
         public void TestEmptyObject_ExpectTwoAnnotations()
@@ -53,35 +53,18 @@ namespace gg.parse.script.tests.unit
         public void DefineTryMatchRule_Tokenize_ExpectValidMatchAnyTokens()
         {
             var tokenizer = new ScriptTokenizer();
-            // try shorthand first
-            var rule = "rule_name = >'literal';";
+            var rule = "rule_name = if 'literal';";
 
             var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
 
-            Assert.IsTrue(isSuccess);
-            Assert.IsTrue(charactersRead == rule.Length);
-            Assert.IsTrue(annotations!.Count == 5);
-            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
-            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
-            Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.TryMatchOperatorShortHand));
-            Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
-            Assert.IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
-
-            // try full operator
-            rule = "rule_name = try 'literal';";
-
-            (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
-
-            Assert.IsTrue(isSuccess);
-            Assert.IsTrue(charactersRead == rule.Length);
-            Assert.IsTrue(annotations!.Count == 5);
-            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
-            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
-            Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.TryMatchOperator));
-            Assert.IsTrue(annotations[2].Start == 12);
-            Assert.IsTrue(annotations[2].Length == 3);
-            Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
-            Assert.IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 5);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.If));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
 
         [TestMethod]
@@ -94,13 +77,13 @@ namespace gg.parse.script.tests.unit
 
             var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
 
-            Assert.IsTrue(isSuccess);
-            Assert.IsTrue(charactersRead == rule.Length);
-            Assert.IsTrue(annotations!.Count == 4);
-            Assert.IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
-            Assert.IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
-            Assert.IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.AnyCharacter));
-            Assert.IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 4);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.AnyCharacter));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
 
         [TestMethod]

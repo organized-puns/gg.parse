@@ -51,7 +51,7 @@ namespace gg.parse.script.parser
 
         public MatchFunctionSequence<int> MatchNotOperator { get; private set; }
 
-        public MatchFunctionSequence<int> TryMatchOperator { get; private set; }
+        public MatchFunctionSequence<int> IfMatchOperator { get; private set; }
 
         public MatchFunctionSequence<int> MatchRuleHeader{ get; private set; }
 
@@ -233,10 +233,10 @@ namespace gg.parse.script.parser
                 unaryDataTermsOptions
             );
 
-            // >(a | b | c) / try ( a | b | c)
-            TryMatchOperator = Sequence(
-                "TryMatch", 
-                OneOf(Token(CommonTokenNames.TryMatchOperator), Token(CommonTokenNames.TryMatchOperatorShortHand)),
+            // if ( a | b | c)
+            IfMatchOperator = Sequence(
+                "IfMatch", 
+                Token(CommonTokenNames.If),
                 unaryDataTermsOptions
             );
 
@@ -246,7 +246,7 @@ namespace gg.parse.script.parser
                 MatchZeroOrOneOperator,
                 MatchOneOrMoreOperator,
                 MatchNotOperator,
-                TryMatchOperator
+                IfMatchOperator
             };
 
             // A stray production modifier found, production modifier can only appear in front of references
@@ -289,7 +289,7 @@ namespace gg.parse.script.parser
                 "PrecedenceNotFoundError", 
                 "Expecting precedence number.",
                 // xxx this is rather weak test eg as it will fail rule () = .; because () are two tokens
-                Sequence(Any(), TryMatch(AssignmentToken))
+                Sequence(Any(), IfMatch(AssignmentToken))
             );
 
             MatchRuleHeader = Sequence(
@@ -299,7 +299,7 @@ namespace gg.parse.script.parser
                 ZeroOrOne("#Precedence",
                     OneOf("#RulePrecedenceOptions",
                         // ie no a precedence
-                        TryMatch(AssignmentToken),
+                        IfMatch(AssignmentToken),
                         MatchPrecedence,
                         InvalidPrecedenceError
                     )
@@ -312,7 +312,7 @@ namespace gg.parse.script.parser
                 Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
-            var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", TryMatch(RuleEndToken));
+            var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", IfMatch(RuleEndToken));
 
             var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
 
@@ -625,7 +625,7 @@ namespace gg.parse.script.parser
             return OneOf(
                 "#HeaderRuleProduction",
                 // if an indentifier token is found, it means there is no production
-                TryMatch(IdentifierToken),
+                IfMatch(IdentifierToken),
                 MatchTransitiveSelector,
                 MatchNoProductSelector,
                 InvalidProductInHeaderError
