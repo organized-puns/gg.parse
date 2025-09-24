@@ -1,0 +1,17 @@
+<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <UseVSTest>true</UseVSTest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\gg.parse.calculator\gg.parse.calculator.csproj" />
+    <ProjectReference Include="..\gg.parse.script\gg.parse.script.csproj" />
+    <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
+  </ItemGroup>
+
+</Project>

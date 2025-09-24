@@ -1,4 +1,4 @@
-﻿#nullable disable
+﻿
 
 using gg.parse.script;
 
@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.instances.tests.calculator
+namespace gg.parse.calculator.tests
 {
     [TestClass]
     public class CalculatorSpecs_1Tests

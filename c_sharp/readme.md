@@ -137,6 +137,14 @@ Todo (for mvp)
 
    Move instances to their own project 
 
+    Fix calculator interpreter not raising errors when it should
+
+    checkout the xxx 
+     public void ResolveReferences()
+
+    continue improving the rulebody of the scriptparser (too much spagetti)
+
+    document match evaluation
 
 alpha (featured complete, buggy, ugly mess)
 -------------------------------------------
