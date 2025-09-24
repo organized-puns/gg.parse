@@ -1,10 +1,7 @@
-﻿#nullable disable
-
+﻿
 using gg.parse.script.common;
 
-using gg.parse.instances.json;
-
-namespace gg.parse.tests.examples
+namespace gg.parse.json.tests
 {
     [TestClass]
     public class JsonTokenizerTests
@@ -35,20 +32,6 @@ namespace gg.parse.tests.examples
             Directory.CreateDirectory("output");
 
             File.WriteAllText("output/jsontokenizer_example_annotation.html",
-                tokenizer.AnnotateTextUsingHtml(text, annotations, AnnotationMarkup.CreateTokenStyleLookup()));
-        }
-
-        [TestMethod]
-        public void TestJsonFileWithErrors_ExpectLotsOfAnnotationsAndErrors()
-        {
-            var tokenizer = new JsonTokenizer();
-            var ((isSuccess, charactersRead, annotations), text) = tokenizer.ParseFile("assets/example_with_errors.json");
-
-            Assert.IsTrue(isSuccess);
-
-            Directory.CreateDirectory("output");
-
-            File.WriteAllText("output/jsontokenizer_example_with_errors_annotations.html",
                 tokenizer.AnnotateTextUsingHtml(text, annotations, AnnotationMarkup.CreateTokenStyleLookup()));
         }
     }

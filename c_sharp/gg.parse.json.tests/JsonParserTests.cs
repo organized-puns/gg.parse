@@ -1,6 +1,6 @@
 ﻿
-using gg.parse.instances.json;
 
+using gg.parse.json;
 
 namespace gg.parse.tests.examples
 {

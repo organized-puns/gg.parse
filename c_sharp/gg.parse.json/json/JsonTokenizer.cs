@@ -3,7 +3,7 @@ using gg.parse.script.common;
 
 using static gg.parse.script.common.CommonTokenNames;
 
-namespace gg.parse.instances.json
+namespace gg.parse.json
 {
     public class JsonTokenizer : CommonTokenizer
     {     
@@ -37,10 +37,7 @@ namespace gg.parse.instances.json
             Root = ZeroOrMore("#jsonTokenizer", OneOf("#whiteSpaceTokenOrError", Whitespace(), jsonTokens, error));
         }
 
-        //public RuleBase<char> Literal(string token, string name) =>
-          //  CommonRules.Literal(this, name, AnnotationProduct.Annotation, token.ToCharArray());
-
-        public ParseResult Tokenize(string text) => Root.Parse(text.ToCharArray(), 0);
+        public ParseResult Tokenize(string text) => Root.Parse(text);
 
         public (ParseResult, string) ParseFile(string path)
         {

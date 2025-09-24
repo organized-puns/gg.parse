@@ -2,7 +2,7 @@
 
 using gg.parse.script.common;
 
-namespace gg.parse.instances.json
+namespace gg.parse.json
 {
     public static class AnnotationMarkup
     {
