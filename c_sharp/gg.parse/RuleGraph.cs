@@ -14,30 +14,13 @@ namespace gg.parse
 
         public RuleBase<T>? Root { get; set; }
 
-        public IEnumerable<string> FunctionNames => _nameRuleLookup.Keys;
+        public IEnumerable<string> RuleNames => _nameRuleLookup.Keys;
 
         /// <summary>
         /// Number of registered rules.
         /// </summary>
         public int Count => _nameRuleLookup.Count;
 
-        public RuleGraph<T> Merge(RuleGraph<T> other)
-        {
-            Assertions.RequiresNotNull(other);
-            Assertions.Requires(other != this);
-
-            foreach (var rule in other)
-            {
-                if (!_nameRuleLookup.ContainsKey(rule.Name))
-                {
-                    // xxx needs to be a clone
-                    rule.Id = -1;
-                    RegisterRule(rule);
-                }
-            }
-
-            return this;
-        }
 
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
@@ -135,6 +118,7 @@ namespace gg.parse
                     
                     // do not overwrite this property, if this rule is lower than its composition in the table
                     // this will be reset
+                    // xxx I have no idea what I meant with that :-\
                     // reference.IsPartOfComposition = false;
                 }
             }

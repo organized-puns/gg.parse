@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using gg.parse.script.common;
+﻿using gg.parse.script.common;
 
 namespace gg.parse.tests.rulefunctions
 {

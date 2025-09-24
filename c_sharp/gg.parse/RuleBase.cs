@@ -50,5 +50,9 @@
                 _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
             };
         }
+
+        public RuleBase<T> CloneRule() => (RuleBase<T>)Clone();
+
+        public object Clone() => MemberwiseClone();
     }
 }

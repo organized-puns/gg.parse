@@ -2,7 +2,7 @@
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.instances.tests.calculator
+namespace gg.parse.calculator.tests
 {
     [TestClass]
     public class CalculatorTests
@@ -18,8 +18,6 @@ namespace gg.parse.instances.tests.calculator
             
             (string input, double expectedOutput)[] testValues = [
                 ("42", 42.0),
-                // xxx fails because trailing -3 is tokenized as an int
-                // not part of the preceding operation
                 ("1 + 2-3", 0.0),
                 ("1.5 * 2", 3.0),
                 ("2 * 2 + 1", 5.0),

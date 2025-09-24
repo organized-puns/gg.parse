@@ -1,12 +1,13 @@
 ﻿#nullable disable
 
+using gg.parse.json;
 using gg.parse.rules;
 using gg.parse.script;
 
 namespace gg.parse.tests.examples
 {
     [TestClass]
-    public class EbnfParserTest
+    public class JsonParserTest
     {
 
         [TestMethod]
@@ -118,42 +119,94 @@ namespace gg.parse.tests.examples
         }
 
         [TestMethod]
-        public void ReadOptimizedEbnfGrammar_IntegrationTest()
+        public void ParseSimpleKeyValue_ExpectSuccess()
         {
-            var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
-            var grammarSpec = File.ReadAllText("assets/json_grammar.ebnf");
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var tokenizer = new JsonTokenizer();
+            var parser = new JsonParser(tokenizer);
 
-            // try parsing an object with two kvp
-            var keyStrValue = "{\r\n\"key1\": \"value\", \n \"key2\": 123}";
+            var keyStrValue = "{\"key\": \"value\"}";
 
-            var (tokensResult, astResult) = jsonParser.Parse(keyStrValue);
-           
-            // try parsing an array with various values
-            var arrayStrValue = "[-123,\"abc\"]";
+            var tokens = tokenizer.Tokenize(keyStrValue).Annotations;
+            var result = parser.Parse(tokens);
 
-            (tokensResult, astResult) = jsonParser.Parse(arrayStrValue);
-            Assert.IsTrue(tokensResult.FoundMatch && astResult.FoundMatch);
+            Assert.IsTrue(result.FoundMatch);
+            Assert.IsTrue(result.MatchedLength == tokens.Count);
 
-            // try parsing an empty text
-            var emptyText = "";
+            var keyIntValue = "{\"key\": 123}";
 
-            (tokensResult, astResult) = jsonParser.Parse(emptyText);
-            Assert.IsTrue(tokensResult.FoundMatch && astResult.FoundMatch);
+            tokens = tokenizer.Tokenize(keyIntValue).Annotations;
+            result = parser.Parse(tokens);
 
-            // try an object with all allowed values
-            var jsonValuesObject = File.ReadAllText("assets/json_values_object.json");
+            Assert.IsTrue(result.FoundMatch);
 
-            (tokensResult, astResult) = jsonParser.Parse(jsonValuesObject);
-            Assert.IsTrue(tokensResult.FoundMatch && astResult.FoundMatch);
+            var keyValueList = "{\"key1\": 123.12, \"key2\": null}";
 
-            // read a full json file covering all cases
-            var jsonFile = File.ReadAllText("assets/example.json");
+            tokens = tokenizer.Tokenize(keyValueList).Annotations;
+            result = parser.Parse(tokens);
 
-            (tokensResult, astResult) = jsonParser.Parse(jsonFile);
-            Assert.IsTrue(tokensResult.FoundMatch && astResult.FoundMatch);
+            Assert.IsTrue(result.FoundMatch);
+
+            var emptyKeyValueList = "{}";
+
+            tokens = tokenizer.Tokenize(emptyKeyValueList).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.FoundMatch);
+
+            var compoundList = "{\"root\": {\"key1\": 123.12, \"key2\": null}}";
+
+            tokens = tokenizer.Tokenize(compoundList).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.FoundMatch);
+
+            var jsonArray = "[1, 2, \"a\"]";
+
+            tokens = tokenizer.Tokenize(jsonArray).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.FoundMatch);
+
+            var emptyArray = "[]";
+
+            tokens = tokenizer.Tokenize(emptyArray).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.FoundMatch);
 
 
+            var compoundArray = "[1, [{\"key\": true}, false] ]";
+
+            tokens = tokenizer.Tokenize(compoundArray).Annotations;
+            result = parser.Parse(tokens);
+
+            Assert.IsTrue(result.FoundMatch);
+        }
+
+        [TestMethod]
+        public void Missing_KeyValue_ExpectRecovery()
+        {
+            var tokenizer = new JsonTokenizer();
+            var parser = new JsonParser(tokenizer);
+
+            var missingValue = "{\"key\": }";
+            var tokens = tokenizer.Tokenize(missingValue).Annotations;
+            var result = parser.Parse(tokens);
+
+        }
+
+
+        [TestMethod]
+        public void AnnotateJsonFile_ExpectValidHtml()
+        {
+            var parser = new JsonParser();
+            var (tokens, astNodes, text) = parser.ParseFile("assets/example.json");
+
+            var html = parser.AnnotateTextUsingHtml(text, tokens, astNodes, parser.CreateAstStyleLookup());
+
+            Directory.CreateDirectory("output");
+
+            File.WriteAllText("output/astfile_example_annotation.html", html);
         }
     }
 }

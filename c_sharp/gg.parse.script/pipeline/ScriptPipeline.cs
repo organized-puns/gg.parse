@@ -222,7 +222,7 @@ namespace gg.parse.script.pipeline
         private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
-            foreach (var tokenFunctionName in tokenSource.FunctionNames)
+            foreach (var tokenFunctionName in tokenSource.RuleNames)
             {
                 var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 

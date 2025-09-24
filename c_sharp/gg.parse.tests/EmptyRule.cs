@@ -14,5 +14,7 @@
             Precedence = precedence;
             Production = product;
         }
+
+        public object Clone() => MemberwiseClone();
     }
 }

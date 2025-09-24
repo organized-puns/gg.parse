@@ -27,7 +27,7 @@
                 // or as 'rename' eg renamed_rule = ~old_name;
                 if (IsPartOfComposition)
                 {
-                    // this rule is anonymous, ie part of a sequence/option/oneormore/..., it's assumed this is only to change 
+                    // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 
                     // the rule production so pass back the result based on this' product
                     switch (Production)
                     {
@@ -47,7 +47,9 @@
                 }
                 else
                 {
-                    // this rule is a named rule we assume the user wants this id to show up (or hide)
+                    // this rule is a named rule we assume the user wants this rule to show up in the result
+                    // rather than the referred rule (for whatever the motivations are of the user).
+                    // eg foo = 'bar'; bar = foo; => bar will show up in the result, not foo.
                     switch (Production)
                     {
                         case AnnotationProduct.Annotation:

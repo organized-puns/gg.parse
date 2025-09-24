@@ -1,8 +1,8 @@
 ﻿using gg.parse.script.common;
-using gg.parse.script.parser;
+
 using System.Text;
 
-namespace gg.parse.instances.json
+namespace gg.parse.json
 {
     public static class JsonNodeNames
     {
@@ -108,9 +108,6 @@ namespace gg.parse.instances.json
             var rule = Tokenizer.FindRule(tokenName);
             return MatchSingle($"{product.GetPrefix()}Token({rule.Name})", rule.Id);
         }
-
-        //public RuleBase<int> Token(string name, int tokenId) => 
-          //  MatchSingle(name, _defaultProduct, tokenId);
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);
 
