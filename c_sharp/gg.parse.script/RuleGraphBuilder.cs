@@ -39,8 +39,10 @@ namespace gg.parse.script
             var tokenizeResult = Tokenizer!.Root!.Parse(input);
 
             if (tokenizeResult.FoundMatch)
-            {
-                // xxx to do handle potential errors in the token annotations
+            {                
+                
+
+
                 if (Parser != null)
                 {
                     if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)

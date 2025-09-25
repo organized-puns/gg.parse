@@ -67,10 +67,7 @@ namespace gg.parse.script.pipeline
         {
             var tokenizer = new ScriptTokenizer();
             var pipelineLogger = logger ?? new PipelineLog();
-            var parser = new ScriptParser(tokenizer)
-            {
-                FailOnWarning = pipelineLogger.FailOnWarning
-            };
+            var parser = new ScriptParser(tokenizer);
 
             var tokenizerSession = new PipelineSession<T>()
             {
@@ -143,7 +140,7 @@ namespace gg.parse.script.pipeline
 
             try
             {
-                return session.Parser!.Parse(session.Text!);
+                return session.Parser!.Parse(session.Text!, session.LogHandler.FailOnWarning);
             }
             catch (TokenizeException te)
             {

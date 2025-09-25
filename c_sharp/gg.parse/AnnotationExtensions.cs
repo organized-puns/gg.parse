@@ -108,6 +108,20 @@ namespace gg.parse
             return result;
         }
 
+        public static bool Contains(this List<Annotation> annotations, Func<Annotation, bool> predicate, out List<Annotation> results)
+        {
+            results = [];
+
+            foreach (var annotation in annotations)
+            {
+                annotation.Collect(predicate, results);
+            }
+
+            return results.Count > 0;
+        }
+
+        public static bool ContainsRule(this List<Annotation> annotations, IRule rule, out List<Annotation> results) =>
+            Contains(annotations, new Func<Annotation, bool>(a => a.Rule == rule), out results);
 
     }
 }
