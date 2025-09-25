@@ -2,7 +2,9 @@
  * Simple EBNF-like notation for the grammar of a simple calculator
  */
 
-#expression		   = operation | term | unknown_expression;
+#expression		   = eof | +(operation | term | unknown_expression);
+
+eof				   = !.;
 
 #term			   = unary_operation | number | group;
 

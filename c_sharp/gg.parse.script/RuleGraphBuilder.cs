@@ -1,4 +1,5 @@
-﻿using gg.parse.script.pipeline;
+﻿using gg.parse.script.common;
+using gg.parse.script.pipeline;
 
 namespace gg.parse.script
 {
@@ -36,27 +37,9 @@ namespace gg.parse.script
             Assertions.RequiresNotNull(Tokenizer!);
             Assertions.RequiresNotNull(Tokenizer!.Root!);
 
-            var tokenizeResult = Tokenizer!.Root!.Parse(input);
-
-            if (tokenizeResult.FoundMatch)
-            {                
-                
-
-
-                if (Parser != null)
-                {
-                    if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)
-                    {
-                        // xxx to do handle potential errors in the annotations
-                        return (tokenizeResult, Parser!.Root!.Parse(tokenizeResult.Annotations));
-                    }
-                }
-
-                // no tokens found, so return empty
-                return (tokenizeResult, new ParseResult(true, 0, []));
-            }
-
-            return (ParseResult.Failure, ParseResult.Failure);
+            return Parser == null
+                    ? (Tokenizer.TokenizeText(input), ParseResult.Unknown)
+                    : Parser.Parse(Tokenizer, input);
         }
     }
 }

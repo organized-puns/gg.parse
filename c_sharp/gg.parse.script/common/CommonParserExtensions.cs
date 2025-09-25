@@ -1,8 +1,6 @@
 ﻿using gg.parse.script.parser;
 
-using ParseOutput = (
-    System.Collections.Generic.List<gg.parse.Annotation> tokens,
-    System.Collections.Generic.List<gg.parse.Annotation> astNodes);
+using ParseOutput = (gg.parse.ParseResult tokeninzeResult, gg.parse.ParseResult parseResult);
 
 namespace gg.parse.script.common
 {
@@ -19,18 +17,25 @@ namespace gg.parse.script.common
         {
             if (!string.IsNullOrEmpty(text))
             {
-                var tokenizerTokens = tokenizer.TokenizeText(text);
+                var tokenizeResult = tokenizer.TokenizeText(text);
 
-                if (tokenizerTokens != null && tokenizerTokens.Count > 0)
+                if (tokenizeResult.FoundMatch)
                 {
-                    return parser.ParseGrammar(text, tokenizerTokens, failOnWarning);
+                    if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)
+                    {
+                        return (tokenizeResult,
+                                parser.ParseGrammar(text, tokenizeResult.Annotations, failOnWarning));
+                    }
                 }
+
+                return (tokenizeResult, ParseResult.Failure);
+
             }
 
-            return ([], []);
+            return (ParseResult.Failure, ParseResult.Failure);
         }
 
-        public static List<Annotation> TokenizeText(this RuleGraph<char> tokenizer, string text)
+        public static ParseResult TokenizeText(this RuleGraph<char> tokenizer, string text)
         {
             Assertions.RequiresNotNullOrEmpty(text, nameof(text));
 
@@ -50,14 +55,12 @@ namespace gg.parse.script.common
                         text
                     );
                 }
-
-                return tokenizationResult.Annotations!;
             }
 
-            throw new TokenizeException("input contains no valid tokens.");
+            return tokenizationResult;
         }
 
-        public static (List<Annotation> tokens, List<Annotation> astNodes) ParseGrammar(
+        public static ParseResult ParseGrammar(
             this RuleGraph<int> parser, 
             string text, 
             in List<Annotation> tokens,
@@ -69,12 +72,7 @@ namespace gg.parse.script.common
             {
                 var astNodes = astResult.Annotations;
 
-                if (astNodes == null)
-                {
-                    throw new ParseException("input contains no valid grammar.");
-                }
-
-                if (astNodes.ContainsParseErrors(failOnWarning, out var grammarErrors))
+                if (astNodes != null && astNodes.ContainsParseErrors(failOnWarning, out var grammarErrors))
                 {
                     throw new ParseException(
                             "Parsing encountered some errors (or warnings which are treated as errors).",
@@ -83,13 +81,9 @@ namespace gg.parse.script.common
                             tokens
                     );
                 }
+            }
 
-                return (tokens, astResult.Annotations!);
-            }
-            else
-            {
-                return (tokens, []);
-            }
+            return astResult;
         }
     }
 }
