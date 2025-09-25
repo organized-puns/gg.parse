@@ -7,9 +7,12 @@
         public RuleBase<T>? Rule { get; set; }
 
         /// <summary>
-        /// Should be set during resolve
+        /// If set to true then the result of this rule will be based on the referenced rule's production.
+        /// ie this rule will never show up in the result/ast tree.
+        /// If false (this is the default) this rule will show up in the ast tree if its annotation production
+        /// is set to 'Annotation'.
         /// </summary>
-        public bool IsPartOfComposition { get; set; } = false;
+        public bool DeferResultToReference { get; set; } = false;
 
         public RuleReference(string name, string reference, AnnotationProduct product = AnnotationProduct.Annotation, int precedence = 0)
             : base(name, product, precedence) 
@@ -24,48 +27,33 @@
             if (result.FoundMatch)
             {
                 // parse behaviour depends on whether this reference is part of a composition (eg sequence)
-                // or as 'rename' eg renamed_rule = ~old_name;
-                if (IsPartOfComposition)
+                // in which case we take in account any production modifiers applied to this rule, but
+                // otherwise pass the results of the refereed rule
+                if (DeferResultToReference)
                 {
                     // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 
                     // the rule production so pass back the result based on this' product
-                    switch (Production)
+                    return Production switch
                     {
-                        case AnnotationProduct.Annotation:
-
-                            return result;
-
-                        case AnnotationProduct.Transitive:
-
-                            return new ParseResult(true, result.MatchedLength, result.Annotations);
-
-                        case AnnotationProduct.None:
-                        default:
-
-                            return new ParseResult(true, result.MatchedLength);
-                    }
+                        AnnotationProduct.Annotation => result,
+                        AnnotationProduct.Transitive => new ParseResult(true, result.MatchedLength, result.Annotations),
+                        _ => new ParseResult(true, result.MatchedLength),
+                    };
                 }
                 else
                 {
-                    // this rule is a named rule we assume the user wants this rule to show up in the result
+                    // this rule is a named rule we _assume+ the user wants this rule to show up in the result/asttree
                     // rather than the referred rule (for whatever the motivations are of the user).
-                    // eg foo = 'bar'; bar = foo; => bar will show up in the result, not foo.
-                    switch (Production)
+                    // eg let's say the user states foo = 'bar'; bar = foo; in this case the rule 'bar' has its own name
+                    // so the results should include 'bar' as the rule name, not 'foo'. Bar may still have any production
+                    // modifiers eg "#bar = foo;" in which case foo will show up.
+                    return Production switch
                     {
-                        case AnnotationProduct.Annotation:
-
-                            return new ParseResult(true, result.MatchedLength,
-                                               [new Annotation(this, new Range(start, result.MatchedLength), result.Annotations)]);
-
-                        case AnnotationProduct.Transitive:
-
-                            return result;
-
-                        case AnnotationProduct.None:
-                        default:
-
-                            return new ParseResult(true, result.MatchedLength);
-                    }
+                        AnnotationProduct.Annotation => new ParseResult(true, result.MatchedLength,
+                                                                       [new Annotation(this, new Range(start, result.MatchedLength), result.Annotations)]),
+                        AnnotationProduct.Transitive => result,
+                        _ => new ParseResult(true, result.MatchedLength),
+                    };
                 }
             }
 

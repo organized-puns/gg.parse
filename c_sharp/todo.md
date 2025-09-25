@@ -4,7 +4,6 @@ Todo (for mvp)
 - Finalize:  
   - Fix calculator interpreter not raising errors when it should
   - Remove "Function" notion in favor of Rule in names across the project
-  - checkout the xxx in public void ResolveReferences()
   - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
   - document match evaluation

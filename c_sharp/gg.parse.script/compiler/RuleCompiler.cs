@@ -3,16 +3,6 @@ using gg.parse.rules;
 
 namespace gg.parse.script.compiler
 {
-    public class NoCompilationFunctionException : Exception
-    {
-        public int RuleId { get; init; }
-
-        public NoCompilationFunctionException(int id) 
-            : base("No complilation function for the given rule id.")
-        {
-            RuleId = id;
-        }
-    }
 
     public delegate RuleBase<T> CompileFunction<T>(
         RuleCompiler<T> compiler,
@@ -46,7 +36,7 @@ namespace gg.parse.script.compiler
                 return compilationFunction;
             }
 
-            throw new NoCompilationFunctionException(parseFunctionId);
+            throw new RuleReferenceException($"Cannot find a compilation function referred to by rule id {parseFunctionId}", parseFunctionId);
         }
 
         public RuleGraph<T> Compile(CompileSession context)
@@ -99,7 +89,7 @@ namespace gg.parse.script.compiler
                 throw new ArgumentException("Input text contains no root function. Make sure the main input always contains at least one rule.");
             }
 
-            resultGraph.ResolveReferences();
+            RuleCompiler<T>.ResolveReferences(resultGraph);
 
             return resultGraph;
         }
@@ -162,6 +152,57 @@ namespace gg.parse.script.compiler
             }
 
             return new(product, name, precedence, ruleBody);
+        }
+
+        /// <summary>
+        /// Try find the rule referred to by name in the graph. If the name is not found an exception is thrown.
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="RuleReferenceException"></exception>
+        private static RuleBase<T> FindRule(RuleGraph<T> graph, string name)
+        {
+            var referredRule = graph.FindRule(name);
+
+            if (referredRule == null)
+            {
+                throw new RuleReferenceException($"Cannot find rule reffered to by name: {name}.", name);
+            }
+
+            return referredRule;
+        }
+
+        /// <summary>
+        /// In all RuleReference rules in the graph find and set the actual rule they refer to.
+        /// </summary>
+        /// <param name="graph"></param>
+        private static void ResolveReferences(RuleGraph<T> graph)
+        {
+            foreach (var rule in graph)
+            {
+                if (rule is IRuleComposition<T> composition)
+                {
+                    foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                    {
+                        var referredRule = RuleCompiler<T>.FindRule(graph, referenceRule.Reference);
+
+                        // note: we don't replace the rule we just set the reference. This allows
+                        // these subrules to have their own annotation production. If we replace these 
+                        // any production modifiers will affect the original rule
+                        referenceRule.Rule = referredRule!;
+
+                        // if the reference rule is part of a composition (sequence/option/oneormore/...)
+                        // then use the referred rule's name / production to show up in the result/ast tree
+                        // rather than this reference rule's name/production
+                        referenceRule.DeferResultToReference = true;
+                    }
+                }
+                else if (rule is RuleReference<T> reference)
+                {
+                    reference.Rule = RuleCompiler<T>.FindRule(graph, reference.Reference);
+                }
+            }
         }
     }
 }

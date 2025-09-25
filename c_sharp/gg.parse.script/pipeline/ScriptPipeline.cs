@@ -92,7 +92,7 @@ namespace gg.parse.script.pipeline
                         .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                         .RegisterTokenizerCompilerFunctions(parser);
             }
-            catch (NoCompilationFunctionException nce)
+            catch (RuleReferenceException nce)
             {
                 var rule = parser.FindRule(nce.RuleId);
 
@@ -116,7 +116,7 @@ namespace gg.parse.script.pipeline
                     .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                     .RegisterGrammarCompilerFunctions(parser);
             }
-            catch (NoCompilationFunctionException nce)
+            catch (RuleReferenceException nce)
             {
                 var rule = parser.FindRule(nce.RuleId);
 

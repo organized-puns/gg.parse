@@ -89,40 +89,7 @@ namespace gg.parse
         }
 
         // xxx todo return errors of unresolved replacements
-        public void ResolveReferences()
-        {
-            foreach (var rule in this)
-            {
-                if (rule is IRuleComposition<T> composition)
-                {
-                    foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
-                    {
-                        var referredRule = FindRule(referenceRule.Reference);
-
-                        Assertions.Requires(referredRule != null, $"Cannot find reference {referenceRule.Reference}.");
-
-                        // note: we don't replace the rule we just set the reference. This allows
-                        // these subrules to have their own annotation production. If we replace these 
-                        // any production modifiers will affect the original rule
-                        referenceRule.Rule = referredRule!;
-                        referenceRule.IsPartOfComposition = true;
-                    }
-                }
-                if (rule is RuleReference<T> reference)
-                {
-                    var referredRule = FindRule(reference.Reference);
-
-                    Assertions.Requires(referredRule != null, $"Cannot find reference {reference.Reference}.");
-
-                    reference.Rule = referredRule;
-                    
-                    // do not overwrite this property, if this rule is lower than its composition in the table
-                    // this will be reset
-                    // xxx I have no idea what I meant with that :-\
-                    // reference.IsPartOfComposition = false;
-                }
-            }
-        }
+        
 
         public TRule FindOrRegister<TRule>(
             string ruleName,
