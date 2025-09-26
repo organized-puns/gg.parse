@@ -135,7 +135,7 @@ namespace gg.parse.instances.calculator
                 Multiply = multiplyRule!.Id,
                 Divide = divisionRule!.Id,
                 Add = additionRule!.Id,
-                Subtract = subtractionRule!.Id
+                Subtract = subtractionRule!.Id,
             };
 
             return this;

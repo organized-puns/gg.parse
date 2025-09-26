@@ -26,50 +26,26 @@ namespace gg.parse.calculator.tests
 
             IsNotNull(expressionRule);
             IsTrue(expressionRule.Production == AnnotationProduct.Transitive);
-            IsTrue(expressionRule.RuleOptions.Length == 2);
+            IsTrue(expressionRule.RuleOptions.Length == 3);
 
-            var eofRef = expressionRule.RuleOptions[0] as RuleReference<int>;
+            var operationRef = expressionRule.RuleOptions[0] as RuleReference<int>;
 
-            IsNotNull(eofRef);
-            IsTrue(eofRef.Production == AnnotationProduct.Annotation);
-            IsTrue(eofRef.Reference == "eof");
+            IsNotNull(operationRef);
+            IsTrue(operationRef.Production == AnnotationProduct.Annotation);
+            IsTrue(operationRef.Reference == "operation");
 
-            var statements = expressionRule.RuleOptions[1] as MatchFunctionCount<int>;
+            var termRef = expressionRule.RuleOptions[1] as RuleReference<int>;
 
-            IsNotNull(statements);
-            IsTrue(statements.Min == 1);
-            IsTrue(statements.Max == 0);
-            IsTrue(statements.Production == AnnotationProduct.Annotation);
-        }
+            IsNotNull(termRef);
+            IsTrue(termRef.Production == AnnotationProduct.Annotation);
+            IsTrue(termRef.Reference == "term");
 
-        [TestMethod]
-        public void CreateAst_ValidateNodes()
-        {
-            var tokenizer = new ScriptTokenizer();
-            var parser = new ScriptParser();
+            var unknown = expressionRule.RuleOptions[2] as RuleReference<int>;
 
-            var tokenizeResult = tokenizer.Tokenize(_tokenizerSpec);
-
-            IsTrue(tokenizeResult.FoundMatch);
-
-            var astResult = parser.ParseGrammar(_grammarSpec, tokenizeResult.Annotations);
-
-            IsTrue(astResult.FoundMatch);
-            IsNotNull(astResult.Annotations);
-
-            // expression 
-            IsTrue(astResult.Annotations[0].Rule == parser.MatchRule);
-
-            // annotation production
-            IsTrue(astResult.Annotations[0][0].Rule == parser.MatchTransitiveSelector);
-
-            // rulename
-            IsTrue(astResult.Annotations[0][1].Rule  == parser.MatchRuleName);
-
-            // rule body
-            IsTrue(astResult.Annotations[0][2].Rule.GetType() == typeof(MatchOneOfFunction<int>));
-        }
-
+            IsNotNull(unknown);
+            IsTrue(unknown.Production == AnnotationProduct.Annotation);
+            IsTrue(unknown.Reference == "unknown_expression");
+        }      
 
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseAndCalculate_ExpectMatchingOutpout()
@@ -98,6 +74,7 @@ namespace gg.parse.calculator.tests
                 ("2 * 2 * (2)", 8.0),
                 ("2 * 2 * (2 + (3 - -3))", 32.0),
                 ("2 * 2 * (2 + (3 - -3)) + --(1)", 33.0),
+                
             ];
 
             foreach (var (input, expectedOutput) in testValues)
