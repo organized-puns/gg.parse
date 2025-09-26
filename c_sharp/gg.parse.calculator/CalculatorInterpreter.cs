@@ -1,9 +1,10 @@
 ﻿using gg.parse.script;
-
 using System.Globalization;
 
 namespace gg.parse.instances.calculator
 {
+    public delegate double CalculatorFunction(string text, Annotation node, List<Annotation> tokens);
+
     public class CalculatorInterpreter
     {
         public static class NodeNames
@@ -27,29 +28,9 @@ namespace gg.parse.instances.calculator
             public static readonly string Subtraction = "subtraction";
         }
 
-        public class Ids
-        {
-            public int Group { get; init; }
+        private readonly RuleGraphBuilder _builder; 
 
-            public int Number { get; init; }
-
-            public int Unary { get; init; }
-
-            public int Plus { get; init; }
-
-            public int Minus { get; init; }
-
-            public int Multiply { get; init; }
-
-            public int Divide { get; init; }
-
-            public int Add { get; init; }
-
-            public int Subtract { get; init; }
-        }
-
-        private Ids _graphIds;
-        private RuleGraphBuilder _builder; 
+        private readonly Dictionary<IRule, CalculatorFunction> _functionLookup;
 
         public RuleGraphBuilder Builder => _builder;
 
@@ -58,7 +39,7 @@ namespace gg.parse.instances.calculator
             _builder = new RuleGraphBuilder();            
             _builder.InitializeFromDefinition(tokenizerSpec, grammarSpec);
 
-            SetIds(_builder.Parser!);
+            _functionLookup = CreateFunctionLookup(_builder.Parser!);
         }
 
         public double Interpret(string text)
@@ -73,72 +54,40 @@ namespace gg.parse.instances.calculator
             throw new ArgumentException("Failed to parse text.");
         }
 
-        public double Interpret(string text, Annotation node, List<Annotation> tokens)
-        {
-            // xxx remove id ... not necessary anymore
-            if (node.Rule.Id == _graphIds.Number)
-            {
-                var valueText = node.GetText(text, tokens);
-                return double.Parse(valueText, CultureInfo.InvariantCulture);
-            }
-            else if (node.Rule.Id == _graphIds.Unary)
-            {
-                var sign = node.Children[0].Rule.Id == _graphIds.Plus ? 1.0 : -1.0;
-                return sign * Interpret(text, node.Children[1], tokens);
-            }
-            else if (node.Rule.Id == _graphIds.Multiply)
-            {
-                return Interpret(text, node.Children[0], tokens) * Interpret(text, node.Children[2], tokens);
-            }
-            else if (node.Rule.Id == _graphIds.Add)
-            {
-                return Interpret(text, node.Children[0], tokens) + Interpret(text, node.Children[2], tokens);
-            }
-            else if (node.Rule.Id == _graphIds.Subtract)
-            {
-                return Interpret(text, node.Children[0], tokens) - Interpret(text, node.Children[2], tokens);
-            }
-            else if (node.Rule.Id == _graphIds.Divide)
-            {
-                return Interpret(text, node.Children[0], tokens) / Interpret(text, node.Children[2], tokens);
-            }
-            else if (node.Rule.Id == _graphIds.Group)
-            {
-                return Interpret(text, node.Children[0], tokens);
-            }
+        public double Interpret(string text, in Annotation node, in List<Annotation> tokens) =>
+            _functionLookup.TryGetValue(node.Rule, out var function) 
+                ? function(text, node, tokens)
+                : throw new NotImplementedException();
+        
 
-            throw new NotImplementedException();
-        }
+        private Dictionary<IRule, CalculatorFunction> CreateFunctionLookup(RuleGraph<int> graph) =>       
+#nullable disable
+            new()
+            {                
+                { graph.FindRule(NodeNames.Group), (text, node, tokens) => 
+                    Interpret(text, node.Children[0], tokens) },
 
-        private CalculatorInterpreter SetIds(RuleGraph<int> graph)
-        {
-            if (!graph.TryFindRule<RuleBase<int>>(NodeNames.Group, out var groupRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Number, out var numberRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Unary, out var unaryRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Plus, out var plusRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Minus, out var minusRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Multiply, out var multiplyRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Division, out var divisionRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Addition, out var additionRule) ||
-                !graph.TryFindRule<RuleBase<int>>(NodeNames.Subtraction, out var subtractionRule))
-            {
-                throw new InvalidOperationException("One or more required rules are missing from the rule graph.");
-            }
+                { graph.FindRule(NodeNames.Number), (text, node, tokens) => 
+                    double.Parse(node.GetText(text, tokens), CultureInfo.InvariantCulture) },
 
-            _graphIds = new Ids
-            {
-                Group = groupRule!.Id,
-                Number = numberRule!.Id,
-                Unary = unaryRule!.Id,
-                Plus = plusRule!.Id,
-                Minus = minusRule!.Id,
-                Multiply = multiplyRule!.Id,
-                Divide = divisionRule!.Id,
-                Add = additionRule!.Id,
-                Subtract = subtractionRule!.Id,
+                { graph.FindRule(NodeNames.Unary), (text, node, tokens) =>
+                    {
+                        var sign = node.Children[0].Rule == graph.FindRule(NodeNames.Plus) ? 1.0 : -1.0;
+                        return sign * Interpret(text, node.Children[1], tokens);
+                    }
+                },
+                { graph.FindRule(NodeNames.Multiply), (text, node, tokens) =>
+                        Interpret(text, node.Children[0], tokens) * Interpret(text, node.Children[2], tokens) },
+
+                { graph.FindRule(NodeNames.Addition), (text, node, tokens) =>
+                        Interpret(text, node.Children[0], tokens) + Interpret(text, node.Children[2], tokens) },
+
+                { graph.FindRule(NodeNames.Subtraction), (text, node, tokens) =>
+                        Interpret(text, node.Children[0], tokens) - Interpret(text, node.Children[2], tokens) },
+
+                { graph.FindRule(NodeNames.Division), (text, node, tokens) =>
+                        Interpret(text, node.Children[0], tokens) / Interpret(text, node.Children[2], tokens) },
             };
-
-            return this;
-        }
+#nullable enable       
     }
 }
