@@ -32,14 +32,17 @@ namespace gg.parse.script
             return this;
         }
 
-        public (ParseResult tokens, ParseResult astNodes) Parse(string input)
+        public (ParseResult tokens, ParseResult astNodes) Parse(
+            string input, 
+            bool failOnWarning = false,
+            bool throwExceptionsOnError = true)
         {
             Assertions.RequiresNotNull(Tokenizer!);
             Assertions.RequiresNotNull(Tokenizer!.Root!);
 
             return Parser == null
-                    ? (Tokenizer.TokenizeText(input), ParseResult.Unknown)
-                    : Parser.Parse(Tokenizer, input);
+                    ? (Tokenizer.TokenizeText(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
+                    : Parser.Parse(Tokenizer, input, failOnWarning, throwExceptionsOnError);
         }
     }
 }

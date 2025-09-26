@@ -1,5 +1,6 @@
-﻿using gg.parse.script;
-using System.Globalization;
+﻿using System.Globalization;
+
+using gg.parse.script;
 
 namespace gg.parse.instances.calculator
 {

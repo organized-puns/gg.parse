@@ -12,7 +12,8 @@ namespace gg.parse.script.common
                 this RuleGraph<int> parser, 
                 RuleGraph<char> tokenizer, 
                 string text, 
-                bool failOnWarning = false
+                bool failOnWarning = false,
+                bool throwExceptionOnTokenizeErrors = true
             )
         {
             if (!string.IsNullOrEmpty(text))
@@ -35,19 +36,22 @@ namespace gg.parse.script.common
             return (ParseResult.Failure, ParseResult.Failure);
         }
 
-        public static ParseResult TokenizeText(this RuleGraph<char> tokenizer, string text)
+        public static ParseResult TokenizeText(
+            this RuleGraph<char> tokenizer, 
+            string text, 
+            bool failOnWarning = false,
+            bool throwExceptionOnErrors = true)
         {
             Assertions.RequiresNotNullOrEmpty(text, nameof(text));
+            Assertions.RequiresNotNull(tokenizer);
+            Assertions.RequiresNotNull(tokenizer.Root!);
 
-            var tokenizationResult = tokenizer.Root.Parse(text);
+            var tokenizationResult = tokenizer.Root!.Parse(text);
 
             if (tokenizationResult.FoundMatch && tokenizationResult.Annotations != null)
             {
-                if (tokenizationResult
-                        .Annotations
-                        // xxx fix this, should work the same as parser
-                        .ContainsRule(tokenizer.FindRule(CommonTokenNames.UnknownToken)!, out var tokenizerErrors)
-                )
+                if (throwExceptionOnErrors
+                    && tokenizationResult.Annotations.ContainsErrors<char>(failOnWarning, out var tokenizerErrors))
                 {
                     throw new TokenizeException(
                         "input contains characters which could not be mapped to a token.",
@@ -64,7 +68,8 @@ namespace gg.parse.script.common
             this RuleGraph<int> parser, 
             string text, 
             in List<Annotation> tokens,
-            bool failOnWarning = false)
+            bool failOnWarning = false,
+            bool throwExceptionOnErrors = true)
         {
             var astResult = parser.Root!.Parse(tokens);
 
@@ -72,7 +77,9 @@ namespace gg.parse.script.common
             {
                 var astNodes = astResult.Annotations;
 
-                if (astNodes != null && astNodes.ContainsParseErrors(failOnWarning, out var grammarErrors))
+                if (astNodes != null 
+                    && throwExceptionOnErrors 
+                    && astNodes.ContainsErrors<int>(failOnWarning, out var grammarErrors))
                 {
                     throw new ParseException(
                             "Parsing encountered some errors (or warnings which are treated as errors).",

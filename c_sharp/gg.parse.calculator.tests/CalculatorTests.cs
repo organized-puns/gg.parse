@@ -54,6 +54,7 @@ namespace gg.parse.calculator.tests
 
             (string input, double expectedOutput)[] testValues = [
                 ("42", 42.0),
+                ("1 * -2", -2),
                 ("1 + 2-3", 0.0),
                 ("1.5 * 2", 3.0),
                 ("2 * 2 + 1", 5.0),
@@ -74,7 +75,6 @@ namespace gg.parse.calculator.tests
                 ("2 * 2 * (2)", 8.0),
                 ("2 * 2 * (2 + (3 - -3))", 32.0),
                 ("2 * 2 * (2 + (3 - -3)) + --(1)", 33.0),
-                
             ];
 
             foreach (var (input, expectedOutput) in testValues)

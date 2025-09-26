@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using gg.parse.rules;
+﻿using gg.parse.rules;
 
 namespace gg.parse.script.tests.integration
 {
@@ -58,7 +56,8 @@ namespace gg.parse.script.tests.integration
 
             foreach (var testString in invalidStrings)
             {
-                var (result, _) = parser.Parse(testString);
+                // turn off exception throwing for this test so we can test the error annotations
+                var (result, _) = parser.Parse(testString, throwExceptionsOnError: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
@@ -88,7 +87,8 @@ namespace gg.parse.script.tests.integration
 
             foreach (var testConfig in testConfigurations)
             {
-                var (result, _) = parser.Parse(testConfig.input);
+                // turn off exception throwing for this test so we can test the error annotations
+                var (result, _) = parser.Parse(testConfig.input, throwExceptionsOnError: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
@@ -131,7 +131,8 @@ namespace gg.parse.script.tests.integration
 
             foreach (var testConfig in testConfigurations)
             {
-                var (result, _) = parser.Parse(testConfig.input);
+                // turn off exception throwing for this test so we can test the error annotations
+                var (result, _) = parser.Parse(testConfig.input, throwExceptionsOnError: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
