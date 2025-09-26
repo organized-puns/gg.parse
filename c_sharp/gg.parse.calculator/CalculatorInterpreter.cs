@@ -49,18 +49,21 @@ namespace gg.parse.instances.calculator
         }
 
         private Ids _graphIds;
-        private RuleGraphBuilder _parser; 
+        private RuleGraphBuilder _builder; 
 
+        public RuleGraphBuilder Builder => _builder;
 
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
-            _parser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
-            SetIds(_parser.Parser!);
+            _builder = new RuleGraphBuilder();            
+            _builder.InitializeFromDefinition(tokenizerSpec, grammarSpec);
+
+            SetIds(_builder.Parser!);
         }
 
         public double Interpret(string text)
         {
-            var (tokensResult, treeResult) = _parser.Parse(text);
+            var (tokensResult, treeResult) = _builder.Parse(text);
 
             if (tokensResult.FoundMatch && treeResult.FoundMatch)
             {

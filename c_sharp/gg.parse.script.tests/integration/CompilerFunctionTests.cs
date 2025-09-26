@@ -11,6 +11,14 @@ namespace gg.parse.script.tests.integration
     [TestClass]
     public class CompilerFunctionTests
     {
+        // -- Static Methods ------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Takes a script text, tokenizes, parses and compiles it returning the compiled rule graph.
+        /// Every step is validated.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         private static RuleGraph<char> Compile(string text)
         {
             var tokenizer = new ScriptTokenizer();
@@ -19,16 +27,16 @@ namespace gg.parse.script.tests.integration
 
             var result = tokenizer.Tokenize(text);
 
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null && result.Annotations.Count > 0);
 
             var tokens = result.Annotations;
 
             result = parser.Root!.Parse(tokens);
 
-            Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations != null && result.Annotations.Count > 0);
-            Assert.IsTrue(result.Annotations[0].Rule != parser.UnknownInputError);
+            IsTrue(result.FoundMatch);
+            IsTrue(result.Annotations != null && result.Annotations.Count > 0);
+            IsTrue(result.Annotations[0].Rule != parser.UnknownInputError);
 
             var astNodes = result.Annotations;
 
@@ -36,8 +44,10 @@ namespace gg.parse.script.tests.integration
                     .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                     .RegisterTokenizerCompilerFunctions(parser)
                     .Compile(new CompileSession(text, tokens, astNodes));
-
         }
+
+        // -- Tests ---------------------------------------------------------------------------------------------------
+
         [TestMethod]
         public void TokenizeParseCompileLitRule_ExpectSuccess()
         {
