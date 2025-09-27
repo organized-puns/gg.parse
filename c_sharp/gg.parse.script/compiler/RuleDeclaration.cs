@@ -9,7 +9,7 @@
     {
         public string Name { get; init; }
 
-        public AnnotationProduct Product { get; init; }
+        public IRule.Output Product { get; init; }
               
         public int Precedence { get; init; }
 
@@ -18,7 +18,7 @@
         /// </summary>
         public Annotation? RuleBodyAnnotation { get; init; }
 
-        public RuleDeclaration(AnnotationProduct product, string name, int precedence, Annotation? annotation)
+        public RuleDeclaration(IRule.Output product, string name, int precedence, Annotation? annotation)
         {
             Name = name;
             Product = product;
@@ -26,7 +26,7 @@
             RuleBodyAnnotation = annotation;
         }
 
-        public RuleDeclaration(AnnotationProduct product, string name, Annotation? annotation)
+        public RuleDeclaration(IRule.Output product, string name, Annotation? annotation)
         {
             Name = name;
             Product = product;

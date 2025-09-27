@@ -93,8 +93,8 @@ namespace gg.parse
 
         public TRule FindOrRegister<TRule>(
             string ruleName,
-            AnnotationProduct product,
-            Func<string, AnnotationProduct, TRule> factoryMethod)
+            IRule.Output product,
+            Func<string, IRule.Output, TRule> factoryMethod)
             where TRule : RuleBase<T> =>
 
             TryFindRule(ruleName, out TRule? existingRule)

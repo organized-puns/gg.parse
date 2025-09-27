@@ -355,7 +355,7 @@ namespace gg.parse.script.tests.integration
             table.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
 
             table = compiler
-                    .WithAnnotationProductMapping([(noneProductId, AnnotationProduct.None)])
+                    .WithAnnotationProductMapping([(noneProductId, IRule.Output.Void)])
                     .Compile(context, table);
 
             IsNotNull(table);
@@ -365,7 +365,7 @@ namespace gg.parse.script.tests.integration
             var identifierRule = table.FindRule("rule");
 
             IsNotNull(identifierRule);
-            IsTrue(identifierRule.Production == AnnotationProduct.None);
+            IsTrue(identifierRule.Production == IRule.Output.Void);
 
             // the compiled table's root should be able to parse a bar string 
             var testText = "bar";

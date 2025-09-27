@@ -3,7 +3,7 @@
     public class MatchFunctionCount<T>(
         string name, 
         RuleBase<T> function, 
-        AnnotationProduct production = AnnotationProduct.Annotation, 
+        IRule.Output production = IRule.Output.Self, 
         int min = 1, 
         int max = 1, 
         int precedence = 0
@@ -40,7 +40,7 @@
                 index += result.MatchedLength;
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                    (Production == AnnotationProduct.Annotation || Production == AnnotationProduct.Transitive))
+                    (Production == IRule.Output.Self || Production == IRule.Output.Children))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

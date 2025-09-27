@@ -14,7 +14,7 @@
         /// </summary>
         public bool DeferResultToReference { get; set; } = false;
 
-        public RuleReference(string name, string reference, AnnotationProduct product = AnnotationProduct.Annotation, int precedence = 0)
+        public RuleReference(string name, string reference, IRule.Output product = IRule.Output.Self, int precedence = 0)
             : base(name, product, precedence) 
         {
             Reference = reference;
@@ -35,8 +35,8 @@
                     // the rule production so pass back the result based on this' product
                     return Production switch
                     {
-                        AnnotationProduct.Annotation => result,
-                        AnnotationProduct.Transitive => new ParseResult(true, result.MatchedLength, result.Annotations),
+                        IRule.Output.Self => result,
+                        IRule.Output.Children => new ParseResult(true, result.MatchedLength, result.Annotations),
                         _ => new ParseResult(true, result.MatchedLength),
                     };
                 }
@@ -49,9 +49,9 @@
                     // modifiers eg "#bar = foo;" in which case foo will show up.
                     return Production switch
                     {
-                        AnnotationProduct.Annotation => new ParseResult(true, result.MatchedLength,
+                        IRule.Output.Self => new ParseResult(true, result.MatchedLength,
                                                                        [new Annotation(this, new Range(start, result.MatchedLength), result.Annotations)]),
-                        AnnotationProduct.Transitive => result,
+                        IRule.Output.Children => result,
                         _ => new ParseResult(true, result.MatchedLength),
                     };
                 }

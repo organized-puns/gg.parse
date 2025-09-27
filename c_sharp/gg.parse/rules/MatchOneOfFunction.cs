@@ -19,12 +19,12 @@
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
         public MatchOneOfFunction(string name, params RuleBase<T>[] options)
-            : base(name, AnnotationProduct.Annotation)
+            : base(name, IRule.Output.Self)
         {
             RuleOptions = options;
         }
 
-        public MatchOneOfFunction(string name, AnnotationProduct production, int precedence = 0, params RuleBase<T>[] options)
+        public MatchOneOfFunction(string name, IRule.Output production, int precedence = 0, params RuleBase<T>[] options)
             : base(name, production, precedence)
         {
             RuleOptions = options;

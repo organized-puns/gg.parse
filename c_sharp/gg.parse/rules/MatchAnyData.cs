@@ -2,7 +2,7 @@
 {
     public class MatchAnyData<T>(
         string name, 
-        AnnotationProduct production = AnnotationProduct.Annotation, 
+        IRule.Output production = IRule.Output.Self, 
         int precedence = 0
      ) : RuleBase<T>(name, production, precedence) where T : IComparable<T>
     {

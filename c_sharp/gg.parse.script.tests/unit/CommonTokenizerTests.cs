@@ -101,7 +101,7 @@ namespace gg.parse.script.tests.unit
 
                 if (name != null)
                 {
-                    var (expectedName, production) = name.SplitNameAndProduct();
+                    var (expectedName, production) = name.SplitNameAndOutput();
                     
                     IsTrue(rule.Name == expectedName);
                     IsTrue(rule.Production == production);
@@ -110,7 +110,7 @@ namespace gg.parse.script.tests.unit
                 {
                     // no name provided, there should be a non null default name
                     IsNotNull(rule.Name);
-                    IsTrue(rule.Production == AnnotationProduct.None);
+                    IsTrue(rule.Production == IRule.Output.Void);
                 }
 
                 IsTrue(tokenizer.FindRule(rule.Name) == rule);
@@ -134,7 +134,7 @@ namespace gg.parse.script.tests.unit
                     IsTrue(result.FoundMatch);
                     IsTrue(result.MatchedLength > 0);
 
-                    if (rule.Production == AnnotationProduct.None)
+                    if (rule.Production == IRule.Output.Void)
                     {
                         IsTrue(result.Annotations == null);
                     }

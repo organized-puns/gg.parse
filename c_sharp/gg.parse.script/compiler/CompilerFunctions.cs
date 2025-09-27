@@ -142,7 +142,7 @@ namespace gg.parse.script.compiler
 
                     var elementDeclaration = 
                         new RuleDeclaration(
-                            AnnotationProduct.Transitive, 
+                            IRule.Output.Children, 
                             $"{declaration.Name}[{i}], type: {elementName}", 
                             0,
                             elementAnnotation
@@ -180,7 +180,7 @@ namespace gg.parse.script.compiler
                     var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.Rule.Id);
                     var elementDeclaration = 
                         new RuleDeclaration(
-                            AnnotationProduct.Annotation, 
+                            IRule.Output.Self, 
                             $"{declaration.Name}[{i}], type: {elementName}",
                             0,
                             elementAnnotation
@@ -220,7 +220,7 @@ namespace gg.parse.script.compiler
 
                     var elementDeclaration = 
                         new RuleDeclaration(
-                            AnnotationProduct.Transitive, 
+                            IRule.Output.Children, 
                             $"{declaration.Name}[{i}], type: {elementName}",
                             0,
                             elementAnnotation
@@ -290,7 +290,7 @@ namespace gg.parse.script.compiler
 
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Transitive, $"{declaration.Name} of {elementName}", elementAnnotation);
+            var elementDeclaration = new RuleDeclaration(IRule.Output.Children, $"{declaration.Name} of {elementName}", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -317,7 +317,7 @@ namespace gg.parse.script.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}, type: Not({elementName})", elementAnnotation);
+            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Not({elementName})", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -345,7 +345,7 @@ namespace gg.parse.script.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}, type: Skip({elementName})", elementAnnotation);
+            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Skip({elementName})", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -372,7 +372,7 @@ namespace gg.parse.script.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name}, type: Find({elementName})", elementAnnotation);
+            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Find({elementName})", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -399,7 +399,7 @@ namespace gg.parse.script.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{elementName}, type: {declaration.Name}", elementAnnotation);
+            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{elementName}, type: {declaration.Name}", elementAnnotation);
             var subFunction = compilationFunction(compiler, elementDeclaration, session);
 
             if (subFunction == null)
@@ -453,7 +453,7 @@ namespace gg.parse.script.compiler
             {
                 var conditionDefinition = ruleDefinition.Children[2];
                 var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.Rule.Id];
-                var conditionDeclaration = new RuleDeclaration(AnnotationProduct.Annotation, $"{declaration.Name} condition: {elementName}", conditionDefinition);
+                var conditionDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name} condition: {elementName}", conditionDefinition);
                 condition = compilationFunction(compiler, conditionDeclaration, context);
 
                 if (condition == null)

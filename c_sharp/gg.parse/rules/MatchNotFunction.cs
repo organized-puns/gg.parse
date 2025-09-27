@@ -6,14 +6,14 @@
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
-        public MatchNotFunction(string name, AnnotationProduct production, RuleBase<T> rule, int precedence = 0)
+        public MatchNotFunction(string name, IRule.Output production, RuleBase<T> rule, int precedence = 0)
             : base(name, production, precedence)
         {
             Rule = rule;
         }
 
         public MatchNotFunction(string name, RuleBase<T> rule)
-            : base(name, AnnotationProduct.Annotation)
+            : base(name, IRule.Output.Self)
         {
             Rule = rule;
         }

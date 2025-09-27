@@ -59,7 +59,7 @@ namespace gg.parse.rules
 
         public LogRule(
             string name, 
-            AnnotationProduct product, 
+            IRule.Output product, 
             string? text, 
             RuleBase<T>? condition = null, 
             LogLevel level = LogLevel.Info

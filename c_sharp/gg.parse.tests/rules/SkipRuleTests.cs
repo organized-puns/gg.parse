@@ -13,7 +13,7 @@ namespace gg.parse.tests.rules
         public void CreateSkipUntilFoo_Parse_ExpectSkippedUntilFoo()
         {
             var isFoo = new MatchDataSequence<char>("isFoo", "foo".ToCharArray());
-            var skipRule = new SkipRule<char>("testSkip", AnnotationProduct.Annotation, isFoo)
+            var skipRule = new SkipRule<char>("testSkip", IRule.Output.Self, isFoo)
             {
                 Id = 42
             };
@@ -29,7 +29,7 @@ namespace gg.parse.tests.rules
         public void CreateSkipUntilFoo_Parse_ExpectFailureBecauseEoF()
         {
             var isFoo = new MatchDataSequence<char>("isFoo", "foo".ToCharArray());
-            var skipRule = new SkipRule<char>("testSkip", AnnotationProduct.Annotation, isFoo)
+            var skipRule = new SkipRule<char>("testSkip", IRule.Output.Self, isFoo)
             {
                 Id = 42
             };
@@ -42,7 +42,7 @@ namespace gg.parse.tests.rules
         public void CreateSkipUntilFoo_Parse_ExpectSucceedDespiteEof()
         {
             var isFoo = new MatchDataSequence<char>("isFoo", "foo".ToCharArray());
-            var skipRule = new SkipRule<char>("testSkip", AnnotationProduct.Annotation, isFoo, failOnEof: false)
+            var skipRule = new SkipRule<char>("testSkip", IRule.Output.Self, isFoo, failOnEof: false)
             {
                 Id = 42
             };

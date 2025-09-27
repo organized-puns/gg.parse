@@ -30,7 +30,7 @@ namespace gg.parse.rules
 
         public SkipRule(
             string name,
-            AnnotationProduct product,
+            IRule.Output product,
             RuleBase<T> condition,
             bool failOnEof = true
         ) 

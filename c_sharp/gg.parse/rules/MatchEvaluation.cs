@@ -22,7 +22,7 @@ namespace gg.parse.rules
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
         public MatchEvaluation(string name, params RuleBase<T>[] options)
-            : base(name, AnnotationProduct.Annotation)
+            : base(name, IRule.Output.Self)
         {
             Assertions.Requires(options != null);
             Assertions.Requires(options!.Any(v => v != null));
@@ -30,7 +30,7 @@ namespace gg.parse.rules
             RuleOptions = options!;
         }
 
-        public MatchEvaluation(string name, AnnotationProduct production, int precedence, params RuleBase<T>[] options)
+        public MatchEvaluation(string name, IRule.Output production, int precedence, params RuleBase<T>[] options)
             : base(name, production, precedence)
         {
             Assertions.Requires(options != null);
