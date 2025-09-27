@@ -10,7 +10,7 @@ namespace gg.parse.script.pipeline
 {
     public static class ScriptPipeline
     {
-        public static PipelineSession<char> RunTokenPipeline(string tokenizerDefinition, PipelineLog? logger = null)
+        public static PipelineSession<char> RunTokenPipeline(string tokenizerDefinition, ScriptLogger? logger = null)
         {
             RequiresNotNullOrEmpty(tokenizerDefinition);
 
@@ -62,15 +62,12 @@ namespace gg.parse.script.pipeline
             return session;
         }
 
-        public static PipelineSession<T> InitializeSession<T>(string script, PipelineLog? logger = null)
+        public static PipelineSession<T> InitializeSession<T>(string script, ScriptLogger? logger = null)
             where T : IComparable<T>
         {
             var tokenizer = new ScriptTokenizer();
-            var pipelineLogger = logger ?? new PipelineLog();
-            var parser = new ScriptParser(tokenizer)
-            {
-                FailOnWarning = pipelineLogger.FailOnWarning
-            };
+            var pipelineLogger = logger ?? new ScriptLogger();
+            var parser = new ScriptParser(tokenizer);
 
             var tokenizerSession = new PipelineSession<T>()
             {
@@ -133,9 +130,10 @@ namespace gg.parse.script.pipeline
         }
 
 
-        private static (List<Annotation> tokens, List<Annotation> astNodes) ParseSessionText<T>(PipelineSession<T> session)
+        private static (List<Annotation>? tokens, List<Annotation>? astNodes) ParseSessionText<T>(PipelineSession<T> session)
             where T : IComparable<T>
         {
+            RequiresNotNull(session);
             RequiresNotNull(session.Tokenizer!);
             RequiresNotNull(session.Parser!);
             RequiresNotNull(session.LogHandler!);
@@ -143,12 +141,7 @@ namespace gg.parse.script.pipeline
 
             try
             {
-                return session.Parser!.Parse(session.Text!);
-            }
-            catch (TokenizeException te)
-            {
-                session.LogHandler!.ProcessException(te);
-                throw new ScriptPipelineException("Exception in tokens while tokenizing text.", te);
+                return session!.Parser!.Parse(session.Text!, session.LogHandler!.FailOnWarning);
             }
             catch (ParseException pe)
             {

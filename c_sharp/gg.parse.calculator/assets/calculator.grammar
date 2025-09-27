@@ -2,21 +2,47 @@
  * Simple EBNF-like notation for the grammar of a simple calculator
  */
 
-#expression		   = operation | term | unknown_expression;
+#expression		     = operation | term | unknown_expression;
 
-#term			   = unary_operation | number | group;
+#term			     = unary_operation | number | group_variations;
 
-unary_operation    = (plus | minus), term;
+unary_operation      = (plus | minus), term;
+
+
+#group_variations    = group | group_err;
 
 // group needs to produce an annotation, if it's transitive the precedence parsing will happily move the expression
 // up the ast tree, removing the effect of a group
-group             = ~group_start, expression, ~group_end;
+group                = ~group_start, expression, ~group_end;
 
-#operation         = multiplication / division / addition / subtraction;
+group_err			 = error "found group end ')' without preceding group start '('." if group_end;
 
-multiplication 100 = term, mult,  term;
-division       75  = term, div,   term;
-addition       50  = term, plus,  term;
-subtraction    25  = term, minus, term;
+#operation           = mult_options / division_options / addition_options / sub_options / missing_operator_err;
 
-unknown_expression = error "unknown expression found." if *(!(operation | term), .);
+missing_operator_err = error "operator expected between two numbers." if number, number;
+
+#mult_options	     = multiplication | multiplication_err;
+
+multiplication 100   = term, mult, term;
+multiplication_err   = error "expecting term after *." if (term, mult, !term) | (mult, !term);
+
+
+#division_options    = division | division_err;
+
+division       75    = term, div,   term;
+division_err	     = error "expecting term after /." if (term, div, !term);
+
+
+#addition_options    = addition | addition_err;
+
+addition       50    = term, plus,  term;
+addition_err	     = error "expecting term after '+'" if (term, plus, !term);
+
+
+#sub_options	     = subtraction | sub_err;
+
+subtraction    25    = term, minus, term;
+sub_err			     = error "expecting term after '-'." if (term, minus, !term);
+
+
+unknown_expression   = error "unknown expression found." if *(!(operation | term), .);

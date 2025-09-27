@@ -1,13 +1,14 @@
 ﻿namespace gg.parse
 {
-    public readonly struct ParseResult(bool isSuccess, int charactersRead, List<Annotation>? annotations = null)
+    public readonly struct ParseResult(bool isSuccess, int dataRead, List<Annotation>? annotations = null)
     {
         public static readonly ParseResult Success = new(true, 0, null);
+        public static readonly ParseResult Unknown = new(true, -1, null);
         public static readonly ParseResult Failure = new(false, 0, null);
 
         public bool FoundMatch { get; init; } = isSuccess;
 
-        public int MatchedLength { get; init; } = charactersRead;
+        public int MatchedLength { get; init; } = dataRead;
 
         public List<Annotation>? Annotations { get; init; } = annotations;
 

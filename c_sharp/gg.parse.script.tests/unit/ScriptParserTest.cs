@@ -51,6 +51,30 @@ namespace gg.parse.script.tests.unit
             IsTrue(fooLiteral.Name == CommonTokenNames.Literal);
         }
 
+        [TestMethod]
+        public void CreateRuleAsOptionScript_Parse_ExpectToFindRuleNameAndOption()
+        {
+            var parser = new ScriptParser();
+
+            var (tokens, nodes) = parser.Parse("rule = 'foo' | 'bar';");
+
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
+
+            var ruleNameRule = nodes[0][0].Rule;
+            IsTrue(ruleNameRule == parser.MatchRuleName);
+
+            var optionRule = nodes[0][1].Rule;
+            IsTrue(optionRule.Name == parser.MatchOption.Name);
+            IsTrue(optionRule.GetType() == typeof(MatchFunctionSequence<int>));
+            
+            var option1 = nodes[0][1][0].Rule;
+            IsTrue(option1.Name == parser.MatchLiteral.Name);
+
+            var option2 = nodes[0][1][1].Rule;
+            IsTrue(option2.Name == parser.MatchLiteral.Name);
+        }
+
 
         [TestMethod]
         public void ParseRule_ExpectSucess()
@@ -96,6 +120,7 @@ namespace gg.parse.script.tests.unit
 
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
+            
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == "Option");
 

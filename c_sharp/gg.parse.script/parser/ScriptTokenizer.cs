@@ -1,6 +1,7 @@
 ﻿
 using gg.parse.rules;
 using gg.parse.script.common;
+
 namespace gg.parse.script.parser
 {
     public class ScriptTokenizer : CommonTokenizer

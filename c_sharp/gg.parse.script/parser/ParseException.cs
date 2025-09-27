@@ -19,6 +19,13 @@
         {
         }
 
+        public ParseException(string message, List<Annotation> errors, string text)
+            : base(message)
+        {
+            Errors = errors;
+            Text = text;
+        }
+
         public ParseException(string message, List<Annotation> errors, string text, List<Annotation> tokens)
             : base(message)
         {
@@ -27,17 +34,19 @@
             Tokens = tokens;
         }
 
-        public void WriteErrors(Action<string> writeError)
+        /*public void WriteErrors(Action<string> writeError)
         {
-            if (Errors != null && Text != null && Tokens != null)
+            if (Errors != null && Text != null)
             {
+
+                if 
                 var errorMessages = Errors.Select(annotation => $"Parse error at: {annotation.GetText(Text, Tokens)}.");
                 foreach (var errorMessage in errorMessages)
                 {
                     writeError(errorMessage);
                 }
             }
-        }
+        }*/
     }
 }
 

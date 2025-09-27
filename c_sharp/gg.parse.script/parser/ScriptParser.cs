@@ -3,18 +3,8 @@ using gg.parse.script.common;
 
 namespace gg.parse.script.parser
 {
-    /// <summary>
-    /// Turns a list of tokens into an abstract syntax tree according to EBNF(like) grammar.
-    /// </summary>
-    public class ScriptParser : CommonGraphWrapper<int>
+    public class ScriptParser : CommonParser
     {
-        public ScriptTokenizer Tokenizer { get; init; }
-
-        /// <summary>
-        /// If set to true an exception will be thrown when a warning is encountered
-        /// </summary>
-        public bool FailOnWarning { get; set; } = false;
-
         public MatchOneOfFunction<int> MatchLiteral { get; private set; }
 
         public MatchSingleData<int> MatchAnyToken { get; private set; }
@@ -111,9 +101,8 @@ namespace gg.parse.script.parser
         }
         
         public ScriptParser(ScriptTokenizer tokenizer)
+            : base(tokenizer)
         {
-            Tokenizer = tokenizer;
-
             RegisterTokens();
 
             MatchRuleHeader = RegisterRuleHeader();
@@ -134,129 +123,6 @@ namespace gg.parse.script.parser
 
             Root = ZeroOrMore("#root", OneOf("#statement", validStatement, UnknownInputError));
         }
-
-        /// <summary>
-        /// Parse and validate the results of the various steps involved.
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        /// <exception cref="TokenizeException">Thrown when the tokenization step results in errors.</exception>
-        /// <exception cref="ParseException">Thrown when parsing reports error.</exception>
-        public (List<Annotation> tokens, List<Annotation> astNodes) Parse(string text)
-        {
-            if (!string.IsNullOrEmpty(text))
-            {
-                var tokenizerTokens = TokenizeText(text);
-
-                if (tokenizerTokens.Count > 0)
-                {
-                    return ParseGrammar(text, tokenizerTokens!);
-                }
-            }
-
-            return ([], []);
-        }
-
-        private List<Annotation> TokenizeText(string text)
-        {
-            Assertions.RequiresNotNullOrEmpty(text, nameof(text));
-
-            var tokenizationResult = Tokenizer.Tokenize(text);
-
-            if (tokenizationResult.FoundMatch && tokenizationResult.Annotations != null)
-            {
-                if (ContainsTokenErrors(tokenizationResult.Annotations,out var tokenizerErrors))
-                {
-                    throw new TokenizeException(
-                        "input contains characters which could not be mapped to a token.",
-                        tokenizerErrors,
-                        text
-                    );
-                }
-
-                return tokenizationResult.Annotations!;
-            }
-
-            throw new TokenizeException("input contains no valid tokens.");
-        }
-
-        private Func<Annotation, bool> SetupErrorPredicate(bool failOnWarning)
-        {
-            var errorLevel = FailOnWarning
-                    ? LogLevel.Warning | LogLevel.Error
-                    : LogLevel.Error;
-
-            return new Func<Annotation, bool>(
-                a => a.Rule is LogRule<int> logRule && (logRule.Level & errorLevel) > 0
-            );
-        }
-
-        private (List<Annotation> tokens, List<Annotation> astNodes) ParseGrammar(string text, List<Annotation> tokens)
-        {
-            var astResult = Root!.Parse(tokens);
-
-            if (astResult.FoundMatch)
-            {
-                var astNodes = astResult.Annotations;
-
-                if (astNodes == null)
-                {
-                    throw new ParseException("input contains no valid grammar.");
-                }
-
-                if (ContainsParseErrors(astNodes, FailOnWarning, out var grammarErrors))
-                {
-                    throw new ParseException(
-                            "Parsing encountered some errors (or warnings which are treated as errors).",
-                            grammarErrors,
-                            text,
-                            tokens
-                    );
-                }
-
-                return (tokens, astResult.Annotations!);
-            }
-            else
-            {
-                return (tokens, []);
-            }
-        }
-
-        private bool ContainsTokenErrors(List<Annotation> annotations, out List<Annotation> errors)
-        {
-            var unknownTokenId = Tokenizer.FindRule(CommonTokenNames.UnknownToken);
-
-            var errorPredicate = new Func<Annotation, bool>(a => a.Rule == unknownTokenId);
-
-            errors = [];
-
-            foreach (var annotation in annotations)
-            {
-                annotation.Collect(errorPredicate, errors);
-            }
-
-            return errors.Count > 0;
-        }
-
-        private bool ContainsParseErrors(List<Annotation> annotations, bool failOnWarning, out List<Annotation> errors)
-        {
-            var errorPredicate = SetupErrorPredicate(FailOnWarning);
-            errors = new List<Annotation>();
-
-            foreach (var annotation in annotations)
-            {
-                annotation.Collect(errorPredicate, errors);
-            }
-
-            return errors.Count > 0;
-        }
-
-        private MatchSingleData<int> Token(string tokenName) =>
-            MatchSingle($"{AnnotationProduct.None.GetPrefix()}Token({tokenName})", Tokenizer.FindRule(tokenName)!.Id);
-
-        private MatchSingleData<int> Token(string ruleName, string tokenName) =>
-            MatchSingle($"Token({ruleName})", Tokenizer.FindRule(tokenName)!.Id);
-
 
         private MatchFunctionSequence<int> RegisterRuleHeader()
         {

@@ -1,5 +1,4 @@
-﻿#nullable disable
-
+﻿using gg.parse.script.parser;
 using gg.parse.script.pipeline;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -14,7 +13,7 @@ namespace gg.parse.script.tests.integration
         {
             var result = new List<string>();
             
-            var logger = new PipelineLog()
+            var logger = new ScriptLogger()
             {
                 Out = (l, s) => result.Add(s),
             };
@@ -32,7 +31,7 @@ namespace gg.parse.script.tests.integration
         {
             var result = new List<string>();
 
-            var logger = new PipelineLog()
+            var logger = new ScriptLogger()
             {
                 Out = (level, message) => result.Add(message),
             };
@@ -52,7 +51,7 @@ namespace gg.parse.script.tests.integration
         {
             var result = new List<string>();
 
-            var logger = new PipelineLog()
+            var logger = new ScriptLogger()
             {
                 Out = (level, message) => result.Add(message),
                 FailOnWarning = true

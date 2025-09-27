@@ -19,7 +19,7 @@ namespace gg.parse.script.pipeline
 
         public ScriptParser? Parser { get; set; }
 
-        public PipelineLog? LogHandler { get; set; }
+        public ScriptLogger? LogHandler { get; set; }
 
         public RuleCompiler<T>? Compiler { get; set; }
 

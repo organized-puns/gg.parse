@@ -194,19 +194,5 @@ namespace gg.parse.tests.examples
             var result = parser.Parse(tokens);
 
         }
-
-
-        [TestMethod]
-        public void AnnotateJsonFile_ExpectValidHtml()
-        {
-            var parser = new JsonParser();
-            var (tokens, astNodes, text) = parser.ParseFile("assets/example.json");
-
-            var html = parser.AnnotateTextUsingHtml(text, tokens, astNodes, parser.CreateAstStyleLookup());
-
-            Directory.CreateDirectory("output");
-
-            File.WriteAllText("output/astfile_example_annotation.html", html);
-        }
     }
 }

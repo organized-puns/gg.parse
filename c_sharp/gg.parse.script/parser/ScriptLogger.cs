@@ -1,12 +1,9 @@
-﻿
-using gg.parse.rules;
-using gg.parse.script.parser;
-
+﻿using gg.parse.rules;
 using static gg.parse.Assertions;
 
-namespace gg.parse.script.pipeline
+namespace gg.parse.script.parser
 {
-    public class PipelineLog
+    public class ScriptLogger   
     {
         // Note: not thread safe, application will need to deal with this
         public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
@@ -20,7 +17,7 @@ namespace gg.parse.script.pipeline
 
         public Action<LogLevel, string>? Out { get; set; } = null;
 
-        public PipelineLog(bool storeLogs = true, int maxStoredLogs = -1)
+        public ScriptLogger(bool storeLogs = true, int maxStoredLogs = -1)
         {
             if (storeLogs)
             {
@@ -91,27 +88,23 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public void ProcessException(TokenizeException exception)
+        public void ProcessException(ParseException exception, bool logException = true)
         {
-            Log(LogLevel.Fatal, $"Exception: {exception}");
+            if (logException)
+            {
+                Log(LogLevel.Fatal, $"Exception: {exception}");
+            }
 
             if (exception.Errors != null && exception.Text != null)
             {
-                ProcessTokenAnnotations(exception.Text, exception.Errors);
-            }
-            else
-            {
-                Log(LogLevel.Fatal, "No further details on the underlying error.");
-            }
-        }
-
-        public void ProcessException(ParseException exception)
-        {
-            Log(LogLevel.Fatal, $"Exception: {exception}");
-
-            if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
-            {
-                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+                if (exception.Tokens == null)
+                {
+                    ProcessTokenAnnotations(exception.Text, exception.Errors);
+                }
+                else
+                {
+                    ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+                }
             }
             else
             {

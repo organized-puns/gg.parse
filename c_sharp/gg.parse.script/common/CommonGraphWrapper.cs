@@ -1,4 +1,5 @@
 ﻿using gg.parse.rules;
+using gg.parse.script.parser;
 
 namespace gg.parse.script.common
 {
@@ -9,7 +10,7 @@ namespace gg.parse.script.common
     public class CommonGraphWrapper<T> : RuleGraph<T> where T : IComparable<T>
     {
         // -- Utility methods -----------------------------------------------------------------------------------------
-        
+
         public static (string name, AnnotationProduct product) CreateRuleNameAndProduct(string? name, string fallback) =>
             string.IsNullOrEmpty(name)
                 ? ($"{AnnotationProduct.None.GetPrefix()}{fallback}", AnnotationProduct.None)
