@@ -89,16 +89,16 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("#sequence_rule = 'foo', 'bar';");
 
-            var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
+            var sequenceRule = table.FindRule("sequence_rule") as MatchRuleSequence<char>;
 
             IsNotNull(sequenceRule);
             IsTrue(sequenceRule.Production == IRule.Output.Children);
 
-            var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.SequenceRules[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
             IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.SequenceRules[1] as MatchDataSequence<char>;
             IsNotNull(barLit);
             IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
@@ -108,7 +108,7 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("option_rule = 'foo' | 'bar';");
 
-            var optionRule = table.FindRule("option_rule") as MatchOneOfFunction<char>;
+            var optionRule = table.FindRule("option_rule") as MatchOneOf<char>;
 
             IsNotNull(optionRule);
             IsTrue(optionRule.Production == IRule.Output.Self);
@@ -127,21 +127,21 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("group_rule = ('foo', 'bar') | 'baz';");
 
-            var groupRule = table.FindRule("group_rule") as MatchOneOfFunction<char>;
+            var groupRule = table.FindRule("group_rule") as MatchOneOf<char>;
 
             IsNotNull(groupRule);
-            var sequenceRule = groupRule.RuleOptions[0] as MatchFunctionSequence<char>;
+            var sequenceRule = groupRule.RuleOptions[0] as MatchRuleSequence<char>;
             var litRule = groupRule.RuleOptions[1] as MatchDataSequence<char>;
 
             IsNotNull(sequenceRule);
             IsNotNull(litRule);
             IsTrue(litRule.DataArray.SequenceEqual("baz".ToArray()));
 
-            var fooLit = sequenceRule.SequenceSubfunctions[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.SequenceRules[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
             IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
 
-            var barLit = sequenceRule.SequenceSubfunctions[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.SequenceRules[1] as MatchDataSequence<char>;
             IsNotNull(barLit);
             IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
         }
@@ -151,10 +151,10 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("sequence_rule = foo, bar; foo = 'foo'; bar = 'bar';");
 
-            var sequenceRule = table.FindRule("sequence_rule") as MatchFunctionSequence<char>;
+            var sequenceRule = table.FindRule("sequence_rule") as MatchRuleSequence<char>;
             IsNotNull(sequenceRule);
 
-            var fooLitRef = sequenceRule.SequenceSubfunctions[0] as RuleReference<char>;
+            var fooLitRef = sequenceRule.SequenceRules[0] as RuleReference<char>;
             IsNotNull(fooLitRef);
 
             var fooLit = fooLitRef.Rule as MatchDataSequence<char>;
@@ -163,7 +163,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
             IsTrue(table.FindRule("foo") == fooLit);
 
-            var barLitRef = sequenceRule.SequenceSubfunctions[1] as RuleReference<char>;
+            var barLitRef = sequenceRule.SequenceRules[1] as RuleReference<char>;
             IsNotNull(barLitRef);
 
             var barLit = barLitRef.Rule as MatchDataSequence<char>;
@@ -178,11 +178,11 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("zero_or_more_rule = *'bar';");
 
-            var zeroOrMore = table.FindRule("zero_or_more_rule") as MatchFunctionCount<char>;
+            var zeroOrMore = table.FindRule("zero_or_more_rule") as MatchCount<char>;
             IsNotNull(zeroOrMore);
             IsTrue(zeroOrMore.Min == 0);
             IsTrue(zeroOrMore.Max == 0);
-            IsTrue(zeroOrMore.Function == table.FindRule("zero_or_more_rule of Literal"));
+            IsTrue(zeroOrMore.Rule == table.FindRule("zero_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -190,11 +190,11 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("one_or_more_rule = +'bar';");
 
-            var oneOrMore = table.FindRule("one_or_more_rule") as MatchFunctionCount<char>;
+            var oneOrMore = table.FindRule("one_or_more_rule") as MatchCount<char>;
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 1);
             IsTrue(oneOrMore.Max == 0);
-            IsTrue(oneOrMore.Function == table.FindRule("one_or_more_rule of Literal"));
+            IsTrue(oneOrMore.Rule == table.FindRule("one_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -202,11 +202,11 @@ namespace gg.parse.script.tests.integration
         {
             var table = Compile("zero_or_one_rule = ?'bar';");
 
-            var oneOrMore = table.FindRule("zero_or_one_rule") as MatchFunctionCount<char>;
+            var oneOrMore = table.FindRule("zero_or_one_rule") as MatchCount<char>;
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 0);
             IsTrue(oneOrMore.Max == 1);
-            IsTrue(oneOrMore.Function == table.FindRule("zero_or_one_rule of Literal"));
+            IsTrue(oneOrMore.Rule == table.FindRule("zero_or_one_rule of Literal"));
         }
 
         [TestMethod]
@@ -219,7 +219,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(error.Text == "msg");
             IsTrue(error.Level == LogLevel.Error);
             IsTrue(error.Condition == table.FindRule("error_rule condition: Not"));
-            var matchFunction = error.Condition as MatchNotFunction<char>;
+            var matchFunction = error.Condition as MatchNot<char>;
             IsNotNull(matchFunction);
             IsTrue(matchFunction.Rule == table.FindRule("error_rule condition: Not, type: Not(Literal)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);

@@ -1,32 +1,31 @@
 ﻿namespace gg.parse.rules
 {
-    public class MatchFunctionSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
+    public class MatchRuleSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {
-        private RuleBase<T>[] _sequence;
+        private RuleBase<T>[] _rules;
 
-        public RuleBase<T>[] SequenceSubfunctions
+        public RuleBase<T>[] SequenceRules
         {
-            get => _sequence;
+            get => _rules;
             set
             {
                 Assertions.Requires(value != null);
                 Assertions.Requires(value!.Any( v => v != null));
 
-                _sequence = value!;
+                _rules = value!;
             }
         }
 
+        public IEnumerable<RuleBase<T>> Rules => SequenceRules;
 
-        public IEnumerable<RuleBase<T>> Rules => SequenceSubfunctions;
-
-        public MatchFunctionSequence(
+        public MatchRuleSequence(
             string name, 
             IRule.Output production = IRule.Output.Self, 
             int precedence = 0,
             params RuleBase<T>[] sequence
         ) : base(name, production, precedence) 
         {
-            SequenceSubfunctions = sequence;
+            SequenceRules = sequence;
         }
 
         public override ParseResult Parse(T[] input, int start)
@@ -34,9 +33,9 @@
             var index = start;
             List<Annotation>? children = null;
 
-            foreach (var function in SequenceSubfunctions)
+            foreach (var rule in SequenceRules)
             {
-                var result = function.Parse(input, index);
+                var result = rule.Parse(input, index);
                 
                 if (!result.FoundMatch)
                 {
@@ -53,7 +52,7 @@
                 index += result.MatchedLength;
             }
 
-            return BuildFunctionRuleResult(new Range(start, index - start), children);
+            return BuildResult(new Range(start, index - start), children);
         }
     }
 }

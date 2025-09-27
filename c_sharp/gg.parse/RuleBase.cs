@@ -15,7 +15,9 @@
 
         public IRule.Output Production { get; init; } = production;
 
+        
         public abstract ParseResult Parse(T[] input, int start);
+
 
         public override string ToString() => $"{Production} {Name}({Id})";
 
@@ -36,7 +38,7 @@
             };
         }
 
-        public ParseResult BuildFunctionRuleResult(Range dataRange, List<Annotation>? children = null)
+        public ParseResult BuildResult(Range dataRange, List<Annotation>? children = null)
         {
             return Production switch
             {

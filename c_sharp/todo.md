@@ -2,7 +2,6 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
-  - Remove "Function" notion in favor of Rule in names across the project
   - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
   - document match evaluation

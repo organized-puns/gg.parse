@@ -56,13 +56,13 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchDataSet<T>(ruleName, product, set)));
 
-        public IfMatchRule<T> IfMatch(RuleBase<T> condition) =>
+        public MatchCondition<T> IfMatch(RuleBase<T> condition) =>
             IfMatch(null, condition);
 
-        public IfMatchRule<T> IfMatch(string? name, RuleBase<T> condition) =>
+        public MatchCondition<T> IfMatch(string? name, RuleBase<T> condition) =>
             FindOrRegister(name, $"{CommonTokenNames.If}({condition.Name})",
                         (ruleName, product) => RegisterRule(
-                            new IfMatchRule<T>(ruleName, product, condition)));
+                            new MatchCondition<T>(ruleName, product, condition)));
         
         public MatchDataSequence<T> Literal(T[] sequence) =>
             Literal(null, sequence);
@@ -72,28 +72,28 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchDataSequence<T>(ruleName, sequence, product)));
 
-        public MatchNotFunction<T> Not(string? name, RuleBase<T> rule) =>
+        public MatchNot<T> Not(string? name, RuleBase<T> rule) =>
             FindOrRegister(name, $"{CommonTokenNames.Literal}({rule.Name})",
                         (ruleName, product) => RegisterRule(
-                            new MatchNotFunction<T>(ruleName, product, rule)));
+                            new MatchNot<T>(ruleName, product, rule)));
 
-        public MatchNotFunction<T> Not(RuleBase<T> rule) =>
+        public MatchNot<T> Not(RuleBase<T> rule) =>
             Not(null, rule);
 
-        public MatchOneOfFunction<T> OneOf(string? name, params RuleBase<T>[] rules) =>
+        public MatchOneOf<T> OneOf(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.OneOf}({string.Join(", ", rules.Select(r => r.Name))})",
                         (ruleName, product) => RegisterRule(
-                            new MatchOneOfFunction<T>(ruleName, product, 0, rules)));
+                            new MatchOneOf<T>(ruleName, product, 0, rules)));
 
-        public MatchOneOfFunction<T> OneOf(params RuleBase<T>[] rules) =>
+        public MatchOneOf<T> OneOf(params RuleBase<T>[] rules) =>
             OneOf(null, rules);
 
-        public MatchFunctionSequence<T> Sequence(string? name, params RuleBase<T>[] rules) =>
+        public MatchRuleSequence<T> Sequence(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.FunctionSequence}({string.Join(", ", rules.Select(r => r.Name))})",
                         (ruleName, product) => RegisterRule(
-                            new MatchFunctionSequence<T>(ruleName, product, 0, rules)));
+                            new MatchRuleSequence<T>(ruleName, product, 0, rules)));
 
-        public MatchFunctionSequence<T> Sequence(params RuleBase<T>[] rules) =>
+        public MatchRuleSequence<T> Sequence(params RuleBase<T>[] rules) =>
             Sequence(null, rules);
 
         public MatchSingleData<T> MatchSingle(T data) =>
@@ -117,26 +117,26 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new LogRule<T>(ruleName, product, message, condition, LogLevel.Warning)));
 
-        public MatchFunctionCount<T> ZeroOrOne(string? name, RuleBase<T> rule) =>
+        public MatchCount<T> ZeroOrOne(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrOne}({rule.Name})",
                 (ruleName, product) => RegisterRule(
-                    new MatchFunctionCount<T>(ruleName, rule, product, 0, 1)
+                    new MatchCount<T>(ruleName, rule, product, 0, 1)
                 )
             );
 
-        public MatchFunctionCount<T> ZeroOrOne(RuleBase<T> rule) =>
+        public MatchCount<T> ZeroOrOne(RuleBase<T> rule) =>
             ZeroOrOne(null, rule);
 
-        public MatchFunctionCount<T> ZeroOrMore(string? name, RuleBase<T> rule) =>
+        public MatchCount<T> ZeroOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrMore}({rule.Name})",
                 (ruleName, product) => RegisterRule(
-                    new MatchFunctionCount<T>(ruleName, rule, product, 0, 0)
+                    new MatchCount<T>(ruleName, rule, product, 0, 0)
                 )
             );
 
-        public MatchFunctionCount<T> ZeroOrMore(RuleBase<T> rule) =>
+        public MatchCount<T> ZeroOrMore(RuleBase<T> rule) =>
             ZeroOrMore(null, rule);
     }
 }
