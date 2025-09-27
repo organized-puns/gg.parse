@@ -2,7 +2,7 @@
 
 using gg.parse.script;
 
-namespace gg.parse.instances.calculator
+namespace gg.parse.calculator
 {
     public delegate double CalculatorFunction(string text, Annotation node, List<Annotation> tokens);
 

@@ -1,7 +1,5 @@
-﻿using gg.parse.instances.calculator;
-using gg.parse.rules;
-using gg.parse.script.common;
-using gg.parse.script.parser;
+﻿using gg.parse.rules;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.calculator.tests

@@ -24,7 +24,7 @@ missing_operator_err = error "operator expected between two numbers." if number,
 #mult_options	     = multiplication | multiplication_err;
 
 multiplication 100   = term, mult, term;
-multiplication_err   = error "expecting term after *." if (term, mult, !term);
+multiplication_err   = error "expecting term after *." if (term, mult, !term) | (mult, !term);
 
 
 #division_options    = division | division_err;

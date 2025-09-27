@@ -1,4 +1,7 @@
-﻿using gg.parse.instances.calculator;
+﻿using System.Globalization;
+
+using gg.parse.rules;
+using gg.parse.script.parser;
 
 namespace gg.parse.calculator
 {
@@ -6,13 +9,35 @@ namespace gg.parse.calculator
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("gg.parse.calculator\n");
+            // write a welcome message
+            Console.WriteLine("Welcome to the gg.parse.calculator example.");
+            Console.WriteLine("Type 'exit' or 'x' to quit, or enter a simple equation like 1+2.\n");
 
+            // load the tokenizer and grammar from file
             var interpreter = new CalculatorInterpreter(
                 File.ReadAllText("assets/calculator.tokens"),
                 File.ReadAllText("assets/calculator.grammar")
             );
 
+            // set up a logger to handle errors and warnings
+            var logger = new ScriptLogger()
+            {
+                Out = (level, message) =>
+                {
+                    if (level == LogLevel.Warning)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                    }
+                    else if (level == LogLevel.Error)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    Console.WriteLine($"{level}: {message}");
+                    Console.ResetColor();
+                }
+            };
+
+            // loop until the user wants to exit
             while (true) 
             {
                 try
@@ -23,21 +48,31 @@ namespace gg.parse.calculator
 
                     if (!string.IsNullOrEmpty(input))
                     {
-                        if (input == "x" || input == "exit" || input == "quit" || input == "q")
+                        if (IsExitCommand(input)) 
                         {
                             break;
                         }
 
-                        Console.WriteLine(interpreter.Interpret(input));
+                        Console.WriteLine(
+                            interpreter
+                                .Interpret(input)
+                                .ToString(CultureInfo.InvariantCulture)
+                        );
                     }
 
                 }
+                catch (ParseException e)
+                {
+                    logger.ProcessException(e, logException: false);
+                }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine("unexpected exception occured... " + e);
                 }
-            }
-            
+            }         
         }
+
+        private static bool IsExitCommand(string input) =>
+            input == "x" || input == "exit" || input == "quit" || input == "q";
     }
 }

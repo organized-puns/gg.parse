@@ -18,6 +18,12 @@ namespace gg.parse.calculator.tests
                 // so anything after the first expression is ignored.
                 // So this expression is valid (')' after '3' is ignored):
                 //"1 + 2 * 3)",
+
+                "3 * 3 * ",
+                "1.0 + -2.0 * ",
+                "1.0 + -2.5 - ",
+
+
                 "1 # 2",
                 "1 ** 2",
                 
@@ -48,7 +54,6 @@ namespace gg.parse.calculator.tests
 
                 "1 2",
                 ")1+ 2)",
-                
             ];
 
             foreach (var input in invalidInputs)

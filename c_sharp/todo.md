@@ -2,7 +2,6 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
-  - Fix calculator interpreter not raising errors when it should
   - Remove "Function" notion in favor of Rule in names across the project
   - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
@@ -20,12 +19,12 @@ alpha (featured complete, buggy, ugly mess)
 
 - Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
 
-- build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
+- transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
 - add optional namespaces to avoid grammar / token name clash 
 - Implement a function console
 
-- add BuildMatcher() class (add function to EbnfParser?) which takes a tokenizer rule term and will match a string and has
+- add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has
      all common tokens defined
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges

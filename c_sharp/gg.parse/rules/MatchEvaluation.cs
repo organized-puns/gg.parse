@@ -77,6 +77,18 @@ namespace gg.parse.rules
                     && (nextMatchResult = FindMatch(input, tokenIndex)).FoundMatch) 
                 {
                     var nextMatch = nextMatchResult.Annotations![0];
+
+                    // need to take in account that we've encountered an error in the remainder
+                    if (nextMatch.Rule is LogRule<T> logRule)
+                    {
+                        if (logRule.Level == LogLevel.Error)
+                        {
+                            return BuildFunctionRuleResult(new Range(start, tokenIndex - start), [nextMatch]);
+                        }
+                        // else this is unexpected but we should assume the user knows what they are doing
+                        // (until there's reason to believe otherwise)
+                    }
+
                     var nextPrecedence = nextMatch.Rule.Precedence;
 
                     tokensRead += nextMatchResult.MatchedLength - 1;
