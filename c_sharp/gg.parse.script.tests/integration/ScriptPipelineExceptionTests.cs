@@ -19,7 +19,7 @@ namespace gg.parse.script.tests.integration
             try
             {
                 // & and ^ are no valid tokens, so this should raise an exception
-                parser.InitializeFromDefinition("& foo ^");
+                parser.From("& foo ^");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -55,7 +55,7 @@ namespace gg.parse.script.tests.integration
             try
             {
                 // , is a valid token, just not a valid expression for the body
-                parser.InitializeFromDefinition(" foo=,;");
+                parser.From(" foo=,;");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -89,7 +89,7 @@ namespace gg.parse.script.tests.integration
             try
             {
                 // . is a valid token, just not a valid expression in the header
-                parser.InitializeFromDefinition(".foo='bar';");
+                parser.From(".foo='bar';");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -131,7 +131,7 @@ namespace gg.parse.script.tests.integration
             try
             {
                 // . is a valid token, just not a valid expression in the header
-                parser.InitializeFromDefinition("foo number ='bar';");
+                parser.From("foo number ='bar';");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -175,7 +175,7 @@ namespace gg.parse.script.tests.integration
                 // first rule has no terminating ;
                 // second rule is fine
                 // third rule has no assignment, =
-                parser.InitializeFromDefinition("rule1 = 'foo' rule2 = 'bar'; rule3 'qaz';");
+                parser.From("rule1 = 'foo' rule2 = 'bar'; rule3 'qaz';");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -212,7 +212,7 @@ namespace gg.parse.script.tests.integration
             {
                 // ^ and : are no valid tokens, so this should raise an exception
                 // while tokenizing the grammar
-                parser.InitializeFromDefinition("foo='string';", "^ bar=foo; :");
+                parser.From("foo='string';", "^ bar=foo; :");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -247,7 +247,7 @@ namespace gg.parse.script.tests.integration
 
             try
             {
-                parser.InitializeFromDefinition("foo='string';", "bar=foo");
+                parser.From("foo='string';", "bar=foo");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -281,7 +281,7 @@ namespace gg.parse.script.tests.integration
             try
             {
                 // missing ';' after 'bar=foo' and missing '=' after 'baz'
-                parser.InitializeFromDefinition("foo='string';", "bar=foo xxx=foo; baz foo;");
+                parser.From("foo='string';", "bar=foo xxx=foo; baz foo;");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
@@ -314,7 +314,7 @@ namespace gg.parse.script.tests.integration
         public void SetupRuleWithFatalWithCondition_CreateParserAndParseRule_ExpectException()
         {
             var parser = new RuleGraphBuilder()
-                .InitializeFromDefinition("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
+                .From("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
 
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");
@@ -325,7 +325,7 @@ namespace gg.parse.script.tests.integration
         public void SetupRuleWithFatalWithoutCondition_CreateParserAndParseRule_ExpectException()
         {
             var parser = new RuleGraphBuilder()
-                .InitializeFromDefinition("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
+                .From("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
 
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");
@@ -341,7 +341,7 @@ namespace gg.parse.script.tests.integration
                 // first rule has no term after !;
                 // second rule is fine
                 // third rule has a ? and then nothing
-                parser.InitializeFromDefinition("rule1 = !; rule2 = 'bar'; rule3=?");
+                parser.From("rule1 = !; rule2 = 'bar'; rule3=?");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)

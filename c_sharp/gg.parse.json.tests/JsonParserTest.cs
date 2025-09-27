@@ -17,7 +17,7 @@ namespace gg.parse.tests.examples
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
             var jsonParser = new RuleGraphBuilder()
-                            .InitializeFromDefinition(tokenizerSpec, grammarSpec);
+                            .From(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.Tokenizer;
 
@@ -45,7 +45,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().From(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.Tokenizer;
 
@@ -80,7 +80,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().From(tokenizerSpec, grammarSpec);
 
             var generatedTokenizer = jsonParser.Tokenizer;
          
@@ -107,7 +107,7 @@ namespace gg.parse.tests.examples
             var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
             var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
 
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            var jsonParser = new RuleGraphBuilder().From(tokenizerSpec, grammarSpec);
 
             var tokenizer = jsonParser.Tokenizer;
             var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
@@ -130,7 +130,7 @@ namespace gg.parse.tests.examples
             var result = parser.Parse(tokens);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.MatchedLength == tokens.Count);
+            Assert.IsTrue(result.MatchLength == tokens.Count);
 
             var keyIntValue = "{\"key\": 123}";
 

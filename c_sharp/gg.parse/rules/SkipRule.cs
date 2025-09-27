@@ -47,9 +47,9 @@ namespace gg.parse.rules
             {
                 var conditionalResult = StopCondition.Parse(input, idx);
 
-                if (conditionalResult.FoundMatch)
+                if (conditionalResult)
                 {
-                    return BuildDataRuleResult(new(start, idx - start));
+                    return BuildResult(new(start, idx - start));
                 }
 
                 idx++;

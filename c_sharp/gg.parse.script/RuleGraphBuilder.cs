@@ -16,7 +16,7 @@ namespace gg.parse.script
 
         public PipelineSession<int>? GrammarSession { get; private set; }
 
-        public RuleGraphBuilder InitializeFromDefinition(string tokenDefinition, string? grammarDefinition = null, ScriptLogger? logger = null)
+        public RuleGraphBuilder From(string tokenDefinition, string? grammarDefinition = null, ScriptLogger? logger = null)
         {
             LogHandler = logger ?? new ScriptLogger();
 

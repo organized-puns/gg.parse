@@ -38,7 +38,7 @@ namespace gg.parse.calculator
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
             _builder = new RuleGraphBuilder();            
-            _builder.InitializeFromDefinition(tokenizerSpec, grammarSpec);
+            _builder.From(tokenizerSpec, grammarSpec);
 
             _functionLookup = CreateFunctionLookup(_builder.Parser!);
         }
@@ -47,7 +47,7 @@ namespace gg.parse.calculator
         {
             var (tokensResult, treeResult) = _builder.Parse(text);
 
-            if (tokensResult.FoundMatch && treeResult.FoundMatch)
+            if (tokensResult && treeResult)
             {
                 return Interpret(text, treeResult!.Annotations![0], tokensResult!.Annotations!);
             }

@@ -36,7 +36,7 @@ namespace gg.parse.tests.rulefunctions
             var result = evalRule.Parse([1, 2, 1], 0);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.MatchedLength == 3);
+            Assert.IsTrue(result.MatchLength == 3);
             Assert.IsTrue(result.Annotations[0].Rule == evalRule);
             Assert.IsTrue(result.Annotations[0].Children[0].Rule == addFunction);
         }
@@ -81,7 +81,7 @@ namespace gg.parse.tests.rulefunctions
             var result = evalRule.Parse([1, 2, 1, 2, 1], 0);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.MatchedLength == 5);
+            Assert.IsTrue(result.MatchLength == 5);
             Assert.IsTrue(result.Annotations[0].Rule == evalRule);
 
             var addRoot = result.Annotations[0].Children[0];
@@ -166,7 +166,7 @@ namespace gg.parse.tests.rulefunctions
             var result = evalRule.Parse([1, 2, 1, 3, 1], 0);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.MatchedLength == 5);
+            Assert.IsTrue(result.MatchLength == 5);
             Assert.IsTrue(result.Annotations[0].Rule == evalRule);
 
             var addRoot = result.Annotations[0].Children[0];
@@ -250,7 +250,7 @@ namespace gg.parse.tests.rulefunctions
             var result = evalRule.Parse([1, 3, 1, 2, 1], 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == 5);
+            IsTrue(result.MatchLength == 5);
             IsTrue(result.Annotations[0].Rule == evalRule);
 
             var addRoot = result.Annotations[0].Children[0];

@@ -26,18 +26,19 @@
             while (index < input.Length && (Max <= 0 || count < Max))
             {
                 var result = Rule.Parse(input, index);
-                if (!result.FoundMatch)
+                
+                if (!result)
                 {
                     break;
                 }
         
-                if (result.MatchedLength == 0 && Max <= 0)
+                if (result.MatchLength == 0 && Max <= 0)
                 {
                     throw new InvalidProgramException($"Rule {Name} detected an infinite loop with its subrule {Rule.Name}.");
                 }
 
                 count++;
-                index += result.MatchedLength;
+                index += result.MatchLength;
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
                     (Production == IRule.Output.Self || Production == IRule.Output.Children))

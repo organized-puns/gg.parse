@@ -14,7 +14,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateParse_ParseValidStrings_ExpectNoErrors()
         {
-            var parser = new RuleGraphBuilder().InitializeFromDefinition(StringTokenizationText);
+            var parser = new RuleGraphBuilder().From(StringTokenizationText);
             var stringRule = parser.Tokenizer.FindRule("string");
 
             var validStrings = new string[]
@@ -45,7 +45,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void InvalidEOFTerminatedString_Parse_ExpectErrors()
         {
-            var parser = new RuleGraphBuilder().InitializeFromDefinition(StringTokenizationText);
+            var parser = new RuleGraphBuilder().From(StringTokenizationText);
             var errEOF = parser.Tokenizer.FindRule("err_string_eof");
 
             var invalidStrings = new string[]
@@ -75,7 +75,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void InvalidEOLNTerminatedString_Parse_ExpectErrors()
         {
-            var parser = new RuleGraphBuilder().InitializeFromDefinition(StringTokenizationText);
+            var parser = new RuleGraphBuilder().From(StringTokenizationText);
             var errEOLN = parser.Tokenizer.FindRule("log_err_string_eoln");
 
             var testConfigurations = new (string input, int expectedPosition, int expectedLength) []
@@ -106,7 +106,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void MixOfValidAndInvalidStrings_Parse_ExpectFunctionIdsMatchExpectations()
         {
-            var parser = new RuleGraphBuilder().InitializeFromDefinition(StringTokenizationText);
+            var parser = new RuleGraphBuilder().From(StringTokenizationText);
             var stringRule = parser.Tokenizer.FindRule("string");
             var errEOLN = parser.Tokenizer.FindRule("log_err_string_eoln");
             var errEOF = parser.Tokenizer.FindRule("err_string_eof");

@@ -76,14 +76,14 @@ namespace gg.parse.rules
             {
                 var conditionalResult = Condition.Parse(input, start);
 
-                if (conditionalResult.FoundMatch)
+                if (conditionalResult)
                 {
                     if (Level == LogLevel.Fatal)
                     {
                         throw new FatalConditionException<T>(this);
                     }
 
-                    return BuildDataRuleResult(new(start, conditionalResult.MatchedLength));
+                    return BuildDataRuleResult(new(start, conditionalResult.MatchLength));
                 }
 
                 return ParseResult.Failure;

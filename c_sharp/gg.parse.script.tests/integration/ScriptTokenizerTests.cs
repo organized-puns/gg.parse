@@ -17,7 +17,7 @@ namespace gg.parse.script.tests.integration
             var result = tokenizer.Root!.Parse(testText);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == testText.Length);
+            IsTrue(result.MatchLength == testText.Length);
 
             var expectedNames = new string[]
             {
@@ -43,7 +43,7 @@ namespace gg.parse.script.tests.integration
             var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == testText.Length);
+            IsTrue(result.MatchLength == testText.Length);
 
             var expectedNames = new string[]
             {
@@ -65,7 +65,7 @@ namespace gg.parse.script.tests.integration
             var result = tokenizer.Root!.Parse(testText.ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == testText.Length);
+            IsTrue(result.MatchLength == testText.Length);
 
             var expectedNames = new string[]
             {
@@ -88,7 +88,7 @@ namespace gg.parse.script.tests.integration
             var result = tokenizer.Root!.Parse(testText);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == testText.Length);
+            IsTrue(result.MatchLength == testText.Length);
 
             var expectedNames = new string[]
             {

@@ -22,7 +22,7 @@ namespace gg.parse.tests.rulefunctions
             var result = rule.Parse(input, 0);
             
             IsTrue(result.FoundMatch);
-            AreEqual(3, result.MatchedLength);
+            AreEqual(3, result.MatchLength);
             IsTrue(result.Annotations.Count == 1);
             IsTrue(result.Annotations[0].Rule == rule);
             IsTrue(result.Annotations[0].Children!.Count == 1);
@@ -41,7 +41,7 @@ namespace gg.parse.tests.rulefunctions
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             IsTrue(result.FoundMatch);
-            AreEqual(6, result.MatchedLength);
+            AreEqual(6, result.MatchLength);
             IsTrue(result.Annotations!.Count == 1);
             IsTrue(result.Annotations![0].Range.Start == 0);
             IsTrue(result.Annotations![0].Range.End == 6);
@@ -67,7 +67,7 @@ namespace gg.parse.tests.rulefunctions
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             IsTrue(result.FoundMatch);
-            AreEqual(6, result.MatchedLength);
+            AreEqual(6, result.MatchLength);
             IsTrue(result.Annotations.Count == 2);
             IsTrue(result.Annotations[0].Range.Start == 0);
             IsTrue(result.Annotations[0].Range.End == 3);
@@ -91,7 +91,7 @@ namespace gg.parse.tests.rulefunctions
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             IsTrue(result.FoundMatch);
-            AreEqual(6, result.MatchedLength);
+            AreEqual(6, result.MatchLength);
             IsTrue(result.Annotations == null);
         }
 
@@ -104,22 +104,22 @@ namespace gg.parse.tests.rulefunctions
             var result = function.Parse("foo".ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == 3);
+            IsTrue(result.MatchLength == 3);
 
             result = function.Parse("foofoofoo".ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == 9);
+            IsTrue(result.MatchLength == 9);
 
             result = function.Parse("foobarfoo".ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == 3);
+            IsTrue(result.MatchLength == 3);
 
             result = function.Parse("bar".ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == 0);
+            IsTrue(result.MatchLength == 0);
         }
 
         [TestMethod]
@@ -133,7 +133,7 @@ namespace gg.parse.tests.rulefunctions
             var result = function2.Parse("foo".ToCharArray(), 0);
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.MatchedLength == 3);
+            IsTrue(result.MatchLength == 3);
 
             result = function2.Parse("bar".ToCharArray(), 0);
         }

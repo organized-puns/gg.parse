@@ -49,7 +49,7 @@
                     children.AddRange(result.Annotations);
                 }
 
-                index += result.MatchedLength;
+                index += result.MatchLength;
             }
 
             return BuildResult(new Range(start, index - start), children);

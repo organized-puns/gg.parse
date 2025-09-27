@@ -233,7 +233,7 @@ namespace gg.parse.script.tests.integration
             var errorParseResult = tokenizerParser.MatchUnexpectedProductInBodyError.Parse(tokenizeResult.Annotations.Select(a => a.Rule.Id).ToArray(), 0);
 
             IsTrue(errorParseResult.FoundMatch);
-            IsTrue(errorParseResult.MatchedLength == expectedTokenCount);
+            IsTrue(errorParseResult.MatchLength == expectedTokenCount);
             IsTrue(errorParseResult.Annotations != null
                     && errorParseResult.Annotations.Count == 1
                     && errorParseResult.Annotations[0].Children != null
