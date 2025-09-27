@@ -13,9 +13,9 @@ namespace gg.parse.script.compiler
     {
         public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
 
-        public (int functionId, AnnotationProduct product)[]? ProductLookup { get; set; }
+        public (int functionId, IRule.Output product)[]? ProductLookup { get; set; }
 
-        public RuleCompiler<T> WithAnnotationProductMapping((int functionId, AnnotationProduct product)[] productMapp)
+        public RuleCompiler<T> WithAnnotationProductMapping((int functionId, IRule.Output product)[] productMapp)
         {
             ProductLookup = productMapp;
             return this;
@@ -94,9 +94,9 @@ namespace gg.parse.script.compiler
             return resultGraph;
         }
 
-        public bool TryGetProduct(int functionId, out AnnotationProduct product)
+        public bool TryGetProduct(int functionId, out IRule.Output product)
         {
-            product = AnnotationProduct.Annotation;
+            product = IRule.Output.Self;
 
             if (ProductLookup != null)
             {

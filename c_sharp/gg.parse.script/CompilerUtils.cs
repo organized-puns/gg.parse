@@ -51,10 +51,10 @@ namespace gg.parse.script
         }
 
         // xxx needs to move out of compiler utils
-        public static (int functionId, AnnotationProduct product)[] CreateAnnotationProductMapping(this ScriptParser parser) =>
+        public static (int functionId, IRule.Output product)[] CreateAnnotationProductMapping(this ScriptParser parser) =>
             [
-                (parser.MatchTransitiveSelector.Id, AnnotationProduct.Transitive),
-                (parser.MatchNoProductSelector.Id, AnnotationProduct.None),
+                (parser.MatchTransitiveSelector.Id, IRule.Output.Children),
+                (parser.MatchNoProductSelector.Id, IRule.Output.Void),
             ];
     }
 }

@@ -116,7 +116,7 @@ namespace gg.parse.script.tests.integration
                 new MatchFunctionCount<char>(
                     "#string_list", 
                     parser.Tokenizer.Root, 
-                    production: AnnotationProduct.Transitive, 
+                    production: IRule.Output.Children, 
                     min: 1, 
                     max: 0
                 )

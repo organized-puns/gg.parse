@@ -219,9 +219,9 @@ namespace gg.parse.script.pipeline
             {
                 var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 
-                if (tokenFunction.Production == AnnotationProduct.Annotation)
+                if (tokenFunction.Production == IRule.Output.Self)
                 {
-                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, AnnotationProduct.Annotation));
+                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, IRule.Output.Self));
                 }
             }
 

@@ -21,7 +21,7 @@
 
         public MatchFunctionSequence(
             string name, 
-            AnnotationProduct production = AnnotationProduct.Annotation, 
+            IRule.Output production = IRule.Output.Self, 
             int precedence = 0,
             params RuleBase<T>[] sequence
         ) : base(name, production, precedence) 
@@ -44,7 +44,7 @@
                 }
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                   (Production == AnnotationProduct.Annotation || Production == AnnotationProduct.Transitive))
+                   (Production == IRule.Output.Self || Production == IRule.Output.Children))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

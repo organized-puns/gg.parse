@@ -54,21 +54,21 @@ namespace gg.parse.tests.examples
             // check json tokens as defined in the tokenizer spec (ie #json_tokens	= *valid_token;)
             var jsonTokensRule = generatedTokenizer.FindRule("json_tokens") as MatchFunctionCount<char>;
             Assert.IsNotNull(jsonTokensRule);
-            Assert.IsTrue(jsonTokensRule.Production == AnnotationProduct.Transitive);
+            Assert.IsTrue(jsonTokensRule.Production == IRule.Output.Children);
             Assert.IsTrue(jsonTokensRule.Min == 0);
             Assert.IsTrue(jsonTokensRule.Max == 0);
 
             var jsonTokensRuleFunction = jsonTokensRule.Function as RuleReference<char>;
 
             Assert.IsNotNull(jsonTokensRuleFunction);
-            Assert.IsTrue(jsonTokensRuleFunction.Production == AnnotationProduct.Transitive);
+            Assert.IsTrue(jsonTokensRuleFunction.Production == IRule.Output.Children);
             Assert.IsTrue(jsonTokensRuleFunction.DeferResultToReference);
 
             // check valid_token rule, ie #valid_token	= json_token | white_space | unknown_token;
             var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOfFunction<char>;
 
             Assert.IsNotNull(validTokenRule);
-            Assert.IsTrue(jsonTokensRule.Production == AnnotationProduct.Transitive);
+            Assert.IsTrue(jsonTokensRule.Production == IRule.Output.Children);
             Assert.IsTrue(validTokenRule.RuleOptions.Length == 3);
 
             Assert.IsTrue(jsonTokensRuleFunction.Rule == validTokenRule);
@@ -113,7 +113,7 @@ namespace gg.parse.tests.examples
             var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
 
             Assert.IsTrue(whiteSpaceRule != null);
-            Assert.IsTrue(whiteSpaceRule.Production == AnnotationProduct.None);
+            Assert.IsTrue(whiteSpaceRule.Production == IRule.Output.Void);
             Assert.IsTrue(whiteSpaceRule.MatchingValues.Length == 4);
             Assert.IsTrue(whiteSpaceRule.MatchingValues.SequenceEqual(" \t\r\n".ToArray()));
         }

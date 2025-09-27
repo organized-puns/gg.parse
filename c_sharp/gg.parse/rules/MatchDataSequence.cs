@@ -3,7 +3,7 @@
     public class MatchDataSequence<T>(
         string name, 
         T[] dataArray, 
-        AnnotationProduct production = AnnotationProduct.Annotation,
+        IRule.Output production = IRule.Output.Self,
         int precedence = 0
     )
         : RuleBase<T>(name, production, precedence)

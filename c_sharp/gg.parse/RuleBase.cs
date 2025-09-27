@@ -3,7 +3,7 @@
 
     public abstract class RuleBase<T>(
         string name, 
-        AnnotationProduct production = AnnotationProduct.Annotation, 
+        IRule.Output production = IRule.Output.Self, 
         int precedence = 0) 
         : IRule
     {
@@ -13,7 +13,7 @@
 
         public int Precedence { get; init; } = precedence;
 
-        public AnnotationProduct Production { get; init; } = production;
+        public IRule.Output Production { get; init; } = production;
 
         public abstract ParseResult Parse(T[] input, int start);
 
@@ -23,13 +23,13 @@
         {
             return Production switch
             {
-                AnnotationProduct.Annotation => 
+                IRule.Output.Self => 
                     new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
-                AnnotationProduct.Transitive => 
+                IRule.Output.Children => 
                     new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
-                AnnotationProduct.None => 
+                IRule.Output.Void => 
                     new ParseResult(true, dataRange.Length),
   
                 _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
@@ -40,12 +40,12 @@
         {
             return Production switch
             {
-                AnnotationProduct.Annotation => new ParseResult(true, dataRange.Length,
+                IRule.Output.Self => new ParseResult(true, dataRange.Length,
                                         [new Annotation(this, dataRange, children)]),
 
-                AnnotationProduct.Transitive => new ParseResult(true, dataRange.Length, children),
+                IRule.Output.Children => new ParseResult(true, dataRange.Length, children),
 
-                AnnotationProduct.None => new ParseResult(true, dataRange.Length),
+                IRule.Output.Void => new ParseResult(true, dataRange.Length),
 
                 _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
             };

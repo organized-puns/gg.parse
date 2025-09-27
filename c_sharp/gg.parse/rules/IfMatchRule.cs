@@ -8,7 +8,7 @@
 
         public IfMatchRule(
             string name, 
-            AnnotationProduct production, 
+            IRule.Output production, 
             RuleBase<T> rule, 
             int precedence = 0
         ) : base(name, production, precedence)
@@ -19,7 +19,7 @@
         }
 
         public IfMatchRule(string name, RuleBase<T> rule)
-            : base(name, AnnotationProduct.Annotation)
+            : base(name, IRule.Output.Self)
         {
             Assertions.RequiresNotNull(rule);
 

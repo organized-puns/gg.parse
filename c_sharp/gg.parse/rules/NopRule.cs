@@ -11,7 +11,7 @@ namespace gg.parse.rules
     {
 
         public NopRule(string name) 
-            : base(name, AnnotationProduct.None)
+            : base(name, IRule.Output.Void)
         {
         }
 
