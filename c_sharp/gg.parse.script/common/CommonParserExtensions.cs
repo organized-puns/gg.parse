@@ -18,7 +18,7 @@ namespace gg.parse.script.common
         {
             if (!string.IsNullOrEmpty(text))
             {
-                var tokenizeResult = tokenizer.TokenizeText(text);
+                var tokenizeResult = tokenizer.TokenizeText(text, failOnWarning, throwExceptionOnTokenizeErrors);
 
                 if (tokenizeResult.FoundMatch)
                 {
@@ -53,7 +53,12 @@ namespace gg.parse.script.common
                 if (throwExceptionOnErrors
                     && tokenizationResult.Annotations.ContainsErrors<char>(failOnWarning, out var tokenizerErrors))
                 {
-                    throw new TokenizeException(
+                    /*throw new TokenizeException(
+                        "input contains characters which could not be mapped to a token.",
+                        tokenizerErrors,
+                        text
+                    );*/
+                    throw new ParseException(
                         "input contains characters which could not be mapped to a token.",
                         tokenizerErrors,
                         text

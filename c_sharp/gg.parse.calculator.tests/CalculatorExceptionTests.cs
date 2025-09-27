@@ -58,9 +58,6 @@ namespace gg.parse.calculator.tests
                     var output = parser.Parse(input);
                     Fail($"Expected exception for input: {input}, but got output: {output}");
                 }
-                catch (TokenizeException)
-                {
-                }
                 catch (ParseException)
                 {
                 }

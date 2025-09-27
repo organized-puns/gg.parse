@@ -91,27 +91,20 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public void ProcessException(TokenizeException exception)
+        public void ProcessException(ParseException exception)
         {
             Log(LogLevel.Fatal, $"Exception: {exception}");
 
             if (exception.Errors != null && exception.Text != null)
             {
-                ProcessTokenAnnotations(exception.Text, exception.Errors);
-            }
-            else
-            {
-                Log(LogLevel.Fatal, "No further details on the underlying error.");
-            }
-        }
-
-        public void ProcessException(ParseException exception)
-        {
-            Log(LogLevel.Fatal, $"Exception: {exception}");
-
-            if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
-            {
-                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+                if (exception.Tokens == null)
+                {
+                    ProcessTokenAnnotations(exception.Text, exception.Errors);
+                }
+                else
+                {
+                    ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+                }
             }
             else
             {

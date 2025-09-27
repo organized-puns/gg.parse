@@ -24,7 +24,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as TokenizeException;
+                var e = pipelineException.InnerException as ParseException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
@@ -217,7 +217,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as TokenizeException;
+                var e = pipelineException.InnerException as ParseException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
