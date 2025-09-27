@@ -5,7 +5,7 @@ namespace gg.parse.script.parser
 {
     public class ScriptParser : CommonParser
     {
-        public MatchOneOfFunction<int> MatchLiteral { get; private set; }
+        public MatchOneOf<int> MatchLiteral { get; private set; }
 
         public MatchSingleData<int> MatchAnyToken { get; private set; }
 
@@ -13,49 +13,49 @@ namespace gg.parse.script.parser
 
         public MatchSingleData<int> MatchNoProductSelector { get; private set; }
 
-        public MatchFunctionSequence<int> MatchRule { get; private set; }
+        public MatchRuleSequence<int> MatchRule { get; private set; }
 
         public MatchSingleData<int> MatchRuleName { get; private set; }
 
         public MatchSingleData<int> MatchPrecedence { get; private set; }
 
-        public MatchFunctionSequence<int> MatchIdentifier { get; private set; }
+        public MatchRuleSequence<int> MatchIdentifier { get; private set; }
 
-        public MatchFunctionSequence<int> MatchSequence { get; private set; }
+        public MatchRuleSequence<int> MatchSequence { get; private set; }
 
-        public MatchFunctionSequence<int> MatchOption { get; private set; }
+        public MatchRuleSequence<int> MatchOption { get; private set; }
 
-        public MatchFunctionSequence<int> MatchEval { get; private set; }
+        public MatchRuleSequence<int> MatchEval { get; private set; }
 
-        public MatchFunctionSequence<int> MatchCharacterSet { get; private set; }
+        public MatchRuleSequence<int> MatchCharacterSet { get; private set; }
 
-        public MatchFunctionSequence<int> MatchCharacterRange { get; private set; }
+        public MatchRuleSequence<int> MatchCharacterRange { get; private set; }
 
-        public MatchFunctionSequence<int> MatchGroup { get; private set; }
+        public MatchRuleSequence<int> MatchGroup { get; private set; }
 
-        public MatchFunctionSequence<int> MatchZeroOrMoreOperator { get; private set; }
+        public MatchRuleSequence<int> MatchZeroOrMoreOperator { get; private set; }
 
-        public MatchFunctionSequence<int> MatchZeroOrOneOperator { get; private set; }
+        public MatchRuleSequence<int> MatchZeroOrOneOperator { get; private set; }
 
-        public MatchFunctionSequence<int> MatchOneOrMoreOperator { get; private set; }
+        public MatchRuleSequence<int> MatchOneOrMoreOperator { get; private set; }
 
-        public MatchFunctionSequence<int> MatchNotOperator { get; private set; }
+        public MatchRuleSequence<int> MatchNotOperator { get; private set; }
 
-        public MatchFunctionSequence<int> IfMatchOperator { get; private set; }
+        public MatchRuleSequence<int> IfMatchOperator { get; private set; }
 
-        public MatchFunctionSequence<int> MatchSkipOperator { get; private set; }
+        public MatchRuleSequence<int> MatchSkipOperator { get; private set; }
 
-        public MatchFunctionSequence<int> MatchFindOperator { get; private set; }
+        public MatchRuleSequence<int> MatchFindOperator { get; private set; }
 
-        public MatchOneOfFunction<int> MatchRuleBody { get; private set; }
+        public MatchOneOf<int> MatchRuleBody { get; private set; }
 
-        public MatchFunctionSequence<int> MatchRuleHeader{ get; private set; }
+        public MatchRuleSequence<int> MatchRuleHeader{ get; private set; }
 
-        public MatchFunctionSequence<int> MatchLog { get; private set; }
+        public MatchRuleSequence<int> MatchLog { get; private set; }
 
-        public MatchFunctionSequence<int> Include { get; private set; }
+        public MatchRuleSequence<int> Include { get; private set; }
 
-        public MatchFunctionSequence<int> MatchUnexpectedProductInBodyError { get; private set; }
+        public MatchRuleSequence<int> MatchUnexpectedProductInBodyError { get; private set; }
 
         public LogRule<int> UnexpectedProductInBodyError { get; private set; }
 
@@ -124,7 +124,7 @@ namespace gg.parse.script.parser
             Root = ZeroOrMore("#root", OneOf("#statement", validStatement, UnknownInputError));
         }
 
-        private MatchFunctionSequence<int> RegisterRuleHeader()
+        private MatchRuleSequence<int> RegisterRuleHeader()
         {
             MatchRuleName = MatchSingle("ruleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
             MatchPrecedence = MatchSingle("rulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
@@ -155,7 +155,7 @@ namespace gg.parse.script.parser
             );
         }
 
-        private MatchOneOfFunction<int> RegisterRuleBody()
+        private MatchOneOf<int> RegisterRuleBody()
         {
             var dataMatchers = RegisterDataMatchers();
             var unaryTerms = OneOf("#unaryTerms", dataMatchers);
@@ -185,7 +185,7 @@ namespace gg.parse.script.parser
             return ruleBody;
         }
 
-        private MatchFunctionSequence<int> RegisterRule(RuleBase<int> ruleHeader, RuleBase<int> ruleBody)
+        private MatchRuleSequence<int> RegisterRule(RuleBase<int> ruleHeader, RuleBase<int> ruleBody)
         {
             RuleBodyError = Error(
                 "RuleBodyError",
@@ -226,7 +226,7 @@ namespace gg.parse.script.parser
             return MatchRule;
         }
 
-        private MatchOneOfFunction<int> RegisterRuleBodyErrorHandlers(RuleBase<int>[] recoveryRules)
+        private MatchOneOf<int> RegisterRuleBodyErrorHandlers(RuleBase<int>[] recoveryRules)
         {
             // A stray production modifier found, production modifier can only appear in front of references
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
@@ -297,7 +297,7 @@ namespace gg.parse.script.parser
             ];
         }
 
-        private RuleBase<int>[] RegisterUnaryOperators(MatchOneOfFunction<int> unaryTerms)
+        private RuleBase<int>[] RegisterUnaryOperators(MatchOneOf<int> unaryTerms)
         {
             MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
 
@@ -382,7 +382,7 @@ namespace gg.parse.script.parser
             MatchNoProductSelector = Token(CommonTokenNames.NoProductSelector, CommonTokenNames.NoProductSelector);
         }
 
-        private RuleBase<int>[] RegisterBinaryOperators(MatchOneOfFunction<int> unaryTerms)
+        private RuleBase<int>[] RegisterBinaryOperators(MatchOneOf<int> unaryTerms)
         {
             // mainSequence contains both the match and error handling
             (var mainSequence, MatchSequence) = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryTerms);
@@ -408,8 +408,8 @@ namespace gg.parse.script.parser
         /// <param name="ruleTerms">A function which can match the rule terms </param>
         /// <returns>A tuple which contains the main function, ie the function which holds all
         /// success and error conditions and matchOperationFunction which holds the success condition</returns>
-        private (MatchOneOfFunction<int> mainFunction, MatchFunctionSequence<int> matchOperationFunction)
-            CreateBinaryOperator(string name, string operatorTokenName, MatchOneOfFunction<int> ruleTerms)
+        private (MatchOneOf<int> mainFunction, MatchRuleSequence<int> matchOperationFunction)
+            CreateBinaryOperator(string name, string operatorTokenName, MatchOneOf<int> ruleTerms)
         {
             // end_of_operator = (eof | ruleEnd | endGroup)
 
@@ -504,7 +504,7 @@ namespace gg.parse.script.parser
             );
         }
 
-        private MatchFunctionSequence<int> CreateMatchLog(MatchOneOfFunction<int> condition)
+        private MatchRuleSequence<int> CreateMatchLog(MatchOneOf<int> condition)
         {
             var matchLogLevel = OneOf(
                 "LogLevel",
@@ -534,7 +534,7 @@ namespace gg.parse.script.parser
             );
         }
 
-        private MatchOneOfFunction<int> CreateMatchHeaderAnnotationProduction()
+        private MatchOneOf<int> CreateMatchHeaderAnnotationProduction()
         {
             InvalidProductInHeaderError = Error(
                 "InvalidProductInHeaderError",
@@ -556,7 +556,7 @@ namespace gg.parse.script.parser
         /// Annotation production matching for references in the rule's body
         /// </summary>
         /// <returns></returns>
-        private MatchFunctionCount<int> CreateMatchBodyAnnotationProduction()
+        private MatchCount<int> CreateMatchBodyAnnotationProduction()
         {
             return ZeroOrOne(
                 "#ruleBodyProduction", 

@@ -55,7 +55,7 @@ namespace gg.parse.script.parser
 
         // -- private methods -----------------------------------------------------------------------------------------
 
-        private MatchFunctionSequence<char> MatchScriptKeyword() =>
+        private MatchRuleSequence<char> MatchScriptKeyword() =>
             Sequence(
                     "#matchKeyword",
                     IfMatch(LowerCaseLetter()),
@@ -73,7 +73,7 @@ namespace gg.parse.script.parser
                     )
                 );
 
-        private MatchOneOfFunction<char> MatchScriptLiteral() =>
+        private MatchOneOf<char> MatchScriptLiteral() =>
             OneOf(
                 "#matchToken",
 

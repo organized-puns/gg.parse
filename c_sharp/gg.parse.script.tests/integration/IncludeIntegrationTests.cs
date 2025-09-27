@@ -157,7 +157,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(jsonParser.Parser.Root != null);
 
             // spot check to see if object is in the grammar rule graph
-            var objectRule = jsonParser.Parser.FindRule("object") as MatchFunctionSequence<int>;
+            var objectRule = jsonParser.Parser.FindRule("object") as MatchRuleSequence<int>;
             
             IsNotNull(objectRule);
             IsTrue(objectRule.Rules.Count() == 3);

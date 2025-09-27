@@ -1,12 +1,12 @@
 ﻿namespace gg.parse.rules
 {
-    public class IfMatchRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public class MatchCondition<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         public RuleBase<T> Rule { get; private set; }
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
-        public IfMatchRule(
+        public MatchCondition(
             string name, 
             IRule.Output production, 
             RuleBase<T> rule, 
@@ -18,7 +18,7 @@
             Rule = rule;
         }
 
-        public IfMatchRule(string name, RuleBase<T> rule)
+        public MatchCondition(string name, RuleBase<T> rule)
             : base(name, IRule.Output.Self)
         {
             Assertions.RequiresNotNull(rule);
@@ -32,7 +32,7 @@
 
             if (result.FoundMatch)
             {
-                return BuildFunctionRuleResult(new Range(start, 0), result.Annotations);
+                return BuildResult(new Range(start, 0), result.Annotations);
             }
 
             return ParseResult.Failure;

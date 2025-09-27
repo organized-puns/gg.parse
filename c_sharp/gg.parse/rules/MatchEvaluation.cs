@@ -56,7 +56,7 @@ namespace gg.parse.rules
                 if (parent.Children == null || parent.Children.Count < 3)
                 {                     
                     // unary operator / value, nothing more to evaluate
-                    return BuildFunctionRuleResult(parent.Range, [parent]);
+                    return BuildResult(parent.Range, [parent]);
                 }
 
                 var root = parent;
@@ -83,7 +83,7 @@ namespace gg.parse.rules
                     {
                         if (logRule.Level == LogLevel.Error)
                         {
-                            return BuildFunctionRuleResult(new Range(start, tokenIndex - start), [nextMatch]);
+                            return BuildResult(new Range(start, tokenIndex - start), [nextMatch]);
                         }
                         // else this is unexpected but we should assume the user knows what they are doing
                         // (until there's reason to believe otherwise)
@@ -142,7 +142,7 @@ namespace gg.parse.rules
                 // So set the range of the root according to the tokens read
                 root.Range = new Range(start, tokensRead);
 
-                return BuildFunctionRuleResult(root.Range, [root]);
+                return BuildResult(root.Range, [root]);
             }
 
             return ParseResult.Failure;

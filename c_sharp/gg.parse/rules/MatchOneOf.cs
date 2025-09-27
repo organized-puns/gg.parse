@@ -1,6 +1,6 @@
 ﻿namespace gg.parse.rules
 {
-    public class MatchOneOfFunction<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>[] _options;
 
@@ -18,13 +18,13 @@
 
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
-        public MatchOneOfFunction(string name, params RuleBase<T>[] options)
+        public MatchOneOf(string name, params RuleBase<T>[] options)
             : base(name, IRule.Output.Self)
         {
             RuleOptions = options;
         }
 
-        public MatchOneOfFunction(string name, IRule.Output production, int precedence = 0, params RuleBase<T>[] options)
+        public MatchOneOf(string name, IRule.Output production, int precedence = 0, params RuleBase<T>[] options)
             : base(name, production, precedence)
         {
             RuleOptions = options;
@@ -41,7 +41,7 @@
                             ? null 
                             : [..result.Annotations!];
 
-                    return BuildFunctionRuleResult(new(start, result.MatchedLength), children);
+                    return BuildResult(new(start, result.MatchedLength), children);
                 }
             }
             return ParseResult.Failure;

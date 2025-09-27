@@ -20,7 +20,7 @@ namespace gg.parse.calculator.tests
             var parser = calculator.Builder.Parser;
             
             // this is the compiled version of the grammar (script)
-            var expressionRule = parser.FindRule("expression") as MatchOneOfFunction<int>;
+            var expressionRule = parser.FindRule("expression") as MatchOneOf<int>;
 
             IsNotNull(expressionRule);
             IsTrue(expressionRule.Production == IRule.Output.Children);

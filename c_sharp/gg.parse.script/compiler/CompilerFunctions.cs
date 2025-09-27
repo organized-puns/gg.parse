@@ -161,7 +161,7 @@ namespace gg.parse.script.compiler
                 }
             }
 
-            return new MatchFunctionSequence<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. sequenceElements]);
+            return new MatchRuleSequence<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. sequenceElements]);
         }
 
         public static RuleBase<T> CompileOption<T>(
@@ -198,7 +198,7 @@ namespace gg.parse.script.compiler
                 }
             }
 
-            return new MatchOneOfFunction<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
+            return new MatchOneOf<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
         }
 
         
@@ -300,7 +300,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementAnnotation.Range, null);
             }
 
-            return new MatchFunctionCount<T>(declaration.Name, subFunction, declaration.Product, min, max, declaration.Precedence);
+            return new MatchCount<T>(declaration.Name, subFunction, declaration.Product, min, max, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileNot<T>(
@@ -327,7 +327,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Not.", elementAnnotation.Range, null);
             }
 
-            return new MatchNotFunction<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
+            return new MatchNot<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         // xxx unary functions are copy/pasting code, could roll these up
@@ -409,7 +409,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException<char>("Cannot compile subFunction definition for Try match.", elementAnnotation.Range, null);
             }
 
-            return new IfMatchRule<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
+            return new MatchCondition<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
         public static RuleBase<T> CompileAny<T>(

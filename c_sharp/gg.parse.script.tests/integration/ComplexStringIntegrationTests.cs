@@ -113,7 +113,7 @@ namespace gg.parse.script.tests.integration
 
             // modify the root to expect one or more strings
             parser.Tokenizer.Root = parser.Tokenizer.RegisterRule(
-                new MatchFunctionCount<char>(
+                new MatchCount<char>(
                     "#string_list", 
                     parser.Tokenizer.Root, 
                     production: IRule.Output.Children, 

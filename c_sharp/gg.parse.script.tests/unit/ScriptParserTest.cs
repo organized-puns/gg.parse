@@ -66,7 +66,7 @@ namespace gg.parse.script.tests.unit
 
             var optionRule = nodes[0][1].Rule;
             IsTrue(optionRule.Name == parser.MatchOption.Name);
-            IsTrue(optionRule.GetType() == typeof(MatchFunctionSequence<int>));
+            IsTrue(optionRule.GetType() == typeof(MatchRuleSequence<int>));
             
             var option1 = nodes[0][1][0].Rule;
             IsTrue(option1.Name == parser.MatchLiteral.Name);

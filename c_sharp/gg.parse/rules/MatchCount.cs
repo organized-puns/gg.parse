@@ -1,21 +1,21 @@
 ﻿namespace gg.parse.rules
 {
-    public class MatchFunctionCount<T>(
+    public class MatchCount<T>(
         string name, 
-        RuleBase<T> function, 
+        RuleBase<T> rule, 
         IRule.Output production = IRule.Output.Self, 
         int min = 1, 
         int max = 1, 
         int precedence = 0
     ) : RuleBase<T>(name, production, precedence), IRuleComposition<T> where T : IComparable<T>
     {
-        public RuleBase<T> Function { get; private set; } = function;
+        public RuleBase<T> Rule { get; private set; } = rule;
         
         public int Min { get; } = min;
         
         public int Max { get; } = max;
 
-        public IEnumerable<RuleBase<T>> Rules => [Function];
+        public IEnumerable<RuleBase<T>> Rules => [Rule];
 
         public override ParseResult Parse(T[] input, int start)
         {
@@ -25,7 +25,7 @@
 
             while (index < input.Length && (Max <= 0 || count < Max))
             {
-                var result = Function.Parse(input, index);
+                var result = Rule.Parse(input, index);
                 if (!result.FoundMatch)
                 {
                     break;
@@ -33,7 +33,7 @@
         
                 if (result.MatchedLength == 0 && Max <= 0)
                 {
-                    throw new InvalidProgramException($"Rule {Name} detected an infinite loop with its subrule {Function.Name}.");
+                    throw new InvalidProgramException($"Rule {Name} detected an infinite loop with its subrule {Rule.Name}.");
                 }
 
                 count++;
@@ -48,7 +48,7 @@
             }
 
             return Min <= 0 || count >= Min
-                ? BuildFunctionRuleResult(new Range(start, index - start), children)
+                ? BuildResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
         }
     }

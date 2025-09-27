@@ -52,20 +52,20 @@ namespace gg.parse.tests.examples
             // spot check of some compiled rules
 
             // check json tokens as defined in the tokenizer spec (ie #json_tokens	= *valid_token;)
-            var jsonTokensRule = generatedTokenizer.FindRule("json_tokens") as MatchFunctionCount<char>;
+            var jsonTokensRule = generatedTokenizer.FindRule("json_tokens") as MatchCount<char>;
             Assert.IsNotNull(jsonTokensRule);
             Assert.IsTrue(jsonTokensRule.Production == IRule.Output.Children);
             Assert.IsTrue(jsonTokensRule.Min == 0);
             Assert.IsTrue(jsonTokensRule.Max == 0);
 
-            var jsonTokensRuleFunction = jsonTokensRule.Function as RuleReference<char>;
+            var jsonTokensRuleFunction = jsonTokensRule.Rule as RuleReference<char>;
 
             Assert.IsNotNull(jsonTokensRuleFunction);
             Assert.IsTrue(jsonTokensRuleFunction.Production == IRule.Output.Children);
             Assert.IsTrue(jsonTokensRuleFunction.DeferResultToReference);
 
             // check valid_token rule, ie #valid_token	= json_token | white_space | unknown_token;
-            var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOfFunction<char>;
+            var validTokenRule = generatedTokenizer.FindRule("valid_token") as MatchOneOf<char>;
 
             Assert.IsNotNull(validTokenRule);
             Assert.IsTrue(jsonTokensRule.Production == IRule.Output.Children);
