@@ -319,7 +319,7 @@ namespace gg.parse.calculator.tests
 
 
             IsTrue(astResult.FoundMatch);
-            IsTrue(astResult.MatchedLength == expectedTokenTypes.Length);
+            IsTrue(astResult.MatchLength == expectedTokenTypes.Length);
 
             // root
             IsTrue(astResult![0]!.Rule!.Name == "addition");
@@ -348,7 +348,7 @@ namespace gg.parse.calculator.tests
             
             try
             {
-                return parser.InitializeFromDefinition(_tokenizerSpec, _grammarSpec);
+                return parser.From(_tokenizerSpec, _grammarSpec);
             }
             catch (Exception e)
             {

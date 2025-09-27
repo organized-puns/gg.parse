@@ -41,7 +41,7 @@
                             ? null 
                             : [..result.Annotations!];
 
-                    return BuildResult(new(start, result.MatchedLength), children);
+                    return BuildResult(new(start, result.MatchLength), children);
                 }
             }
             return ParseResult.Failure;

@@ -20,7 +20,7 @@ namespace gg.parse.tests.rulefunctions
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(2, result.MatchedLength);
+            Assert.AreEqual(2, result.MatchLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].Rule == rule);
             Assert.IsTrue(result.Annotations![0].Children!.Count == 1);
@@ -30,7 +30,7 @@ namespace gg.parse.tests.rulefunctions
             result = rule.Parse(input, 2);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(2, result.MatchedLength);
+            Assert.AreEqual(2, result.MatchLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].Rule == rule);
             Assert.IsTrue(result.Annotations![0].Children!.Count == 1);
@@ -55,7 +55,7 @@ namespace gg.parse.tests.rulefunctions
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(2, result.MatchedLength);
+            Assert.AreEqual(2, result.MatchLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].Rule == function1);
             Assert.IsTrue(result.Annotations![0].Children == null);
@@ -63,7 +63,7 @@ namespace gg.parse.tests.rulefunctions
             result = rule.Parse(input, 2);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.AreEqual(2, result.MatchedLength);
+            Assert.AreEqual(2, result.MatchLength);
             Assert.IsTrue(result.Annotations!.Count == 1);
             Assert.IsTrue(result.Annotations![0].Rule == function2);
             Assert.IsTrue(result.Annotations![0].Children == null);

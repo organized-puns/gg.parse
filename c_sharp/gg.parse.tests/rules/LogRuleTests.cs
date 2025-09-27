@@ -23,12 +23,12 @@ namespace gg.parse.tests.rules
             var parseFooResult = logRule.Parse("foo".ToCharArray(), 0);
 
             IsTrue(parseFooResult.FoundMatch);
-            IsTrue(parseFooResult.MatchedLength == 0);
+            IsTrue(parseFooResult.MatchLength == 0);
             IsTrue(parseFooResult.Annotations != null && parseFooResult.Annotations.Count == 1);
             IsTrue(parseFooResult.Annotations[0].Rule == logRule);
             
             IsTrue(logRule.Parse("".ToCharArray(), 0).FoundMatch);
-            IsTrue(logRule.Parse("".ToCharArray(), 0).MatchedLength == 0);
+            IsTrue(logRule.Parse("".ToCharArray(), 0).MatchLength == 0);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace gg.parse.tests.rules
 
             // positive case
             IsTrue(parseFooResult.FoundMatch);
-            IsTrue(parseFooResult.MatchedLength == 3);
+            IsTrue(parseFooResult.MatchLength == 3);
             IsTrue(parseFooResult.Annotations != null && parseFooResult.Annotations.Count == 1);
             IsTrue(parseFooResult.Annotations[0].Rule == logRule);
             IsTrue(parseFooResult.Annotations[0].Children == null);

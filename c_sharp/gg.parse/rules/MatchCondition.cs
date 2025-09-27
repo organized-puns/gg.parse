@@ -30,7 +30,7 @@
         {
             var result = Rule.Parse(input, start);
 
-            if (result.FoundMatch)
+            if (result)
             {
                 return BuildResult(new Range(start, 0), result.Annotations);
             }

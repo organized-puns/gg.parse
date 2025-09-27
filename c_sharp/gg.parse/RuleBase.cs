@@ -42,8 +42,7 @@
         {
             return Production switch
             {
-                IRule.Output.Self => new ParseResult(true, dataRange.Length,
-                                        [new Annotation(this, dataRange, children)]),
+                IRule.Output.Self => new ParseResult(true, dataRange.Length, [ new Annotation(this, dataRange, children) ]),
 
                 IRule.Output.Children => new ParseResult(true, dataRange.Length, children),
 

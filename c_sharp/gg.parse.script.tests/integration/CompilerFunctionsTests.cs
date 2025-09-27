@@ -959,7 +959,7 @@ namespace gg.parse.script.tests.integration
             if (min == 0)
             {
                 IsTrue(result.FoundMatch);
-                IsTrue(result.MatchedLength == 0);
+                IsTrue(result.MatchLength == 0);
             }
             else
             {
@@ -975,7 +975,7 @@ namespace gg.parse.script.tests.integration
             
             IsTrue(result.FoundMatch);
             var expectedLength = max == 0 ? testText.Length : max * 3;
-            IsTrue(result.MatchedLength == expectedLength);
+            IsTrue(result.MatchLength == expectedLength);
             IsTrue(result.Annotations != null);
             IsTrue(result.Annotations.Count == 1);
             IsTrue(result.Annotations[0].Rule == countFunction);
@@ -994,7 +994,7 @@ namespace gg.parse.script.tests.integration
                 result = table.Root.Parse(testText.ToCharArray(), 0);
 
                 IsTrue(result.FoundMatch);
-                IsTrue(result.MatchedLength == testText.Length - 3);
+                IsTrue(result.MatchLength == testText.Length - 3);
                 IsTrue(result.Annotations != null);
                 IsTrue(result.Annotations.Count == 1);
                 IsTrue(result.Annotations[0].Rule == countFunction);

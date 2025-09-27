@@ -132,7 +132,7 @@ namespace gg.parse.script.tests.unit
                     var result = rule.Parse(sample);
 
                     IsTrue(result.FoundMatch);
-                    IsTrue(result.MatchedLength > 0);
+                    IsTrue(result.MatchLength > 0);
 
                     if (rule.Production == IRule.Output.Void)
                     {

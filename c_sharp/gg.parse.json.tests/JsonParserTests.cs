@@ -19,7 +19,7 @@ namespace gg.parse.tests.examples
             var result = parser.Parse(tokens);
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.MatchedLength == tokens.Count);
+            Assert.IsTrue(result.MatchLength == tokens.Count);
 
             var keyIntValue = "{\"key\": 123}";
             

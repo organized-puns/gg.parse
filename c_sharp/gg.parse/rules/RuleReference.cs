@@ -36,8 +36,8 @@
                     return Production switch
                     {
                         IRule.Output.Self => result,
-                        IRule.Output.Children => new ParseResult(true, result.MatchedLength, result.Annotations),
-                        _ => new ParseResult(true, result.MatchedLength),
+                        IRule.Output.Children => new ParseResult(true, result.MatchLength, result.Annotations),
+                        _ => new ParseResult(true, result.MatchLength),
                     };
                 }
                 else
@@ -49,10 +49,10 @@
                     // modifiers eg "#bar = foo;" in which case foo will show up.
                     return Production switch
                     {
-                        IRule.Output.Self => new ParseResult(true, result.MatchedLength,
-                                                                       [new Annotation(this, new Range(start, result.MatchedLength), result.Annotations)]),
+                        IRule.Output.Self => new ParseResult(true, result.MatchLength,
+                                                                       [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]),
                         IRule.Output.Children => result,
-                        _ => new ParseResult(true, result.MatchedLength),
+                        _ => new ParseResult(true, result.MatchLength),
                     };
                 }
             }

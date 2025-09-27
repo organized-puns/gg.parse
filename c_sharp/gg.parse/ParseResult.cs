@@ -1,6 +1,8 @@
-﻿namespace gg.parse
+﻿using System.Collections;
+
+namespace gg.parse
 {
-    public readonly struct ParseResult(bool isSuccess, int dataRead, List<Annotation>? annotations = null)
+    public readonly struct ParseResult(bool isSuccess, int dataRead, List<Annotation>? annotations = null) : IEnumerable<Annotation>
     {
         public static readonly ParseResult Success = new(true, 0, null);
         public static readonly ParseResult Unknown = new(true, -1, null);
@@ -8,16 +10,18 @@
 
         public bool FoundMatch { get; init; } = isSuccess;
 
-        public int MatchedLength { get; init; } = dataRead;
+        public int MatchLength { get; init; } = dataRead;
 
         public List<Annotation>? Annotations { get; init; } = annotations;
 
-        public Annotation? this [int index] => Annotations != null ? Annotations[index] : null;
+        public Annotation? this [int index] => Annotations?[index];
+
+        public int Count => Annotations?.Count ?? 0;
 
         public void Deconstruct(out bool isSuccess, out int matchedLength, out List<Annotation>? annotations)
         {
             isSuccess = FoundMatch;
-            matchedLength = MatchedLength;
+            matchedLength = MatchLength;
             annotations = Annotations;
         }
 
@@ -27,12 +31,28 @@
         {
             if (FoundMatch)
             {
-                return $"match, length={MatchedLength}, count={(Annotations == null ? 0 : Annotations.Count)}";
+                return $"match, length={MatchLength}, count={(Annotations == null ? 0 : Annotations.Count)}";
             }
             else
             {
-                return $"no match, length={MatchedLength}";
+                return $"no match, length={MatchLength}";
             }
         }
+
+        public static implicit operator bool(ParseResult result) => result.FoundMatch;
+
+        public IEnumerator<Annotation> GetEnumerator()
+        {
+            return Annotations != null
+                    ? Annotations.GetEnumerator()
+                    : Enumerable.Empty<Annotation>().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        
     }
 }

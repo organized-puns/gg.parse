@@ -58,7 +58,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/string.tokens'; /*dummy main rule */ main=.;";
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(includeCommand);
+            var jsonParser = new RuleGraphBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
@@ -72,7 +72,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParserUsingAFileContainingAnInclude_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/include_test.tokens'; /*dummy main rule */ grammar_root=.;";
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(includeCommand);
+            var jsonParser = new RuleGraphBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
@@ -85,7 +85,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_ParseCompiledRule_ExpectRuleToFindMatch()
         {
             var includeCommand = "include 'assets/string.tokens'; string_ref = string;";
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(includeCommand);
+            var jsonParser = new RuleGraphBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
@@ -109,7 +109,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_ParseCompiledRule_ExpectDuplicateIncludesToBeIgnored()
         {
             var includeCommand = "include 'assets/string.tokens'; include 'assets/string.tokens'; string_ref = string;";
-            var jsonParser = new RuleGraphBuilder().InitializeFromDefinition(includeCommand);
+            var jsonParser = new RuleGraphBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
@@ -131,7 +131,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_ParseCompiledRule_ExpectExceptionBecauseOfCircularDependencies()
         {
             // this should throw and exception
-            new RuleGraphBuilder().InitializeFromDefinition("include 'assets/include_circular_1.tokens';");
+            new RuleGraphBuilder().From("include 'assets/include_circular_1.tokens';");
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParserIncludeJsonGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
             var jsonParser = new RuleGraphBuilder()
-                .InitializeFromDefinition(
+                .From(
                     File.ReadAllText("assets/json.tokens"), 
                     "include 'assets/json.grammar';#main=json;"
             );
@@ -169,7 +169,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParserIncludeJsonTokensAndGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
             var jsonParser = new RuleGraphBuilder()
-                .InitializeFromDefinition(
+                .From(
                     "include 'assets/json.tokens';#token_main = json_tokens;",
                     "include 'assets/json.grammar'; # main = json;"
                 );

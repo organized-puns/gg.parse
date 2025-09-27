@@ -49,7 +49,7 @@ namespace gg.parse.rules
         {            
             var parentResult = FindMatch(input, start);
 
-            if (parentResult.FoundMatch)
+            if (parentResult)
             {               
                 var parent = parentResult.Annotations![0];
 
@@ -60,7 +60,7 @@ namespace gg.parse.rules
                 }
 
                 var root = parent;
-                var tokensRead = parentResult.MatchedLength;
+                var tokensRead = parentResult.MatchLength;
 
                 // move the token pointer to the end of the last child annotation, so we can try to match another 
                 // binary. The assumption here is that the root of this annotation expresses the operator
@@ -74,7 +74,7 @@ namespace gg.parse.rules
                 // have we run out of tokens ?
                 while (tokenIndex < input.Length
                     // is there another match ?
-                    && (nextMatchResult = FindMatch(input, tokenIndex)).FoundMatch) 
+                    && (nextMatchResult = FindMatch(input, tokenIndex))) 
                 {
                     var nextMatch = nextMatchResult.Annotations![0];
 
@@ -91,7 +91,7 @@ namespace gg.parse.rules
 
                     var nextPrecedence = nextMatch.Rule.Precedence;
 
-                    tokensRead += nextMatchResult.MatchedLength - 1;
+                    tokensRead += nextMatchResult.MatchLength - 1;
 
                     // move up the right hand side of the tree until we reach the root of the tree
                     // or until we find a node with a lower precedence
@@ -160,7 +160,7 @@ namespace gg.parse.rules
             foreach (var option in RuleOptions)
             {   
                 var result = option.Parse(input, start);
-                if (result.FoundMatch)
+                if (result)
                 {
                     // validate 
                     // xxx treat this as a user error, not a fatal programming issue

@@ -13,7 +13,7 @@ namespace gg.parse.script.compiler
         /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
         public static RuleBase<char> CompileLiteral(
-           RuleCompiler<char> compiler,
+           RuleCompiler<char> _,
            RuleDeclaration declaration,
            CompileSession context)
         {

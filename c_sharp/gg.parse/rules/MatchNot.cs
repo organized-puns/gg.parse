@@ -20,9 +20,9 @@
 
         public override ParseResult Parse(T[] input, int start)
         {
-            var result = Rule.Parse(input, start);
+            var subRuleResult = Rule.Parse(input, start);
 
-            if (!result.FoundMatch)
+            if (!subRuleResult)
             {
                 return BuildResult(new Range(start, 0));
             }
