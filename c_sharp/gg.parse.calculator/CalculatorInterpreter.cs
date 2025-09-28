@@ -29,15 +29,15 @@ namespace gg.parse.calculator
             public static readonly string Subtraction = "subtraction";
         }
 
-        private readonly RuleGraphBuilder _builder; 
+        private readonly ParserBuilder _builder; 
 
         private readonly Dictionary<IRule, CalculatorFunction> _functionLookup;
 
-        public RuleGraphBuilder Builder => _builder;
+        public ParserBuilder Builder => _builder;
 
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
-            _builder = new RuleGraphBuilder();            
+            _builder = new ParserBuilder();            
             _builder.From(tokenizerSpec, grammarSpec);
 
             _functionLookup = CreateFunctionLookup(_builder.Parser!);

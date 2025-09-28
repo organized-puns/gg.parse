@@ -4,7 +4,7 @@ using gg.parse.script.pipeline;
 
 namespace gg.parse.script
 {
-    public class RuleGraphBuilder
+    public class ParserBuilder
     {
         public RuleGraph<char>? Tokenizer {get;set;}
 
@@ -16,7 +16,7 @@ namespace gg.parse.script
 
         public PipelineSession<int>? GrammarSession { get; private set; }
 
-        public RuleGraphBuilder From(string tokenDefinition, string? grammarDefinition = null, ScriptLogger? logger = null)
+        public ParserBuilder From(string tokenDefinition, string? grammarDefinition = null, ScriptLogger? logger = null)
         {
             LogHandler = logger ?? new ScriptLogger();
 

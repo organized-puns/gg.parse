@@ -5,6 +5,7 @@ using static gg.parse.script.compiler.CompilerFunctions;
 
 namespace gg.parse.script
 {
+    // xxx move to pipeline
     public static class CompilerUtils
     {
         private static RuleCompiler<T> RegisterFunction<T>(this RuleCompiler<T> compiler, RuleBase<int> rule, CompileFunction<T> function) where T : IComparable<T> =>

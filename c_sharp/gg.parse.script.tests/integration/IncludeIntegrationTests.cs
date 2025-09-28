@@ -22,7 +22,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/string.tokens'; /*dummy main rule */ main=.;";
-            var parser = new RuleGraphBuilder().From(includeCommand);
+            var parser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             IsTrue(parser.Tokenizer.FindRule("string") != null);
@@ -36,7 +36,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParserUsingAFileContainingAnInclude_FindRule_ExpectIncludedRulesToExist()
         {
             var includeCommand = "include 'assets/include_test.tokens'; /*dummy main rule */ grammar_root=.;";
-            var parser = new RuleGraphBuilder().From(includeCommand);
+            var parser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             IsTrue(parser.Tokenizer.FindRule("string") != null);
@@ -49,7 +49,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_ParseCompiledRule_ExpectRuleToFindMatch()
         {
             var includeCommand = "include 'assets/string.tokens'; string_ref = string;";
-            var parser = new RuleGraphBuilder().From(includeCommand);
+            var parser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
             IsTrue(parser.Tokenizer.FindRule("string") != null);
@@ -73,7 +73,7 @@ namespace gg.parse.script.tests.integration
         public void CreateEbnfParser_ParseCompiledRule_ExpectDuplicateIncludesToBeIgnored()
         {
             var includeCommand = "include 'assets/string.tokens'; include 'assets/string.tokens'; string_ref = string;";
-            var parser = new RuleGraphBuilder().From(includeCommand);
+            var parser = new ParserBuilder().From(includeCommand);
 
             // should have one include message, despite two includes
             IsTrue(parser.LogHandler!.ReceivedLogs
@@ -102,7 +102,7 @@ namespace gg.parse.script.tests.integration
         {
             var includeCommand = "include 'assets/include_circular_1.tokens';";
             // this should throw and exception
-            new RuleGraphBuilder().From(includeCommand);
+            new ParserBuilder().From(includeCommand);
         }
 
         
@@ -112,7 +112,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateEbnfParserIncludeJsonGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
-            var jsonParser = new RuleGraphBuilder()
+            var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
                                     "include 'assets/json.grammar';#main=json;"
@@ -145,7 +145,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateEbnfParserIncludeJsonTokensAndGrammar_ParseGrammar_ExpectJsonGrammarIncluded()
         {
-            var jsonParser = new RuleGraphBuilder()
+            var jsonParser = new ParserBuilder()
                                 .From(
                                     "include 'assets/json.tokens';#token_main = json_tokens;",
                                     "include 'assets/json.grammar'; # main = json;"

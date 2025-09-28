@@ -10,7 +10,7 @@ namespace gg.parse.script.tests.integration
         public void SetupTrivalCase_Parse_ExpectAWorkingParser()
         {
             var token = "bar";
-            var parser = new RuleGraphBuilder().From($"foo='{token}';", "root=foo;");
+            var parser = new ParserBuilder().From($"foo='{token}';", "root=foo;");
 
             var (_, barParseResult) = parser.Parse(token);
 
@@ -21,7 +21,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetupFindBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new RuleGraphBuilder().From($"foo = >> lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder().From($"foo = >> lit; lit = 'bar';", "root = foo;");
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
@@ -45,7 +45,7 @@ namespace gg.parse.script.tests.integration
         public void SetupFindAllBars_Parse_ExpectBarFoundIfPresentInString()
         {
             var searchTerm = "bar";
-            var tokenizer = new RuleGraphBuilder().From($"#find_bar = +( >> '{searchTerm}', '{searchTerm}' );");
+            var tokenizer = new ParserBuilder().From($"#find_bar = +( >> '{searchTerm}', '{searchTerm}' );");
 
             var testStringWithBar = "123ba345bar567 bar ";
             var (result, _) = tokenizer.Parse(testStringWithBar);
@@ -66,7 +66,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetupSkipUntilBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new RuleGraphBuilder().From($"foo = >>> lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder().From($"foo = >>> lit; lit = 'bar';", "root = foo;");
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);

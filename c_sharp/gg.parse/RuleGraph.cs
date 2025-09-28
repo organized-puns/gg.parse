@@ -86,10 +86,7 @@ namespace gg.parse
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _idRuleLookup.Values.GetEnumerator();
-        }
-
-        // xxx todo return errors of unresolved replacements
-        
+        }       
 
         public TRule FindOrRegister<TRule>(
             string ruleName,

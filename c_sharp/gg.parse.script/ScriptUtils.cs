@@ -5,7 +5,7 @@ namespace gg.parse.script
 {
     public static class ScriptUtils
     {
-        public static string AstToString(RuleGraphBuilder parser)
+        public static string AstToString(ParserBuilder parser)
         {
             Assertions.RequiresNotNull(parser);
             Assertions.RequiresNotNull(parser!.GrammarSession!);

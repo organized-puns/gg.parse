@@ -342,9 +342,9 @@ namespace gg.parse.calculator.tests
             IsTrue(astResult[0][2].Rule.Name == "number");
         }
 
-        private RuleGraphBuilder CreateParser()
+        private ParserBuilder CreateParser()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
             
             try
             {

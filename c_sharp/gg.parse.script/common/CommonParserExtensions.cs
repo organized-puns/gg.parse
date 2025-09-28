@@ -58,7 +58,7 @@ namespace gg.parse.script.common
                         tokenizerErrors,
                         text
                     );*/
-                    throw new ParseException(
+                    throw new ScriptException(
                         "input contains characters which could not be mapped to a token.",
                         tokenizerErrors,
                         text
@@ -86,7 +86,7 @@ namespace gg.parse.script.common
                     && throwExceptionOnErrors 
                     && astNodes.ContainsErrors<int>(failOnWarning, out var grammarErrors))
                 {
-                    throw new ParseException(
+                    throw new ScriptException(
                             "Parsing encountered some errors (or warnings which are treated as errors).",
                             grammarErrors,
                             text,

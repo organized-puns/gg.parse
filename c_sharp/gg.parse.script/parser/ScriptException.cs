@@ -1,6 +1,6 @@
 ﻿namespace gg.parse.script.parser
 {
-    public class ParseException : Exception
+    public class ScriptException : Exception
     {
         public List<Annotation>? Errors { get; init; }
 
@@ -14,19 +14,19 @@
         /// </summary>
         public List<Annotation>? Tokens { get; init; }
 
-        public ParseException(string message)
+        public ScriptException(string message)
             : base(message)
         {
         }
 
-        public ParseException(string message, List<Annotation> errors, string text)
+        public ScriptException(string message, List<Annotation> errors, string text)
             : base(message)
         {
             Errors = errors;
             Text = text;
         }
 
-        public ParseException(string message, List<Annotation> errors, string text, List<Annotation> tokens)
+        public ScriptException(string message, List<Annotation> errors, string text, List<Annotation> tokens)
             : base(message)
         {
             Errors = errors;

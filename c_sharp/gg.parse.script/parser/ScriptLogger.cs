@@ -88,7 +88,7 @@ namespace gg.parse.script.parser
             }
         }
 
-        public void ProcessException(ParseException exception, bool logException = true)
+        public void ProcessException(ScriptException exception, bool logException = true)
         {
             if (logException)
             {
@@ -112,7 +112,7 @@ namespace gg.parse.script.parser
             }
         }
 
-        public void ProcessExceptions(ParseException exception)
+        public void ProcessExceptions(ScriptException exception)
         {
             Log(LogLevel.Fatal, $"Exception: {exception}");
 

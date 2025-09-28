@@ -14,7 +14,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TwoInvalidTokensInTokenizer_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -24,7 +24,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
@@ -50,7 +50,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetupValidTokenInTheWrongPlace_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -60,7 +60,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 1);
@@ -84,7 +84,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetupInvalidHeaderProduction_InitializeParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -98,7 +98,7 @@ namespace gg.parse.script.tests.integration
                 // xxx this is not ideal because we're making assumptions about the rule
                 // later on.
                 var scriptParser = new ScriptParser();
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 1);
@@ -126,7 +126,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetupInvalidPrecedence_InitializeParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -140,7 +140,7 @@ namespace gg.parse.script.tests.integration
                 // xxx this is not ideal because we're making assumptions about the rule
                 // later on.
                 var scriptParser = new ScriptParser();
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 1);
@@ -168,7 +168,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void InvalidTokenGrammar_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -180,7 +180,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
@@ -206,7 +206,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void InvalidTokensInGrammar_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -217,7 +217,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
@@ -243,7 +243,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateSpecWithMissingRuleInGrammar_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -252,7 +252,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 1);
@@ -276,7 +276,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void InvalidGrammarInGrammar_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -286,7 +286,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 2);
@@ -313,7 +313,7 @@ namespace gg.parse.script.tests.integration
         [ExpectedException(typeof(FatalConditionException<int>))]
         public void SetupRuleWithFatalWithCondition_CreateParserAndParseRule_ExpectException()
         {
-            var parser = new RuleGraphBuilder()
+            var parser = new ParserBuilder()
                 .From("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
 
             // should trigger the fatal exception 
@@ -324,7 +324,7 @@ namespace gg.parse.script.tests.integration
         [ExpectedException(typeof(FatalConditionException<int>))]
         public void SetupRuleWithFatalWithoutCondition_CreateParserAndParseRule_ExpectException()
         {
-            var parser = new RuleGraphBuilder()
+            var parser = new ParserBuilder()
                 .From("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
 
             // should trigger the fatal exception 
@@ -334,7 +334,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void MissingUnaryTermInput_CreateParser_ExpectException()
         {
-            var parser = new RuleGraphBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
@@ -346,7 +346,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                var e = pipelineException.InnerException as ParseException;
+                var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count() == 3);

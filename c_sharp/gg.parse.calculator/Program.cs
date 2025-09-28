@@ -61,7 +61,7 @@ namespace gg.parse.calculator
                     }
 
                 }
-                catch (ParseException e)
+                catch (ScriptException e)
                 {
                     logger.ProcessException(e, logException: false);
                 }

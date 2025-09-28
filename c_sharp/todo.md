@@ -2,6 +2,7 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
+  - Clean up compiler functions
   - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
   - document match evaluation
@@ -12,6 +13,14 @@ Todo (for mvp)
 alpha (featured complete, buggy, ugly mess)
 -------------------------------------------
 
+- Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc
+
+- include 'inclusive' property to skip rules eg inclusive find +-> -->, inclusive skip +->> -->>
+	  or find, find_including, skip, skip_including  
+		or >>, +>>, >>>, +>>>, ->|, |->, ->>|, |->> stop_at, stop_after, skip_to, skip_after
+
+- better compile name generation
+
 -  Figure out if we really need all sub rules in the rulegraph id/name. 
    Yes because a = 'foo'; and b = 'foo', 'bar'; should NOT generate two 'foo-rules. a ='foo'; and b = ~'foo'; are different though
    (I'm sure this doesn't work as of yet - it actually does, probably not so much for the compile stage though)   
@@ -20,13 +29,16 @@ alpha (featured complete, buggy, ugly mess)
 
 - transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
-- add optional namespaces to avoid grammar / token name clash 
-- Implement a function console
+- Add FromFile to ParserBuilder. Add Extend() to existing parser 
 
 - add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has
      all common tokens defined
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
+
+- add optional namespaces to avoid grammar / token name clash 
+- Implement a function console
+
 
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)

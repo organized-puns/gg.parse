@@ -19,7 +19,7 @@ namespace gg.parse.script.tests.integration
             };
 
             // this should trigger a warning (because the rule is empty)
-            var pipeline = new RuleGraphBuilder()
+            var pipeline = new ParserBuilder()
                             .From("foo='bar';", "trigger_warning=;\ntrigger_warning_2=;", logger);
 
             // logger should have written two warnings to the output
@@ -37,7 +37,7 @@ namespace gg.parse.script.tests.integration
             };
 
             // this should trigger a warning (because the rule is empty)
-            var pipeline = new RuleGraphBuilder()
+            var pipeline = new ParserBuilder()
                             .From("\n\r\nfoo=;", null, logger);
 
             // logger should have written two warnings to the output
@@ -58,7 +58,7 @@ namespace gg.parse.script.tests.integration
             };
 
             // this should trigger an exception
-            new RuleGraphBuilder()
+            new ParserBuilder()
                     .From("foo='bar';", "trigger_warning=;", logger);
         }
     }

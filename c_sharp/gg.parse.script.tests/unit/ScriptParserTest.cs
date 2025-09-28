@@ -210,7 +210,7 @@ namespace gg.parse.script.tests.unit
                 (tokens, nodes) = parser.Parse("rule = iff \"lit\";");
                 Fail();
             }
-            catch (ParseException)
+            catch (ScriptException)
             {
             }
         }

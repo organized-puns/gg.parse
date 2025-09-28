@@ -143,7 +143,7 @@ namespace gg.parse.script.pipeline
             {
                 return session!.Parser!.Parse(session.Text!, session.LogHandler!.FailOnWarning);
             }
-            catch (ParseException pe)
+            catch (ScriptException pe)
             {
                 session.LogHandler!.ProcessException(pe);
                 throw new ScriptPipelineException("Exception in grammar while parsing tokens.", pe);
