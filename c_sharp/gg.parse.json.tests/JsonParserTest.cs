@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using gg.parse.json;
+﻿using gg.parse.json;
 using gg.parse.rules;
 using gg.parse.script;
 
@@ -19,7 +17,7 @@ namespace gg.parse.tests.examples
             var jsonParser = new ParserBuilder()
                             .From(tokenizerSpec, grammarSpec);
 
-            var generatedTokenizer = jsonParser.Tokenizer;
+            var generatedTokenizer = jsonParser.TokenGraph;
 
             // basic checks
             Assert.IsTrue(generatedTokenizer != null);
@@ -47,7 +45,7 @@ namespace gg.parse.tests.examples
 
             var jsonParser = new ParserBuilder().From(tokenizerSpec, grammarSpec);
 
-            var generatedTokenizer = jsonParser.Tokenizer;
+            var generatedTokenizer = jsonParser.TokenGraph;
 
             // spot check of some compiled rules
 
@@ -61,7 +59,7 @@ namespace gg.parse.tests.examples
             var jsonTokensRuleFunction = jsonTokensRule.Rule as RuleReference<char>;
 
             Assert.IsNotNull(jsonTokensRuleFunction);
-            Assert.IsTrue(jsonTokensRuleFunction.Production == IRule.Output.Children);
+            Assert.IsTrue(jsonTokensRuleFunction.Production == IRule.Output.Self);
             Assert.IsTrue(jsonTokensRuleFunction.DeferResultToReference);
 
             // check valid_token rule, ie #valid_token	= json_token | white_space | unknown_token;
@@ -82,7 +80,7 @@ namespace gg.parse.tests.examples
 
             var jsonParser = new ParserBuilder().From(tokenizerSpec, grammarSpec);
 
-            var generatedTokenizer = jsonParser.Tokenizer;
+            var generatedTokenizer = jsonParser.TokenGraph;
          
             // test the full set of tokens
             var validTokens = "{ } [ ] , : \"key\" 123 123.0 true false null @";
@@ -109,7 +107,7 @@ namespace gg.parse.tests.examples
 
             var jsonParser = new ParserBuilder().From(tokenizerSpec, grammarSpec);
 
-            var tokenizer = jsonParser.Tokenizer;
+            var tokenizer = jsonParser.TokenGraph;
             var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
 
             Assert.IsTrue(whiteSpaceRule != null);

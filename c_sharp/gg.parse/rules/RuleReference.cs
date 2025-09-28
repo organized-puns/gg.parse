@@ -28,7 +28,7 @@
             {
                 // parse behaviour depends on whether this reference is part of a composition (eg sequence)
                 // in which case we take in account any production modifiers applied to this rule, but
-                // otherwise pass the results of the refereed rule
+                // otherwise pass the results of the referced rule
                 if (DeferResultToReference)
                 {
                     // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 

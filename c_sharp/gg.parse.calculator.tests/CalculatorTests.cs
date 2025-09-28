@@ -17,7 +17,7 @@ namespace gg.parse.calculator.tests
         public void CreateInterpreter_FindRules_ExpectRulesToValidate()
         {
             var calculator = new CalculatorInterpreter(_tokenizerSpec, _grammarSpec);
-            var parser = calculator.Builder.Parser;
+            var parser = calculator.Builder.GrammarGraph;
             
             // this is the compiled version of the grammar (script)
             var expressionRule = parser.FindRule("expression") as MatchOneOf<int>;
@@ -29,13 +29,13 @@ namespace gg.parse.calculator.tests
             var operationRef = expressionRule.RuleOptions[0] as RuleReference<int>;
 
             IsNotNull(operationRef);
-            IsTrue(operationRef.Production == IRule.Output.Self);
+            IsTrue(operationRef.Production == IRule.Output.Self);            
             IsTrue(operationRef.Reference == "operation");
 
             var termRef = expressionRule.RuleOptions[1] as RuleReference<int>;
 
             IsNotNull(termRef);
-            IsTrue(termRef.Production == IRule.Output.Self);
+            IsTrue(termRef.Production == IRule.Output.Self);            
             IsTrue(termRef.Reference == "term");
 
             var unknown = expressionRule.RuleOptions[2] as RuleReference<int>;

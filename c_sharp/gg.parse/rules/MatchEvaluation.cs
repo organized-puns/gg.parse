@@ -7,6 +7,8 @@ namespace gg.parse.rules
 
         private RuleBase<T>[]? _options;
 
+        public RuleBase<T>? this[int index] => _options == null ? null : _options[index];
+
         public RuleBase<T>[] RuleOptions 
         {
             get => _options!;

@@ -40,7 +40,7 @@ namespace gg.parse.calculator
             _builder = new ParserBuilder();            
             _builder.From(tokenizerSpec, grammarSpec);
 
-            _functionLookup = CreateFunctionLookup(_builder.Parser!);
+            _functionLookup = CreateFunctionLookup(_builder.GrammarGraph!);
         }
 
         public double Interpret(string text)

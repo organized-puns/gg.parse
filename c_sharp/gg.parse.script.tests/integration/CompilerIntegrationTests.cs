@@ -18,7 +18,7 @@ namespace gg.parse.script.tests.integration
         {
             // xxx turn this into a more unit-y test
             var parser = new ParserBuilder().From("token = 't1';", "empty_rule=;");
-            var emptyRule = parser.Parser.FindRule("empty_rule") as NopRule<int>;
+            var emptyRule = parser.GrammarGraph.FindRule("empty_rule") as NopRule<int>;
             
             IsTrue(emptyRule != null);
 

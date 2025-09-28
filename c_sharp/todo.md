@@ -2,7 +2,9 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
-  - Clean up compiler functions
+  - Clean up compiler functions 
+  - Capture missing rules as errors from which can be recovered (currently they just throw exceptions)
+	eg 'foo = bar;' when bar is not defined
   - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
   - document match evaluation

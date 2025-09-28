@@ -6,9 +6,9 @@ namespace gg.parse.script
 {
     public class ParserBuilder
     {
-        public RuleGraph<char>? Tokenizer {get;set;}
+        public RuleGraph<char>? TokenGraph {get;set;}
 
-        public RuleGraph<int>? Parser { get; set; }
+        public RuleGraph<int>? GrammarGraph { get; set; }
 
         public ScriptLogger? LogHandler { get; set; }
 
@@ -22,12 +22,12 @@ namespace gg.parse.script
 
             TokenSession = ScriptPipeline.RunTokenPipeline(tokenDefinition, LogHandler);
 
-            Tokenizer = TokenSession.RuleGraph!;
+            TokenGraph = TokenSession.RuleGraph!;
 
             if (grammarDefinition != null)
             {
                 GrammarSession = ScriptPipeline.RunGrammarPipeline(grammarDefinition, TokenSession);
-                Parser = GrammarSession.RuleGraph;
+                GrammarGraph = GrammarSession.RuleGraph;
             }
 
             return this;
@@ -38,12 +38,12 @@ namespace gg.parse.script
             bool failOnWarning = false,
             bool throwExceptionsOnError = true)
         {
-            Assertions.RequiresNotNull(Tokenizer!);
-            Assertions.RequiresNotNull(Tokenizer!.Root!);
+            Assertions.RequiresNotNull(TokenGraph!);
+            Assertions.RequiresNotNull(TokenGraph!.Root!);
 
-            return Parser == null
-                    ? (Tokenizer.TokenizeText(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
-                    : Parser.Parse(Tokenizer, input, failOnWarning, throwExceptionsOnError);
+            return GrammarGraph == null
+                    ? (TokenGraph.TokenizeText(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
+                    : GrammarGraph.Parse(TokenGraph, input, failOnWarning, throwExceptionsOnError);
         }
     }
 }

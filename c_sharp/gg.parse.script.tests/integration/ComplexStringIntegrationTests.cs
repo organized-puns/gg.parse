@@ -15,7 +15,7 @@ namespace gg.parse.script.tests.integration
         public void CreateParse_ParseValidStrings_ExpectNoErrors()
         {
             var parser = new ParserBuilder().From(StringTokenizationText);
-            var stringRule = parser.Tokenizer.FindRule("string");
+            var stringRule = parser.TokenGraph.FindRule("string");
 
             var validStrings = new string[]
             {
@@ -46,7 +46,7 @@ namespace gg.parse.script.tests.integration
         public void InvalidEOFTerminatedString_Parse_ExpectErrors()
         {
             var parser = new ParserBuilder().From(StringTokenizationText);
-            var errEOF = parser.Tokenizer.FindRule("err_string_eof");
+            var errEOF = parser.TokenGraph.FindRule("err_string_eof");
 
             var invalidStrings = new string[]
             {
@@ -76,7 +76,7 @@ namespace gg.parse.script.tests.integration
         public void InvalidEOLNTerminatedString_Parse_ExpectErrors()
         {
             var parser = new ParserBuilder().From(StringTokenizationText);
-            var errEOLN = parser.Tokenizer.FindRule("log_err_string_eoln");
+            var errEOLN = parser.TokenGraph.FindRule("log_err_string_eoln");
 
             var testConfigurations = new (string input, int expectedPosition, int expectedLength) []
             {
@@ -107,15 +107,15 @@ namespace gg.parse.script.tests.integration
         public void MixOfValidAndInvalidStrings_Parse_ExpectFunctionIdsMatchExpectations()
         {
             var parser = new ParserBuilder().From(StringTokenizationText);
-            var stringRule = parser.Tokenizer.FindRule("string");
-            var errEOLN = parser.Tokenizer.FindRule("log_err_string_eoln");
-            var errEOF = parser.Tokenizer.FindRule("err_string_eof");
+            var stringRule = parser.TokenGraph.FindRule("string");
+            var errEOLN = parser.TokenGraph.FindRule("log_err_string_eoln");
+            var errEOF = parser.TokenGraph.FindRule("err_string_eof");
 
             // modify the root to expect one or more strings
-            parser.Tokenizer.Root = parser.Tokenizer.RegisterRule(
+            parser.TokenGraph.Root = parser.TokenGraph.RegisterRule(
                 new MatchCount<char>(
                     "#string_list", 
-                    parser.Tokenizer.Root, 
+                    parser.TokenGraph.Root, 
                     production: IRule.Output.Children, 
                     min: 1, 
                     max: 0

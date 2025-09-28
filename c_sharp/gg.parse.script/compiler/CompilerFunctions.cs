@@ -60,6 +60,10 @@ namespace gg.parse.script.compiler
             {
                 compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
             }
+            else
+            {
+                product = IRule.Output.Self;
+            }
 
             return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
         }
@@ -121,120 +125,73 @@ namespace gg.parse.script.compiler
                 // xxx parameter order...
                 new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product, declaration.Precedence);
         }
-       
+
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-        // xxx check the overlap with option and eval (and club together)
-        public static RuleBase<T> CompileSequence<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T: IComparable<T>
+        public static TRule CompileBinaryOperator<T, TRule>(
+    RuleCompiler<T> compiler,
+    RuleDeclaration declaration,
+    CompileSession session) where T : IComparable<T> where TRule : RuleBase<T>
         {
-            var sequenceElements = new List<RuleBase<T>>();
+            RuleBase<T>[] elementArray = null;
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
             if (ruleDefinition.Children != null)
             {
+                elementArray = new RuleBase<T>[ruleDefinition.Children.Count];
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
                     var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
 
-                    var elementDeclaration = 
+                    var elementDeclaration =
                         new RuleDeclaration(
-                            IRule.Output.Children, 
-                            $"{declaration.Name}[{i}], type: {elementName}", 
+                            IRule.Output.Children,
+                            $"{declaration.Name}[{i}], type: {elementName}",
                             0,
                             elementAnnotation
                         );
 
-                    var sequenceElement = compilationFunction(compiler, elementDeclaration, session);
+                    var element = compilationFunction(compiler, elementDeclaration, session);
 
-                    if (sequenceElement == null)
+                    if (element == null)
                     {
                         // xxx add context errors if fatal
                         // xxx resolve rule
                         throw new CompilationException<char>("Cannot compile rule definition for sequence.", elementAnnotation.Range, null);
                     }
 
-                    sequenceElements.Add(sequenceElement);
+                    elementArray[i] = element;
                 }
             }
 
-            return new MatchRuleSequence<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. sequenceElements]);
+            return (TRule)Activator.CreateInstance(typeof(TRule), declaration.Name, declaration.Product, declaration.Precedence, elementArray);
         }
+
+        public static RuleBase<T> CompileSequence<T>(
+            RuleCompiler<T> compiler,
+            RuleDeclaration declaration,
+            CompileSession session) where T: IComparable<T> =>
+        
+            CompileBinaryOperator<T, MatchRuleSequence<T>>(compiler, declaration, session);
+        
 
         public static RuleBase<T> CompileOption<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T>
-        {
-            var optionElements = new List<RuleBase<T>>();
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            if (ruleDefinition.Children != null)
-            {
-                for (var i = 0; i < ruleDefinition.Children.Count; i++)
-                {
-                    var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.Rule.Id);
-                    var elementDeclaration = 
-                        new RuleDeclaration(
-                            IRule.Output.Self, 
-                            $"{declaration.Name}[{i}], type: {elementName}",
-                            0,
-                            elementAnnotation
-                        );
-                    var optionElement = compilationFunction(compiler, elementDeclaration, context);
-
-                    if (optionElement == null)
-                    {
-                        // xxx add context errors if fatal
-                        // xxx resolve rule
-                        throw new CompilationException<char>("Cannot compile rule definition for option.", elementAnnotation.Range, null);
-                    }
-
-                    optionElements.Add(optionElement);
-                }
-            }
-
-            return new MatchOneOf<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
-        }
-
+            CompileSession session) where T : IComparable<T> =>
         
+            CompileBinaryOperator<T, MatchOneOf<T>>(compiler, declaration, session);
+        
+       
 
         public static RuleBase<T> CompileEvaluation<T>(
             RuleCompiler<T> compiler,
             RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
-        {
-            var evaluationElements = new List<RuleBase<T>>();
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            if (ruleDefinition.Children != null)
-            {
-                for (var i = 0; i < ruleDefinition.Children.Count; i++)
-                {
-                    var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-
-                    var elementDeclaration = 
-                        new RuleDeclaration(
-                            IRule.Output.Children, 
-                            $"{declaration.Name}[{i}], type: {elementName}",
-                            0,
-                            elementAnnotation
-                        );
-                    var elementFunction = 
-                        compilationFunction(compiler, elementDeclaration, session) 
-                        ?? throw new CompilationException<char>($"Compiling evaluation, can't find function for element at {elementAnnotation.Range}.", elementAnnotation.Range, null);
-
-                    evaluationElements.Add(elementFunction);
-                }
-            }
-
-            return new MatchEvaluation<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. evaluationElements]);
-        }
+            CompileSession session) where T : IComparable<T> =>
+        
+            CompileBinaryOperator<T, MatchEvaluation<T>>(compiler, declaration, session);
+        
 
         public static RuleBase<T> CompileGroup<T>(
             RuleCompiler<T> compiler,
