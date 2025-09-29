@@ -311,8 +311,7 @@ namespace gg.parse.script.tests.integration
             var indentifierId = 42;
             var noneProductId = 62;
 
-            var compiler = new RuleCompiler()
-                .WithAnnotationProductMapping([(noneProductId, IRule.Output.Void)])
+            var compiler = new RuleCompiler([(noneProductId, IRule.Output.Void)])
                 .RegisterFunction(indentifierId, CompileIdentifier<char>);
 
             // compile a rule table which can tokenize foo

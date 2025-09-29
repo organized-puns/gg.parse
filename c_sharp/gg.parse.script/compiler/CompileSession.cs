@@ -30,17 +30,10 @@ namespace gg.parse.script.compiler
         public (CompileFunction?, string?) FindFunction(int functionId) =>
             Compiler.FindCompilationFunction(functionId);
 
-
         public Range GetTextRange(Range tokenRange) =>
-            Tokens!.CombinedRange(tokenRange); 
+            Tokens!.CombinedRange(tokenRange);
 
-        public string GetText(Range tokenRange)
-        {
-            Assertions.RequiresNotNull(Text!);
-
-            var range = GetTextRange(tokenRange);
-            
-            return Text!.Substring(range.Start, range.Length);
-        }
+        public string GetText(Range tokenRange) =>
+            Text!.Substring(GetTextRange(tokenRange));
     }
 }

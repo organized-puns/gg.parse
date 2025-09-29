@@ -1,6 +1,5 @@
 ﻿
 using gg.parse.rules;
-using System;
 
 namespace gg.parse.script.compiler
 {
@@ -10,13 +9,17 @@ namespace gg.parse.script.compiler
     {
         public Dictionary<int, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
-        public (int functionId, IRule.Output product)[]? ProductLookup { get; set; }
+        public (int functionId, IRule.Output product)[]? RuleOutputLookup { get; set; }
 
-        public RuleCompiler WithAnnotationProductMapping((int functionId, IRule.Output product)[] productMapp)
+        public RuleCompiler()
         {
-            ProductLookup = productMapp;
-            return this;
         }
+
+        public RuleCompiler((int functionId, IRule.Output product)[] outputLookup)
+        {
+            RuleOutputLookup = outputLookup;
+        }
+
 
         public RuleCompiler RegisterFunction(int parseFunctionId, CompileFunction function, string? name = null)
         {
@@ -108,13 +111,13 @@ namespace gg.parse.script.compiler
         {
             product = IRule.Output.Self;
 
-            if (ProductLookup != null)
+            if (RuleOutputLookup != null)
             {
-                for (var i = 0; i < ProductLookup.Length; i++)
+                for (var i = 0; i < RuleOutputLookup.Length; i++)
                 {
-                    if (functionId == ProductLookup[i].functionId)
+                    if (functionId == RuleOutputLookup[i].functionId)
                     {
-                        product = ProductLookup[i].product;
+                        product = RuleOutputLookup[i].product;
                         return true;
                     }
                 }
@@ -153,15 +156,8 @@ namespace gg.parse.script.compiler
             {
                 idx++;
             }
-            
-            /*Annotation? ruleBody = null;
 
-            if (ruleNodes.Count > idx)
-            {
-                ruleBody = ruleNodes[idx];
-            }*/
-
-            return new(product, name, precedence, idx - index/*, ruleBody*/);
+            return new(product, name, precedence, idx - index);
         }
 
         /// <summary>

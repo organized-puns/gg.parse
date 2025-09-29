@@ -3,6 +3,7 @@
 using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.compiler;
+using gg.parse.script.pipeline;
 
 namespace gg.parse.script.tests.integration
 {
@@ -37,8 +38,7 @@ namespace gg.parse.script.tests.integration
 
             var syntaxTree = result.Annotations;
             var compiler =
-                new RuleCompiler()
-                    .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
+                new RuleCompiler(ScriptPipeline.CreateRuleOutputMapping(parser))
                     .RegisterTokenizerCompilerFunctions(parser);
 
             return compiler.Compile<char>(text, tokens, syntaxTree);
