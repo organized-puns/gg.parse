@@ -653,7 +653,6 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestNotFunction()
         {
-
             var literalId = 42;
             var notId = 64;
 

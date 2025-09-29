@@ -2,8 +2,7 @@
 namespace gg.parse.script.compiler
 {
     public class CompileSession
-    {
-        
+    {       
         public RuleCompiler Compiler { get; init; } 
 
         public string? Text { get; init; }
@@ -12,7 +11,6 @@ namespace gg.parse.script.compiler
 
         public List<Annotation>? SyntaxTree { get; init; }      
        
-
         public CompileSession(
             RuleCompiler compiler,
             string text, 
@@ -24,7 +22,6 @@ namespace gg.parse.script.compiler
             Text = text;
             Tokens = tokens;
             SyntaxTree = syntaxTree;
-            
         }
 
         public (CompileFunction?, string?) FindFunction(IRule rule) =>
@@ -34,20 +31,8 @@ namespace gg.parse.script.compiler
             Compiler.FindCompilationFunction(functionId);
 
 
-        public Range GetTextRange(Range tokenRange)
-        {
-            Assertions.RequiresNotNull(Tokens!);
-
-            var start = Tokens![tokenRange.Start].Start;
-            var length = 0;
-
-            for (var i = 0; i < tokenRange.Length; i++)
-            {
-                length += Tokens[tokenRange.Start + i].Length;
-            }
-
-            return new Range(start, length);
-        }
+        public Range GetTextRange(Range tokenRange) =>
+            Tokens!.CombinedRange(tokenRange); 
 
         public string GetText(Range tokenRange)
         {

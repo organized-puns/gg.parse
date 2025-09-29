@@ -50,7 +50,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0]!.Rule!.Name == "root");
 
-            var rangeTillBar = tokensResult.Annotations.UnionOfRanges(barParseResult[0].Range);
+            var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
             IsTrue(rangeTillBar.End == 8);
 
@@ -95,7 +95,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0]!.Rule!.Name == "root");
 
-            var rangeTillBar = tokensResult.Annotations.UnionOfRanges(barParseResult[0].Range);
+            var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
             IsTrue(rangeTillBar.End == 8);
 
@@ -106,7 +106,7 @@ namespace gg.parse.script.tests.integration
             // unlike find, skip will be happy if no bars are found
             IsTrue(tokensResult.FoundMatch);
 
-            rangeTillBar = tokensResult.Annotations.UnionOfRanges(barParseResult[0].Range);
+            rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
             IsTrue(rangeTillBar.End == testStringWithoutBar.Length);
         }

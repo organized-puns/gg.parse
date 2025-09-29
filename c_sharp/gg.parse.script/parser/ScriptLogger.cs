@@ -186,6 +186,6 @@ namespace gg.parse.script.parser
         }
 
         private static (int line, int column) MapAnnotationRangeToLineColumn(Annotation annotation, string text, List<Annotation> tokens, List<Range> lineRanges) =>
-           MapAnnotationRangeToLineColumn(tokens.UnionOfRanges(annotation.Range), text, lineRanges);         
+           MapAnnotationRangeToLineColumn(tokens.CombinedRange(annotation.Range), text, lineRanges);         
     }
 }

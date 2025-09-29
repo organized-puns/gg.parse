@@ -9,8 +9,8 @@
         public MatchCondition(
             string name, 
             IRule.Output production, 
-            RuleBase<T> rule, 
-            int precedence = 0
+            int precedence,
+            RuleBase<T> rule
         ) : base(name, production, precedence)
         {
             Assertions.RequiresNotNull(rule);

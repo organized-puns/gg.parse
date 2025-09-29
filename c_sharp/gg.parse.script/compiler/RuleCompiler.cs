@@ -1,9 +1,10 @@
 ﻿
 using gg.parse.rules;
+using System;
 
 namespace gg.parse.script.compiler
 {
-    public delegate IRule CompileFunction(RuleDeclaration declaration, CompileSession context);
+    public delegate IRule CompileFunction(RuleHeader header, Annotation bodyNode, CompileSession context);
 
     public class RuleCompiler
     {
@@ -56,14 +57,13 @@ namespace gg.parse.script.compiler
         private RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
         {
             foreach (var node in session.SyntaxTree)
-            {
-                var declaration = GetRuleDeclaration(session, node.Children, 0);
-                var ruleBody = declaration.RuleBodyAnnotation;
-
+            {                
+                var ruleHeader = ReadRuleHeader(session, node.Children!, 0);
+                
                 // user provided an empty body - which is results in a warning but is allowed
-                if (ruleBody == null)
+                if (ruleHeader.Length >= node.Children!.Count)
                 {
-                    var compiledRule = resultGraph.RegisterRuleAndSubRules(new NopRule<T>(declaration.Name));
+                    var compiledRule = resultGraph.RegisterRuleAndSubRules(new NopRule<T>(ruleHeader.Name));
 
                     // First compiled rule will be assigned to the root. Seems the most intuitive
                     // xxx replace with name root or smth
@@ -71,11 +71,12 @@ namespace gg.parse.script.compiler
                 }
                 else
                 {
-                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.Rule.Id);
+                    var ruleBodyNode = node.Children[ruleHeader.Length];
+                    var (compilationFunction, _) = FindCompilationFunction(ruleBodyNode.Rule.Id);
 
-                    if (resultGraph.FindRule(declaration.Name) == null)
+                    if (resultGraph.FindRule(ruleHeader.Name) == null)
                     {
-                        var compiledRule = (RuleBase<T>) compilationFunction(declaration, session);
+                        var compiledRule = (RuleBase<T>) compilationFunction(ruleHeader, ruleBodyNode, session);
 
                         resultGraph.RegisterRuleAndSubRules(compiledRule);
 
@@ -86,7 +87,7 @@ namespace gg.parse.script.compiler
                     else
                     {
                         // xxx add to the compilation errors, don't throw
-                        throw new InvalidOperationException($"Trying to register a rule with the same name ({declaration.Name}).");
+                        throw new InvalidOperationException($"Trying to register a rule with the same name ({ruleHeader.Name}).");
                     }
                 }
             }
@@ -129,7 +130,7 @@ namespace gg.parse.script.compiler
         /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private RuleDeclaration GetRuleDeclaration(CompileSession context, List<Annotation> ruleNodes, int index)
+        private RuleHeader ReadRuleHeader(CompileSession context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
@@ -153,14 +154,14 @@ namespace gg.parse.script.compiler
                 idx++;
             }
             
-            Annotation? ruleBody = null;
+            /*Annotation? ruleBody = null;
 
             if (ruleNodes.Count > idx)
             {
                 ruleBody = ruleNodes[idx];
-            }
+            }*/
 
-            return new(product, name, precedence, ruleBody);
+            return new(product, name, precedence, idx - index/*, ruleBody*/);
         }
 
         /// <summary>

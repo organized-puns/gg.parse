@@ -6,7 +6,7 @@
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
-        public MatchNot(string name, IRule.Output production, RuleBase<T> rule, int precedence = 0)
+        public MatchNot(string name, IRule.Output production, int precedence, RuleBase<T> rule)
             : base(name, production, precedence)
         {
             Rule = rule;
