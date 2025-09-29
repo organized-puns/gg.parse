@@ -19,9 +19,7 @@ namespace gg.parse.script.compiler
 
             if (string.IsNullOrEmpty(unescapedLiteralText))
             {
-                // xxx add warnings
-                // xxx resolve rule
-                throw new CompilationException("Literal text is empty.", annotation: bodyNode);
+                throw new CompilationException("Literal text is empty (somehow...).", annotation: bodyNode);
             }
 
             return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Product, header.Precedence);
@@ -37,9 +35,7 @@ namespace gg.parse.script.compiler
 
             if (string.IsNullOrEmpty(setText) || setText.Length <= 2)
             {
-                // xxx add context errors if fatal
-                // xxx resolve rule
-                throw new CompilationException("Text defining the set text is null or empty", annotation: bodyNode);
+                throw new CompilationException("Text defining the MatchDataSet text is null or empty", annotation: bodyNode);
             }
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
@@ -70,9 +66,13 @@ namespace gg.parse.script.compiler
                             annotation: bodyNode);
             }
 
-            return 
-                // xxx parameter order...
-                new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product, declaration.Precedence);
+            return new MatchDataRange<char>(
+                declaration.Name, 
+                minText[1], 
+                maxText[1], 
+                declaration.Product, 
+                declaration.Precedence
+            );
         }
 
         // -- Generic functions ---------------------------------------------------------------------------------------
@@ -89,9 +89,7 @@ namespace gg.parse.script.compiler
 
             if (string.IsNullOrEmpty(referenceName))
             {
-                // xxx add context errors if fatal
-                // xxx resolve rule
-                throw new CompilationException("ReferenceName text is empty", annotation: bodyNode);
+                throw new CompilationException("ReferenceName text is empty (somehow...).", annotation: bodyNode);
             }
 
             var product = declaration.Product;
@@ -189,9 +187,7 @@ namespace gg.parse.script.compiler
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {
-                // xxx add context errors if fatal
-                // xxx resolve rule
-                throw new CompilationException("Cannot compile subFunction definition for match count.", annotation: elementBody);
+                throw new CompilationException("Cannot compile countRule definition for MatchCount.", annotation: elementBody);
             }
 
             return new MatchCount<T>(header.Name, countRule, header.Product, min, max, header.Precedence);
@@ -237,8 +233,8 @@ namespace gg.parse.script.compiler
 
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
-            // xxx add human understandable name instead of subfunction
             var elementHeader = new RuleHeader(IRule.Output.Self, $"{header.Name}, type: Not({elementName})");
+
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
                 ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
 

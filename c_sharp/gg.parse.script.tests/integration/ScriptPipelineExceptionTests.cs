@@ -84,19 +84,21 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetupInvalidHeaderProduction_InitializeParser_ExpectException()
         {
-            var parser = new ParserBuilder();
+            var builder = new ParserBuilder();
 
             try
             {
                 // . is a valid token, just not a valid expression in the header
-                parser.From(".foo='bar';");
+                builder.From(".foo='bar';");
                 Fail();
             }
             catch (ScriptPipelineException pipelineException)
             {
+                // note about parser
                 // at this point we don't have access to the parser used anymore. 
-                // xxx this is not ideal because we're making assumptions about the rule
-                // later on.
+                // so create the same as builder
+                // the parse used is inside the builder's session but that doesn't
+                // get set because an exception is raised before that.
                 var scriptParser = new ScriptParser();
                 var e = pipelineException.InnerException as ScriptException;
 
@@ -109,13 +111,13 @@ namespace gg.parse.script.tests.integration
                 IsTrue(error.Length == 1);
                 IsTrue(error.Rule.Id == scriptParser.InvalidProductInHeaderError.Id);
 
-                IsTrue(parser
+                IsTrue(builder
                         .LogHandler!
                         .ReceivedLogs!
                         .Where(entry => entry.level == LogLevel.Fatal)
                         .Count() == 1);
 
-                IsTrue(parser
+                IsTrue(builder
                         .LogHandler!
                         .ReceivedLogs!
                         .Where(entry => entry.level == LogLevel.Error)
@@ -136,9 +138,7 @@ namespace gg.parse.script.tests.integration
             }
             catch (ScriptPipelineException pipelineException)
             {
-                // at this point we don't have access to the parser used anymore. 
-                // xxx this is not ideal because we're making assumptions about the rule
-                // later on.
+                // see 'note about parser' above
                 var scriptParser = new ScriptParser();
                 var e = pipelineException.InnerException as ScriptException;
 

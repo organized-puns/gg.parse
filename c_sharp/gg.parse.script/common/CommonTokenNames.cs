@@ -1,6 +1,5 @@
 ﻿namespace gg.parse.script.common
 {
-    // xxx move keywords out of token names
     public static class CommonTokenNames
     {
         public static readonly string AnyCharacter = "AnyCharacter";
@@ -47,7 +46,7 @@
 
         public static readonly string If = "Keyword(if)";
 
-        public static readonly string Include = "include";
+        public static readonly string Include = "Include";
 
         public static readonly string Integer = "Integer";
 

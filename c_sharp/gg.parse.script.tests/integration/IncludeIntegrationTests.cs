@@ -94,7 +94,6 @@ namespace gg.parse.script.tests.integration
 
         /// <summary>
         /// Include a file which holds a circular dependency. This should cause an exception.
-        /// // xxx should be ignored and downgraded to a warning
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ScriptPipelineException))]

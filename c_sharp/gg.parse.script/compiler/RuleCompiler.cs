@@ -185,7 +185,6 @@ namespace gg.parse.script.compiler
                 idx++;
             }
 
-            // xxx assuming this is a string literal, need to validate
             var name = context.GetText(ruleNodes[idx].Range);
             idx++;
 
