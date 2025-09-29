@@ -105,8 +105,8 @@ namespace gg.parse.script.parser
         {
             RegisterTokens();
 
-            MatchRuleHeader = RegisterRuleHeader();
-            MatchRuleBody = RegisterRuleBody();
+            MatchRuleHeader = RegisterRuleHeaderMatchers();
+            MatchRuleBody = RegisterRuleBodyMatchers();
 
             MatchRule = RegisterRule(MatchRuleHeader, MatchRuleBody);
 
@@ -124,7 +124,7 @@ namespace gg.parse.script.parser
             Root = ZeroOrMore("#root", OneOf("#statement", validStatement, UnknownInputError));
         }
 
-        private MatchRuleSequence<int> RegisterRuleHeader()
+        private MatchRuleSequence<int> RegisterRuleHeaderMatchers()
         {
             MatchRuleName = MatchSingle("ruleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
             MatchPrecedence = MatchSingle("rulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
@@ -155,23 +155,34 @@ namespace gg.parse.script.parser
             );
         }
 
-        private MatchOneOf<int> RegisterRuleBody()
+        /// <summary>
+        /// Register all the matchers which can be used in the body of a rule and
+        /// return a matcher which can match a rule body term.
+        /// </summary>
+        /// <returns></returns>
+        private MatchOneOf<int> RegisterRuleBodyMatchers()
         {
-            var dataMatchers = RegisterDataMatchers();
-            var unaryTerms = OneOf("#unaryTerms", dataMatchers);
+            // register matching rules like literals, identifiers, character sets/ranges, any character
+            var dataMatchersArray = RegisterDataMatchers();
 
-            var unaryOperators = RegisterUnaryOperators(unaryTerms);
-            var binaryOperators = OneOf("#BinaryRuleTerms", RegisterBinaryOperators(unaryTerms));
+            // unary terms are single terms, ie everything but binary operators
+            var unaryTerms = OneOf("#unaryTerms", dataMatchersArray);
+
+            // operators like not(x), if(x), *(x), +(x), ?(x)
+            var unaryOperators = RegisterUnaryOperatorMatchers(unaryTerms);
+
+            // operators like a | b | c , a , b , c , a / b / c
+            var binaryOperators = OneOf("#binaryRuleTerms", RegisterBinaryOperatorMatchers(unaryTerms));
             
-            var ruleBody = OneOf("#RuleBody", binaryOperators, unaryTerms);
+            var ruleBody = OneOf("#ruleBody", binaryOperators, unaryTerms);
 
             // ( a, b, c )
-            MatchGroup = Sequence("#Group", GroupStartToken!, ruleBody, GroupEndToken!);
+            MatchGroup = Sequence("#group", GroupStartToken!, ruleBody, GroupEndToken!);
 
             // create all various instances of logs (errors,warnings,infos...)
             MatchLog = CreateMatchLog(ruleBody);
 
-            RuleBase<int>[] recoveryRules = [.. dataMatchers, .. unaryOperators, MatchGroup];
+            RuleBase<int>[] recoveryRules = [.. dataMatchersArray, .. unaryOperators, MatchGroup];
             var ruleBodyErrorHandler = RegisterRuleBodyErrorHandlers(recoveryRules);
 
             unaryTerms.RuleOptions = [
@@ -297,7 +308,7 @@ namespace gg.parse.script.parser
             ];
         }
 
-        private RuleBase<int>[] RegisterUnaryOperators(MatchOneOf<int> unaryTerms)
+        private RuleBase<int>[] RegisterUnaryOperatorMatchers(MatchOneOf<int> unaryTerms)
         {
             MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
 
@@ -382,7 +393,7 @@ namespace gg.parse.script.parser
             MatchNoProductSelector = Token(CommonTokenNames.NoProductSelector, CommonTokenNames.NoProductSelector);
         }
 
-        private RuleBase<int>[] RegisterBinaryOperators(MatchOneOf<int> unaryTerms)
+        private RuleBase<int>[] RegisterBinaryOperatorMatchers(MatchOneOf<int> unaryTerms)
         {
             // mainSequence contains both the match and error handling
             (var mainSequence, MatchSequence) = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryTerms);

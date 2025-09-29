@@ -2,9 +2,6 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
-  - Clean up compiler functions 
-  - Capture missing rules as errors from which can be recovered (currently they just throw exceptions)
-	eg 'foo = bar;' when bar is not defined
   - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
   - document match evaluation
@@ -14,6 +11,9 @@ Todo (for mvp)
      
 alpha (featured complete, buggy, ugly mess)
 -------------------------------------------
+
+- Figure out a way to capture the annotation associated with a reference, so in case of errors we can report the correct line/column
+  (probably by adding a property to ReferenceRule which is set during compilation)
 
 - Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc
 
