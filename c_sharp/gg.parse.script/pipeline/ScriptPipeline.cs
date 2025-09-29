@@ -56,7 +56,7 @@ namespace gg.parse.script.pipeline
 
             // combine the rule graph from the includes with the rulegraph with the one based on the current
             // parse results
-            var compileSession = new CompileSession(session.Text, session.Tokens, session.AstNodes);
+            var compileSession = new CompileSession(session.Compiler, session.Text, session.Tokens, session.AstNodes);
             session.RuleGraph = session.Compiler!.Compile(compileSession, session.RuleGraph);
             
             return session;

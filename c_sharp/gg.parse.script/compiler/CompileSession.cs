@@ -1,41 +1,45 @@
-﻿using gg.parse;
+﻿using System.Data;
 
 namespace gg.parse.script.compiler
 {
     public class CompileSession
     {
-        public RuleCompiler Compiler { get; set; } 
+        
+        public RuleCompiler Compiler { get; init; } 
 
-        public string? Text { get; set; }
+        public string? Text { get; init; }
 
-        public List<Annotation>? Tokens { get; set; } 
+        public List<Annotation>? Tokens { get; init; } 
 
-        public List<Annotation>? AstNodes { get; set; }      
+        public List<Annotation>? AstNodes { get; init; }      
        
 
-        public CompileSession()
-        {
-            Compiler = new RuleCompiler();
-        }
-
         public CompileSession(
+            RuleCompiler compiler,
             string text, 
             List<Annotation> tokens, 
-            List<Annotation> astNodes,
-            RuleCompiler? compiler = null)
-           
+            List<Annotation>? syntaxTree = null
+        )
         {
+            Compiler = compiler;
             Text = text;
             Tokens = tokens;
-            AstNodes = astNodes;
-            Compiler = compiler ?? new RuleCompiler();
+            AstNodes = syntaxTree;
+            
         }
+
+        public (CompileFunction?, string?) FindFunction(IRule rule) =>
+            Compiler.FindCompilationFunction(rule.Id);
+
+        public (CompileFunction?, string?) FindFunction(int functionId) =>
+            Compiler.FindCompilationFunction(functionId);
+
 
         public Range GetTextRange(Range tokenRange)
         {
-            Assertions.RequiresNotNull(Tokens);
+            Assertions.RequiresNotNull(Tokens!);
 
-            var start = Tokens[tokenRange.Start].Start;
+            var start = Tokens![tokenRange.Start].Start;
             var length = 0;
 
             for (var i = 0; i < tokenRange.Length; i++)
@@ -48,22 +52,11 @@ namespace gg.parse.script.compiler
 
         public string GetText(Range tokenRange)
         {
+            Assertions.RequiresNotNull(Text!);
+
             var range = GetTextRange(tokenRange);
             
-            return Text.Substring(range.Start, range.Length);
+            return Text!.Substring(range.Start, range.Length);
         }
-
-        public CompileSession WithText(string text)
-        {
-            Text = text;
-            return this;
-        }        
-
-        public CompileSession WithTokens(List<Annotation> tokens)
-        {
-            Tokens = tokens;
-            return this;
-        }
-
     }
 }

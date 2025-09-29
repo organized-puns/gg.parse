@@ -12,10 +12,7 @@ namespace gg.parse.script.compiler
     {
         /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
-        public static RuleBase<char> CompileLiteral(
-           RuleCompiler _,
-           RuleDeclaration declaration,
-           CompileSession context)
+        public static RuleBase<char> CompileLiteral(RuleDeclaration declaration, CompileSession context)
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
             var literalText = context.GetText(ruleDefinition.Range);
@@ -31,10 +28,7 @@ namespace gg.parse.script.compiler
             return new MatchDataSequence<char>(declaration.Name, unescapedLiteralText.ToCharArray(), declaration.Product, declaration.Precedence);
         }        
 
-        public static RuleBase<char> CompileCharacterSet(
-           RuleCompiler _,
-           RuleDeclaration declaration,
-           CompileSession session)
+        public static RuleBase<char> CompileCharacterSet( RuleDeclaration declaration, CompileSession session)
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -56,10 +50,7 @@ namespace gg.parse.script.compiler
             return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray(), declaration.Precedence);
         }
 
-        public static RuleBase<char> CompileCharacterRange(
-           RuleCompiler _,
-           RuleDeclaration declaration,
-           CompileSession context)
+        public static RuleBase<char> CompileCharacterRange(RuleDeclaration declaration, CompileSession context)
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
             var lowerRange = ruleDefinition.Children[0].Range;
@@ -91,10 +82,8 @@ namespace gg.parse.script.compiler
 
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-        public static RuleBase<T> CompileIdentifier<T>(
-           RuleCompiler compiler,
-           RuleDeclaration declaration,
-           CompileSession session) where T : IComparable<T>
+        public static RuleBase<T> CompileIdentifier<T>(RuleDeclaration declaration, CompileSession session) 
+            where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
             var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
@@ -118,7 +107,7 @@ namespace gg.parse.script.compiler
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasProductionOperator)
             {
-                compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
+                session.Compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
             }
             else
             {
@@ -128,10 +117,7 @@ namespace gg.parse.script.compiler
             return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
         }
 
-        public static TRule CompileBinaryOperator<T, TRule>(
-            RuleCompiler compiler,
-            RuleDeclaration declaration,
-            CompileSession session) 
+        public static TRule CompileBinaryOperator<T, TRule>(RuleDeclaration declaration, CompileSession session) 
             where T : IComparable<T> where TRule : RuleBase<T>
         {
             RuleBase<T>[] elementArray = null;
@@ -143,7 +129,7 @@ namespace gg.parse.script.compiler
                 for (var i = 0; i < ruleDefinition.Children.Count; i++)
                 {
                     var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+                    var (compilationFunction, elementName) = session.Compiler.Functions[elementAnnotation.Rule.Id];
 
                     var elementDeclaration =
                         new RuleDeclaration(
@@ -153,7 +139,7 @@ namespace gg.parse.script.compiler
                             elementAnnotation
                         );
 
-                    var element = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
+                    var element = compilationFunction(elementDeclaration, session) as RuleBase<T>;
 
                     if (element == null)
                     {
@@ -170,30 +156,26 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileSequence<T>(
-            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T: IComparable<T> =>
         
-            CompileBinaryOperator<T, MatchRuleSequence<T>>(compiler, declaration, session);
+            CompileBinaryOperator<T, MatchRuleSequence<T>>(declaration, session);
         
         public static RuleBase<T> CompileOption<T>(
-            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T> =>
         
-            CompileBinaryOperator<T, MatchOneOf<T>>(compiler, declaration, session);               
+            CompileBinaryOperator<T, MatchOneOf<T>>(declaration, session);               
 
         public static RuleBase<T> CompileEvaluation<T>(
-            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T> =>
         
-            CompileBinaryOperator<T, MatchEvaluation<T>>(compiler, declaration, session);        
+            CompileBinaryOperator<T, MatchEvaluation<T>>(declaration, session);        
 
         public static RuleBase<T> CompileGroup<T>(
-            RuleCompiler compiler,
             RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T>
+            CompileSession session) where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -202,36 +184,13 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction,_) = compiler.Functions[elementAnnotation.Rule.Id];
+            var (compilationFunction,_) = session.Compiler.Functions[elementAnnotation.Rule.Id];
             var groupDeclaration = new RuleDeclaration(declaration.Product, declaration.Name, elementAnnotation);
 
-            return compilationFunction(compiler, groupDeclaration, context) as RuleBase<T>;
+            return compilationFunction(groupDeclaration, session) as RuleBase<T>;
         }
 
-        public static RuleBase<T> CompileZeroOrMore<T>(
-            RuleCompiler compiler,
-            RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T> =>
-            
-            CompileCount<T>(compiler, declaration, context, 0, 0);
-
-
-        public static RuleBase<T> CompileOneOrMore<T>(
-            RuleCompiler compiler,
-            RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T> =>
-
-            CompileCount<T>(compiler, declaration, context, 1, 0);
-
-        public static RuleBase<T> CompileZeroOrOne<T>(
-            RuleCompiler compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T> =>
-
-            CompileCount<T>(compiler, declaration, session, 0, 1);
-
         public static RuleBase<T> CompileCount<T>(
-            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session,
             int min, int max) where T : IComparable<T>
@@ -243,9 +202,9 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            var (compilationFunction, elementName) = session.Compiler.Functions[elementAnnotation.Rule.Id];
             var elementDeclaration = new RuleDeclaration(IRule.Output.Children, $"{declaration.Name} of {elementName}", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
+            var subFunction = compilationFunction(elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -257,10 +216,27 @@ namespace gg.parse.script.compiler
             return new MatchCount<T>(declaration.Name, subFunction, declaration.Product, min, max, declaration.Precedence);
         }
 
-        public static RuleBase<T> CompileNot<T>(
-            RuleCompiler compiler,
+
+        public static RuleBase<T> CompileZeroOrMore<T>(
             RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
+            CompileSession session) where T : IComparable<T> =>
+            
+            CompileCount<T>(declaration, session, 0, 0);
+
+
+        public static RuleBase<T> CompileOneOrMore<T>(RuleDeclaration declaration, CompileSession session) 
+            where T : IComparable<T> =>
+
+            CompileCount<T>(declaration, session, 1, 0);
+
+        public static RuleBase<T> CompileZeroOrOne<T>(RuleDeclaration declaration,CompileSession session) 
+            where T : IComparable<T> =>
+
+            CompileCount<T>(declaration, session, 0, 1);
+
+
+        public static RuleBase<T> CompileNot<T>(RuleDeclaration declaration, CompileSession session) 
+            where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -269,10 +245,10 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            var (compilationFunction, elementName) = session.Compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Not({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
+            var subFunction = compilationFunction(elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -285,10 +261,8 @@ namespace gg.parse.script.compiler
         }
 
         // xxx unary functions are copy/pasting code, could roll these up
-        public static RuleBase<T> CompileSkip<T>(
-            RuleCompiler compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
+        public static RuleBase<T> CompileSkip<T>(RuleDeclaration declaration, CompileSession session) 
+            where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -297,10 +271,10 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            var (compilationFunction, elementName) = session.Compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Skip({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
+            var subFunction = compilationFunction(elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -312,10 +286,8 @@ namespace gg.parse.script.compiler
             return new SkipRule<T>(declaration.Name, declaration.Product, subFunction, failOnEof: false);
         }
 
-        public static RuleBase<T> CompileFind<T>(
-            RuleCompiler compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
+        public static RuleBase<T> CompileFind<T>(RuleDeclaration declaration, CompileSession session) 
+            where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -324,10 +296,10 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            var (compilationFunction, elementName) = session.FindFunction(elementAnnotation.Rule.Id);
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Find({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
+            var subFunction = compilationFunction(elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -340,7 +312,6 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileTryMatch<T>(
-            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T>
         {
@@ -351,10 +322,10 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
             var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
+            var (compilationFunction, elementName) = session.FindFunction(elementAnnotation.Rule);
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{elementName}, type: {declaration.Name}", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
+            var subFunction = compilationFunction(elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -366,20 +337,16 @@ namespace gg.parse.script.compiler
             return new MatchCondition<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
         }
 
-        public static RuleBase<T> CompileAny<T>(
-            RuleCompiler _,
-            RuleDeclaration declaration,
-            CompileSession __) where T : IComparable<T>
+        public static RuleBase<T> CompileAny<T>(RuleDeclaration declaration, CompileSession __) 
+            where T : IComparable<T>
         {
             Assertions.Requires(declaration != null);
 
             return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
         }
 
-        public static RuleBase<T> CompileLog<T>(
-           RuleCompiler compiler,
-           RuleDeclaration declaration,
-           CompileSession context) where T : IComparable<T>
+        public static RuleBase<T> CompileLog<T>(RuleDeclaration declaration, CompileSession session) 
+            where T : IComparable<T>
         {
             var ruleDefinition = declaration.RuleBodyAnnotation;
 
@@ -387,10 +354,10 @@ namespace gg.parse.script.compiler
             Assertions.Requires(ruleDefinition!.Children != null);
             Assertions.Requires(ruleDefinition.Children!.Count > 0);
 
-            var logLevelText = context.GetText(ruleDefinition.Children[0].Range);
+            var logLevelText = session.GetText(ruleDefinition.Children[0].Range);
             var logLevel = Enum.Parse<LogLevel>(logLevelText, ignoreCase: true);
 
-            var message = context.GetText(ruleDefinition.Children[1].Range);
+            var message = session.GetText(ruleDefinition.Children[1].Range);
 
             if (string.IsNullOrEmpty(message) || message.Length < 2)
             {
@@ -406,9 +373,9 @@ namespace gg.parse.script.compiler
             if (ruleDefinition.Children.Count == 3)
             {
                 var conditionDefinition = ruleDefinition.Children[2];
-                var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.Rule.Id];
+                var (compilationFunction, elementName) = session.FindFunction(conditionDefinition.Rule);
                 var conditionDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name} condition: {elementName}", conditionDefinition);
-                condition = compilationFunction(compiler, conditionDeclaration, context) as RuleBase<T>;
+                condition = compilationFunction(conditionDeclaration, session) as RuleBase<T>;
 
                 if (condition == null)
                 {

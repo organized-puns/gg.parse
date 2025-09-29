@@ -3,10 +3,7 @@ using gg.parse.rules;
 
 namespace gg.parse.script.compiler
 {
-    public delegate IRule CompileFunction(
-        RuleCompiler compiler,
-        RuleDeclaration declaration,
-        CompileSession context);
+    public delegate IRule CompileFunction(RuleDeclaration declaration, CompileSession context);
 
     public class RuleCompiler
     {
@@ -74,7 +71,7 @@ namespace gg.parse.script.compiler
 
                     if (resultGraph.FindRule(declaration.Name) == null)
                     {
-                        var compiledRule = (RuleBase<T>) compilationFunction(this, declaration, session);
+                        var compiledRule = (RuleBase<T>) compilationFunction(declaration, session);
 
                         resultGraph.RegisterRuleAndSubRules(compiledRule);
 

@@ -1,5 +1,6 @@
 ﻿namespace gg.parse.script.compiler
 {
+    // xxx rename to RuleHeader and remove RuleBodyAnnotation
     /// <summary>
     /// Name + Production of a rule 
     /// </summary>

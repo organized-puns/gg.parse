@@ -8,9 +8,6 @@ namespace gg.parse.script
     // xxx move to pipeline
     public static class CompilerUtils
     {
-        private static RuleCompiler RegisterFunction(this RuleCompiler compiler, RuleBase<int> rule, CompileFunction function) =>
-            compiler.RegisterFunction(rule.Id, function, rule.Name);
-
         public static RuleCompiler RegisterTokenizerCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
         {
             return compiler
