@@ -1,18 +1,17 @@
 ﻿
 using gg.parse.rules;
-
-using gg.parse.script.parser;
 using gg.parse.script.compiler;
-
+using gg.parse.script.parser;
+using System.ComponentModel.DataAnnotations;
 using static gg.parse.Assertions;
-
 using static gg.parse.script.compiler.CompilerFunctions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.script.pipeline
 {
     public static class ScriptPipeline
     {
-        public static PipelineSession<char> RunTokenPipeline(string tokenizerDefinition, ScriptLogger? logger = null)
+        public static PipelineSession<char> RunTokenPipeline(string tokenizerDefinition, PipelineLogger? logger = null)
         {
             RequiresNotNullOrEmpty(tokenizerDefinition);
 
@@ -45,37 +44,53 @@ namespace gg.parse.script.pipeline
             RequiresNotNull(session.Compiler!);
             RequiresNotNullOrEmpty(session.Text!);
 
-            (session.Tokens, session.AstNodes) = ParseSessionText(session);
+            (session.Tokens, session.SyntaxTree) = ParseSessionText(session);
 
             // merge the sessions' rulegraph with all the included files
             MergeIncludes(session);
 
             // send logs created by parsing to handler.out in a curated format
-            session.LogHandler!.ProcessAstAnnotations(session.Text!, session.Tokens, session.AstNodes);
+            session.LogHandler!.ProcessAstAnnotations(session.Text!, session.Tokens, session.SyntaxTree);
             
             // remove logs from the annotations
-            session.AstNodes = session.AstNodes.Filter(a => a.Rule is not LogRule<int>);
+            session.SyntaxTree = session.SyntaxTree.Filter(a => a.Rule is not LogRule<int>);
 
             // combine the rule graph from the includes with the rulegraph with the one based on the current
             // parse results
-            session.RuleGraph = 
-                session
-                    .Compiler!
-                    .Compile(
-                        session.Text, 
-                        session.Tokens, 
-                        session.AstNodes,
-                        session.RuleGraph
-            );
+            try
+            {
+                session.RuleGraph =
+                    session
+                        .Compiler!
+                        .Compile(
+                            session.Text!,
+                            session.Tokens,
+                            session.SyntaxTree,
+                            session.RuleGraph
+                );
+            }
+            catch (AggregateException ae)
+            {
+                if (session.LogHandler != null)
+                {
+                    session.LogHandler.ProcessExceptions(
+                        ae.InnerExceptions,
+                        session.Text!,
+                        session.Tokens
+                    );
+                }
+
+                throw new ScriptPipelineException("Compliation exception(s) raised", ae);
+            }
             
             return session;
         }
 
-        public static PipelineSession<T> InitializeSession<T>(string script, ScriptLogger? logger = null)
+        public static PipelineSession<T> InitializeSession<T>(string script, PipelineLogger? logger = null)
             where T : IComparable<T>
         {
             var tokenizer = new ScriptTokenizer();
-            var pipelineLogger = logger ?? new ScriptLogger();
+            var pipelineLogger = logger ?? new PipelineLogger();
             var parser = new ScriptParser(tokenizer);
 
             var tokenizerSession = new PipelineSession<T>()
@@ -97,18 +112,20 @@ namespace gg.parse.script.pipeline
                 return new RuleCompiler(CreateRuleOutputMapping(parser))
                         .RegisterTokenizerCompilerFunctions(parser);
             }
-            catch (RuleReferenceException nce)
+            catch (CompilationException ce)
             {
-                var rule = parser.FindRule(nce.RuleId);
+                var rule = parser.FindRule(ce.RuleId);
 
                 // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId},"
+                        +" and no corresponding rule was found in the parser. Please check the compiler configuration.");
                 }
                 else
                 {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with" 
+                        + "i d={ce.RuleId}({rule.Name}).", ce);
                 }
             }
         }
@@ -126,18 +143,18 @@ namespace gg.parse.script.pipeline
                 return new RuleCompiler(CreateRuleOutputMapping(parser))
                     .RegisterGrammarCompilerFunctions(parser);
             }
-            catch (RuleReferenceException nce)
+            catch (CompilationException ce)
             {
-                var rule = parser.FindRule(nce.RuleId);
+                var rule = parser.FindRule(ce.RuleId);
 
                 // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
                 }
                 else
                 {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={nce.RuleId}({rule.Name}).", nce);
+                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId}({rule.Name}).", ce);
                 }
             }
         }
@@ -221,13 +238,13 @@ namespace gg.parse.script.pipeline
             RequiresNotNull(session);
             RequiresNotNullOrEmpty(session.Text!);
             RequiresNotNull(session.Parser!);
-            RequiresNotNull(session.AstNodes!);
+            RequiresNotNull(session.SyntaxTree!);
             RequiresNotNull(session.Tokens!);
             RequiresNotNull(session.RuleGraph!);
 
-            for (var i = 0; i < session.AstNodes!.Count;)
+            for (var i = 0; i < session.SyntaxTree!.Count;)
             {
-                var statement = session.AstNodes[i];
+                var statement = session.SyntaxTree[i];
 
                 if (statement.Rule == session.Parser!.Include)
                 {
@@ -268,7 +285,7 @@ namespace gg.parse.script.pipeline
                         session.IncludedFiles[filePath] = includeSession.RuleGraph;
                     }
 
-                    session.AstNodes.RemoveAt(i);
+                    session.SyntaxTree.RemoveAt(i);
                 }
                 else
                 {

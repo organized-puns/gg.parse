@@ -11,6 +11,8 @@ namespace gg.parse.script.compiler
 
         public List<Annotation>? SyntaxTree { get; init; }      
        
+        public List<Exception> Exceptions { get; init; } = [];
+
         public CompileSession(
             RuleCompiler compiler,
             string text, 

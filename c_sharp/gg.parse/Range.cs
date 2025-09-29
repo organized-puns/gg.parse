@@ -4,6 +4,8 @@ namespace gg.parse
 {
     public readonly struct Range(int start, int length) 
     {
+        public static readonly Range Undefined = new Range(0, -1);
+
         public int Start { get; init; } = start;
 
         public int End => Start + Length;

@@ -19,7 +19,7 @@ namespace gg.parse.script.pipeline
 
         public ScriptParser? Parser { get; set; }
 
-        public ScriptLogger? LogHandler { get; set; }
+        public PipelineLogger? LogHandler { get; set; }
 
         public RuleCompiler Compiler { get; set; }
 
@@ -29,6 +29,6 @@ namespace gg.parse.script.pipeline
 
         public List<Annotation>? Tokens { get; set; }
 
-        public List<Annotation>? AstNodes { get; set; }
+        public List<Annotation>? SyntaxTree { get; set; }
     }
 }

@@ -11,9 +11,9 @@ namespace gg.parse.script
             Assertions.RequiresNotNull(parser!.GrammarSession!);
             Assertions.RequiresNotNull(parser.GrammarSession!.Text!);
             Assertions.RequiresNotNull(parser.GrammarSession!.Tokens!);
-            Assertions.RequiresNotNull(parser.GrammarSession!.AstNodes!);
+            Assertions.RequiresNotNull(parser.GrammarSession!.SyntaxTree!);
 
-            return AstToString(parser.GrammarSession.Text!, parser.GrammarSession.Tokens!, parser.GrammarSession.AstNodes!);
+            return AstToString(parser.GrammarSession.Text!, parser.GrammarSession.Tokens!, parser.GrammarSession.SyntaxTree!);
         }
 
         public static string AstToString(string text, List<Annotation> tokens, List<Annotation> astNodes, string indentStr = "   ")

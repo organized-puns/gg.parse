@@ -21,7 +21,7 @@ namespace gg.parse.script.compiler
             {
                 // xxx add warnings
                 // xxx resolve rule
-                throw new CompilationException<char>("Literal text is empty", bodyNode.Range, null);
+                throw new CompilationException("Literal text is empty.", annotation: bodyNode);
             }
 
             return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Product, header.Precedence);
@@ -39,7 +39,7 @@ namespace gg.parse.script.compiler
             {
                 // xxx add context errors if fatal
                 // xxx resolve rule
-                throw new CompilationException<char>("Text defining the set text is null or empty", bodyNode.Range, null);
+                throw new CompilationException("Text defining the set text is null or empty", annotation: bodyNode);
             }
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
@@ -57,10 +57,8 @@ namespace gg.parse.script.compiler
 
             if (minText.Length != 3)
             {
-                throw new CompilationException<char>($"CompileCharacterRange: invalid range definition {minText}.",
-                            context.GetTextRange(lowerRange),
-                            // xxx resolve rule
-                            null);
+                throw new CompilationException($"CompileCharacterRange: invalid range definition {minText}.",
+                            annotation: bodyNode);
             }
 
             var upperRange = bodyNode.Children[1].Range;
@@ -68,10 +66,8 @@ namespace gg.parse.script.compiler
 
             if (maxText.Length != 3)
             {
-                throw new CompilationException<char>($"CompileCharacterRange: invalid range definition {maxText}.",
-                            context.GetTextRange(upperRange),
-                            // xxx resolve rule
-                            null);
+                throw new CompilationException($"CompileCharacterRange: invalid range definition {maxText}.",
+                            annotation: bodyNode);
             }
 
             return 
@@ -95,12 +91,12 @@ namespace gg.parse.script.compiler
             {
                 // xxx add context errors if fatal
                 // xxx resolve rule
-                throw new CompilationException<char>("ReferenceName text is empty", bodyNode.Range, null);
+                throw new CompilationException("ReferenceName text is empty", annotation: bodyNode);
             }
 
             var product = declaration.Product;
 
-            // xxx shouldn't raise a warning if product is anything else than annotation eg
+            // xxx should raise a warning if product is anything else than annotation eg
             // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasProductionOperator)
@@ -133,7 +129,7 @@ namespace gg.parse.script.compiler
                     var elementHeader = new RuleHeader(IRule.Output.Children, elementName, 0, 0);
 
                     elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
-                            ?? throw new CompilationException<char>("Cannot compile rule definition for sequence.", elementBody.Range, null);
+                            ?? throw new CompilationException("Cannot compile rule definition for sequence.", annotation: elementBody);
                 }
             }
 
@@ -195,7 +191,7 @@ namespace gg.parse.script.compiler
             {
                 // xxx add context errors if fatal
                 // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementBody.Range, null);
+                throw new CompilationException("Cannot compile subFunction definition for match count.", annotation: elementBody);
             }
 
             return new MatchCount<T>(header.Name, countRule, header.Product, min, max, header.Precedence);
@@ -244,7 +240,7 @@ namespace gg.parse.script.compiler
             // xxx add human understandable name instead of subfunction
             var elementHeader = new RuleHeader(IRule.Output.Self, $"{header.Name}, type: Not({elementName})");
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
-                ?? throw new CompilationException<char>($"Cannot compile unary rule definition for {typeof(TRule)}.", elementBody.Range, null);
+                ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
 
             return creationParams == null || creationParams.Length == 0
                 ? (TRule)Activator.CreateInstance(typeof(TRule), header.Name, header.Product, header.Precedence, unaryRule)
@@ -310,8 +306,7 @@ namespace gg.parse.script.compiler
 
             if (string.IsNullOrEmpty(message) || message.Length < 2)
             {
-                throw new CompilationException<T>("LogText is missing (quotes).",
-                    bodyNode.Range,
+                throw new CompilationException("LogText is missing (quotes).",
                     annotation: bodyNode);
             }
 
@@ -326,7 +321,7 @@ namespace gg.parse.script.compiler
                 var conditionHeader = new RuleHeader(IRule.Output.Self, $"{header.Name} condition: {elementName}");
 
                 condition = compilationFunction(conditionHeader, conditionBody, session) as RuleBase<T>
-                    ?? throw new CompilationException<char>("Cannot compile condition for Log.", conditionBody.Range, null);
+                    ?? throw new CompilationException("Cannot compile condition for Log.", annotation: conditionBody);
             }
 
             return new LogRule<T>(header.Name, header.Product, message, condition, logLevel);

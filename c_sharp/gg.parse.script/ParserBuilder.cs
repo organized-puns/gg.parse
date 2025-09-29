@@ -1,5 +1,4 @@
 ﻿using gg.parse.script.common;
-using gg.parse.script.parser;
 using gg.parse.script.pipeline;
 
 namespace gg.parse.script
@@ -10,15 +9,15 @@ namespace gg.parse.script
 
         public RuleGraph<int>? GrammarGraph { get; set; }
 
-        public ScriptLogger? LogHandler { get; set; }
+        public PipelineLogger? LogHandler { get; set; }
 
         public PipelineSession<char>? TokenSession { get; private set; }
 
         public PipelineSession<int>? GrammarSession { get; private set; }
 
-        public ParserBuilder From(string tokenDefinition, string? grammarDefinition = null, ScriptLogger? logger = null)
+        public ParserBuilder From(string tokenDefinition, string? grammarDefinition = null, PipelineLogger? logger = null)
         {
-            LogHandler = logger ?? new ScriptLogger();
+            LogHandler = logger ?? new PipelineLogger();
 
             TokenSession = ScriptPipeline.RunTokenPipeline(tokenDefinition, LogHandler);
 
