@@ -41,7 +41,7 @@ namespace gg.parse.script.tests.integration
                     .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                     .RegisterTokenizerCompilerFunctions(parser);
 
-            return compiler.Compile<char>(new CompileSession(compiler, text, tokens, syntaxTree));
+            return compiler.Compile<char>(text, tokens, syntaxTree);
         }
 
         // -- Tests ---------------------------------------------------------------------------------------------------

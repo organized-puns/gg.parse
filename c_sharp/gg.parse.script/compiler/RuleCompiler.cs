@@ -44,14 +44,18 @@ namespace gg.parse.script.compiler
             throw new RuleReferenceException($"Cannot find a compilation function referred to by rule id {parseFunctionId}", parseFunctionId);
         }
 
-        public RuleGraph<T> Compile<T>(CompileSession context) where T : IComparable<T>
+        public RuleGraph<T> Compile<T>(
+            string text, 
+            List<Annotation> tokens, 
+            List<Annotation>? syntaxTree = null,
+            RuleGraph<T>? resultGraph = null) where T : IComparable<T>
         {
-            return Compile(context, new RuleGraph<T>());
+            return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? new RuleGraph<T>());
         }
 
-        public RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
+        private RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
         {
-            foreach (var node in session.AstNodes)
+            foreach (var node in session.SyntaxTree)
             {
                 var declaration = GetRuleDeclaration(session, node.Children, 0);
                 var ruleBody = declaration.RuleBodyAnnotation;

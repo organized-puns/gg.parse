@@ -1,5 +1,4 @@
-﻿using System.Data;
-
+﻿
 namespace gg.parse.script.compiler
 {
     public class CompileSession
@@ -11,7 +10,7 @@ namespace gg.parse.script.compiler
 
         public List<Annotation>? Tokens { get; init; } 
 
-        public List<Annotation>? AstNodes { get; init; }      
+        public List<Annotation>? SyntaxTree { get; init; }      
        
 
         public CompileSession(
@@ -24,7 +23,7 @@ namespace gg.parse.script.compiler
             Compiler = compiler;
             Text = text;
             Tokens = tokens;
-            AstNodes = syntaxTree;
+            SyntaxTree = syntaxTree;
             
         }
 
