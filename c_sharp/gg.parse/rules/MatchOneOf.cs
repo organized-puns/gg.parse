@@ -4,6 +4,8 @@
     {
         private RuleBase<T>[] _options;
 
+        public RuleBase<T>? this[int index] => _options[index];
+
         public RuleBase<T>[] RuleOptions 
         {
             get => _options;
@@ -24,10 +26,14 @@
             RuleOptions = options;
         }
 
-        public MatchOneOf(string name, IRule.Output production, int precedence = 0, params RuleBase<T>[] options)
-            : base(name, production, precedence)
+        public MatchOneOf(
+            string name, 
+            IRule.Output production, 
+            int precedence = 0, 
+            params RuleBase<T>[] rules
+        ) : base(name, production, precedence)
         {
-            RuleOptions = options;
+            RuleOptions = rules;
         }
 
         public override ParseResult Parse(T[] input, int start)

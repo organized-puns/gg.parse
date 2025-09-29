@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using gg.parse.rules;
+using System.Diagnostics;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.integration
@@ -6,6 +7,26 @@ namespace gg.parse.script.tests.integration
     [TestClass]
     public sealed class RuleGraphBuilderIntegrationTests
     {
+        [TestMethod]
+        public void SetupReferencesWithDifferentOutputs_BuildParser_ExpectRulesToMatchSpecifiedOutput()
+        {
+            var parser = new ParserBuilder().From($"foo='foo';bar='bar';", "root=foo, #bar, ~foo;");
+
+            var root = parser.GrammarGraph.FindRule("root") as MatchRuleSequence<int>;
+
+            IsTrue(root != null);
+            
+            IsTrue((root[0] as RuleReference<int>).Reference == "foo");
+            IsTrue(root[0].Production == IRule.Output.Self);
+
+            IsTrue((root[1] as RuleReference<int>).Reference == "bar");
+            IsTrue(root[1].Production == IRule.Output.Children);
+
+            IsTrue((root[2] as RuleReference<int>).Reference == "foo");
+            IsTrue(root[2].Production == IRule.Output.Void);
+
+        }
+
         [TestMethod]
         public void SetupTrivalCase_Parse_ExpectAWorkingParser()
         {
@@ -29,7 +50,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0]!.Rule!.Name == "root");
 
-            var rangeTillBar = tokensResult.Annotations.UnionOfRanges(barParseResult[0].Range);
+            var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
             IsTrue(rangeTillBar.End == 8);
 
@@ -74,7 +95,7 @@ namespace gg.parse.script.tests.integration
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0]!.Rule!.Name == "root");
 
-            var rangeTillBar = tokensResult.Annotations.UnionOfRanges(barParseResult[0].Range);
+            var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
             IsTrue(rangeTillBar.End == 8);
 
@@ -85,7 +106,7 @@ namespace gg.parse.script.tests.integration
             // unlike find, skip will be happy if no bars are found
             IsTrue(tokensResult.FoundMatch);
 
-            rangeTillBar = tokensResult.Annotations.UnionOfRanges(barParseResult[0].Range);
+            rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
             IsTrue(rangeTillBar.End == testStringWithoutBar.Length);
         }

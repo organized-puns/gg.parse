@@ -61,7 +61,7 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
-            Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
+            Assert.IsTrue(jsonParser.TokenGraph.FindRule("string") != null);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
-            Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
+            Assert.IsTrue(jsonParser.TokenGraph.FindRule("string") != null);
         }
 
         /// <summary>
@@ -88,9 +88,9 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
-            Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
+            Assert.IsTrue(jsonParser.TokenGraph.FindRule("string") != null);
 
-            var stringRef = jsonParser.Tokenizer.FindRule("string_ref");
+            var stringRef = jsonParser.TokenGraph.FindRule("string_ref");
             Assert.IsTrue(stringRef != null);
 
             var parseResult = stringRef.Parse("\"this is a string\"".ToCharArray(), 0);
@@ -112,9 +112,9 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder().From(includeCommand);
 
             // should have loaded the string rule from the included file
-            Assert.IsTrue(jsonParser.Tokenizer.FindRule("string") != null);
+            Assert.IsTrue(jsonParser.TokenGraph.FindRule("string") != null);
 
-            var stringRef = jsonParser.Tokenizer.FindRule("string_ref");
+            var stringRef = jsonParser.TokenGraph.FindRule("string_ref");
             Assert.IsTrue(stringRef != null);
 
             var parseResult = stringRef.Parse("\"this is a string\"".ToCharArray(), 0);
@@ -146,20 +146,20 @@ namespace gg.parse.script.tests.integration
                     "include 'assets/json.grammar';#main=json;"
             );
 
-            Assert.IsTrue(jsonParser.Tokenizer != null);
-            Assert.IsTrue(jsonParser.Tokenizer.Root != null);
-            Assert.IsTrue(jsonParser.Parser != null);
-            Assert.IsTrue(jsonParser.Parser.Root != null);
+            Assert.IsTrue(jsonParser.TokenGraph != null);
+            Assert.IsTrue(jsonParser.TokenGraph.Root != null);
+            Assert.IsTrue(jsonParser.GrammarGraph != null);
+            Assert.IsTrue(jsonParser.GrammarGraph.Root != null);
 
             // spot check to see if object is in the grammar rule graph
-            Assert.IsTrue(jsonParser.Parser.FindRule("object") != null);
+            Assert.IsTrue(jsonParser.GrammarGraph.FindRule("object") != null);
 
             // check if it compiles json
             var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations[0].Children[0].Rule == jsonParser.Parser.FindRule("object"));
-            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].Rule == jsonParser.Parser.FindRule("key_value_pair"));
+            Assert.IsTrue(result.Annotations[0].Children[0].Rule == jsonParser.GrammarGraph.FindRule("object"));
+            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].Rule == jsonParser.GrammarGraph.FindRule("key_value_pair"));
         }
 
         /// <summary>
@@ -174,13 +174,13 @@ namespace gg.parse.script.tests.integration
                     "include 'assets/json.grammar'; # main = json;"
                 );
 
-            Assert.IsTrue(jsonParser.Tokenizer != null);
-            Assert.IsTrue(jsonParser.Tokenizer.Root != null);
-            Assert.IsTrue(jsonParser.Parser != null);
-            Assert.IsTrue(jsonParser.Parser.Root != null);
+            Assert.IsTrue(jsonParser.TokenGraph != null);
+            Assert.IsTrue(jsonParser.TokenGraph.Root != null);
+            Assert.IsTrue(jsonParser.GrammarGraph != null);
+            Assert.IsTrue(jsonParser.GrammarGraph.Root != null);
 
             // spot check to see if object is in the grammar rule graph
-            Assert.IsTrue(jsonParser.Parser.FindRule("object") != null);
+            Assert.IsTrue(jsonParser.GrammarGraph.FindRule("object") != null);
 
             // check if it compiles json
             var (tokens, ast) = jsonParser.Parse("{ \"key\": 123 }");
@@ -188,11 +188,11 @@ namespace gg.parse.script.tests.integration
             // test if the tokes came out as expected
             var expectedTokens = new int[]
             {
-                jsonParser.Tokenizer.FindRule("scope_start").Id,
-                jsonParser.Tokenizer.FindRule("string").Id,
-                jsonParser.Tokenizer.FindRule("kv_separator").Id,
-                jsonParser.Tokenizer.FindRule("int").Id,
-                jsonParser.Tokenizer.FindRule("scope_end").Id,
+                jsonParser.TokenGraph.FindRule("scope_start").Id,
+                jsonParser.TokenGraph.FindRule("string").Id,
+                jsonParser.TokenGraph.FindRule("kv_separator").Id,
+                jsonParser.TokenGraph.FindRule("int").Id,
+                jsonParser.TokenGraph.FindRule("scope_end").Id,
             };
 
             var tokenIds = tokens.Annotations.Select(t => t.Rule.Id).ToArray();
@@ -202,8 +202,8 @@ namespace gg.parse.script.tests.integration
             var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
 
             Assert.IsTrue(result.FoundMatch);
-            Assert.IsTrue(result.Annotations[0].Children[0].Rule == jsonParser.Parser.FindRule("object"));
-            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].Rule == jsonParser.Parser.FindRule("key_value_pair"));
+            Assert.IsTrue(result.Annotations[0].Children[0].Rule == jsonParser.GrammarGraph.FindRule("object"));
+            Assert.IsTrue(result.Annotations[0].Children[0].Children[0].Rule == jsonParser.GrammarGraph.FindRule("key_value_pair"));
         }
     }
 }

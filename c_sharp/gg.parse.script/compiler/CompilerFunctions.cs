@@ -12,459 +12,319 @@ namespace gg.parse.script.compiler
     {
         /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
-        public static RuleBase<char> CompileLiteral(
-           RuleCompiler<char> _,
-           RuleDeclaration declaration,
-           CompileSession context)
+        public static RuleBase<char> CompileLiteral(RuleHeader header, Annotation bodyNode, CompileSession context)
         {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-            var literalText = context.GetText(ruleDefinition.Range);
+            var literalText = context.GetText(bodyNode.Range);
             var unescapedLiteralText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
 
             if (string.IsNullOrEmpty(unescapedLiteralText))
             {
                 // xxx add warnings
                 // xxx resolve rule
-                throw new CompilationException<char>("Literal text is empty", ruleDefinition.Range, null);
+                throw new CompilationException("Literal text is empty.", annotation: bodyNode);
             }
 
-            return new MatchDataSequence<char>(declaration.Name, unescapedLiteralText.ToCharArray(), declaration.Product, declaration.Precedence);
-        }
+            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Product, header.Precedence);
+        }        
 
-        public static RuleBase<T> CompileIdentifier<T>(
-           RuleCompiler<T> compiler,
-           RuleDeclaration declaration,
-           CompileSession session) where T : IComparable<T>
+        public static RuleBase<char> CompileCharacterSet( RuleHeader header, Annotation bodyNode, CompileSession session)
         {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-            var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
-            var referenceName = hasProductionOperator
-                    // ref name contains a production
-                    ? session.GetText(ruleDefinition.Children[1].Range)
-                    // no operator, use the entire span
-                    : session.GetText(ruleDefinition.Range);
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+            Assertions.Requires(bodyNode.Children!.Count == 1);
 
-            if (string.IsNullOrEmpty(referenceName))
-            {
-                // xxx add context errors if fatal
-                // xxx resolve rule
-                throw new CompilationException<char>("ReferenceName text is empty", ruleDefinition.Range, null);
-            }
-
-            var product = declaration.Product;
-
-            // xxx shouldn't raise a warning if product is anything else than annotation eg
-            // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
-            // arbitrary. The user should either go #rule = ref or rule = ~ref...
-            if (hasProductionOperator)
-            {
-                compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
-            }
-
-            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
-        }
-
-        public static RuleBase<char> CompileCharacterSet(
-           RuleCompiler<char> compiler,
-           RuleDeclaration declaration,
-           CompileSession session)
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count == 1);
-
-            var setText = session.GetText(ruleDefinition.Children[0].Range);
+            var setText = session.GetText(bodyNode.Children[0].Range);
 
             if (string.IsNullOrEmpty(setText) || setText.Length <= 2)
             {
                 // xxx add context errors if fatal
                 // xxx resolve rule
-                throw new CompilationException<char>("Text defining the set text is null or empty", ruleDefinition.Range, null);
+                throw new CompilationException("Text defining the set text is null or empty", annotation: bodyNode);
             }
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 
-            return new MatchDataSet<char>(declaration.Name, declaration.Product, setText.ToArray(), declaration.Precedence);
+            return new MatchDataSet<char>(header.Name, header.Product, setText.ToArray(), header.Precedence);
         }
 
-        public static RuleBase<char> CompileCharacterRange(
-           RuleCompiler<char> compiler,
-           RuleDeclaration declaration,
-           CompileSession context)
+        public static RuleBase<char> CompileCharacterRange(RuleHeader declaration, Annotation bodyNode, CompileSession context)
         {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-            var lowerRange = ruleDefinition.Children[0].Range;
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+
+            var lowerRange = bodyNode.Children![0].Range;
             var minText = context.GetText(lowerRange);
 
             if (minText.Length != 3)
             {
-                throw new CompilationException<char>($"CompileCharacterRange: invalid range definition {minText}.",
-                            context.GetTextRange(lowerRange),
-                            // xxx resolve rule
-                            null);
+                throw new CompilationException($"CompileCharacterRange: invalid range definition {minText}.",
+                            annotation: bodyNode);
             }
 
-            var upperRange = ruleDefinition.Children[1].Range;
+            var upperRange = bodyNode.Children[1].Range;
             var maxText = context.GetText(upperRange);
 
             if (maxText.Length != 3)
             {
-                throw new CompilationException<char>($"CompileCharacterRange: invalid range definition {maxText}.",
-                            context.GetTextRange(upperRange),
-                            // xxx resolve rule
-                            null);
+                throw new CompilationException($"CompileCharacterRange: invalid range definition {maxText}.",
+                            annotation: bodyNode);
             }
 
             return 
                 // xxx parameter order...
                 new MatchDataRange<char>(declaration.Name, minText[1], maxText[1], declaration.Product, declaration.Precedence);
         }
-       
+
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-        // xxx check the overlap with option and eval (and club together)
-        public static RuleBase<T> CompileSequence<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T: IComparable<T>
+        public static RuleBase<T> CompileIdentifier<T>(RuleHeader declaration, Annotation bodyNode, CompileSession session) 
+            where T : IComparable<T>
         {
-            var sequenceElements = new List<RuleBase<T>>();
-            var ruleDefinition = declaration.RuleBodyAnnotation;
+            var hasProductionOperator = (bodyNode.Children != null && bodyNode.Children.Count > 1);
+            var referenceName = hasProductionOperator
+                    // ref name contains a production - take the name only 
+                    ? session.GetText(bodyNode.Children[1].Range)
+                    // no operator, use the entire span
+                    : session.GetText(bodyNode.Range);
 
-            if (ruleDefinition.Children != null)
-            {
-                for (var i = 0; i < ruleDefinition.Children.Count; i++)
-                {
-                    var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-
-                    var elementDeclaration = 
-                        new RuleDeclaration(
-                            IRule.Output.Children, 
-                            $"{declaration.Name}[{i}], type: {elementName}", 
-                            0,
-                            elementAnnotation
-                        );
-
-                    var sequenceElement = compilationFunction(compiler, elementDeclaration, session);
-
-                    if (sequenceElement == null)
-                    {
-                        // xxx add context errors if fatal
-                        // xxx resolve rule
-                        throw new CompilationException<char>("Cannot compile rule definition for sequence.", elementAnnotation.Range, null);
-                    }
-
-                    sequenceElements.Add(sequenceElement);
-                }
-            }
-
-            return new MatchRuleSequence<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. sequenceElements]);
-        }
-
-        public static RuleBase<T> CompileOption<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T>
-        {
-            var optionElements = new List<RuleBase<T>>();
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            if (ruleDefinition.Children != null)
-            {
-                for (var i = 0; i < ruleDefinition.Children.Count; i++)
-                {
-                    var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.FindCompilationFunction(elementAnnotation.Rule.Id);
-                    var elementDeclaration = 
-                        new RuleDeclaration(
-                            IRule.Output.Self, 
-                            $"{declaration.Name}[{i}], type: {elementName}",
-                            0,
-                            elementAnnotation
-                        );
-                    var optionElement = compilationFunction(compiler, elementDeclaration, context);
-
-                    if (optionElement == null)
-                    {
-                        // xxx add context errors if fatal
-                        // xxx resolve rule
-                        throw new CompilationException<char>("Cannot compile rule definition for option.", elementAnnotation.Range, null);
-                    }
-
-                    optionElements.Add(optionElement);
-                }
-            }
-
-            return new MatchOneOf<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. optionElements]);
-        }
-
-        
-
-        public static RuleBase<T> CompileEvaluation<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
-        {
-            var evaluationElements = new List<RuleBase<T>>();
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            if (ruleDefinition.Children != null)
-            {
-                for (var i = 0; i < ruleDefinition.Children.Count; i++)
-                {
-                    var elementAnnotation = ruleDefinition.Children[i];
-                    var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-
-                    var elementDeclaration = 
-                        new RuleDeclaration(
-                            IRule.Output.Children, 
-                            $"{declaration.Name}[{i}], type: {elementName}",
-                            0,
-                            elementAnnotation
-                        );
-                    var elementFunction = 
-                        compilationFunction(compiler, elementDeclaration, session) 
-                        ?? throw new CompilationException<char>($"Compiling evaluation, can't find function for element at {elementAnnotation.Range}.", elementAnnotation.Range, null);
-
-                    evaluationElements.Add(elementFunction);
-                }
-            }
-
-            return new MatchEvaluation<T>(declaration.Name, declaration.Product, declaration.Precedence, [.. evaluationElements]);
-        }
-
-        public static RuleBase<T> CompileGroup<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction,_) = compiler.Functions[elementAnnotation.Rule.Id];
-            var groupDeclaration = new RuleDeclaration(declaration.Product, declaration.Name, elementAnnotation);
-
-            return compilationFunction(compiler, groupDeclaration, context);
-        }
-
-        public static RuleBase<T> CompileZeroOrMore<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T> =>
-            
-            CompileCount(compiler, declaration, context, 0, 0);
-
-
-        public static RuleBase<T> CompileOneOrMore<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession context) where T : IComparable<T> =>
-
-            CompileCount(compiler, declaration, context, 1, 0);
-
-        public static RuleBase<T> CompileZeroOrOne<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T> =>
-
-            CompileCount(compiler, declaration, session, 0, 1);
-
-        public static RuleBase<T> CompileCount<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session,
-            int min, int max) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-            var elementDeclaration = new RuleDeclaration(IRule.Output.Children, $"{declaration.Name} of {elementName}", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
-
-            if (subFunction == null)
+            if (string.IsNullOrEmpty(referenceName))
             {
                 // xxx add context errors if fatal
                 // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for match count.", elementAnnotation.Range, null);
+                throw new CompilationException("ReferenceName text is empty", annotation: bodyNode);
             }
 
-            return new MatchCount<T>(declaration.Name, subFunction, declaration.Product, min, max, declaration.Precedence);
+            var product = declaration.Product;
+
+            // xxx should raise a warning if product is anything else than annotation eg
+            // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
+            // arbitrary. The user should either go #rule = ref or rule = ~ref...
+            if (hasProductionOperator)
+            {
+                session.Compiler.TryGetProduct(bodyNode.Children[0]!.Rule.Id, out product);
+            }
+            else
+            {
+                product = IRule.Output.Self;
+            }
+
+            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
+        }
+
+        public static TRule CompileBinaryOperator<T, TRule>(RuleHeader declaration, Annotation bodyNode, CompileSession session) 
+            where T : IComparable<T> where TRule : RuleBase<T>
+        {
+            RuleBase<T>[]? elementArray = null;
+
+            if (bodyNode.Children != null)
+            {
+                elementArray = new RuleBase<T>[bodyNode.Children.Count];
+                
+                for (var i = 0; i < bodyNode.Children.Count; i++)
+                {
+                    var elementBody = bodyNode.Children[i];
+                    var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule.Id];
+
+                    var elementName = $"{declaration.Name}[{i}], type: {functionName}";
+                    var elementHeader = new RuleHeader(IRule.Output.Children, elementName, 0, 0);
+
+                    elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
+                            ?? throw new CompilationException("Cannot compile rule definition for sequence.", annotation: elementBody);
+                }
+            }
+
+            return (TRule)Activator.CreateInstance(typeof(TRule), declaration.Name, declaration.Product, declaration.Precedence, elementArray);
+        }
+
+        public static RuleBase<T> CompileSequence<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T: IComparable<T> =>
+        
+            CompileBinaryOperator<T, MatchRuleSequence<T>>(header, bodyNode, session);
+        
+        public static RuleBase<T> CompileOption<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T> =>
+        
+            CompileBinaryOperator<T, MatchOneOf<T>>(header, bodyNode, session);               
+
+        public static RuleBase<T> CompileEvaluation<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T> =>
+        
+            CompileBinaryOperator<T, MatchEvaluation<T>>(header, bodyNode,session);        
+
+        public static RuleBase<T> CompileGroup<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T>
+        {
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+            Assertions.Requires(bodyNode.Children!.Count > 0);
+
+            var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule.Id];
+            var groupDeclaration = new RuleHeader(header.Product, header.Name, 0, 0);
+
+            return compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
+        }
+
+        public static RuleBase<T> CompileCount<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session,
+            int min, 
+            int max) where T : IComparable<T>
+        {
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+            Assertions.Requires(bodyNode.Children!.Count > 0);
+
+            var elementBody = bodyNode.Children[0];
+            var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
+            var elementHeader = new RuleHeader(IRule.Output.Children, $"{header.Name} of {elementName}", 0, 0);
+
+            if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
+            {
+                // xxx add context errors if fatal
+                // xxx resolve rule
+                throw new CompilationException("Cannot compile subFunction definition for match count.", annotation: elementBody);
+            }
+
+            return new MatchCount<T>(header.Name, countRule, header.Product, min, max, header.Precedence);
+        }
+
+
+        public static RuleBase<T> CompileZeroOrMore<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T> =>
+            
+            CompileCount<T>(header, bodyNode, session, 0, 0);
+
+
+        public static RuleBase<T> CompileOneOrMore<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) 
+            where T : IComparable<T> =>
+
+            CompileCount<T>(header, bodyNode, session, 1, 0);
+
+        public static RuleBase<T> CompileZeroOrOne<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) 
+            where T : IComparable<T> =>
+
+            CompileCount<T>(header, bodyNode, session, 0, 1);
+
+
+        public static TRule CompileUnary<T, TRule>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session,
+            params object[] creationParams)
+            where T : IComparable<T>
+            where TRule : RuleBase<T>
+        {
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+            Assertions.Requires(bodyNode.Children!.Count > 0);
+
+            var elementBody = bodyNode.Children[0];
+            var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
+            // xxx add human understandable name instead of subfunction
+            var elementHeader = new RuleHeader(IRule.Output.Self, $"{header.Name}, type: Not({elementName})");
+            var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
+                ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
+
+            return creationParams == null || creationParams.Length == 0
+                ? (TRule)Activator.CreateInstance(typeof(TRule), header.Name, header.Product, header.Precedence, unaryRule)
+                : (TRule)Activator.CreateInstance(typeof(TRule), [header.Name, header.Product, header.Precedence, unaryRule, ..creationParams]);
         }
 
         public static RuleBase<T> CompileNot<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) 
+            where T : IComparable<T> =>
+        
+            CompileUnary<T, MatchNot<T>>(header, bodyNode, session);
+        
 
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-            // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Not({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
-
-            if (subFunction == null)
-            {
-                // xxx add errors
-                // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for Not.", elementAnnotation.Range, null);
-            }
-
-            return new MatchNot<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
-        }
-
-        // xxx unary functions are copy/pasting code, could roll these up
         public static RuleBase<T> CompileSkip<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-            // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Skip({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
-
-            if (subFunction == null)
-            {
-                // xxx add errors
-                // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for Skip.", elementAnnotation.Range, null);
-            }
-
-            return new SkipRule<T>(declaration.Name, declaration.Product, subFunction, failOnEof: false);
-        }
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) 
+            where T : IComparable<T> =>
+        
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false);
 
         public static RuleBase<T> CompileFind<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-            // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Find({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
-
-            if (subFunction == null)
-            {
-                // xxx add errors
-                // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for Find.", elementAnnotation.Range, null);
-            }
-
-            return new SkipRule<T>(declaration.Name, declaration.Product, subFunction, failOnEof: true);
-        }
+            RuleHeader header, 
+            Annotation bodyNode,
+            CompileSession session) 
+            where T : IComparable<T> =>
+        
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, true);
+        
 
         public static RuleBase<T> CompileTryMatch<T>(
-            RuleCompiler<T> compiler,
-            RuleDeclaration declaration,
-            CompileSession session) where T : IComparable<T>
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T> =>
+        
+        CompileUnary<T, MatchCondition<T>>(header, bodyNode, session);
+        
+
+        public static RuleBase<T> CompileAny<T>(RuleHeader header, Annotation _, CompileSession __) 
+            where T : IComparable<T>
         {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
+            Assertions.Requires(header != null);
 
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var elementAnnotation = ruleDefinition.Children[0];
-            var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
-            // xxx add human understandable name instead of subfunction
-            var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{elementName}, type: {declaration.Name}", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
-
-            if (subFunction == null)
-            {
-                // xxx add errors
-                // xxx resolve rule
-                throw new CompilationException<char>("Cannot compile subFunction definition for Try match.", elementAnnotation.Range, null);
-            }
-
-            return new MatchCondition<T>(declaration.Name, declaration.Product, subFunction, declaration.Precedence);
-        }
-
-        public static RuleBase<T> CompileAny<T>(
-            RuleCompiler<T> _,
-            RuleDeclaration declaration,
-            CompileSession __) where T : IComparable<T>
-        {
-            Assertions.Requires(declaration != null);
-
-            return new MatchAnyData<T>(declaration.Name, declaration.Product, precedence: declaration.Precedence);
+            return new MatchAnyData<T>(header.Name, header.Product, precedence: header.Precedence);
         }
 
         public static RuleBase<T> CompileLog<T>(
-           RuleCompiler<T> compiler,
-           RuleDeclaration declaration,
-           CompileSession context) where T : IComparable<T>
+            RuleHeader header, 
+            Annotation bodyNode,
+            CompileSession session) 
+            where T : IComparable<T>
         {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+            Assertions.Requires(bodyNode.Children!.Count > 0);
 
-            Assertions.Requires(ruleDefinition != null);
-            Assertions.Requires(ruleDefinition!.Children != null);
-            Assertions.Requires(ruleDefinition.Children!.Count > 0);
-
-            var logLevelText = context.GetText(ruleDefinition.Children[0].Range);
+            var logLevelText = session.GetText(bodyNode.Children[0].Range);
             var logLevel = Enum.Parse<LogLevel>(logLevelText, ignoreCase: true);
 
-            var message = context.GetText(ruleDefinition.Children[1].Range);
+            var message = session.GetText(bodyNode.Children[1].Range);
 
             if (string.IsNullOrEmpty(message) || message.Length < 2)
             {
-                throw new CompilationException<T>("LogText is missing (quotes).",
-                    ruleDefinition.Range,
-                    annotation: declaration.RuleBodyAnnotation);
+                throw new CompilationException("LogText is missing (quotes).",
+                    annotation: bodyNode);
             }
 
             message = message.Substring(1, message.Length - 2);
 
             RuleBase<T>? condition = null;
 
-            if (ruleDefinition.Children.Count == 3)
+            if (bodyNode.Children.Count == 3)
             {
-                var conditionDefinition = ruleDefinition.Children[2];
-                var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.Rule.Id];
-                var conditionDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name} condition: {elementName}", conditionDefinition);
-                condition = compilationFunction(compiler, conditionDeclaration, context);
+                var conditionBody = bodyNode.Children[2];
+                var (compilationFunction, elementName) = session.FindFunction(conditionBody.Rule);
+                var conditionHeader = new RuleHeader(IRule.Output.Self, $"{header.Name} condition: {elementName}");
 
-                if (condition == null)
-                {
-                    // xxx add warnings
-                    // xxx resolve rule
-                    throw new CompilationException<char>("Cannot compile condition for Log.", conditionDefinition.Range, null);
-                }
+                condition = compilationFunction(conditionHeader, conditionBody, session) as RuleBase<T>
+                    ?? throw new CompilationException("Cannot compile condition for Log.", annotation: conditionBody);
             }
 
-            return new LogRule<T>(declaration.Name, declaration.Product, message, condition, logLevel);
+            return new LogRule<T>(header.Name, header.Product, message, condition, logLevel);
         }
     }
 }

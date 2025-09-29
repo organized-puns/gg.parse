@@ -1,9 +1,12 @@
 ﻿using gg.parse.rules;
+using gg.parse.script.compiler;
+using gg.parse.script.parser;
+using System;
 using static gg.parse.Assertions;
 
-namespace gg.parse.script.parser
+namespace gg.parse.script.pipeline
 {
-    public class ScriptLogger   
+    public class PipelineLogger   
     {
         // Note: not thread safe, application will need to deal with this
         public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
@@ -17,7 +20,7 @@ namespace gg.parse.script.parser
 
         public Action<LogLevel, string>? Out { get; set; } = null;
 
-        public ScriptLogger(bool storeLogs = true, int maxStoredLogs = -1)
+        public PipelineLogger(bool storeLogs = true, int maxStoredLogs = -1)
         {
             if (storeLogs)
             {
@@ -57,7 +60,7 @@ namespace gg.parse.script.parser
             {
                 foreach (var (annotation, log) in logList)
                 {
-                    var (line, column) = MapAnnotationRangeToLineColumn(annotation.Range, text, lineRanges);
+                    var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
                     var message = $"({line}, {column}) {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
 
                     Log(log.Level, message);
@@ -80,7 +83,7 @@ namespace gg.parse.script.parser
             {
                 foreach (var (annotation, log) in logList)
                 {
-                    var (line, column) = MapAnnotationRangeToLineColumn(annotation, text, tokens, lineRanges);
+                    var (line, column) = MapAnnotationRangeToLineColumn(annotation, tokens, lineRanges);
                     var message = $"({line}, {column}) {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
 
                     Log(log.Level, message);
@@ -123,6 +126,43 @@ namespace gg.parse.script.parser
             else
             {
                 Log(LogLevel.Fatal, "No further details on the underlying error.");
+            }
+        }
+
+        public void ProcessExceptions(
+            IEnumerable<Exception> exceptions, 
+            string text,
+            List<Annotation> tokens)
+        {
+            var lineRanges = CollectLineRanges(text);
+
+            foreach (var ex in exceptions)
+            {
+                if (ex is ScriptException scriptEx)
+                {
+                    ProcessException(scriptEx, logException: false);
+                }
+                else if (ex is CompilationException ce)
+                {
+                    ProcessException(ce, tokens, lineRanges);
+                }
+                else
+                {
+                    Log(LogLevel.Error, $"Exception: {ex}");
+                }
+            }
+        }
+
+        public void ProcessException(CompilationException exception, List<Annotation> tokens, List<Range> lineRanges)
+        {
+            if (exception.Annotation != null)
+            {
+                var (line, column) = MapAnnotationRangeToLineColumn(exception.Annotation, tokens, lineRanges);
+                Log(LogLevel.Error, $"({line}, {column}) Compilation error: {exception.Message}");
+            }          
+            else
+            {
+                Log(LogLevel.Error, $"Compilation error: {exception.Message}");
             }
         }
 
@@ -170,7 +210,7 @@ namespace gg.parse.script.parser
             return result;
         }
 
-        private static (int line, int column) MapAnnotationRangeToLineColumn(Range textRange, string text, List<Range> lineRanges)
+        public static (int line, int column) MapRangeToLineColumn(Range textRange, List<Range> lineRanges)
         {
             var line = 0;
 
@@ -185,7 +225,11 @@ namespace gg.parse.script.parser
             return (line + 1, textRange.Start - lineRanges[line].Start + 1);
         }
 
-        private static (int line, int column) MapAnnotationRangeToLineColumn(Annotation annotation, string text, List<Annotation> tokens, List<Range> lineRanges) =>
-           MapAnnotationRangeToLineColumn(tokens.UnionOfRanges(annotation.Range), text, lineRanges);         
+        private static (int line, int column) MapAnnotationRangeToLineColumn(
+            Annotation annotation, 
+            List<Annotation> tokens, 
+            List<Range> lineRanges) =>
+
+           MapRangeToLineColumn(tokens.CombinedRange(annotation.Range), lineRanges);         
     }
 }

@@ -19,7 +19,7 @@ namespace gg.parse
 
         public static string GetText(this Annotation grammarAnnotation, string text, List<Annotation> tokens)
         {
-            var range = UnionOfRanges(tokens, grammarAnnotation.Range);
+            var range = CombinedRange(tokens, grammarAnnotation.Range);
             return text.Substring(range.Start, range.Length);
         }
 
@@ -29,7 +29,7 @@ namespace gg.parse
         /// <param name="tokens"></param>
         /// <param name="tokensRange"></param>
         /// <returns></returns>
-        public static Range UnionOfRanges(this List<Annotation> tokens, Range tokensRange)
+        public static Range CombinedRange(this List<Annotation> tokens, Range tokensRange)
         {
             // tokenRange is allowed to start above the max count as it signals a token
             // at the eof.
@@ -123,7 +123,9 @@ namespace gg.parse
         public static bool ContainsRule(this List<Annotation> annotations, IRule rule, out List<Annotation> results) =>
             Contains(annotations, new Func<Annotation, bool>(a => a.Rule == rule), out results);
 
-        public static string Substring(this string str, Annotation range) => str.Substring(range.Start, range.Length);
+        public static string Substring(this string str, Annotation annotation) => str.Substring(annotation.Range);
+
+        public static string Substring(this string str, Range range) => str.Substring(range.Start, range.Length);
 
     }
 }

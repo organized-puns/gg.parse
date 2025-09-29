@@ -1,10 +1,9 @@
-﻿#nullable disable
-
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.compiler;
+using gg.parse.script.pipeline;
 
 namespace gg.parse.script.tests.integration
 {
@@ -23,7 +22,6 @@ namespace gg.parse.script.tests.integration
         {
             var tokenizer = new ScriptTokenizer();
             var parser = new ScriptParser(tokenizer);
-            var compiler = new RuleCompiler<char>();
 
             var result = tokenizer.Tokenize(text);
 
@@ -38,12 +36,12 @@ namespace gg.parse.script.tests.integration
             IsTrue(result.Annotations != null && result.Annotations.Count > 0);
             IsTrue(result.Annotations[0].Rule != parser.UnknownInputError);
 
-            var astNodes = result.Annotations;
+            var syntaxTree = result.Annotations;
+            var compiler =
+                new RuleCompiler(ScriptPipeline.CreateRuleOutputMapping(parser))
+                    .RegisterTokenizerCompilerFunctions(parser);
 
-            return compiler
-                    .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
-                    .RegisterTokenizerCompilerFunctions(parser)
-                    .Compile(new CompileSession(text, tokens, astNodes));
+            return compiler.Compile<char>(text, tokens, syntaxTree);
         }
 
         // -- Tests ---------------------------------------------------------------------------------------------------

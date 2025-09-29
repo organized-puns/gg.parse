@@ -42,7 +42,7 @@ namespace gg.parse.calculator.tests
 
             foreach (var token in expectedTokens)
             {
-                IsNotNull(calculatorParser.Tokenizer.FindRule(token), $"Token '{token}' not found.");
+                IsNotNull(calculatorParser.TokenGraph.FindRule(token), $"Token '{token}' not found.");
             }
         }
 
@@ -71,7 +71,7 @@ namespace gg.parse.calculator.tests
 
             foreach (var ruleName in expectedRules)
             {
-                IsNotNull(calculatorParser.Parser!.FindRule(ruleName), $"Rule '{ruleName}' not found.");
+                IsNotNull(calculatorParser.GrammarGraph!.FindRule(ruleName), $"Rule '{ruleName}' not found.");
             }
         }
 
@@ -83,11 +83,11 @@ namespace gg.parse.calculator.tests
         {
             var calculatorParser = CreateParser();
 
-            var tokens = calculatorParser.Tokenizer.Root.Parse("1".ToCharArray(), 0);
+            var tokens = calculatorParser.TokenGraph.Root.Parse("1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 1);
-            IsTrue(tokens[0].Rule == calculatorParser.Tokenizer.FindRule("number"));
+            IsTrue(tokens[0].Rule == calculatorParser.TokenGraph.FindRule("number"));
 
             var (_, astTree) = calculatorParser.Parse("1");
 
@@ -109,12 +109,12 @@ namespace gg.parse.calculator.tests
         {
             var calculatorParser = CreateParser();
 
-            var tokens = calculatorParser.Tokenizer!.Root!.Parse("-1".ToCharArray(), 0);
+            var tokens = calculatorParser.TokenGraph!.Root!.Parse("-1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 2);
-            IsTrue(tokens[0]!.Rule == calculatorParser.Tokenizer.FindRule("minus"));
-            IsTrue(tokens[1]!.Rule == calculatorParser.Tokenizer.FindRule("number"));
+            IsTrue(tokens[0]!.Rule == calculatorParser.TokenGraph.FindRule("minus"));
+            IsTrue(tokens[1]!.Rule == calculatorParser.TokenGraph.FindRule("number"));
 
             var (_, astTree) = calculatorParser.Parse("-1");
 

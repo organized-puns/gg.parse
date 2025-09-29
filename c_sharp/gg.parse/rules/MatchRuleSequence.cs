@@ -4,6 +4,8 @@
     {
         private RuleBase<T>[] _rules;
 
+        public RuleBase<T>? this[int index] => SequenceRules[index];
+
         public RuleBase<T>[] SequenceRules
         {
             get => _rules;
@@ -20,12 +22,12 @@
 
         public MatchRuleSequence(
             string name, 
-            IRule.Output production = IRule.Output.Self, 
+            IRule.Output production, 
             int precedence = 0,
-            params RuleBase<T>[] sequence
+            params RuleBase<T>[] rules
         ) : base(name, production, precedence) 
         {
-            SequenceRules = sequence;
+            SequenceRules = rules;
         }
 
         public override ParseResult Parse(T[] input, int start)

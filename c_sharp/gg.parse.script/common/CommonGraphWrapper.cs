@@ -62,7 +62,7 @@ namespace gg.parse.script.common
         public MatchCondition<T> IfMatch(string? name, RuleBase<T> condition) =>
             FindOrRegister(name, $"{CommonTokenNames.If}({condition.Name})",
                         (ruleName, product) => RegisterRule(
-                            new MatchCondition<T>(ruleName, product, condition)));
+                            new MatchCondition<T>(ruleName, product, 0, condition)));
         
         public MatchDataSequence<T> Literal(T[] sequence) =>
             Literal(null, sequence);
@@ -75,7 +75,7 @@ namespace gg.parse.script.common
         public MatchNot<T> Not(string? name, RuleBase<T> rule) =>
             FindOrRegister(name, $"{CommonTokenNames.Literal}({rule.Name})",
                         (ruleName, product) => RegisterRule(
-                            new MatchNot<T>(ruleName, product, rule)));
+                            new MatchNot<T>(ruleName, product, 0, rule)));
 
         public MatchNot<T> Not(RuleBase<T> rule) =>
             Not(null, rule);
@@ -107,7 +107,7 @@ namespace gg.parse.script.common
         public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
             FindOrRegister(name, $"{CommonTokenNames.Skip}({stopCondition.ToString()}, {failOnEoF})",
                         (ruleName, product) => RegisterRule(
-                            new SkipRule<T>(ruleName, product, stopCondition, failOnEoF)));
+                            new SkipRule<T>(ruleName, product, 0, stopCondition, failOnEoF)));
 
         public SkipRule<T> Skip(RuleBase<T> stopCondition, bool failOnEoF = true) =>
             Skip(null, stopCondition, failOnEoF);

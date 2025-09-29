@@ -1,27 +1,28 @@
 ﻿
 using gg.parse.rules;
+using System.Xml.Linq;
 
 namespace gg.parse.script.compiler
 {
+    public delegate IRule CompileFunction(RuleHeader header, Annotation bodyNode, CompileSession context);
 
-    public delegate RuleBase<T> CompileFunction<T>(
-        RuleCompiler<T> compiler,
-        RuleDeclaration declaration, 
-        CompileSession context) where T : IComparable<T>;
-
-    public class RuleCompiler<T> where T : IComparable<T>
+    public class RuleCompiler
     {
-        public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
+        public Dictionary<int, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
-        public (int functionId, IRule.Output product)[]? ProductLookup { get; set; }
+        public (int functionId, IRule.Output product)[]? RuleOutputLookup { get; set; }
 
-        public RuleCompiler<T> WithAnnotationProductMapping((int functionId, IRule.Output product)[] productMapp)
+        public RuleCompiler()
         {
-            ProductLookup = productMapp;
-            return this;
         }
 
-        public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function, string? name = null)
+        public RuleCompiler((int functionId, IRule.Output product)[] outputLookup)
+        {
+            RuleOutputLookup = outputLookup;
+        }
+
+
+        public RuleCompiler RegisterFunction(int parseFunctionId, CompileFunction function, string? name = null)
         {
             Assertions.Requires(function != null);
 
@@ -29,32 +30,110 @@ namespace gg.parse.script.compiler
             return this;
         }
 
-        public (CompileFunction<T> function, string? name) FindCompilationFunction(int parseFunctionId)
+        public RuleCompiler RegisterFunction(IRule rule, CompileFunction function)
+        {
+            Assertions.Requires(rule != null);
+            Assertions.Requires(function != null);
+
+            Functions.Add(rule!.Id, (function!, rule.Name ?? $"function_id:{rule.Id}"));
+            return this;
+        }
+
+        public (CompileFunction function, string? name) FindCompilationFunction(int parseFunctionId)
         {
             if (Functions.TryGetValue(parseFunctionId, out var compilationFunction))
             {
                 return compilationFunction;
             }
 
-            throw new RuleReferenceException($"Cannot find a compilation function referred to by rule id {parseFunctionId}", parseFunctionId);
+            throw new CompilationException(
+                $"Cannot find a compilation function referred to by rule id {parseFunctionId}", 
+                ruleId: parseFunctionId);
         }
 
-        public RuleGraph<T> Compile(CompileSession context)
+        public RuleGraph<T> Compile<T>(
+            string text, 
+            List<Annotation> tokens, 
+            List<Annotation>? syntaxTree = null,
+            RuleGraph<T>? resultGraph = null) where T : IComparable<T>
         {
-            return Compile(context, new RuleGraph<T>());
+            return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? new RuleGraph<T>());
         }
 
-        public RuleGraph<T> Compile(CompileSession session, RuleGraph<T> resultGraph)
+        private RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
         {
-            foreach (var node in session.AstNodes)
+            foreach (var node in session.SyntaxTree)
             {
-                var declaration = GetRuleDeclaration(session, node.Children, 0);
-                var ruleBody = declaration.RuleBodyAnnotation;
-
-                // user provided an empty body - which is results in a warning but is allowed
-                if (ruleBody == null)
+                try
                 {
-                    var compiledRule = resultGraph.RegisterRuleAndSubRules(new NopRule<T>(declaration.Name));
+                    CompileRule(session, node, resultGraph);
+                }
+                catch (Exception ex)
+                {
+                    // add the exception and continue with the other rules
+                    session.Exceptions.Add(ex);
+                }
+            }
+
+            // no root defined, this can happen when the input is empty or only contains include statements
+            if (resultGraph.Root == null)
+            {
+                session.Exceptions.Add(new CompilationException(
+                    "Input text contains no root function. Make sure the main input always "
+                    + "contains at least one rule."
+                ));
+            }
+
+            try
+            {
+                // after all rules have been compiled we need to resolve any references
+                // to other rules
+                ResolveReferences(resultGraph);
+            }
+            catch (AggregateException ae)
+            {
+                session.Exceptions.AddRange(ae.InnerExceptions);
+            }
+            catch (Exception ex)
+            {
+                session.Exceptions.Add(ex);
+            }
+
+            if (session.Exceptions.Count > 0)
+            {
+                throw new AggregateException("One or more errors occurred during compilation.", session.Exceptions);
+            }
+
+            return resultGraph;
+        }
+
+        private void CompileRule<T>(
+            CompileSession session, 
+            Annotation node, 
+            RuleGraph<T> resultGraph)
+            where T : IComparable<T>
+        {
+            var ruleHeader = ReadRuleHeader(session, node.Children!, 0);
+
+            // user provided an empty body - which is results in a warning but is allowed
+            if (ruleHeader.Length >= node.Children!.Count)
+            {
+                var compiledRule = resultGraph.RegisterRule(new NopRule<T>(ruleHeader.Name));
+
+                // First compiled rule will be assigned to the root. Seems the most intuitive
+                // xxx replace with name root or smth
+                resultGraph.Root ??= compiledRule;
+            }
+            else
+            {
+                var ruleBodyNode = node.Children[ruleHeader.Length];
+                var (compilationFunction, _) = FindCompilationFunction(ruleBodyNode.Rule.Id);
+
+                if (resultGraph.FindRule(ruleHeader.Name) == null)
+                {
+                    var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
+
+                    resultGraph.RegisterRuleAndSubRules(compiledRule);
 
                     // First compiled rule will be assigned to the root. Seems the most intuitive
                     // xxx replace with name root or smth
@@ -62,49 +141,25 @@ namespace gg.parse.script.compiler
                 }
                 else
                 {
-                    var (compilationFunction, _) = FindCompilationFunction(ruleBody.Rule.Id);
-
-                    if (resultGraph.FindRule(declaration.Name) == null)
-                    {
-                        var compiledRule = compilationFunction(this, declaration, session);
-
-                        resultGraph.RegisterRuleAndSubRules(compiledRule);
-
-                        // First compiled rule will be assigned to the root. Seems the most intuitive
-                        // xxx replace with name root or smth
-                        resultGraph.Root ??= compiledRule;
-                    }
-                    else
-                    {
-                        // xxx add to the compilation errors, don't throw
-                        throw new InvalidOperationException($"Trying to register a rule with the same name ({declaration.Name}).");
-                    }
+                    throw new CompilationException(
+                        $"Trying to register a rule with the same name ({ruleHeader.Name}).",
+                        annotation: node
+                    );
                 }
             }
-
-            // no root defined, this can happen when the input is empty or only contains include statements
-            if (resultGraph.Root == null)
-            {
-                // xxx needs to be a warning
-                throw new ArgumentException("Input text contains no root function. Make sure the main input always contains at least one rule.");
-            }
-
-            RuleCompiler<T>.ResolveReferences(resultGraph);
-
-            return resultGraph;
         }
 
         public bool TryGetProduct(int functionId, out IRule.Output product)
         {
             product = IRule.Output.Self;
 
-            if (ProductLookup != null)
+            if (RuleOutputLookup != null)
             {
-                for (var i = 0; i < ProductLookup.Length; i++)
+                for (var i = 0; i < RuleOutputLookup.Length; i++)
                 {
-                    if (functionId == ProductLookup[i].functionId)
+                    if (functionId == RuleOutputLookup[i].functionId)
                     {
-                        product = ProductLookup[i].product;
+                        product = RuleOutputLookup[i].product;
                         return true;
                     }
                 }
@@ -120,7 +175,7 @@ namespace gg.parse.script.compiler
         /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private RuleDeclaration GetRuleDeclaration(CompileSession context, List<Annotation> ruleNodes, int index)
+        private RuleHeader ReadRuleHeader(CompileSession context, List<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
@@ -143,15 +198,8 @@ namespace gg.parse.script.compiler
             {
                 idx++;
             }
-            
-            Annotation? ruleBody = null;
 
-            if (ruleNodes.Count > idx)
-            {
-                ruleBody = ruleNodes[idx];
-            }
-
-            return new(product, name, precedence, ruleBody);
+            return new(product, name, precedence, idx - index);
         }
 
         /// <summary>
@@ -161,47 +209,58 @@ namespace gg.parse.script.compiler
         /// <param name="name"></param>
         /// <returns></returns>
         /// <exception cref="RuleReferenceException"></exception>
-        private static RuleBase<T> FindRule(RuleGraph<T> graph, string name)
+        private static RuleBase<T> FindRule<T>(RuleGraph<T> graph, string name) where T : IComparable<T>
         {
             var referredRule = graph.FindRule(name);
 
-            if (referredRule == null)
-            {
-                throw new RuleReferenceException($"Cannot find rule reffered to by name: {name}.", name);
-            }
-
-            return referredRule;
+            return referredRule == null 
+                ? throw new CompilationException($"Cannot find rule refered to by name: {name}.") 
+                : referredRule;
         }
 
         /// <summary>
         /// In all RuleReference rules in the graph find and set the actual rule they refer to.
         /// </summary>
         /// <param name="graph"></param>
-        private static void ResolveReferences(RuleGraph<T> graph)
+        private static void ResolveReferences<T>(RuleGraph<T> graph) where T : IComparable<T>
         {
+            List<Exception> exceptions = [];
+
             foreach (var rule in graph)
             {
-                if (rule is IRuleComposition<T> composition)
+                try
                 {
-                    foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                    if (rule is IRuleComposition<T> composition)
                     {
-                        var referredRule = RuleCompiler<T>.FindRule(graph, referenceRule.Reference);
+                        foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                        {
+                            var referredRule = FindRule(graph, referenceRule.Reference);
 
-                        // note: we don't replace the rule we just set the reference. This allows
-                        // these subrules to have their own annotation production. If we replace these 
-                        // any production modifiers will affect the original rule
-                        referenceRule.Rule = referredRule!;
+                            // note: we don't replace the rule we just set the reference. This allows
+                            // these subrules to have their own annotation production. If we replace these 
+                            // any production modifiers will affect the original rule
+                            referenceRule.Rule = referredRule!;
 
-                        // if the reference rule is part of a composition (sequence/option/oneormore/...)
-                        // then use the referred rule's name / production to show up in the result/ast tree
-                        // rather than this reference rule's name/production
-                        referenceRule.DeferResultToReference = true;
+                            // if the reference rule is part of a composition (sequence/option/oneormore/...)
+                            // then use the referred rule's name / production to show up in the result/ast tree
+                            // rather than this reference rule's name/production
+                            referenceRule.DeferResultToReference = true;
+                        }
+                    }
+                    else if (rule is RuleReference<T> reference)
+                    {
+                        reference.Rule = FindRule(graph, reference.Reference);
                     }
                 }
-                else if (rule is RuleReference<T> reference)
+                catch (Exception ex)
                 {
-                    reference.Rule = RuleCompiler<T>.FindRule(graph, reference.Reference);
+                    exceptions.Add(ex);
                 }
+            }
+
+            if (exceptions.Count > 0)
+            {
+                throw new AggregateException("One or more errors occurred during reference resolution.", exceptions);
             }
         }
     }

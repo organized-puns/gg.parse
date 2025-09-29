@@ -2,6 +2,7 @@
 
 using gg.parse.rules;
 using gg.parse.script.parser;
+using gg.parse.script.pipeline;
 
 namespace gg.parse.calculator
 {
@@ -20,7 +21,7 @@ namespace gg.parse.calculator
             );
 
             // set up a logger to handle errors and warnings
-            var logger = new ScriptLogger()
+            var logger = new PipelineLogger()
             {
                 Out = (level, message) =>
                 {
