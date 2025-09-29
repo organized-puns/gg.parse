@@ -23,7 +23,7 @@ namespace gg.parse.script.tests.integration
         {
             var tokenizer = new ScriptTokenizer();
             var parser = new ScriptParser(tokenizer);
-            var compiler = new RuleCompiler<char>();
+            var compiler = new RuleCompiler();
 
             var result = tokenizer.Tokenize(text);
 
@@ -43,7 +43,7 @@ namespace gg.parse.script.tests.integration
             return compiler
                     .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                     .RegisterTokenizerCompilerFunctions(parser)
-                    .Compile(new CompileSession(text, tokens, astNodes));
+                    .Compile<char>(new CompileSession(text, tokens, astNodes));
         }
 
         // -- Tests ---------------------------------------------------------------------------------------------------

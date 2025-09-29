@@ -18,7 +18,7 @@ namespace gg.parse.script.tests.integration
         public void CreateRuleWithTheSameName_Compile_ExpectException()
         {
             var litId = 42;
-            var compiler = new RuleCompiler<char>()
+            var compiler = new RuleCompiler()
                     .RegisterFunction(litId, CompileLiteral);
 
             var session = new CompileSession()
@@ -59,7 +59,7 @@ namespace gg.parse.script.tests.integration
             ];
 
             // should throw an exception because of two rules with the same name
-            compiler.Compile(session);
+            compiler.Compile<char>(session);
         }
 
 
@@ -68,7 +68,7 @@ namespace gg.parse.script.tests.integration
         {
             var litId = 42;
             var rulePrecedence = 142;
-            var compiler = new RuleCompiler<char>()
+            var compiler = new RuleCompiler()
                     .RegisterFunction(litId, CompileLiteral);
 
             var session = new CompileSession()
@@ -104,7 +104,7 @@ namespace gg.parse.script.tests.integration
             ];
 
             // should result in no problems
-            var table = compiler.Compile(session);
+            var table = compiler.Compile<char>(session);
 
             IsNotNull(table);
             IsNotNull(table.Root);

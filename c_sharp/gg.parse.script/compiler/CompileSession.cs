@@ -4,6 +4,8 @@ namespace gg.parse.script.compiler
 {
     public class CompileSession
     {
+        public RuleCompiler Compiler { get; set; } 
+
         public string? Text { get; set; }
 
         public List<Annotation>? Tokens { get; set; } 
@@ -13,17 +15,20 @@ namespace gg.parse.script.compiler
 
         public CompileSession()
         {
+            Compiler = new RuleCompiler();
         }
 
         public CompileSession(
             string text, 
             List<Annotation> tokens, 
-            List<Annotation> astNodes)
-
+            List<Annotation> astNodes,
+            RuleCompiler? compiler = null)
+           
         {
             Text = text;
             Tokens = tokens;
             AstNodes = astNodes;
+            Compiler = compiler ?? new RuleCompiler();
         }
 
         public Range GetTextRange(Range tokenRange)

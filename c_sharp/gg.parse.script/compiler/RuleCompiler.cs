@@ -3,25 +3,24 @@ using gg.parse.rules;
 
 namespace gg.parse.script.compiler
 {
+    public delegate IRule CompileFunction(
+        RuleCompiler compiler,
+        RuleDeclaration declaration,
+        CompileSession context);
 
-    public delegate RuleBase<T> CompileFunction<T>(
-        RuleCompiler<T> compiler,
-        RuleDeclaration declaration, 
-        CompileSession context) where T : IComparable<T>;
-
-    public class RuleCompiler<T> where T : IComparable<T>
+    public class RuleCompiler
     {
-        public Dictionary<int, (CompileFunction<T> function, string? name)> Functions { get; private set; } = [];
+        public Dictionary<int, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, IRule.Output product)[]? ProductLookup { get; set; }
 
-        public RuleCompiler<T> WithAnnotationProductMapping((int functionId, IRule.Output product)[] productMapp)
+        public RuleCompiler WithAnnotationProductMapping((int functionId, IRule.Output product)[] productMapp)
         {
             ProductLookup = productMapp;
             return this;
         }
 
-        public RuleCompiler<T> RegisterFunction(int parseFunctionId, CompileFunction<T> function, string? name = null)
+        public RuleCompiler RegisterFunction(int parseFunctionId, CompileFunction function, string? name = null)
         {
             Assertions.Requires(function != null);
 
@@ -29,7 +28,16 @@ namespace gg.parse.script.compiler
             return this;
         }
 
-        public (CompileFunction<T> function, string? name) FindCompilationFunction(int parseFunctionId)
+        public RuleCompiler RegisterFunction(IRule rule, CompileFunction function)
+        {
+            Assertions.Requires(rule != null);
+            Assertions.Requires(function != null);
+
+            Functions.Add(rule!.Id, (function!, rule.Name ?? $"function_id:{rule.Id}"));
+            return this;
+        }
+
+        public (CompileFunction function, string? name) FindCompilationFunction(int parseFunctionId)
         {
             if (Functions.TryGetValue(parseFunctionId, out var compilationFunction))
             {
@@ -39,12 +47,12 @@ namespace gg.parse.script.compiler
             throw new RuleReferenceException($"Cannot find a compilation function referred to by rule id {parseFunctionId}", parseFunctionId);
         }
 
-        public RuleGraph<T> Compile(CompileSession context)
+        public RuleGraph<T> Compile<T>(CompileSession context) where T : IComparable<T>
         {
             return Compile(context, new RuleGraph<T>());
         }
 
-        public RuleGraph<T> Compile(CompileSession session, RuleGraph<T> resultGraph)
+        public RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
         {
             foreach (var node in session.AstNodes)
             {
@@ -66,7 +74,7 @@ namespace gg.parse.script.compiler
 
                     if (resultGraph.FindRule(declaration.Name) == null)
                     {
-                        var compiledRule = compilationFunction(this, declaration, session);
+                        var compiledRule = (RuleBase<T>) compilationFunction(this, declaration, session);
 
                         resultGraph.RegisterRuleAndSubRules(compiledRule);
 
@@ -89,7 +97,7 @@ namespace gg.parse.script.compiler
                 throw new ArgumentException("Input text contains no root function. Make sure the main input always contains at least one rule.");
             }
 
-            RuleCompiler<T>.ResolveReferences(resultGraph);
+            ResolveReferences(resultGraph);
 
             return resultGraph;
         }
@@ -161,7 +169,7 @@ namespace gg.parse.script.compiler
         /// <param name="name"></param>
         /// <returns></returns>
         /// <exception cref="RuleReferenceException"></exception>
-        private static RuleBase<T> FindRule(RuleGraph<T> graph, string name)
+        private static RuleBase<T> FindRule<T>(RuleGraph<T> graph, string name) where T : IComparable<T>
         {
             var referredRule = graph.FindRule(name);
 
@@ -177,7 +185,7 @@ namespace gg.parse.script.compiler
         /// In all RuleReference rules in the graph find and set the actual rule they refer to.
         /// </summary>
         /// <param name="graph"></param>
-        private static void ResolveReferences(RuleGraph<T> graph)
+        private static void ResolveReferences<T>(RuleGraph<T> graph) where T : IComparable<T>
         {
             foreach (var rule in graph)
             {
@@ -185,7 +193,7 @@ namespace gg.parse.script.compiler
                 {
                     foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                     {
-                        var referredRule = RuleCompiler<T>.FindRule(graph, referenceRule.Reference);
+                        var referredRule = RuleCompiler.FindRule<T>(graph, referenceRule.Reference);
 
                         // note: we don't replace the rule we just set the reference. This allows
                         // these subrules to have their own annotation production. If we replace these 
@@ -200,7 +208,7 @@ namespace gg.parse.script.compiler
                 }
                 else if (rule is RuleReference<T> reference)
                 {
-                    reference.Rule = RuleCompiler<T>.FindRule(graph, reference.Reference);
+                    reference.Rule = RuleCompiler.FindRule<T>(graph, reference.Reference);
                 }
             }
         }

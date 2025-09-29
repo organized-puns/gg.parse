@@ -81,11 +81,11 @@ namespace gg.parse.script.pipeline
             return tokenizerSession;
         }
 
-        public static RuleCompiler<char> CreateTokenizerCompiler(ScriptParser parser)
+        public static RuleCompiler CreateTokenizerCompiler(ScriptParser parser)
         {
             try
             {
-                return new RuleCompiler<char>()
+                return new RuleCompiler()
                         .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                         .RegisterTokenizerCompilerFunctions(parser);
             }
@@ -105,11 +105,11 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public static RuleCompiler<int> CreateParserCompiler(ScriptParser parser)
+        public static RuleCompiler CreateParserCompiler(ScriptParser parser)
         {
             try
             {
-                return new RuleCompiler<int>()
+                return new RuleCompiler()
                     .WithAnnotationProductMapping(parser.CreateAnnotationProductMapping())
                     .RegisterGrammarCompilerFunctions(parser);
             }

@@ -8,47 +8,47 @@ namespace gg.parse.script
     // xxx move to pipeline
     public static class CompilerUtils
     {
-        private static RuleCompiler<T> RegisterFunction<T>(this RuleCompiler<T> compiler, RuleBase<int> rule, CompileFunction<T> function) where T : IComparable<T> =>
+        private static RuleCompiler RegisterFunction(this RuleCompiler compiler, RuleBase<int> rule, CompileFunction function) =>
             compiler.RegisterFunction(rule.Id, function, rule.Name);
 
-        public static RuleCompiler<char> RegisterTokenizerCompilerFunctions(this RuleCompiler<char> compiler, ScriptParser parser)
+        public static RuleCompiler RegisterTokenizerCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
         {
             return compiler
-                    .RegisterFunction(parser.MatchAnyToken, CompileAny)
+                    .RegisterFunction(parser.MatchAnyToken, CompileAny<char>)
                     .RegisterFunction(parser.MatchCharacterRange, CompileCharacterRange)
                     .RegisterFunction(parser.MatchCharacterSet, CompileCharacterSet)
-                    .RegisterFunction(parser.MatchLog, CompileLog)
-                    .RegisterFunction(parser.MatchGroup, CompileGroup)
-                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier)
+                    .RegisterFunction(parser.MatchLog, CompileLog<char>)
+                    .RegisterFunction(parser.MatchGroup, CompileGroup<char>)
+                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier<char>)
                     .RegisterFunction(parser.MatchLiteral, CompileLiteral)
-                    .RegisterFunction(parser.MatchNotOperator, CompileNot)
-                    .RegisterFunction(parser.IfMatchOperator, CompileTryMatch)
-                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore)
-                    .RegisterFunction(parser.MatchOption, CompileOption)
-                    .RegisterFunction(parser.MatchSequence, CompileSequence)
-                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne)
-                    .RegisterFunction(parser.MatchFindOperator, CompileFind)
-                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip);
+                    .RegisterFunction(parser.MatchNotOperator, CompileNot<char>)
+                    .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<char>)
+                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
+                    .RegisterFunction(parser.MatchOption, CompileOption<char>)
+                    .RegisterFunction(parser.MatchSequence, CompileSequence<char>)
+                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
+                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
+                    .RegisterFunction(parser.MatchFindOperator, CompileFind<char>)
+                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip<char>);
         }
 
-        public static RuleCompiler<int> RegisterGrammarCompilerFunctions(this RuleCompiler<int> compiler, ScriptParser parser)
+        public static RuleCompiler RegisterGrammarCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
         {
             return compiler
-                    .RegisterFunction(parser.MatchAnyToken, CompileAny)
-                    .RegisterFunction(parser.MatchGroup, CompileGroup)
-                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier)
-                    .RegisterFunction(parser.MatchNotOperator, CompileNot)
-                    .RegisterFunction(parser.IfMatchOperator, CompileTryMatch)
-                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore)
-                    .RegisterFunction(parser.MatchOption, CompileOption)
-                    .RegisterFunction(parser.MatchSequence, CompileSequence)
-                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne)
-                    .RegisterFunction(parser.MatchEval, CompileEvaluation)
-                    .RegisterFunction(parser.MatchLog, CompileLog)
-                    .RegisterFunction(parser.MatchFindOperator, CompileFind)
-                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip);
+                    .RegisterFunction(parser.MatchAnyToken, CompileAny<int>)
+                    .RegisterFunction(parser.MatchGroup, CompileGroup<int>)
+                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier<int>)
+                    .RegisterFunction(parser.MatchNotOperator, CompileNot<int>)
+                    .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<int>)
+                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
+                    .RegisterFunction(parser.MatchOption, CompileOption<int>)
+                    .RegisterFunction(parser.MatchSequence, CompileSequence<int>)
+                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<int>)
+                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<int>)
+                    .RegisterFunction(parser.MatchEval, CompileEvaluation<int>)
+                    .RegisterFunction(parser.MatchLog, CompileLog<int>)
+                    .RegisterFunction(parser.MatchFindOperator, CompileFind<int>)
+                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip<int>);
         }
 
         // xxx needs to move out of compiler utils

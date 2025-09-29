@@ -13,7 +13,7 @@ namespace gg.parse.script.compiler
         /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
         public static RuleBase<char> CompileLiteral(
-           RuleCompiler<char> _,
+           RuleCompiler _,
            RuleDeclaration declaration,
            CompileSession context)
         {
@@ -29,47 +29,10 @@ namespace gg.parse.script.compiler
             }
 
             return new MatchDataSequence<char>(declaration.Name, unescapedLiteralText.ToCharArray(), declaration.Product, declaration.Precedence);
-        }
-
-        public static RuleBase<T> CompileIdentifier<T>(
-           RuleCompiler<T> compiler,
-           RuleDeclaration declaration,
-           CompileSession session) where T : IComparable<T>
-        {
-            var ruleDefinition = declaration.RuleBodyAnnotation;
-            var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
-            var referenceName = hasProductionOperator
-                    // ref name contains a production
-                    ? session.GetText(ruleDefinition.Children[1].Range)
-                    // no operator, use the entire span
-                    : session.GetText(ruleDefinition.Range);
-
-            if (string.IsNullOrEmpty(referenceName))
-            {
-                // xxx add context errors if fatal
-                // xxx resolve rule
-                throw new CompilationException<char>("ReferenceName text is empty", ruleDefinition.Range, null);
-            }
-
-            var product = declaration.Product;
-
-            // xxx shouldn't raise a warning if product is anything else than annotation eg
-            // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
-            // arbitrary. The user should either go #rule = ref or rule = ~ref...
-            if (hasProductionOperator)
-            {
-                compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
-            }
-            else
-            {
-                product = IRule.Output.Self;
-            }
-
-            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
-        }
+        }        
 
         public static RuleBase<char> CompileCharacterSet(
-           RuleCompiler<char> compiler,
+           RuleCompiler _,
            RuleDeclaration declaration,
            CompileSession session)
         {
@@ -94,7 +57,7 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<char> CompileCharacterRange(
-           RuleCompiler<char> compiler,
+           RuleCompiler _,
            RuleDeclaration declaration,
            CompileSession context)
         {
@@ -128,10 +91,48 @@ namespace gg.parse.script.compiler
 
         // -- Generic functions ---------------------------------------------------------------------------------------
 
+        public static RuleBase<T> CompileIdentifier<T>(
+           RuleCompiler compiler,
+           RuleDeclaration declaration,
+           CompileSession session) where T : IComparable<T>
+        {
+            var ruleDefinition = declaration.RuleBodyAnnotation;
+            var hasProductionOperator = (ruleDefinition.Children != null && ruleDefinition.Children.Count > 1);
+            var referenceName = hasProductionOperator
+                    // ref name contains a production - take the name only 
+                    ? session.GetText(ruleDefinition.Children[1].Range)
+                    // no operator, use the entire span
+                    : session.GetText(ruleDefinition.Range);
+
+            if (string.IsNullOrEmpty(referenceName))
+            {
+                // xxx add context errors if fatal
+                // xxx resolve rule
+                throw new CompilationException<char>("ReferenceName text is empty", ruleDefinition.Range, null);
+            }
+
+            var product = declaration.Product;
+
+            // xxx shouldn't raise a warning if product is anything else than annotation eg
+            // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
+            // arbitrary. The user should either go #rule = ref or rule = ~ref...
+            if (hasProductionOperator)
+            {
+                compiler.TryGetProduct(ruleDefinition.Children[0]!.Rule.Id, out product);
+            }
+            else
+            {
+                product = IRule.Output.Self;
+            }
+
+            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
+        }
+
         public static TRule CompileBinaryOperator<T, TRule>(
-    RuleCompiler<T> compiler,
-    RuleDeclaration declaration,
-    CompileSession session) where T : IComparable<T> where TRule : RuleBase<T>
+            RuleCompiler compiler,
+            RuleDeclaration declaration,
+            CompileSession session) 
+            where T : IComparable<T> where TRule : RuleBase<T>
         {
             RuleBase<T>[] elementArray = null;
             var ruleDefinition = declaration.RuleBodyAnnotation;
@@ -152,7 +153,7 @@ namespace gg.parse.script.compiler
                             elementAnnotation
                         );
 
-                    var element = compilationFunction(compiler, elementDeclaration, session);
+                    var element = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
 
                     if (element == null)
                     {
@@ -169,32 +170,28 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileSequence<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T: IComparable<T> =>
         
             CompileBinaryOperator<T, MatchRuleSequence<T>>(compiler, declaration, session);
         
-
         public static RuleBase<T> CompileOption<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T> =>
         
-            CompileBinaryOperator<T, MatchOneOf<T>>(compiler, declaration, session);
-        
-       
+            CompileBinaryOperator<T, MatchOneOf<T>>(compiler, declaration, session);               
 
         public static RuleBase<T> CompileEvaluation<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T> =>
         
-            CompileBinaryOperator<T, MatchEvaluation<T>>(compiler, declaration, session);
-        
+            CompileBinaryOperator<T, MatchEvaluation<T>>(compiler, declaration, session);        
 
         public static RuleBase<T> CompileGroup<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession context) where T : IComparable<T>
         {
@@ -208,33 +205,33 @@ namespace gg.parse.script.compiler
             var (compilationFunction,_) = compiler.Functions[elementAnnotation.Rule.Id];
             var groupDeclaration = new RuleDeclaration(declaration.Product, declaration.Name, elementAnnotation);
 
-            return compilationFunction(compiler, groupDeclaration, context);
+            return compilationFunction(compiler, groupDeclaration, context) as RuleBase<T>;
         }
 
         public static RuleBase<T> CompileZeroOrMore<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession context) where T : IComparable<T> =>
             
-            CompileCount(compiler, declaration, context, 0, 0);
+            CompileCount<T>(compiler, declaration, context, 0, 0);
 
 
         public static RuleBase<T> CompileOneOrMore<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession context) where T : IComparable<T> =>
 
-            CompileCount(compiler, declaration, context, 1, 0);
+            CompileCount<T>(compiler, declaration, context, 1, 0);
 
         public static RuleBase<T> CompileZeroOrOne<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T> =>
 
-            CompileCount(compiler, declaration, session, 0, 1);
+            CompileCount<T>(compiler, declaration, session, 0, 1);
 
         public static RuleBase<T> CompileCount<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session,
             int min, int max) where T : IComparable<T>
@@ -248,7 +245,7 @@ namespace gg.parse.script.compiler
             var elementAnnotation = ruleDefinition.Children[0];
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             var elementDeclaration = new RuleDeclaration(IRule.Output.Children, $"{declaration.Name} of {elementName}", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -261,7 +258,7 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileNot<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T>
         {
@@ -275,7 +272,7 @@ namespace gg.parse.script.compiler
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Not({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -289,7 +286,7 @@ namespace gg.parse.script.compiler
 
         // xxx unary functions are copy/pasting code, could roll these up
         public static RuleBase<T> CompileSkip<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T>
         {
@@ -303,7 +300,7 @@ namespace gg.parse.script.compiler
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Skip({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -316,7 +313,7 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileFind<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T>
         {
@@ -330,7 +327,7 @@ namespace gg.parse.script.compiler
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name}, type: Find({elementName})", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -343,7 +340,7 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileTryMatch<T>(
-            RuleCompiler<T> compiler,
+            RuleCompiler compiler,
             RuleDeclaration declaration,
             CompileSession session) where T : IComparable<T>
         {
@@ -357,7 +354,7 @@ namespace gg.parse.script.compiler
             var (compilationFunction, elementName) = compiler.Functions[elementAnnotation.Rule.Id];
             // xxx add human understandable name instead of subfunction
             var elementDeclaration = new RuleDeclaration(IRule.Output.Self, $"{elementName}, type: {declaration.Name}", elementAnnotation);
-            var subFunction = compilationFunction(compiler, elementDeclaration, session);
+            var subFunction = compilationFunction(compiler, elementDeclaration, session) as RuleBase<T>;
 
             if (subFunction == null)
             {
@@ -370,7 +367,7 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileAny<T>(
-            RuleCompiler<T> _,
+            RuleCompiler _,
             RuleDeclaration declaration,
             CompileSession __) where T : IComparable<T>
         {
@@ -380,7 +377,7 @@ namespace gg.parse.script.compiler
         }
 
         public static RuleBase<T> CompileLog<T>(
-           RuleCompiler<T> compiler,
+           RuleCompiler compiler,
            RuleDeclaration declaration,
            CompileSession context) where T : IComparable<T>
         {
@@ -411,7 +408,7 @@ namespace gg.parse.script.compiler
                 var conditionDefinition = ruleDefinition.Children[2];
                 var (compilationFunction, elementName) = compiler.Functions[conditionDefinition.Rule.Id];
                 var conditionDeclaration = new RuleDeclaration(IRule.Output.Self, $"{declaration.Name} condition: {elementName}", conditionDefinition);
-                condition = compilationFunction(compiler, conditionDeclaration, context);
+                condition = compilationFunction(compiler, conditionDeclaration, context) as RuleBase<T>;
 
                 if (condition == null)
                 {
