@@ -2,7 +2,6 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
-  - continue improving the rulebody of the scriptparser (too much spagetti) 
   - Implement json annotation in its main program
   - document match evaluation
   - address all xxx
