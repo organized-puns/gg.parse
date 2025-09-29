@@ -11,6 +11,8 @@ Todo (for mvp)
 alpha (featured complete, buggy, ugly mess)
 -------------------------------------------
 
+- Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
+
 - Figure out a way to capture the annotation associated with a reference, so in case of errors we can report the correct line/column
   (probably by adding a property to ReferenceRule which is set during compilation)
 

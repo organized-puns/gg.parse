@@ -2,10 +2,9 @@
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-using System.ComponentModel.DataAnnotations;
+
 using static gg.parse.Assertions;
 using static gg.parse.script.compiler.CompilerFunctions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.script.pipeline
 {
@@ -71,14 +70,11 @@ namespace gg.parse.script.pipeline
             }
             catch (AggregateException ae)
             {
-                if (session.LogHandler != null)
-                {
-                    session.LogHandler.ProcessExceptions(
+                session.LogHandler?.ProcessExceptions(
                         ae.InnerExceptions,
                         session.Text!,
                         session.Tokens
                     );
-                }
 
                 throw new ScriptPipelineException("Compliation exception(s) raised", ae);
             }
@@ -116,7 +112,6 @@ namespace gg.parse.script.pipeline
             {
                 var rule = parser.FindRule(ce.RuleId);
 
-                // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
                     throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId},"
@@ -147,7 +142,6 @@ namespace gg.parse.script.pipeline
             {
                 var rule = parser.FindRule(ce.RuleId);
 
-                // xxx not necessary to wrap these ?
                 if (rule == null)
                 {
                     throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
@@ -255,13 +249,14 @@ namespace gg.parse.script.pipeline
 
                     if (session.IncludedFiles.ContainsKey(filePath))
                     {
+                        // if the associated graph is null, we have a circular dependency
                         if (session.IncludedFiles[filePath] == null)
                         {
-                            // xxx do this more insightful, doesn't tell where the error occured 
-                            throw new ScriptPipelineException($"Circular include detected {filePath}.");
+                            //throw new ScriptPipelineException($"Circular include detected {filePath}.");
+                            session.LogHandler!.Log(LogLevel.Warning, $"Circular include detected {filePath}.");
                         }
-                        // cache should already be merged with the result
                         
+                        // cache should already be merged with the result
                     }
                     else
                     {

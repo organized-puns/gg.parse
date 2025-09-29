@@ -258,7 +258,6 @@ namespace gg.parse.script.parser
 
             // xxx add more error conditions here
 
-
             return OneOf("#ruleBodyErrorHandler", MatchUnexpectedProductInBodyError);
         }
 

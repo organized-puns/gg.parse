@@ -101,9 +101,6 @@ namespace gg.parse.script.tests.integration
 
         /// <summary>
         /// See if the duplicate includes are ignored 
-        /// (xxx however until we report warnings, this cannot be detected from the outside
-        /// directly and we just have to see it doesn't throw an error because of duplicate 
-        /// function being registeres)
         /// </summary>
         [TestMethod]
         public void CreateEbnfParser_ParseCompiledRule_ExpectDuplicateIncludesToBeIgnored()
