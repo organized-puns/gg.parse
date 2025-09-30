@@ -20,10 +20,10 @@
             Void
         }
 
-        string Name { get; init; }
-
         int Id { get; set; }
 
+        string Name { get; init; }
+        
         int Precedence { get; init; }
 
         IRule.Output Production { get; init; }

@@ -4,10 +4,10 @@
     {
         public T[] MatchingValues { get; init; }
 
-        public MatchDataSet(string name, IRule.Output action, T[] matchingValues, int precedence = 0)
-            : base(name, action, precedence)
+        public MatchDataSet(string name, IRule.Output production, T[] setValues, int precedence = 0)
+            : base(name, production, precedence)
         {
-            MatchingValues = matchingValues;
+            MatchingValues = setValues;
         }
 
         public MatchDataSet(string name, T[] matchingValues, int precedence = 0)

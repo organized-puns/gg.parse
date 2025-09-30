@@ -4,7 +4,6 @@ Todo (for mvp)
 - Finalize:  
   - Implement json annotation in its main program
   - document match evaluation
-  - address all xxx
   - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
      
@@ -53,3 +52,5 @@ alpha (featured complete, buggy, ugly mess)
 - add full/short names versions for "or /|"
 - add alternative for "= / :"
 - replace any with _, disallow identifier to start with '_' ?
+
+- address all xxx
