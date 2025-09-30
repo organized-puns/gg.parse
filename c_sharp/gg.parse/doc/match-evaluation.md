@@ -88,7 +88,8 @@ result:
 	2   3
 ```
 
-step 3 again, compare precedence, move up the tree, in this case let's _ASSUME_ `+` has a higher precedence so we have to move up.
+let's _ASSUME_ `+` has a higher precedence. 
+step 3 again, compare precedence, move up the tree, in this case so we have to move up.
 
 ```
 input[5]: 1 + 2 * 3
@@ -119,8 +120,60 @@ result:
 C#
 ---
 
-Example of succesful input:
+Example (see gg.parse.doc.examples.test\MatchEvaluationTests.cs):
 
+```csharp
+
+... 
+private (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
+{
+	...
+	var plusToken = new MatchSingleData<int>(PlusTokenName, plus.Id);
+    var multToken = new MatchSingleData<int>(MultTokenName, mult.Id);
+
+    var addOperation = new MatchRuleSequence<int>(AddOpName, production: IRule.Output.Self, precedence: addPrecedence, numberToken, plusToken, numberToken);
+    var multOperation = new MatchRuleSequence<int>(MultOpName, production: IRule.Output.Self, precedence: multPrecedence, numberToken, multToken, numberToken);
+
+    var evaluation = new MatchEvaluation<int>(EvaluationName, production: IRule.Output.Self, precedence: 0, addOperation, multOperation);
+	...
+}
+
+...
+
+// give + a higher precedence
+public void MatchSimpleEquationWithNonStandardPrecedence()
+{
+    var (tokenizer, parser) = CreateTokenizerAndParser(multPrecedence: 200, addPrecedence: 400);
+    var tokens = tokenizer.Root.Parse("3 + 5 * 2");
+
+    IsTrue(tokens.FoundMatch);
+    IsTrue(tokens.Count == 5);
+
+    var tokenIds = tokens.Annotations!.SelectRuleIds();
+    var syntaxTree = parser.Root.Parse(tokenIds, 0);
+
+    IsTrue(syntaxTree.FoundMatch);
+
+    // expect the syntax tree to be:
+    //  evaluation
+    //       |
+    //      mult
+    //      /|\
+    //   add * 2
+    //   /|\
+    //  3 + 5    
+    ...
+```
 
 Script
 ------
+
+To indicate we have an evaluation operation we use a slash character ('/').
+The following is equivalent to the CreateTokenizerAndParser above. Note we define the precedence at the end of the rule header
+
+```
+mult_operation 200 = number_token, mult_token, number_token;
+add_operation 400  = number_token, plus_token, number_token;
+
+evaluation = mult_operation / add_operation;
+```

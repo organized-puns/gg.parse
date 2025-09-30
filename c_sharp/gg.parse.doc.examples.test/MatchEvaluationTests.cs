@@ -17,7 +17,7 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchSimpleEquationWithStandardPrecedence()
         {
-            var (tokenizer, parser) = CreateEquationGraphs(multPrecedence: 200, addPrecedence: 100);
+            var (tokenizer, parser) = CreateTokenizerAndParser(multPrecedence: 200, addPrecedence: 100);
             var tokens = tokenizer.Root.Parse("3 + 5 * 2");
 
             IsTrue(tokens.FoundMatch);
@@ -51,7 +51,7 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchSimpleEquationWithNonStandardPrecedence()
         {
-            var (tokenizer, parser) = CreateEquationGraphs(multPrecedence: 200, addPrecedence: 400);
+            var (tokenizer, parser) = CreateTokenizerAndParser(multPrecedence: 200, addPrecedence: 400);
             var tokens = tokenizer.Root.Parse("3 + 5 * 2");
 
             IsTrue(tokens.FoundMatch);
@@ -84,7 +84,13 @@ namespace gg.parse.doc.examples.test
             IsTrue(syntaxTree[0][0][0][2].Rule.Name == NumberTokenName);
         }
 
-        private (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateEquationGraphs(int multPrecedence, int addPrecedence)
+        /// <summary>
+        /// Create a very simple math tokenizer and parser. 
+        /// </summary>
+        /// <param name="multPrecedence"></param>
+        /// <param name="addPrecedence"></param>
+        /// <returns></returns>
+        private (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
         {
             var whitespace = new MatchDataSet<char>("whitespace", setValues: " \t\r\n".ToCharArray(), production: IRule.Output.Void);
 
