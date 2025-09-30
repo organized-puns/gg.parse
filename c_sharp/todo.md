@@ -3,7 +3,6 @@ Todo (for mvp)
 
 - Finalize:  
   - Implement json annotation in its main program
-  - document match evaluation
   - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
      
