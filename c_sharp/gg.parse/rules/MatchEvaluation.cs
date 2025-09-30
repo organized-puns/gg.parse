@@ -55,6 +55,7 @@ namespace gg.parse.rules
             {               
                 var parent = parentResult.Annotations![0];
 
+                // any more input left
                 if (parent.Children == null || parent.Children.Count < 3)
                 {                     
                     // unary operator / value, nothing more to evaluate
