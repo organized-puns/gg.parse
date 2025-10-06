@@ -1,4 +1,6 @@
 ﻿
+using Range = gg.parse.util.Range;
+
 namespace gg.parse
 {
     public static class AnnotationExtensions
@@ -59,6 +61,7 @@ namespace gg.parse
         /// <param name="filter"></param>
         /// <returns></returns>
         public static List<Annotation> Filter(this List<Annotation> annotations, Func<Annotation, bool> filter) =>
+            
             [.. annotations
                 .Where(a => filter(a))
                 .Select( a => a.FilterChildren(filter))];
@@ -76,6 +79,68 @@ namespace gg.parse
                         .Select( c => c.FilterChildren(filter))],
                     annotation.Parent
                 );
+
+        public static void InvokeOnMatchingRuleNames(this List<Annotation> annotations, Dictionary<string, Action<Annotation>> actions) =>
+            annotations.ForEach( a => a.InvokeOnMatchingRuleNames(actions));
+
+        public static void InvokeOnMatchingRuleNames(this Annotation annotation, Dictionary<string, Action<Annotation>> actions)
+        {
+            if (actions.TryGetValue(annotation.Rule.Name, out var annotationAction))
+            {
+                annotationAction(annotation);
+            }
+
+            if (annotation.Children != null)
+            {
+                InvokeOnMatchingRuleNames(annotation.Children, actions);
+            }
+        }
+            
+
+        /// <summary>
+        /// Finds the first annotation in a DFS manner which matches the predicate.
+        /// </summary>
+        /// <param name="annotations"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public static Annotation? FirstOrDefault(this IEnumerable<Annotation> annotations, Func<Annotation, bool> predicate)
+        {
+            foreach (var annotation in annotations)
+            {
+                var result = annotation.FirstOrDefault(predicate);
+
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public static Annotation? FirstOrDefault(this Annotation annotation, Func<Annotation, bool> predicate)
+        {
+            if (predicate(annotation))
+            {
+                return annotation;
+            }
+
+            if (annotation.Children != null)
+            {
+                var result = FirstOrDefault(annotation.Children, predicate);
+
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        public static Annotation? FindByRuleName(this Annotation annotation, string ruleName) =>
+            annotation.FirstOrDefault(a => a.Rule != null && a.Rule.Name == ruleName);
+        
 
         /// <summary>
         /// Map an annotation to a value and add it to the result if the value is not null

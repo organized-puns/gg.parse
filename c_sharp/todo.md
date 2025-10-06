@@ -2,12 +2,17 @@ Todo (for mvp)
 ---------------
 
 - Finalize:  
-  - Implement json annotation in its main program
+  - Implement Arg parser
+	- include paths need to be a set
+	- parserbuilder needs to be able to read from file
+  - Implement (json) annotations in its main program
   - Clean up unit tests and build proper examples
   - Add some more documentation, extend readme.
      
 alpha (featured complete, buggy, ugly mess)
 -------------------------------------------
+
+- Add literalRule which allows for case senstive matching or not
 
 - Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
 

@@ -1,5 +1,5 @@
 ﻿using gg.parse.script.parser;
-
+using gg.parse.util;
 using ParseOutput = (gg.parse.ParseResult tokeninzeResult, gg.parse.ParseResult parseResult);
 
 namespace gg.parse.script.common
@@ -53,11 +53,6 @@ namespace gg.parse.script.common
                 if (throwExceptionOnErrors
                     && tokenizationResult.Annotations.ContainsErrors<char>(failOnWarning, out var tokenizerErrors))
                 {
-                    /*throw new TokenizeException(
-                        "input contains characters which could not be mapped to a token.",
-                        tokenizerErrors,
-                        text
-                    );*/
                     throw new ScriptException(
                         "input contains characters which could not be mapped to a token.",
                         tokenizerErrors,

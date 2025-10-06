@@ -1,5 +1,4 @@
-﻿#nullable disable
-
+﻿
 using gg.parse.rules;
 
 using gg.parse.script.compiler;
@@ -10,6 +9,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using static gg.parse.script.compiler.CompilerFunctions;
 
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.tests.integration
 {

@@ -1,6 +1,9 @@
 ﻿
 using gg.parse.rules;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.tests.rulefunctions
 {

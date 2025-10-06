@@ -1,11 +1,10 @@
-﻿#nullable disable
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using gg.parse.rules;
 using gg.parse.script.pipeline;
+
 
 namespace gg.parse.script.tests.integration
 {

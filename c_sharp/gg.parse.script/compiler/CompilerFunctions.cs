@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 
 using gg.parse.rules;
+using gg.parse.util;
 
 namespace gg.parse.script.compiler
 {

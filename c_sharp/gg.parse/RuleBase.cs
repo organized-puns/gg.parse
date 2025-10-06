@@ -1,4 +1,8 @@
-﻿namespace gg.parse
+﻿using gg.parse.util;
+
+using Range = gg.parse.util.Range;
+
+namespace gg.parse
 {
 
     public abstract class RuleBase<T>(
@@ -17,7 +21,6 @@
 
         
         public abstract ParseResult Parse(T[] input, int start);
-
 
         public override string ToString() => $"{Production} {Name}({Id})";
 

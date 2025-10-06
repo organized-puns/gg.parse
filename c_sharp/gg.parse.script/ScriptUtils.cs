@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using gg.parse.util;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace gg.parse.script

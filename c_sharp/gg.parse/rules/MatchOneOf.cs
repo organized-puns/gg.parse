@@ -1,4 +1,6 @@
-﻿namespace gg.parse.rules
+﻿using gg.parse.util;
+
+namespace gg.parse.rules
 {
     public class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {

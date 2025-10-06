@@ -1,5 +1,6 @@
 ﻿
 using gg.parse.rules;
+using gg.parse.util;
 using System.Xml.Linq;
 
 namespace gg.parse.script.compiler

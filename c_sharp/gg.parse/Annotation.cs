@@ -1,4 +1,7 @@
-﻿namespace gg.parse
+﻿
+using Range = gg.parse.util.Range;
+
+namespace gg.parse
 {
     public class Annotation 
     {        
@@ -18,6 +21,8 @@
         public List<Annotation>? Children { get; init; }
 
         public Annotation? Parent { get; set; }
+
+        
 
         public Annotation? this[int index] => 
             Children == null 

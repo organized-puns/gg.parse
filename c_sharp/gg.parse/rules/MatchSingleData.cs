@@ -1,4 +1,6 @@
-﻿namespace gg.parse.rules
+﻿using Range = gg.parse.util.Range;
+
+namespace gg.parse.rules
 {
     public class MatchSingleData<T>(string name, T data, IRule.Output production = IRule.Output.Self)
         : RuleBase<T>(name, production)

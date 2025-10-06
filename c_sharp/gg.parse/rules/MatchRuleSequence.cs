@@ -1,4 +1,8 @@
-﻿namespace gg.parse.rules
+﻿using gg.parse.util;
+
+using Range = gg.parse.util.Range;
+
+namespace gg.parse.rules
 {
     public class MatchRuleSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {

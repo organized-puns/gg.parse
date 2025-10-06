@@ -1,4 +1,6 @@
-﻿namespace gg.parse.rules
+﻿using Range = gg.parse.util.Range;
+
+namespace gg.parse.rules
 {
     public class RuleReference<T> : RuleBase<T> where T : IComparable<T>
     {

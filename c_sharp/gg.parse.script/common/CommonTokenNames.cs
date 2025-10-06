@@ -12,6 +12,8 @@
 
         public static readonly string Boolean = "Boolean";
 
+        public static readonly string Callback = "Callback";
+
         public static readonly string CollectionSeparator = "CollectionSeparator";
 
         public static readonly string DataSequence = "DataSequence";

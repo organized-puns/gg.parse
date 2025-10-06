@@ -16,6 +16,8 @@ namespace gg.parse
 
         public Annotation? this [int index] => Annotations?[index];
 
+        public Annotation? this[string name] => Annotations?.FirstOrDefault(a => a.Rule != null && a.Rule.Name == name);   
+
         public int Count => Annotations?.Count ?? 0;
 
         public void Deconstruct(out bool isSuccess, out int matchedLength, out List<Annotation>? annotations)
@@ -51,8 +53,6 @@ namespace gg.parse
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        
+        }       
     }
 }

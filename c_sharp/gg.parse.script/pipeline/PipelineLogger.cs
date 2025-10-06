@@ -1,8 +1,11 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-using System;
-using static gg.parse.Assertions;
+using gg.parse.util;
+
+using static gg.parse.util.Assertions;
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.pipeline
 {

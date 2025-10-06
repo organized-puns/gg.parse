@@ -1,5 +1,4 @@
 ﻿using gg.parse.rules;
-using gg.parse.script.parser;
 
 namespace gg.parse.script.common
 {
@@ -42,7 +41,22 @@ namespace gg.parse.script.common
             FindOrRegister(name, $"{CommonTokenNames.AnyCharacter}",
                         (ruleName, product) => RegisterRule(
                             new MatchAnyData<T>(ruleName, product)));
-        
+
+        public CallbackRule<T> Callback(
+            RuleBase<T> rule,
+            RuleCallbackAction<T> callback,
+            CallbackRule<T>.CallbackCondition condition = CallbackRule<T>.CallbackCondition.Success) =>
+            Callback(null, rule, callback, condition);
+
+        public CallbackRule<T> Callback(
+            string? name, 
+            RuleBase<T> rule,
+            RuleCallbackAction<T> callback,
+            CallbackRule<T>.CallbackCondition condition = CallbackRule<T>.CallbackCondition.Success) =>
+            FindOrRegister(name, $"{CommonTokenNames.Callback}({rule.Name})",
+                        (ruleName, product) => RegisterRule(
+                            new CallbackRule<T>(ruleName, rule, callback, condition)));
+
         public LogRule<T> Error(string name, string message, RuleBase<T>? condition = null) =>
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
                         (ruleName, product) => RegisterRule(
@@ -87,6 +101,18 @@ namespace gg.parse.script.common
 
         public MatchOneOf<T> OneOf(params RuleBase<T>[] rules) =>
             OneOf(null, rules);
+
+
+        public MatchCount<T> OneOrMore(string? name, RuleBase<T> rule) =>
+            FindOrRegister(name,
+                $"{CommonTokenNames.OneOrMore}({rule.Name})",
+                (ruleName, product) => RegisterRule(
+                    new MatchCount<T>(ruleName, rule, product, 1, 0)
+                )
+            );
+
+        public MatchCount<T> OneOrMore(RuleBase<T> rule) =>
+            ZeroOrMore(null, rule);
 
         public MatchRuleSequence<T> Sequence(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.FunctionSequence}({string.Join(", ", rules.Select(r => r.Name))})",
