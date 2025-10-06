@@ -102,10 +102,6 @@ namespace gg.parse.script.compiler
             {
                 session.Compiler.TryGetProduct(bodyNode.Children[0]!.Rule.Id, out product);
             }
-            else
-            {
-                product = IRule.Output.Self;
-            }
 
             return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
         }
@@ -125,7 +121,7 @@ namespace gg.parse.script.compiler
                     var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule.Id];
 
                     var elementName = $"{declaration.Name}[{i}], type: {functionName}";
-                    var elementHeader = new RuleHeader(IRule.Output.Children, elementName, 0, 0);
+                    var elementHeader = new RuleHeader(IRule.Output.Self, elementName, 0, 0);
 
                     elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
                             ?? throw new CompilationException("Cannot compile rule definition for sequence.", annotation: elementBody);

@@ -8,7 +8,7 @@ namespace gg.parse.script.tests.integration
     public sealed class RuleGraphBuilderIntegrationTests
     {
         [TestMethod]
-        public void SetupReferencesWithDifferentOutputs_BuildParser_ExpectRulesToMatchSpecifiedOutput()
+        public void SetupReferencesWithDifferentRuleOutputs_BuildParser_ExpectRulesToMatchSpecifiedOutput()
         {
             var parser = new ParserBuilder().From($"foo='foo';bar='bar';", "root=foo, #bar, ~foo;");
 
@@ -66,7 +66,10 @@ namespace gg.parse.script.tests.integration
         public void SetupFindAllBars_Parse_ExpectBarFoundIfPresentInString()
         {
             var searchTerm = "bar";
-            var tokenizer = new ParserBuilder().From($"#find_bar = +( >> '{searchTerm}', '{searchTerm}' );");
+            var tokenizer = new ParserBuilder().From(
+                $"#find_all_bars = +( find_bar, '{searchTerm}' );" +
+                $"~find_bar      = >> '{searchTerm}';"
+            );
 
             var testStringWithBar = "123ba345bar567 bar ";
             var (result, _) = tokenizer.Parse(testStringWithBar);

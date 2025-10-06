@@ -113,7 +113,7 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    "include 'assets/json.grammar';#main=json;"
+                                    "include 'assets/json.grammar';#__main__=json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);
@@ -132,8 +132,8 @@ namespace gg.parse.script.tests.integration
             var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
 
             IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations![0].Children![0].Rule == jsonParser.GrammarGraph!.FindRule("object"));
-            IsTrue(result.Annotations![0].Children![0].Children![0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
+            IsTrue(result[0][0].Rule == jsonParser.GrammarGraph!.FindRule("object"));
+            IsTrue(result[0][0][0][0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
         }
 
         
@@ -177,7 +177,7 @@ namespace gg.parse.script.tests.integration
 
             IsTrue(objectAnnotation.Rule == jsonParser.GrammarGraph.FindRule("object"));
 
-            var keyValueRuleAnnotation = objectAnnotation[0];
+            var keyValueRuleAnnotation = objectAnnotation[0][0];
 
             IsTrue(keyValueRuleAnnotation.Rule == jsonParser.GrammarGraph.FindRule("key_value_pair"));
         }
