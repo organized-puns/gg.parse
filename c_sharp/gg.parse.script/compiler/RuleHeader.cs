@@ -9,7 +9,7 @@
     {
         public string Name { get; init; }
 
-        public RuleOutput Product { get; init; }
+        public RuleOutput Output { get; init; }
               
         public int Precedence { get; init; }
 
@@ -18,12 +18,15 @@
         /// </summary>
         public int Length { get; init; }
 
-        public RuleHeader(RuleOutput product, string name, int precedence, int length)
+        public bool IsTopLevel { get; init; }
+
+        public RuleHeader(RuleOutput output, string name, int precedence, int length, bool isTopLevel = true)
         {
             Name = name;
-            Product = product;
+            Output = output;
             Precedence = precedence;
             Length = length;
+            IsTopLevel = isTopLevel;
         }
 
         public RuleHeader(RuleOutput product, string name)

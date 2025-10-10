@@ -150,9 +150,9 @@ namespace gg.parse.script.compiler
             }
         }
 
-        public bool TryGetProduct(int functionId, out RuleOutput product)
+        public bool TryMatchOutputModifier(int functionId, out RuleOutput output)
         {
-            product = RuleOutput.Self;
+            output = RuleOutput.Self;
 
             if (RuleOutputLookup != null)
             {
@@ -160,7 +160,7 @@ namespace gg.parse.script.compiler
                 {
                     if (functionId == RuleOutputLookup[i].functionId)
                     {
-                        product = RuleOutputLookup[i].product;
+                        output = RuleOutputLookup[i].product;
                         return true;
                     }
                 }
@@ -181,7 +181,7 @@ namespace gg.parse.script.compiler
             var idx = index;
 
             // annotation product is optional, (will default to Annotation)
-            if (TryGetProduct(ruleNodes[idx].Rule.Id, out var product))
+            if (TryMatchOutputModifier(ruleNodes[idx].Rule.Id, out var product))
             {
                 idx++;
             }

@@ -3,8 +3,6 @@ Todo 0.1
 
 - Implement Arg parser
 
-	- remove reference to output in favor out output/ruleOutput 
-	- Change back the binary/unary operator to output/return its children again instead of self
 - Implement (json) annotations in its main program
 - Clean up unit tests and build proper examples
 - Add some more documentation, extend readme.
@@ -15,8 +13,6 @@ Todo 0.1
 - change '~' to '-' and '#' to '..' (?) or `~` to '--' and '#' to '-'...
 
 - Having a literal in a grammar leads to very confusing errors. Should be handled better.
-
-
 
 - Add literalRule which allows for case senstive matching or not
 

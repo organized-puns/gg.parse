@@ -132,8 +132,11 @@ namespace gg.parse.script.tests.integration
             var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
 
             IsTrue(result.FoundMatch);
-            IsTrue(result[0][0].Rule == jsonParser.GrammarGraph!.FindRule("object"));
-            IsTrue(result[0][0][0][0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
+
+            var objectNode = result[0][0];
+
+            IsTrue(objectNode.Rule == jsonParser.GrammarGraph!.FindRule("object"));
+            IsTrue(objectNode[0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
         }
 
         
@@ -169,15 +172,15 @@ namespace gg.parse.script.tests.integration
             var text = "{ \"key\": 123 }";
             var result = jsonParser.Parse(text);
 
-            IsTrue(result.astNodes.FoundMatch);
+            IsTrue(result.syntaxTree.FoundMatch);
 
-            Debug.WriteLine(ScriptUtils.AstToString(text, result.tokens.Annotations, result.astNodes.Annotations));
+            Debug.WriteLine(ScriptUtils.AstToString(text, result.tokens.Annotations, result.syntaxTree.Annotations));
 
-            var objectAnnotation = result.astNodes[0][0];
+            var objectAnnotation = result.syntaxTree[0][0];
 
             IsTrue(objectAnnotation.Rule == jsonParser.GrammarGraph.FindRule("object"));
 
-            var keyValueRuleAnnotation = objectAnnotation[0][0];
+            var keyValueRuleAnnotation = objectAnnotation[0];
 
             IsTrue(keyValueRuleAnnotation.Rule == jsonParser.GrammarGraph.FindRule("key_value_pair"));
         }

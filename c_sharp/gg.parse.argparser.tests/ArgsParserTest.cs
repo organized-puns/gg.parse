@@ -32,7 +32,7 @@ namespace gg.parse.argparser.tests
             {
                 builder.FromFile(TokenFileName, GrammarFileName);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // add a catch so we can inspect the logger's logs in case the grammar or tokenizers fails to 
                 // parse

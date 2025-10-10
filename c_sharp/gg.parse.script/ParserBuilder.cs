@@ -66,7 +66,7 @@ namespace gg.parse.script
             return this;
         }
 
-        public (ParseResult tokens, ParseResult astNodes) Parse(
+        public (ParseResult tokens, ParseResult syntaxTree) Parse(
             string input, 
             bool failOnWarning = false,
             bool throwExceptionsOnError = true)

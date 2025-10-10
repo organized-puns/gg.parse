@@ -1,7 +1,6 @@
-﻿using System.Text.RegularExpressions;
-
-using gg.parse.rules;
+﻿using gg.parse.rules;
 using gg.parse.util;
+using System.Text.RegularExpressions;
 
 namespace gg.parse.script.compiler
 {
@@ -23,7 +22,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("Literal text is empty (somehow...).", annotation: bodyNode);
             }
 
-            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Product, header.Precedence);
+            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Output, header.Precedence);
         }        
 
         public static RuleBase<char> CompileCharacterSet( RuleHeader header, Annotation bodyNode, CompileSession session)
@@ -41,7 +40,7 @@ namespace gg.parse.script.compiler
 
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 
-            return new MatchDataSet<char>(header.Name, header.Product, setText.ToArray(), header.Precedence);
+            return new MatchDataSet<char>(header.Name, header.Output, setText.ToArray(), header.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterRange(RuleHeader declaration, Annotation bodyNode, CompileSession context)
@@ -71,7 +70,7 @@ namespace gg.parse.script.compiler
                 declaration.Name, 
                 minText[1], 
                 maxText[1], 
-                declaration.Product, 
+                declaration.Output, 
                 declaration.Precedence
             );
         }
@@ -81,8 +80,8 @@ namespace gg.parse.script.compiler
         public static RuleBase<T> CompileIdentifier<T>(RuleHeader declaration, Annotation bodyNode, CompileSession session) 
             where T : IComparable<T>
         {
-            var hasProductionOperator = (bodyNode.Children != null && bodyNode.Children.Count > 1);
-            var referenceName = hasProductionOperator
+            var hasOutputModifier = (bodyNode.Children != null && bodyNode.Children.Count > 1);
+            var referenceName = hasOutputModifier
                     // ref name contains a output - take the name only 
                     ? session.GetText(bodyNode.Children[1].Range)
                     // no operator, use the entire span
@@ -93,17 +92,17 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("ReferenceName text is empty (somehow...).", annotation: bodyNode);
             }
 
-            var product = declaration.Product;
+            var modifier = declaration.Output;
 
             // xxx should raise a warning if product is anything else than annotation eg
             // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
-            if (hasProductionOperator)
+            if (hasOutputModifier)
             {
-                session.Compiler.TryGetProduct(bodyNode.Children[0]!.Rule.Id, out product);
+                session.Compiler.TryMatchOutputModifier(bodyNode.Children[0]!.Rule.Id, out modifier);
             }
 
-            return new RuleReference<T>(declaration.Name, referenceName, product, declaration.Precedence);
+            return new RuleReference<T>(declaration.Name, referenceName, modifier, declaration.Precedence);
         }
 
         public static TRule CompileBinaryOperator<T, TRule>(RuleHeader declaration, Annotation bodyNode, CompileSession session) 
@@ -121,14 +120,29 @@ namespace gg.parse.script.compiler
                     var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule.Id];
 
                     var elementName = $"{declaration.Name}[{i}], type: {functionName}";
-                    var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0);
+                    
+                    var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0, false);
 
                     elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
                             ?? throw new CompilationException("Cannot compile rule definition for sequence.", annotation: elementBody);
                 }
             }
 
-            return (TRule)Activator.CreateInstance(typeof(TRule), declaration.Name, declaration.Product, declaration.Precedence, elementArray);
+            // by default binary (and unary) operators pass the result of the children because
+            // in most cases we're interested in the values in the operation not the fact that there is an binary operation.
+            // The latter would result in much more overhead in specifying the parsers.
+            var output =
+                declaration.IsTopLevel
+                    ? declaration.Output
+                    : RuleOutput.Children;
+
+            return (TRule) Activator.CreateInstance(
+                typeof(TRule), 
+                declaration.Name, 
+                output, 
+                declaration.Precedence, 
+                elementArray
+            )!;
         }
 
         public static RuleBase<T> CompileSequence<T>(
@@ -162,7 +176,7 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule.Id];
-            var groupDeclaration = new RuleHeader(header.Product, header.Name, 0, 0);
+            var groupDeclaration = new RuleHeader(header.Output, header.Name, 0, 0);
 
             return compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
         }
@@ -180,14 +194,23 @@ namespace gg.parse.script.compiler
 
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
-            var elementHeader = new RuleHeader(RuleOutput.Children, $"{header.Name} of {elementName}", 0, 0);
+            var elementHeader = new RuleHeader(RuleOutput.Children, $"{header.Name} of {elementName}", 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {
                 throw new CompilationException("Cannot compile countRule definition for MatchCount.", annotation: elementBody);
             }
 
-            return new MatchCount<T>(header.Name, countRule, header.Product, min, max, header.Precedence);
+            // by default unary (and binary) operators pass the result of the children because
+            // in most cases we're interested in the values in the operation not the fact that there is an binary operation.
+            // The latter would result in much more overhead in specifying the parsers. Only when the rule is a 
+            // toplevel rule (ie rule = a, b, c) we use the user specified output.
+            var output =
+                header.IsTopLevel
+                    ? header.Output
+                    : RuleOutput.Children;
+
+            return new MatchCount<T>(header.Name, countRule, output, min, max, header.Precedence);
         }
 
 
@@ -236,8 +259,8 @@ namespace gg.parse.script.compiler
                 ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
 
             return creationParams == null || creationParams.Length == 0
-                ? (TRule)Activator.CreateInstance(typeof(TRule), header.Name, header.Product, header.Precedence, unaryRule)
-                : (TRule)Activator.CreateInstance(typeof(TRule), [header.Name, header.Product, header.Precedence, unaryRule, ..creationParams]);
+                ? (TRule)Activator.CreateInstance(typeof(TRule), header.Name, header.Output, header.Precedence, unaryRule)
+                : (TRule)Activator.CreateInstance(typeof(TRule), [header.Name, header.Output, header.Precedence, unaryRule, ..creationParams]);
         }
 
         public static RuleBase<T> CompileNot<T>(
@@ -279,7 +302,7 @@ namespace gg.parse.script.compiler
         {
             Assertions.Requires(header != null);
 
-            return new MatchAnyData<T>(header.Name, header.Product, precedence: header.Precedence);
+            return new MatchAnyData<T>(header.Name, header.Output, precedence: header.Precedence);
         }
 
         public static RuleBase<T> CompileLog<T>(
@@ -317,7 +340,7 @@ namespace gg.parse.script.compiler
                     ?? throw new CompilationException("Cannot compile condition for Log.", annotation: conditionBody);
             }
 
-            return new LogRule<T>(header.Name, header.Product, message, condition, logLevel);
+            return new LogRule<T>(header.Name, header.Output, message, condition, logLevel);
         }
     }
 }
