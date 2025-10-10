@@ -8,14 +8,14 @@ namespace gg.parse.rules
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
-        public MatchNot(string name, IRule.Output production, int precedence, RuleBase<T> rule)
-            : base(name, production, precedence)
+        public MatchNot(string name, RuleOutput output, int precedence, RuleBase<T> rule)
+            : base(name, output, precedence)
         {
             Rule = rule;
         }
 
         public MatchNot(string name, RuleBase<T> rule)
-            : base(name, IRule.Output.Self)
+            : base(name, RuleOutput.Self)
         {
             Rule = rule;
         }

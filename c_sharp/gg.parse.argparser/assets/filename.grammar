@@ -1,0 +1,15 @@
+// Cross-platform filename grammar with relative paths 
+
+// filename can be quoted or unquoted. The former is often used in command line arguments
+// where spaces in the filename can lead to different outcomes
+filename					= filename_sequence;
+
+#filename_sequence			= absolute_path, path;
+
+#absolute_path				= ?(drive | ~directory_separator);
+
+path_part					= ~base_name | ~parent_dir | ~period;
+
+path						= path_part, path_chain;
+
+#path_chain					= *(~directory_separator, path_part);

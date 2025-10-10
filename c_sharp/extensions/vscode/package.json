@@ -1,0 +1,23 @@
+{
+  "name": "gg.parse.script.syntax.highlight",
+  "displayName": "gg.parse.script syntax highlight",
+  "description": "Syntax highlighting for My Language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [{
+      "id": "gg.parse.script",
+      "aliases": ["gg.parse.script"],
+      "extensions": [".grammar", ".tokens"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "gg.parse.script",
+      "scopeName": "source.gg.parse",
+      "path": "./syntaxes/gg.parse.tmLanguage.json"
+    }]
+  }
+}

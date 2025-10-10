@@ -5,6 +5,7 @@ namespace gg.parse.script.parser
 {
     public class ScriptParser : CommonParser
     {
+        // xxx put in alphabetical order
         public MatchOneOf<int> MatchLiteral { get; private set; }
 
         public MatchSingleData<int> MatchAnyToken { get; private set; }
@@ -239,13 +240,13 @@ namespace gg.parse.script.parser
 
         private MatchOneOf<int> RegisterRuleBodyErrorHandlers(RuleBase<int>[] recoveryRules)
         {
-            // A stray production modifier found, production modifier can only appear in front of references
+            // A stray output modifier found, output modifier can only appear in front of references
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
             // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
             // in script: (~|#), error "unexpected product modifier" .
             UnexpectedProductInBodyError = Error(
                     "UnexpectedProductionModifier",
-                    "Found an unexpected annotation production modifier. These can only appear in front of references to other rules or rule declarations."
+                    "Found an unexpected annotation output modifier. These can only appear in front of references to other rules or rule declarations."
             );
 
             // error for cases where a product is not followed by a valid term, eg #&, ~; or # followed by EOF
@@ -548,13 +549,13 @@ namespace gg.parse.script.parser
         {
             InvalidProductInHeaderError = Error(
                 "InvalidProductInHeaderError",
-                $"Expected either '{IRule.Output.Void.GetToken()}' or '{IRule.Output.Children.GetToken()}' but found something else entirely.",
+                $"Expected either '{RuleOutput.Void.GetToken()}' or '{RuleOutput.Children.GetToken()}' but found something else entirely.",
                 Any()
             );
 
             return OneOf(
                 "#HeaderRuleProduction",
-                // if an indentifier token is found, it means there is no production
+                // if an indentifier token is found, it means there is no output
                 IfMatch(IdentifierToken),
                 MatchTransitiveSelector,
                 MatchNoProductSelector,
@@ -563,7 +564,7 @@ namespace gg.parse.script.parser
         }
 
         /// <summary>
-        /// Annotation production matching for references in the rule's body
+        /// Annotation output matching for references in the rule's body
         /// </summary>
         /// <returns></returns>
         private MatchCount<int> CreateMatchBodyAnnotationProduction()

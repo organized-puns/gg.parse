@@ -1,0 +1,33 @@
+{
+  "name": "gg-parse-script",
+  "displayName": "GG Parse Script",
+  "description": "Syntax highlighting",
+  "version": "0.0.1",
+  "publisher": "pointless-pun",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "gg.parse.script",
+        "extensions": [".grammar", ".tokens"]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "gg.parse.script",
+        "scopeName": "source.gg.parse",
+        "path": "./syntaxes/gg.parse.tmLanguage.json"
+      }
+    ],
+    "themes": [{
+      "label": "gg.parse.script theme",
+      "uiTheme": "vs-dark",
+      "path": "./themes/gg-parse-script.json"
+    }]
+  }
+}

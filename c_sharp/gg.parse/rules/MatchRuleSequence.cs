@@ -26,10 +26,10 @@ namespace gg.parse.rules
 
         public MatchRuleSequence(
             string name, 
-            IRule.Output production, 
+            RuleOutput output, 
             int precedence = 0,
             params RuleBase<T>[] rules
-        ) : base(name, production, precedence) 
+        ) : base(name, output, precedence) 
         {
             SequenceRules = rules;
         }
@@ -49,7 +49,7 @@ namespace gg.parse.rules
                 }
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                   (Production == IRule.Output.Self || Production == IRule.Output.Children))
+                   (Output == RuleOutput.Self || Output == RuleOutput.Children))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

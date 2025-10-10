@@ -73,6 +73,40 @@ namespace gg.parse.script.tests.unit
             IsTrue(option2.Name == parser.MatchLiteral.Name);
         }
 
+        [TestMethod]
+        public void DefineMatchCharacterSet_Parse_ExpectValidTokens()
+        {
+            var parser = new ScriptParser();
+            var rule = "rule_name = {\"_-~()[]{}+=@!#$%&'`\"};";
+
+            var (_, syntaxTree) = parser.Parse(rule);
+
+            IsTrue(syntaxTree != null);
+
+            var optionRule = syntaxTree[0][1].Rule;
+            IsTrue(optionRule.Name == parser.MatchCharacterSet.Name);
+        }
+
+        [TestMethod]
+        public void DefineMatchCharacterSet_Tokenize_ExpectValidTokens()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var rule = "rule_name = {\"_-~()[]{}+=@!#$%&'`\"};";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 6);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.ScopeStart));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.DoubleQuotedString));
+            IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.ScopeEnd));
+            IsTrue(annotations[5].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
+        }
+
+
 
         [TestMethod]
         public void ParseRule_ExpectSucess()
@@ -160,7 +194,7 @@ namespace gg.parse.script.tests.unit
             name = nodes[0].Children[2].Rule.Name;
             IsTrue(name == "Not");
 
-            // try parsing a no production rule
+            // try parsing a no output rule
             (tokens, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
 
             name = nodes[0].Children[0].Rule.Name;

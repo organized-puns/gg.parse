@@ -131,10 +131,10 @@ private (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndPar
 	var plusToken = new MatchSingleData<int>(PlusTokenName, plus.Id);
     var multToken = new MatchSingleData<int>(MultTokenName, mult.Id);
 
-    var addOperation = new MatchRuleSequence<int>(AddOpName, production: IRule.Output.Self, precedence: addPrecedence, numberToken, plusToken, numberToken);
-    var multOperation = new MatchRuleSequence<int>(MultOpName, production: IRule.Output.Self, precedence: multPrecedence, numberToken, multToken, numberToken);
+    var addOperation = new MatchRuleSequence<int>(AddOpName, output: IRule.Output.Self, precedence: addPrecedence, numberToken, plusToken, numberToken);
+    var multOperation = new MatchRuleSequence<int>(MultOpName, output: IRule.Output.Self, precedence: multPrecedence, numberToken, multToken, numberToken);
 
-    var evaluation = new MatchEvaluation<int>(EvaluationName, production: IRule.Output.Self, precedence: 0, addOperation, multOperation);
+    var evaluation = new MatchEvaluation<int>(EvaluationName, output: IRule.Output.Self, precedence: 0, addOperation, multOperation);
 	...
 }
 

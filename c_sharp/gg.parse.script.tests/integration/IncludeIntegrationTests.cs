@@ -163,7 +163,7 @@ namespace gg.parse.script.tests.integration
             var scopeStart = objectRule.Rules.ElementAt(0) as RuleReference<int>;
 
             IsNotNull(scopeStart);
-            IsTrue(scopeStart.Production == IRule.Output.Void);
+            IsTrue(scopeStart.Output == RuleOutput.Void);
 
             // check if it compiles json
             var text = "{ \"key\": 123 }";

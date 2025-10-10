@@ -79,7 +79,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a literal with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a literal with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForLiteralWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -96,7 +96,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a range with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a range with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForRangeWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -113,7 +113,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a set with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a set with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForSetWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -130,7 +130,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a set with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a set with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForAnyWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -147,7 +147,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a group with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a group with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForGroupWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -165,7 +165,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a not with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a not with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForNotWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -182,7 +182,7 @@ namespace gg.parse.script.tests.integration
         }
 
         /// <summary>
-        /// Try parse a count with a production qualifier. This should yield an unexpected product error. 
+        /// Try parse a count with a output qualifier. This should yield an unexpected product error. 
         /// </summary>
         [TestMethod]
         public void CreateTokensForCountWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
@@ -492,7 +492,7 @@ namespace gg.parse.script.tests.integration
             // expect two rules
             IsTrue(astNodes.Count == 2);
 
-            // expect production modifiers for each of the sequence's terms
+            // expect output modifiers for each of the sequence's terms
             var sequenceNode = astNodes[1][1];
 
             var modifierNode = sequenceNode[0][0];

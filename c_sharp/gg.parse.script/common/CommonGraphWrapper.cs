@@ -10,9 +10,9 @@ namespace gg.parse.script.common
     {
         // -- Utility methods -----------------------------------------------------------------------------------------
 
-        public static (string name, IRule.Output product) CreateRuleNameAndProduct(string? name, string fallback) =>
+        public static (string name, RuleOutput product) CreateRuleNameAndProduct(string? name, string fallback) =>
             string.IsNullOrEmpty(name)
-                ? ($"{IRule.Output.Void.GetToken()}{fallback}", IRule.Output.Void)
+                ? ($"{RuleOutput.Void.GetToken()}{fallback}", RuleOutput.Void)
                 : name.SplitNameAndOutput();
 
         private static string JoinDataArray(T[] array) =>
@@ -22,7 +22,7 @@ namespace gg.parse.script.common
 
         public TRule FindOrRegister<TRule>(
             string? name, string fallback,
-            Func<string, IRule.Output, TRule> factoryMethod)
+            Func<string, RuleOutput, TRule> factoryMethod)
             where TRule : RuleBase<T>
         {
             var (ruleName, product) = CreateRuleNameAndProduct(name, fallback);

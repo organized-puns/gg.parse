@@ -94,13 +94,22 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public void ProcessException(ScriptException exception, bool logException = true)
+        public void ProcessException(Exception exception, bool logException = true)
         {
             if (logException)
             {
                 Log(LogLevel.Fatal, $"Exception: {exception}");
             }
 
+            if (exception is ScriptException se)
+            {
+                ProcessScriptException(se);
+            }
+        }
+
+        public void ProcessScriptException(ScriptException exception)
+        {
+            
             if (exception.Errors != null && exception.Text != null)
             {
                 if (exception.Tokens == null)

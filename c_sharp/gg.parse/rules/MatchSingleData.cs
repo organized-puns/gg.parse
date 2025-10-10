@@ -2,8 +2,8 @@
 
 namespace gg.parse.rules
 {
-    public class MatchSingleData<T>(string name, T data, IRule.Output production = IRule.Output.Self)
-        : RuleBase<T>(name, production)
+    public class MatchSingleData<T>(string name, T data, RuleOutput output = RuleOutput.Self)
+        : RuleBase<T>(name, output)
         where T : IComparable<T>
     {
         public T Data { get; } = data;

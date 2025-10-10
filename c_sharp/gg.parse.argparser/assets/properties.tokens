@@ -2,6 +2,8 @@
  * Script for the tokens of input arguments
  */
 
+include "common.tokens";
+
 #property_token	= property_token_list | white_space | unknown_property_error;
 
 #property_token_list = float | int 
@@ -11,26 +13,10 @@
 					| array_start | array_end 
 					| kv_separator | item_separator;
 
-minus			= '-';
-plus			= '+';
-~sign           = plus | minus;
-digit           = { '0'..'9' };
-float           = int, '.', +digit, ?(('e' | 'E'), int);
-int             = ?sign, +digit;
-
+	
 boolean         = 'true' | 'false';
 null			= 'null';
 
-// allow for both single - and double quoted strings
-~sq_string_char = !'"', .;
-~sq_string      = '"', *sq_string_char, '"';
-
-~dq_string_char = !"'", .;
-~dq_string      = "'", *dq_string_char, "'";
-
-string			= sq_string | dq_string;
-
-letter			= {'a' .. 'z'} | {'A' .. 'Z'};	
 
 identifier	    = ("_" | letter ), *("_" | letter | digit);
 
@@ -42,7 +28,5 @@ array_end		= ']';
 
 kv_separator	= ('=' | ':');
 item_separator	= ',';
-
-~white_space	= { ' \t\r\n' };
 
 unknown_property_error	= error "unknown token found." if *(!property_token_list, .);

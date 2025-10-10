@@ -132,8 +132,10 @@ namespace gg.parse.script.common
                                 MatchSingle(delimiter),
                                 ZeroOrMore(
                                     OneOf(
-                                        // escaped delimiter
-                                        Literal(['\\', delimiter]),
+                                        // escaped character
+                                        Sequence(MatchSingle('\\'), Any()),
+                                        // escaped escape
+                                        //Literal(['\\', '\\']),
                                         // string character that is NOT a delimiter
                                         Sequence(Not(MatchSingle(delimiter)), Any())
                                     )

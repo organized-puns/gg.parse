@@ -54,7 +54,7 @@ namespace gg.parse.script.tests.integration
             var litRule = table.FindRule("lit_rule") as MatchDataSequence<char>;
 
             IsNotNull(litRule);
-            IsTrue(litRule.Production == IRule.Output.Self);
+            IsTrue(litRule.Output == RuleOutput.Self);
             IsTrue(litRule.DataArray.SequenceEqual("foo".ToArray()));
         }
 
@@ -66,7 +66,7 @@ namespace gg.parse.script.tests.integration
             var setRule = table.FindRule("set_rule") as MatchDataSet<char>;
 
             IsNotNull(setRule);
-            IsTrue(setRule.Production == IRule.Output.Void);
+            IsTrue(setRule.Output == RuleOutput.Void);
             IsTrue(setRule.MatchingValues.SequenceEqual("abc".ToArray()));
         }
 
@@ -90,7 +90,7 @@ namespace gg.parse.script.tests.integration
             var sequenceRule = table.FindRule("sequence_rule") as MatchRuleSequence<char>;
 
             IsNotNull(sequenceRule);
-            IsTrue(sequenceRule.Production == IRule.Output.Children);
+            IsTrue(sequenceRule.Output == RuleOutput.Children);
 
             var fooLit = sequenceRule.SequenceRules[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
@@ -109,7 +109,7 @@ namespace gg.parse.script.tests.integration
             var optionRule = table.FindRule("option_rule") as MatchOneOf<char>;
 
             IsNotNull(optionRule);
-            IsTrue(optionRule.Production == IRule.Output.Self);
+            IsTrue(optionRule.Output == RuleOutput.Self);
 
             var fooLit = optionRule.RuleOptions[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
@@ -241,17 +241,17 @@ namespace gg.parse.script.tests.integration
             var rule1 = table.FindRule("rule1") as MatchAnyData<char>;
             IsNotNull(rule1);
             IsTrue(rule1.Precedence == 100);
-            IsTrue(rule1.Production == IRule.Output.Self);
+            IsTrue(rule1.Output == RuleOutput.Self);
 
             var rule2 = table.FindRule("rule2") as MatchAnyData<char>;
             IsNotNull(rule2);
             IsTrue(rule2.Precedence == 200);
-            IsTrue(rule2.Production == IRule.Output.Children);
+            IsTrue(rule2.Output == RuleOutput.Children);
 
             var ruleThree = table.FindRule("rule_three") as MatchAnyData<char>;
             IsNotNull(ruleThree);
             IsTrue(ruleThree.Precedence == -1);
-            IsTrue(ruleThree.Production == IRule.Output.Void);
+            IsTrue(ruleThree.Output == RuleOutput.Void);
         }
 
     }

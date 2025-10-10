@@ -14,10 +14,10 @@ namespace gg.parse.rules
 
         public MatchCondition(
             string name, 
-            IRule.Output production, 
+            RuleOutput output, 
             int precedence,
             RuleBase<T> rule
-        ) : base(name, production, precedence)
+        ) : base(name, output, precedence)
         {
             Assertions.RequiresNotNull(rule);
 
@@ -25,7 +25,7 @@ namespace gg.parse.rules
         }
 
         public MatchCondition(string name, RuleBase<T> rule)
-            : base(name, IRule.Output.Self)
+            : base(name, RuleOutput.Self)
         {
             Assertions.RequiresNotNull(rule);
 

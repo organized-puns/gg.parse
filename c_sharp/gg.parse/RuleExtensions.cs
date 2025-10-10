@@ -16,29 +16,29 @@
 
         
 
-        public static string GetToken(this IRule.Output production) =>
-            production switch
+        public static string GetToken(this RuleOutput output) =>
+            output switch
             {
-                IRule.Output.Self => SelfToken,
-                IRule.Output.Children => ChildrenToken,
-                IRule.Output.Void => VoidToken,
+                RuleOutput.Self => SelfToken,
+                RuleOutput.Children => ChildrenToken,
+                RuleOutput.Void => VoidToken,
                 _ => throw new NotImplementedException(),
             };
 
-        public static (string outputName, IRule.Output product) SplitNameAndOutput(this string name)
+        public static (string outputName, RuleOutput product) SplitNameAndOutput(this string name)
         {
-            var product = IRule.Output.Self;
+            var product = RuleOutput.Self;
             var start = name.IndexOf(ChildrenToken);
             var length = 0;
 
             if (start == 0)
             {
-                product = IRule.Output.Children;
+                product = RuleOutput.Children;
                 length = ChildrenToken.Length;
             }
             else if ((start = name.IndexOf(VoidToken)) == 0)
             {
-                product = IRule.Output.Void;
+                product = RuleOutput.Void;
                 length = VoidToken.Length;
             }
 
@@ -50,16 +50,16 @@
         /// Note: this will only return true because of the current assumption that the product character
         /// will always start at 0 and defaults to AnnotationProduct.Annotation. Should this change in the future
         /// we can more easily revert.
-        public static bool TryGetOutput(this string name, out IRule.Output output, out int start, out int length)
+        public static bool TryGetOutput(this string name, out RuleOutput output, out int start, out int length)
         {
-            output = IRule.Output.Self;
+            output = RuleOutput.Self;
             length = 0;
 
             start = name.IndexOf(ChildrenToken);
 
             if (start == 0)
             {
-                output = IRule.Output.Children;
+                output = RuleOutput.Children;
                 length = ChildrenToken.Length;
                 return true;
             }
@@ -68,7 +68,7 @@
 
             if (start == 0)
             {
-                output = IRule.Output.Void;
+                output = RuleOutput.Void;
                 length = VoidToken.Length;
 
                 return true;

@@ -74,9 +74,17 @@ namespace gg.parse.script
             Assertions.RequiresNotNull(TokenGraph!);
             Assertions.RequiresNotNull(TokenGraph!.Root!);
 
-            return GrammarGraph == null
-                    ? (TokenGraph.TokenizeText(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
-                    : GrammarGraph.Parse(TokenGraph, input, failOnWarning, throwExceptionsOnError);
+            try
+            {
+                return GrammarGraph == null
+                        ? (TokenGraph.TokenizeText(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
+                        : GrammarGraph.Parse(TokenGraph, input, failOnWarning, throwExceptionsOnError);
+            }
+            catch (Exception e)
+            {
+                LogHandler?.ProcessException(e);
+                throw;
+            }
         }
     }
 }

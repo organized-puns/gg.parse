@@ -11,13 +11,13 @@ namespace gg.parse.script.compiler
     {
         public Dictionary<int, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
-        public (int functionId, IRule.Output product)[]? RuleOutputLookup { get; set; }
+        public (int functionId, RuleOutput product)[]? RuleOutputLookup { get; set; }
 
         public RuleCompiler()
         {
         }
 
-        public RuleCompiler((int functionId, IRule.Output product)[] outputLookup)
+        public RuleCompiler((int functionId, RuleOutput product)[] outputLookup)
         {
             RuleOutputLookup = outputLookup;
         }
@@ -150,9 +150,9 @@ namespace gg.parse.script.compiler
             }
         }
 
-        public bool TryGetProduct(int functionId, out IRule.Output product)
+        public bool TryGetProduct(int functionId, out RuleOutput product)
         {
-            product = IRule.Output.Self;
+            product = RuleOutput.Self;
 
             if (RuleOutputLookup != null)
             {
@@ -237,13 +237,13 @@ namespace gg.parse.script.compiler
                             var referredRule = FindRule(graph, referenceRule.Reference);
 
                             // note: we don't replace the rule we just set the reference. This allows
-                            // these subrules to have their own annotation production. If we replace these 
-                            // any production modifiers will affect the original rule
+                            // these subrules to have their own annotation output. If we replace these 
+                            // any output modifiers will affect the original rule
                             referenceRule.Rule = referredRule!;
 
                             // if the reference rule is part of a composition (sequence/option/oneormore/...)
-                            // then use the referred rule's name / production to show up in the result/ast tree
-                            // rather than this reference rule's name/production
+                            // then use the referred rule's name / output to show up in the result/ast tree
+                            // rather than this reference rule's name/output
                             referenceRule.DeferResultToReference = true;
                         }
                     }

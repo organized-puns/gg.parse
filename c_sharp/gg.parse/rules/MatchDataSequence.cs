@@ -3,10 +3,10 @@
     public class MatchDataSequence<T>(
         string name, 
         T[] dataArray, 
-        IRule.Output production = IRule.Output.Self,
+        RuleOutput output = RuleOutput.Self,
         int precedence = 0
     )
-        : RuleBase<T>(name, production, precedence)
+        : RuleBase<T>(name, output, precedence)
         where T : IComparable<T>
     {
         public T[] DataArray { get; } = dataArray;

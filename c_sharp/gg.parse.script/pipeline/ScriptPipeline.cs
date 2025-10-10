@@ -150,10 +150,10 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public static (int functionId, IRule.Output product)[] CreateRuleOutputMapping(ScriptParser parser) =>
+        public static (int functionId, RuleOutput product)[] CreateRuleOutputMapping(ScriptParser parser) =>
         [
-            (parser.MatchTransitiveSelector.Id, IRule.Output.Children),
-            (parser.MatchNoProductSelector.Id, IRule.Output.Void),
+            (parser.MatchTransitiveSelector.Id, RuleOutput.Children),
+            (parser.MatchNoProductSelector.Id, RuleOutput.Void),
         ];
 
         public static RuleCompiler CreateParserCompiler(ScriptParser parser)
@@ -324,9 +324,9 @@ namespace gg.parse.script.pipeline
             {
                 var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 
-                if (tokenFunction.Production == IRule.Output.Self)
+                if (tokenFunction.Output == RuleOutput.Self)
                 {
-                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, IRule.Output.Self));
+                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, RuleOutput.Self));
                 }
             }
 

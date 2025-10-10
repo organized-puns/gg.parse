@@ -5,11 +5,11 @@ namespace gg.parse.rules
     public class MatchCount<T>(
         string name, 
         RuleBase<T> rule, 
-        IRule.Output production = IRule.Output.Self, 
+        RuleOutput output = RuleOutput.Self, 
         int min = 1, 
         int max = 1, 
         int precedence = 0
-    ) : RuleBase<T>(name, production, precedence), IRuleComposition<T> where T : IComparable<T>
+    ) : RuleBase<T>(name, output, precedence), IRuleComposition<T> where T : IComparable<T>
     {
         public RuleBase<T> Rule { get; private set; } = rule;
         
@@ -43,7 +43,7 @@ namespace gg.parse.rules
                 index += result.MatchLength;
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                    (Production == IRule.Output.Self || Production == IRule.Output.Children))
+                    (Output == RuleOutput.Self || Output == RuleOutput.Children))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

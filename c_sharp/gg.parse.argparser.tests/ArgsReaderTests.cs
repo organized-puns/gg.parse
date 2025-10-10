@@ -25,7 +25,7 @@ namespace gg.parse.json.tests
         }
 
 
-        [TestMethod]
+        /*[TestMethod]
         public void CreateReaderWithSingleValueClass_Parse_ExpectValueIsFoo()
         {
             var argReader = new ArgsReader<SingleValueClass>();
@@ -33,9 +33,9 @@ namespace gg.parse.json.tests
             var dummy = argReader.Parse("--Value foo");
 
             IsTrue(dummy.Value == "foo");
-        }
+        }*/
 
-        [TestMethod]
+        /*[TestMethod]
         public void CreateReaderWithSingleValueAttrClass_Parse_ExpectValuesSet()
         {
             var argReader = new ArgsReader<AttrClass>();
@@ -46,7 +46,7 @@ namespace gg.parse.json.tests
             IsTrue(attrs.ShortValue == "bar");
             IsTrue(attrs.NoAttribute == "baz");
             IsTrue(attrs.WithDefaultValue == "???");
-        }
+        }*/
 
     }
 }

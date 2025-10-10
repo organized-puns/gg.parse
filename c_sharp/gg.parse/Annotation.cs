@@ -5,6 +5,9 @@ namespace gg.parse
 {
     public class Annotation 
     {        
+        /// <summary>
+        /// Range in the data which this annotation spans
+        /// </summary>
         public Range Range { get; set; }
         
         public int Start => Range.Start;
@@ -22,7 +25,17 @@ namespace gg.parse
 
         public Annotation? Parent { get; set; }
 
-        
+        /// <summary>
+        /// Shorthand for children.count, checks if children is null and returns 0 
+        /// otherwise returns Children.Count
+        /// </summary>
+        public int Count => Children == null ? 0 : Children.Count;
+
+        /// <summary>
+        /// short hand for Rule.Name
+        /// </summary>
+        public string Name => Rule.Name;
+
 
         public Annotation? this[int index] => 
             Children == null 

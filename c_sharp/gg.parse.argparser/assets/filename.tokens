@@ -1,0 +1,24 @@
+
+include "common.tokens";
+
+#file_name_tokens = *file_name_token;
+
+#file_name_token = drive | base_name | directory_separator | parent_dir | period;
+
+base_name = valid_name_char, *(valid_name_char);
+
+allowed_symbols = { "_-~()[]{}+=@!#$%&'`." };
+
+valid_name_char = letter | digit | allowed_symbols;
+
+drive = ~letter, ~colon, ~directory_separator;
+
+colon = ":";
+
+period = ".";
+
+parent_dir = "..";
+
+directory_separator = '/' | '\\';
+
+quote = '"';

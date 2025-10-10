@@ -17,13 +17,13 @@ namespace gg.parse.script.tests.integration
             IsTrue(root != null);
             
             IsTrue((root[0] as RuleReference<int>).Reference == "foo");
-            IsTrue(root[0].Production == IRule.Output.Self);
+            IsTrue(root[0].Output == RuleOutput.Self);
 
             IsTrue((root[1] as RuleReference<int>).Reference == "bar");
-            IsTrue(root[1].Production == IRule.Output.Children);
+            IsTrue(root[1].Output == RuleOutput.Children);
 
             IsTrue((root[2] as RuleReference<int>).Reference == "foo");
-            IsTrue(root[2].Production == IRule.Output.Void);
+            IsTrue(root[2].Output == RuleOutput.Void);
 
         }
 

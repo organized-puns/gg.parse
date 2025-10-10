@@ -10,21 +10,22 @@
  *  parameter_1 = value
  */
 
-root			  = *(optional_arg | config_arg | required_arg );
+include "properties.grammar";
+include "filename.grammar";
 
-optional_arg	  = (verbose_switch | minus), identifier, ?assignment, arg_value;
+#root			  = optional_list, required_list, arg_chain;
+
+#arg_chain		  = *(optional_arg, optional_list, required_list);
+
+#optional_list	  = *optional_arg;
+
+#required_list	  = *required_arg;	
+
+optional_arg	  = switch_key, #optional_value;
+
+#optional_value   = ?(~kv_separator, arg_value);
+
 required_arg      = arg_value;
-config_arg		  = identifier, assignment, arg_value;
 
-arg_value		  = object | array | float | int | boolean | null | string | identifier | untyped_value;
+#arg_value		  = object | array | float | int | boolean | null | identifier | filename | string;
 
-eof				  = !.;
-
-key_value_pair    = identifier, ~kv_separator, arg_value;
-
-#key_value_list	  = key_value_pair, *(~item_separator, key_value_pair);
-
-object			  = ~scope_start, ?key_value_list, ~scope_end;
-
-#array_item_list  = arg_value, *(~item_separator, arg_value);
-array			  = ~array_start, ?array_item_list, ~array_end;

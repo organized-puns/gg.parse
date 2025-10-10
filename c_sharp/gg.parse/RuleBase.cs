@@ -7,7 +7,7 @@ namespace gg.parse
 
     public abstract class RuleBase<T>(
         string name, 
-        IRule.Output production = IRule.Output.Self, 
+        RuleOutput output = RuleOutput.Self, 
         int precedence = 0) 
         : IRule
     {
@@ -17,41 +17,41 @@ namespace gg.parse
 
         public int Precedence { get; init; } = precedence;
 
-        public IRule.Output Production { get; init; } = production;
+        public RuleOutput Output { get; init; } = output;
 
         
         public abstract ParseResult Parse(T[] input, int start);
 
-        public override string ToString() => $"{Production} {Name}({Id})";
+        public override string ToString() => $"{Name}(id:{Id},out:{Output},pre:{Precedence})";
 
         public ParseResult BuildDataRuleResult(Range dataRange) 
         {
-            return Production switch
+            return Output switch
             {
-                IRule.Output.Self => 
+                RuleOutput.Self => 
                     new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
-                IRule.Output.Children => 
+                RuleOutput.Children => 
                     new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
-                IRule.Output.Void => 
+                RuleOutput.Void => 
                     new ParseResult(true, dataRange.Length),
   
-                _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
+                _ => throw new NotImplementedException($"No implementation to build a data rule result for enum value {Output}."),
             };
         }
 
         public ParseResult BuildResult(Range dataRange, List<Annotation>? children = null)
         {
-            return Production switch
+            return Output switch
             {
-                IRule.Output.Self => new ParseResult(true, dataRange.Length, [ new Annotation(this, dataRange, children) ]),
+                RuleOutput.Self => new ParseResult(true, dataRange.Length, [ new Annotation(this, dataRange, children) ]),
 
-                IRule.Output.Children => new ParseResult(true, dataRange.Length, children),
+                RuleOutput.Children => new ParseResult(true, dataRange.Length, children),
 
-                IRule.Output.Void => new ParseResult(true, dataRange.Length),
+                RuleOutput.Void => new ParseResult(true, dataRange.Length),
 
-                _ => throw new NotImplementedException($"Production rule {Production} is not implemented"),
+                _ => throw new NotImplementedException($"No implementation to build a rule result for enum value {Output}."),
             };
         }
     }
