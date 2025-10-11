@@ -8,7 +8,7 @@ include "filename.tokens";
 #arg_tokens			= *(arg_token | ~white_space | unknown_arg_token);
 
 #arg_token			= 
-	arg_option
+	arg_key
 	| float | int 
 	| boolean 
 	| null 
@@ -19,8 +19,8 @@ include "filename.tokens";
 	| arg_identifier
 	| file_name_token;
 
-arg_option			= ~arg_option_switch, identifier;
-arg_option_switch	= ("--" | "-");	
+arg_key				= ~arg_key_switch, identifier;
+arg_key_switch		= ("--" | "-");	
 
 arg_identifier		= identifier, !(colon | directory_separator | period | allowed_symbols);
 

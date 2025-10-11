@@ -13,10 +13,10 @@
 include "properties.grammar";
 include "filename.grammar";
 
-#root			  = *optional_arg, *required_arg, *(optional_arg, *required_arg);
+#root				= eof | ((arg_option | arg_value), *(arg_option | arg_value)) | unknown_arg_grammar;
 
-optional_arg	  = arg_option, ?(~kv_separator, arg_value);
+arg_option			= arg_key, ?(~kv_separator, arg_value);
 
-required_arg      = arg_value;
+arg_value			= object | array | float | int | boolean | null | arg_identifier | filename | string;
 
-arg_value		  = object | array | float | int | boolean | null | arg_identifier | filename | string;
+unknown_arg_grammar	= error "unknown grammar construct." if *(!(arg_option | arg_value), .);

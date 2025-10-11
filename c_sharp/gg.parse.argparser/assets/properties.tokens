@@ -13,10 +13,9 @@ include "common.tokens";
 					| array_start | array_end 
 					| kv_separator | item_separator;
 
-	
 boolean         = 'true' | 'false';
-null			= 'null';
 
+null			= 'null';
 
 identifier	    = ("_" | letter ), *("_" | letter | digit);
 
