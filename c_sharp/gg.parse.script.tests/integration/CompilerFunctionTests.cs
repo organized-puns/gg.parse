@@ -180,7 +180,7 @@ namespace gg.parse.script.tests.integration
             IsNotNull(zeroOrMore);
             IsTrue(zeroOrMore.Min == 0);
             IsTrue(zeroOrMore.Max == 0);
-            IsTrue(zeroOrMore.Rule == table.FindRule("zero_or_more_rule of Literal"));
+            IsTrue(zeroOrMore.Rule == table.FindRule(CompilerFunctions.UnnamedRulePrefix + "zero_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -192,7 +192,7 @@ namespace gg.parse.script.tests.integration
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 1);
             IsTrue(oneOrMore.Max == 0);
-            IsTrue(oneOrMore.Rule == table.FindRule("one_or_more_rule of Literal"));
+            IsTrue(oneOrMore.Rule == table.FindRule(CompilerFunctions.UnnamedRulePrefix +  "one_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -204,7 +204,7 @@ namespace gg.parse.script.tests.integration
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 0);
             IsTrue(oneOrMore.Max == 1);
-            IsTrue(oneOrMore.Rule == table.FindRule("zero_or_one_rule of Literal"));
+            IsTrue(oneOrMore.Rule == table.FindRule(CompilerFunctions.UnnamedRulePrefix + "zero_or_one_rule of Literal"));
         }
 
         [TestMethod]
@@ -216,10 +216,11 @@ namespace gg.parse.script.tests.integration
             IsNotNull(error);
             IsTrue(error.Text == "msg");
             IsTrue(error.Level == LogLevel.Error);
-            IsTrue(error.Condition == table.FindRule("error_rule condition: Not"));
+            var expectedName = $"{CompilerFunctions.UnnamedRulePrefix}error_rule condition: Not";
+            IsTrue(error.Condition == table.FindRule(expectedName));
             var matchFunction = error.Condition as MatchNot<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule("error_rule condition: Not, type: Not(Literal)"));
+            IsTrue(matchFunction.Rule == table.FindRule($"{CompilerFunctions.UnnamedRulePrefix}{expectedName}(Literal)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 

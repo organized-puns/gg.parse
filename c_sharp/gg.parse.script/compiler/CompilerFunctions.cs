@@ -10,6 +10,8 @@ namespace gg.parse.script.compiler
     /// </summary>
     public static class CompilerFunctions
     {
+        public static readonly string UnnamedRulePrefix = "$";
+
         /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
         public static RuleBase<char> CompileLiteral(RuleHeader header, Annotation bodyNode, CompileSession context)
@@ -119,7 +121,7 @@ namespace gg.parse.script.compiler
                     var elementBody = bodyNode.Children[i];
                     var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule.Id];
 
-                    var elementName = $"{declaration.Name}[{i}], type: {functionName}";
+                    var elementName = $"{UnnamedRulePrefix}{declaration.Name}[{i}], type: {functionName}";
                     
                     var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0, false);
 
@@ -194,7 +196,7 @@ namespace gg.parse.script.compiler
 
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
-            var elementHeader = new RuleHeader(RuleOutput.Children, $"{header.Name} of {elementName}", 0, 0, false);
+            var elementHeader = new RuleHeader(RuleOutput.Children, $"{UnnamedRulePrefix}{header.Name} of {elementName}", 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {
@@ -253,7 +255,7 @@ namespace gg.parse.script.compiler
 
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
-            var elementHeader = new RuleHeader(RuleOutput.Self, $"{header.Name}, type: Not({elementName})");
+            var elementHeader = new RuleHeader(RuleOutput.Self, $"{UnnamedRulePrefix}{header.Name}({elementName})");
 
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
                 ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
@@ -334,7 +336,7 @@ namespace gg.parse.script.compiler
             {
                 var conditionBody = bodyNode.Children[2];
                 var (compilationFunction, elementName) = session.FindFunction(conditionBody.Rule);
-                var conditionHeader = new RuleHeader(RuleOutput.Self, $"{header.Name} condition: {elementName}");
+                var conditionHeader = new RuleHeader(RuleOutput.Self, $"{UnnamedRulePrefix}{header.Name} condition: {elementName}");
 
                 condition = compilationFunction(conditionHeader, conditionBody, session) as RuleBase<T>
                     ?? throw new CompilationException("Cannot compile condition for Log.", annotation: conditionBody);

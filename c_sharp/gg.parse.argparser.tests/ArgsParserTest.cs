@@ -18,6 +18,18 @@ namespace gg.parse.argparser.tests
         static readonly string TokenFileName = "assets/args.tokens";
         static readonly string GrammarFileName = "assets/args.grammar";
 
+        // export the names so we address results by reference
+        /*[TestMethod]
+        public void ExportNames()
+        {
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+
+            var output = ScriptUtils.ExportNames(builder.TokenGraph, builder.GrammarGraph, "gg.parse.argparser", "ArgParserNames");
+
+            File.WriteAllText("ArgParserNames.cs", output);
+        }*/
+            
+
         [TestMethod]
         public void SetupLoadTokensAndGrammar_ExpectNoExceptions()
         {
@@ -50,14 +62,14 @@ namespace gg.parse.argparser.tests
             IsTrue(tokens);
             IsTrue(tokens.Count == 1);
             IsTrue(tokens.MatchLength == 2);
-            IsTrue(tokens[0].Rule.Name == "arg_key");
+            IsTrue(tokens[0].Rule.Name == ArgParserNames.ArgKey);
 
             IsTrue(syntaxTree);
             IsTrue(syntaxTree.Count == 1);
             IsTrue(syntaxTree.MatchLength == 1);
 
-            IsTrue(syntaxTree[0].Name == "arg_option");
-            IsTrue(syntaxTree[0][0].Name == "arg_key");
+            IsTrue(syntaxTree[0].Name == ArgParserNames.ArgOption);
+            IsTrue(syntaxTree[0][0].Name == ArgParserNames.ArgKey);
 
             var optionText = tokens[syntaxTree[0][0].Start][0].GetText("-v");
 
@@ -74,14 +86,14 @@ namespace gg.parse.argparser.tests
             IsTrue(tokens);
             IsTrue(tokens.Count == 1);
             IsTrue(tokens.MatchLength == argText.Length);
-            IsTrue(tokens[0].Rule.Name == "arg_key");
+            IsTrue(tokens[0].Rule.Name == ArgParserNames.ArgKey);
 
             IsTrue(syntaxTree);
             IsTrue(syntaxTree.Count == 1);
             IsTrue(syntaxTree.MatchLength == 1);
 
-            IsTrue(syntaxTree[0].Name == "arg_option");
-            IsTrue(syntaxTree[0][0].Name == "arg_key");
+            IsTrue(syntaxTree[0].Name == ArgParserNames.ArgOption);
+            IsTrue(syntaxTree[0][0].Name == ArgParserNames.ArgKey);
 
             var optionText = tokens[syntaxTree[0][0].Start][0].GetText(argText);
 
@@ -97,14 +109,14 @@ namespace gg.parse.argparser.tests
             var (tokens, syntaxTree) = builder.Parse(argText);
 
             IsTrue(tokens);
-            IsTrue(tokens[0].Name == "arg_key");
-            IsTrue(tokens[1].Name == "kv_separator");
-            IsTrue(tokens[2].Name == "arg_identifier");
+            IsTrue(tokens[0].Name == ArgParserNames.ArgKey);
+            IsTrue(tokens[1].Name == ArgParserNames.KvSeparator);
+            IsTrue(tokens[2].Name == ArgParserNames.ArgIdentifier);
 
             IsTrue(syntaxTree);
-            IsTrue(syntaxTree[0].Rule.Name == "arg_option");
-            IsTrue(syntaxTree[0][0].Rule.Name == "arg_key");
-            IsTrue(syntaxTree[0][1].Rule.Name == "arg_value");
+            IsTrue(syntaxTree[0].Rule.Name == ArgParserNames.ArgOption);
+            IsTrue(syntaxTree[0][0].Rule.Name == ArgParserNames.ArgKey);
+            IsTrue(syntaxTree[0][1].Rule.Name == ArgParserNames.ArgValue);
 
             var valueText = syntaxTree[0][1].GetText(argText, tokens);
             IsTrue(valueText == "value");
@@ -117,8 +129,8 @@ namespace gg.parse.argparser.tests
             var (tokens, syntaxTree) = builder.Parse("value");
 
             IsTrue(syntaxTree);
-            IsTrue(syntaxTree[0].Rule.Name == "arg_value");
-            IsTrue(syntaxTree[0][0].Rule.Name == "arg_identifier");
+            IsTrue(syntaxTree[0].Rule.Name == ArgParserNames.ArgValue);
+            IsTrue(syntaxTree[0][0].Rule.Name == ArgParserNames.ArgIdentifier);
 
             var valueText = syntaxTree[0].GetText("value", tokens);
             IsTrue(valueText == "value");
@@ -139,22 +151,22 @@ namespace gg.parse.argparser.tests
             IsTrue(syntaxTree.Count == 3);
             IsTrue(syntaxTree.MatchLength == 10);
 
-            IsTrue(syntaxTree[0].Name == "arg_option");
-            IsTrue(syntaxTree[0][0].Name == "arg_key");
+            IsTrue(syntaxTree[0].Name == ArgParserNames.ArgOption);
+            IsTrue(syntaxTree[0][0].Name == ArgParserNames.ArgKey);
             IsTrue(syntaxTree[0][0].GetText(argText, tokens.Annotations) == "-s");
-            IsTrue(syntaxTree[0][1].Name == "arg_value");
-            IsTrue(syntaxTree[0][1][0].Name == "int");
+            IsTrue(syntaxTree[0][1].Name == ArgParserNames.ArgValue);
+            IsTrue(syntaxTree[0][1][0].Name == ArgParserNames.Int);
             IsTrue(syntaxTree[0][1][0].GetText(argText, tokens.Annotations) == "123");
 
-            IsTrue(syntaxTree[1].Name == "arg_option");
-            IsTrue(syntaxTree[1][0].Name == "arg_key");
+            IsTrue(syntaxTree[1].Name == ArgParserNames.ArgOption);
+            IsTrue(syntaxTree[1][0].Name == ArgParserNames.ArgKey);
             IsTrue(syntaxTree[1][0].GetText(argText, tokens.Annotations) == "--input");
-            IsTrue(syntaxTree[1][1].Name == "arg_value");
-            IsTrue(syntaxTree[1][1][0].Name == "filename");
+            IsTrue(syntaxTree[1][1].Name == ArgParserNames.ArgValue);
+            IsTrue(syntaxTree[1][1][0].Name == ArgParserNames.Filename);
             IsTrue(syntaxTree[1][1][0].GetText(argText, tokens.Annotations) == "c:\\some\\file.txt");
 
-            IsTrue(syntaxTree[2].Name == "arg_value");
-            IsTrue(syntaxTree[2][0].Name == "arg_identifier");
+            IsTrue(syntaxTree[2].Name == ArgParserNames.ArgValue);
+            IsTrue(syntaxTree[2][0].Name == ArgParserNames.ArgIdentifier);
             IsTrue(syntaxTree[2][0].GetText(argText, tokens.Annotations) == "command");
         }
 
@@ -168,21 +180,21 @@ namespace gg.parse.argparser.tests
 
             IsTrue(syntaxTree);
 
-            IsTrue(syntaxTree[0].Name == "arg_option");
+            IsTrue(syntaxTree[0].Name == ArgParserNames.ArgOption);
             IsTrue(syntaxTree[0][0].GetText(argText, tokens.Annotations) == "-s");
             IsTrue(syntaxTree[0][1].GetText(argText, tokens.Annotations) == "123");
 
-            IsTrue(syntaxTree[1].Name == "arg_value");
+            IsTrue(syntaxTree[1].Name == ArgParserNames.ArgValue);
             IsTrue(syntaxTree[1].GetText(argText, tokens.Annotations) == "command1");
 
-            IsTrue(syntaxTree[2].Name == "arg_value");
+            IsTrue(syntaxTree[2].Name == ArgParserNames.ArgValue);
             IsTrue(syntaxTree[2].GetText(argText, tokens.Annotations) == "command2");
 
-            IsTrue(syntaxTree[3].Name == "arg_option");
+            IsTrue(syntaxTree[3].Name == ArgParserNames.ArgOption);
             IsTrue(syntaxTree[3][0].GetText(argText, tokens.Annotations) == "--next_option");
             IsTrue(syntaxTree[3][1].GetText(argText, tokens.Annotations) == "-1.0");
 
-            IsTrue(syntaxTree[4].Name == "arg_value");
+            IsTrue(syntaxTree[4].Name == ArgParserNames.ArgValue);
             IsTrue(syntaxTree[4].GetText(argText, tokens.Annotations) == "command3");
         }
 
