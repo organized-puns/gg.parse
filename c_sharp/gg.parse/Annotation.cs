@@ -1,10 +1,13 @@
 ﻿
+using System.Collections;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
 {
-    public class Annotation 
-    {        
+    public class Annotation : IEnumerable<Annotation>
+    {
+        public static implicit operator string(Annotation annotation) => annotation.Rule == null ? "" : annotation.Rule.Name;
+
         /// <summary>
         /// Range in the data which this annotation spans
         /// </summary>
@@ -83,6 +86,18 @@ namespace gg.parse
             }
 
             return target;
+        }
+
+        public IEnumerator<Annotation> GetEnumerator()
+        {
+            return Children == null
+                ? Enumerable.Empty<Annotation>().GetEnumerator()
+                : Children.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

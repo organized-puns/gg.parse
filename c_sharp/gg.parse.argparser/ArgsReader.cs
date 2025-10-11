@@ -1,5 +1,7 @@
 ﻿
+using System.Globalization;
 using System.Reflection;
+using gg.parse.argparser;
 using gg.parse.script;
 using gg.parse.script.common;
 
@@ -30,35 +32,173 @@ namespace gg.parse.json
 
             public bool IsRequired =>
                 Attribute != null && Attribute.IsRequired;
+
+            public void SetValue(object target, object value)
+            {
+                Info.SetValue(target, value);
+            }
         }
 
         private static readonly List<PropertyArgs> _propertyAttributes = CreatePropertyArgList();
               
         private ParserBuilder _parserBuilder;
-           
         
         public ArgsReader()
         {
-            _parserBuilder = new ParserBuilder()
-                            .From(File.ReadAllText("assets/args.tokens"), 
-                            File.ReadAllText("assets/args.gramma")
-                         );
+            _parserBuilder = new ParserBuilder().FromFile("assets/args.tokens", "assets/args.grammar");
         }
-
 
         public T Parse(string[] args) =>
             Parse(string.Join(" ", args));
 
         public T Parse(string args)
         {
-            var (tokens, grammar) = _parserBuilder.Parse(args);
-
+            var (tokens, syntaxTree) = _parserBuilder.Parse(args);
             var target = Activator.CreateInstance<T>();
+            var index = 0;
+            var errors = new List<string>();
+            var requiredArgs = new HashSet<PropertyArgs>(_propertyAttributes.Where(attr => attr.IsRequired));
 
+            foreach (var attr in _propertyAttributes)
+            {
+                if (attr.Attribute != null && attr.Attribute.DefaultValue != null)
+                {
+                    attr.SetValue(target, attr.Attribute.DefaultValue);
+                    requiredArgs.Remove(attr);
+                }
+            }
 
-            // xxx todo 
+            foreach (var node in syntaxTree)
+            {
+                if (node == ArgParserNames.ArgOption)
+                {
+                    var key = node[0]!.GetText(args, tokens).Replace("-", "");
+
+                    var property = _propertyAttributes
+                        .FirstOrDefault(propertyArg => 
+                            propertyArg.MatchesShortName(key) || propertyArg.MatchesFullName(key)
+                        );
+
+                    if (property == null)
+                    {
+                        errors.Add($"Can't '{key}' to any known option.");
+                    }
+                    else
+                    {
+                        try
+                        {
+                            object value = node.Count == 2 
+                                ? ParseValue(property.Info.PropertyType, node[1], tokens.Annotations, args) 
+                                // assume its a bool
+                                : true;
+                            property.SetValue(target!, value);
+
+                            requiredArgs.Remove(property);
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add(ex.Message);
+                        }
+                    }
+                }
+                else if (node == ArgParserNames.ArgValue)
+                {
+                    var property = _propertyAttributes
+                        .FirstOrDefault(propertyArg => propertyArg.MatchesIndex(index));
+
+                    if (property == null)
+                    {
+                        errors.Add($"Can't '{index}' to any known option.");
+                    }
+                    try
+                    {
+                        object value = ParseValue(property.Info.PropertyType, node, tokens.Annotations, args);
+                        property.SetValue(target!, value);
+                        requiredArgs.Remove(property);
+                        index++;
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add(ex.Message);
+                    }
+                }
+            }
+
+            foreach (var arg in requiredArgs)
+            {
+                var key = arg.PropertyInfoIndex >= 0 ? $"{arg.PropertyInfoIndex}" : "";
+
+                if (arg.Attribute != null)
+                {
+                    key = !string.IsNullOrEmpty(arg.Attribute.ShortName) ? $"{key}, -{arg.Attribute.ShortName}" : key;
+                    key = !string.IsNullOrEmpty(arg.Attribute.FullName) ? $"{key}, --{arg.Attribute.FullName}" : key;
+                }
+
+                errors.Add($"No argument provided for _required_ arg {arg.Info.Name}(${key}).");
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ArgumentException("Failed to read arguments:\n" + string.Join("\n", errors));
+            }
 
             return target;
+        }
+
+        private object ParseValue(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        {
+            if (targetType.IsArray)
+            {
+                var arrayType = targetType.GetElementType();
+
+                if (annotation[0] == ArgParserNames.Array)
+                {
+                    var result = Array.CreateInstance(arrayType, annotation[0].Count);
+                    var index = 0;
+
+                    foreach (var element in annotation[0])
+                    {
+                        result.SetValue( ParseValue(arrayType, element, tokenList, text), index);
+                        index++;
+                    }
+
+                    return result;
+                }
+                throw new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
+            }
+            else
+            {
+                return ParseBasicValue(targetType, annotation.GetText(text, tokenList));
+            }
+        }
+
+        private object ParseBasicValue(Type targetType, string text)
+        {
+            if (targetType == typeof(bool))
+            {
+                return bool.Parse(text);    
+            }
+            else if (targetType == typeof(string))
+            {
+                return text;
+            }
+            else if (targetType == typeof(int))
+            {
+                return int.Parse(text);
+            }
+            else if (targetType == typeof(double))
+            {
+                return double.Parse(text, CultureInfo.InvariantCulture);
+            }
+            else if (targetType == typeof(float))
+            {
+                return float.Parse(text, CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                throw new NotImplementedException($"No backing implementation to parse type {targetType}.");
+            }
+
         }
 
         private static List<PropertyArgs> CreatePropertyArgList()
@@ -79,37 +219,6 @@ namespace gg.parse.json
             return result;
         }        
 
-        private void TrySetOptionalValue(T target, string text, Annotation annation)
-        {
-            var argSwitch = annation.FindByRuleName("switch");
-            var name = annation.FindByRuleName("optionalArgName");
-            var value = annation.FindByRuleName("argValue");
-
-            // keep a list of which properties we've found values
-            var targetValues = new bool[_propertyAttributes.Count];
-
-            var errors = new List<string>();
-
-            if (argSwitch.Children[0].Rule.Name == "shorthand")
-            {
-
-            }
-            else
-            {
-                var propertyName = name.GetText(text);
-                var argIndex = _propertyAttributes.FindIndex(attr => attr.MatchesFullName(propertyName));
-                
-                if (argIndex >= 0)
-                { 
-                    var propertyValue = value.GetText(text);
-                    _propertyAttributes[argIndex].Info.SetValue(target, propertyValue);
-                    targetValues[argIndex] = true;
-                }
-                else
-                {
-                    errors.Add("No property '{propertyName}' defined.");
-                }
-            }
-        }
+        
     }
 }

@@ -4,6 +4,8 @@ namespace gg.parse
 {
     public readonly struct ParseResult(bool isSuccess, int dataRead, List<Annotation>? annotations = null) : IEnumerable<Annotation>
     {
+        public static implicit operator bool(ParseResult result) => result.FoundMatch;
+
         public static readonly ParseResult Success = new(true, 0, null);
         public static readonly ParseResult Unknown = new(true, -1, null);
         public static readonly ParseResult Failure = new(false, 0, null);
@@ -41,7 +43,7 @@ namespace gg.parse
             }
         }
 
-        public static implicit operator bool(ParseResult result) => result.FoundMatch;
+        
 
         public IEnumerator<Annotation> GetEnumerator()
         {
