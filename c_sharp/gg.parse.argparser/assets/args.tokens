@@ -5,25 +5,24 @@
 include "properties.tokens";
 include "filename.tokens";
 
-#arg_tokens		= *(arg_token_list | ~white_space | unknown_arg_token);
+#arg_tokens			= *(arg_token | ~white_space | unknown_arg_token);
 
-#arg_token_list	= switch 
-					| float | int 
-					| boolean 
-					| null 
-					| string 
-					| scope_start | scope_end 
-					| array_start | array_end 
-					| kv_separator | item_separator 
-					| arg_identifier
-					| file_name_token;
+#arg_token			= 
+	arg_option
+	| float | int 
+	| boolean 
+	| null 
+	| string 
+	| scope_start | scope_end 
+	| array_start | array_end 
+	| kv_separator | item_separator 
+	| arg_identifier
+	| file_name_token;
 
-#switch				= ~switch_options, switch_key;
-switch_options		= "--" | "-";
-switch_key			= identifier;
+arg_option			= ~arg_option_switch, identifier;
+arg_option_switch	= ("--" | "-");	
 
-#arg_identifier		= identifier, ~not_file_char;
-not_file_char		= !(colon | directory_separator | period | allowed_symbols);
+arg_identifier		= identifier, !(colon | directory_separator | period | allowed_symbols);
 
 // errors
-unknown_arg_token	= error "unknown token found." if *(!arg_token_list, .);
+unknown_arg_token	= error "unknown token found." if *(!arg_token, .);

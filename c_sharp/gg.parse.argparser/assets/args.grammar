@@ -13,19 +13,10 @@
 include "properties.grammar";
 include "filename.grammar";
 
-#root			  = optional_list, required_list, arg_chain;
+#root			  = *optional_arg, *required_arg, *(optional_arg, *required_arg);
 
-#arg_chain		  = *(optional_arg, optional_list, required_list);
-
-#optional_list	  = *optional_arg;
-
-#required_list	  = *required_arg;	
-
-optional_arg	  = switch_key, #optional_value;
-
-#optional_value   = ?(~kv_separator, arg_value);
+optional_arg	  = arg_option, ?(~kv_separator, arg_value);
 
 required_arg      = arg_value;
 
-#arg_value		  = object | array | float | int | boolean | null | identifier | filename | string;
-
+arg_value		  = object | array | float | int | boolean | null | arg_identifier | filename | string;

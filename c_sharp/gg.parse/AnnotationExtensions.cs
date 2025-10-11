@@ -14,6 +14,7 @@ namespace gg.parse
             annotations.Select(t => t.Rule.Id).ToArray();
 
 
+
         public static string GetText(this Annotation annotation, string text)
         {
             return text.Substring(annotation.Start, annotation.Length);
@@ -22,6 +23,12 @@ namespace gg.parse
         public static string GetText(this Annotation grammarAnnotation, string text, List<Annotation> tokens)
         {
             var range = CombinedRange(tokens, grammarAnnotation.Range);
+            return text.Substring(range.Start, range.Length);
+        }
+
+        public static string GetText(this Annotation grammarAnnotation, string text, ParseResult tokens)
+        {
+            var range = CombinedRange(tokens.Annotations, grammarAnnotation.Range);
             return text.Substring(range.Start, range.Length);
         }
 
