@@ -1,4 +1,5 @@
-﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+﻿using System.Linq;
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.json.tests
 {
@@ -70,6 +71,24 @@ namespace gg.parse.json.tests
             IsTrue(arrayTypes.Ints.SequenceEqual([42, -3]));
             IsTrue(arrayTypes.FloatArrays[0].SequenceEqual([1f, 2f, 3.5f]));
             IsTrue(arrayTypes.FloatArrays[1].SequenceEqual([4f, -5.5f, 6f]));
+        }
+
+        
+        public class AttrClassWithDictionaryTypes
+        {
+            [Arg(FullName = "table1")]
+            public Dictionary<string, int> StringIntTable { get; set; }
+        }
+
+        [TestMethod]
+        public void CreateReaderWithAttrClassWithDictionaryTypes_Parse_ExpectValuesSet()
+        {
+            var argReader = new ArgsReader<AttrClassWithDictionaryTypes>();
+
+            var dictTypes = argReader.Parse("--table1:{ 'str1' : 1, 'str2': -42}");
+
+            IsTrue(dictTypes.StringIntTable["str1"] == 1);
+            IsTrue(dictTypes.StringIntTable["str2"] == -42);
         }
     }
 }

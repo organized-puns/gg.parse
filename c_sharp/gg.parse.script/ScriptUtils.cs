@@ -108,7 +108,7 @@ namespace gg.parse.script
 
                         if (!ruleSet.Contains(ruleName))
                         {
-                            builder.AppendLine($"        public static readonly string {ruleName} = \"{rule.Name}\";");
+                            builder.AppendLine($"        public const string {ruleName} = \"{rule.Name}\";");
                             ruleSet.Add(ruleName);
                         }
                     }

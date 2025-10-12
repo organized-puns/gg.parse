@@ -17,6 +17,6 @@ include "filename.grammar";
 
 arg_option			= arg_key, ?(~kv_separator, arg_value);
 
-arg_value			= object | array | float | int | boolean | null | arg_identifier | filename | string;
+arg_value			= dictionary | object | array | float | int | boolean | null | arg_identifier | filename | string;
 
 unknown_arg_grammar	= error "unknown grammar construct." if *(!(arg_option | arg_value), .);

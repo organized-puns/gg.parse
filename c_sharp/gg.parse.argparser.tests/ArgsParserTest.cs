@@ -19,7 +19,7 @@ namespace gg.parse.argparser.tests
         static readonly string GrammarFileName = "assets/args.grammar";
 
         // export the names so we address results by reference
-        /*[TestMethod]
+        [TestMethod]
         public void ExportNames()
         {
             var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
@@ -27,7 +27,7 @@ namespace gg.parse.argparser.tests
             var output = ScriptUtils.ExportNames(builder.TokenGraph, builder.GrammarGraph, "gg.parse.argparser", "ArgParserNames");
 
             File.WriteAllText("ArgParserNames.cs", output);
-        }*/
+        }
             
 
         [TestMethod]
@@ -196,6 +196,25 @@ namespace gg.parse.argparser.tests
 
             IsTrue(syntaxTree[4].Name == ArgParserNames.ArgValue);
             IsTrue(syntaxTree[4].GetText(argText, tokens.Annotations) == "command3");
+        }
+
+        [TestMethod]
+        public void SetupObject_Parse_ExpectMatch()
+        {
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+
+            var argText = "-s={}";
+            var (tokens, syntaxTree) = builder.Parse(argText);
+
+            IsTrue(syntaxTree);
+
+            IsTrue(syntaxTree[0].Name == ArgParserNames.ArgOption);
+            IsTrue(syntaxTree[0][0].GetText(argText, tokens.Annotations) == "-s");
+            IsTrue(syntaxTree[0][1].GetText(argText, tokens.Annotations) == "{}");
+            
+            // without key - values we can't determine if it's an object or dictionary
+            // since the dictionary goes before the object it will resolve to a dictionary
+            IsTrue(syntaxTree[0][1][0] == ArgParserNames.Dictionary);
         }
 
         [TestMethod]
