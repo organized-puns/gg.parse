@@ -14,9 +14,9 @@ key_value_pair    = key, ~kv_separator, value;
 
 object			  = ~scope_start, ?key_value_list, ~scope_end;
 
-value_value_pair  = value, ~kv_separator, value;
+dict_kvp_pair	  = value, ~kv_separator, value;
 
-#value_value_list = value_value_pair, *(~item_separator, value_value_pair);
+value_value_list  = dict_kvp_pair, *(~item_separator, dict_kvp_pair);
 
 dictionary		  = ~scope_start, ?value_value_list, ~scope_end;
 
