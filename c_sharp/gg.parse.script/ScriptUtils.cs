@@ -98,11 +98,12 @@ namespace gg.parse.script
 
             return builder.ToString();
 
-            void AppendRules<T>(RuleGraph<T> graph, HashSet<string> ruleSet, StringBuilder builder) where T : IComparable<T>
+            static void AppendRules<T>(RuleGraph<T> graph, HashSet<string> ruleSet, StringBuilder builder) where T : IComparable<T>
             {
                 foreach (var rule in graph)
                 {
-                    if (!string.IsNullOrEmpty(rule.Name) && !rule.Name.StartsWith(CompilerFunctions.UnnamedRulePrefix))
+                    if (!string.IsNullOrEmpty(rule.Name) 
+                        && !rule.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                     {
                         var ruleName = rule.Name.RemoveUnderscoresAndCapitalize();
 

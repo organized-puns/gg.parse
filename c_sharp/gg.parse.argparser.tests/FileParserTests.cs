@@ -41,13 +41,14 @@ namespace gg.parse.argparser.tests
         { 
             var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
 
-            var filename = "c:\\my\\path";
+            var filename = "c:\\my\\path.exe";
             var (tokensResult, syntaxTreeResult) = builder.Parse(filename);
 
             IsTrue(syntaxTreeResult);
 
-            IsTrue(syntaxTreeResult[0].Name == "filename");
-            IsTrue(syntaxTreeResult[0][0].Name == "drive");
+            IsTrue(syntaxTreeResult[0] == "filename");
+            IsTrue(syntaxTreeResult[0][0] == "drive");
+            IsTrue(syntaxTreeResult[0][0][0] == "letter");
 
             var outputText = syntaxTreeResult[0][0].GetText(filename, tokensResult.Annotations);
             IsTrue(outputText == "c:\\");
@@ -55,13 +56,13 @@ namespace gg.parse.argparser.tests
             var path = syntaxTreeResult[0][1];
 
             IsTrue(path.Name == "path");
-            IsTrue(path.GetText(filename, tokensResult.Annotations) == "my\\path");            
+            IsTrue(path.GetText(filename, tokensResult.Annotations) == "my\\path.exe");            
 
             IsTrue(path[0].Name == "path_part");
             IsTrue(path[0].GetText(filename, tokensResult.Annotations) == "my");
 
             IsTrue(path[1].Name == "path_part");
-            IsTrue(path[1].GetText(filename, tokensResult.Annotations) == "path");
+            IsTrue(path[1].GetText(filename, tokensResult.Annotations) == "path.exe");
         }
 
         [TestMethod]
@@ -80,13 +81,15 @@ namespace gg.parse.argparser.tests
             IsTrue(path.Name == "path");
             
             IsTrue(path[0].Name == "path_part");
+            IsTrue(path[0][0].Name == "parent_dir");
             IsTrue(path[0].GetText(filename, tokensResult.Annotations) == "..");
 
             IsTrue(path[1].Name == "path_part");
             IsTrue(path[1].GetText(filename, tokensResult.Annotations) == "parent");
 
             IsTrue(path[2].Name == "path_part");
-            IsTrue(path[2].GetText(filename, tokensResult.Annotations) == "file.txt");            
+            var partText = path[2].GetText(filename, tokensResult.Annotations);
+            IsTrue(partText == "file.txt");            
         }
     }
 }

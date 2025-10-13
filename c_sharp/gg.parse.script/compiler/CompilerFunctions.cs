@@ -2,6 +2,8 @@
 using gg.parse.util;
 using System.Text.RegularExpressions;
 
+using static gg.parse.script.compiler.CompilerFunctionNameGenerator;
+
 namespace gg.parse.script.compiler
 {
     /// <summary>
@@ -10,8 +12,6 @@ namespace gg.parse.script.compiler
     /// </summary>
     public static class CompilerFunctions
     {
-        public static readonly string UnnamedRulePrefix = "$";
-
         /// -- Compiler functions for a Tokenizer ---------------------------------------------------------------------
         
         public static RuleBase<char> CompileLiteral(RuleHeader header, Annotation bodyNode, CompileSession context)
@@ -107,22 +107,21 @@ namespace gg.parse.script.compiler
             return new RuleReference<T>(declaration.Name, referenceName, modifier, declaration.Precedence);
         }
 
-        public static TRule CompileBinaryOperator<T, TRule>(RuleHeader declaration, Annotation bodyNode, CompileSession session) 
+        public static TRule CompileBinaryOperator<T, TRule>(RuleHeader header, Annotation body, CompileSession session) 
             where T : IComparable<T> where TRule : RuleBase<T>
         {
             RuleBase<T>[]? elementArray = null;
 
-            if (bodyNode.Children != null)
+            if (body.Children != null)
             {
-                elementArray = new RuleBase<T>[bodyNode.Children.Count];
+                elementArray = new RuleBase<T>[body.Children.Count];
                 
-                for (var i = 0; i < bodyNode.Children.Count; i++)
+                for (var i = 0; i < body.Children.Count; i++)
                 {
-                    var elementBody = bodyNode.Children[i];
+                    var elementBody = body.Children[i];
                     var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule.Id];
 
-                    var elementName = $"{UnnamedRulePrefix}{declaration.Name}[{i}], type: {functionName}";
-                    
+                    var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, i); 
                     var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0, false);
 
                     elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
@@ -134,15 +133,15 @@ namespace gg.parse.script.compiler
             // in most cases we're interested in the values in the operation not the fact that there is an binary operation.
             // The latter would result in much more overhead in specifying the parsers.
             var output =
-                declaration.IsTopLevel
-                    ? declaration.Output
+                header.IsTopLevel
+                    ? header.Output
                     : RuleOutput.Children;
 
             return (TRule) Activator.CreateInstance(
                 typeof(TRule), 
-                declaration.Name, 
+                header.Name, 
                 output, 
-                declaration.Precedence, 
+                header.Precedence, 
                 elementArray
             )!;
         }
@@ -195,8 +194,11 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var elementBody = bodyNode.Children[0];
-            var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
-            var elementHeader = new RuleHeader(RuleOutput.Children, $"{UnnamedRulePrefix}{header.Name} of {elementName}", 0, 0, false);
+            var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule.Id];
+
+            var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
+
+            var elementHeader = new RuleHeader(RuleOutput.Children, elementName, 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {
@@ -215,14 +217,12 @@ namespace gg.parse.script.compiler
             return new MatchCount<T>(header.Name, countRule, output, min, max, header.Precedence);
         }
 
-
         public static RuleBase<T> CompileZeroOrMore<T>(
             RuleHeader header,
             Annotation bodyNode,
             CompileSession session) where T : IComparable<T> =>
             
             CompileCount<T>(header, bodyNode, session, 0, 0);
-
 
         public static RuleBase<T> CompileOneOrMore<T>(
             RuleHeader header,

@@ -1,10 +1,8 @@
 /* 
- * Simple EBNF notation for the tokens json
+ * Simple script for the tokens of json
  */
 
-#json_tokens	= *valid_token;
-
-#valid_token	= json_token | white_space | unknown_token;
+#json_tokens	= *(json_token | white_space | unknown_token);
 
 #json_token		= float | int | boolean | null | string | scope_start | scope_end | array_start | array_end | 
 					kv_separator | item_separator;

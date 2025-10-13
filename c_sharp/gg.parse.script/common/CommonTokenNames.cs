@@ -32,7 +32,7 @@
 
         public static readonly string Find = "Find";
 
-        public static readonly string FunctionSequence = "FunctionSequence";
+        public const           string FunctionSequence = "FunctionSequence";
 
         public static readonly string Float = "Float";
 
@@ -40,13 +40,13 @@
 
         public static readonly string GroupStart = "GroupStart";
 
-        public static readonly string Identifier = "Identifier";
+        public const           string Identifier = "Identifier";
 
         public static readonly string IdentifierStartingCharacter = "IdentifierStartingCharacter";
 
         public static readonly string IdentifierCharacter = "IdentifierCharacter";
 
-        public static readonly string If = "Keyword(if)";
+        public const           string If = "Keyword(if)";
 
         public static readonly string Include = "Include";
 
@@ -56,7 +56,7 @@
 
         public static readonly string Keyword = "Keyword";
 
-        public static readonly string Literal = "Literal";
+        public const           string Literal = "Literal";
 
         public static readonly string LogDebug = "Keyword(debug)";
 
@@ -74,21 +74,21 @@
 
         public static readonly string NoProductSelector = "NoProductSelector";
 
-        public static readonly string Not = "Not";
+        public const string           Not = "Not";
 
         public static readonly string NotOperator = "NotOperator";
 
         public static readonly string Null = "Null";
 
-        public static readonly string OneOf = "OneOf";
+        public const string           OneOf = "OneOf";
 
-        public static readonly string OneOrMore = "OneOrMore";
+        public const string           OneOrMore = "OneOrMore";
 
         public static readonly string OneOrMoreOperator = "OneOrMoreOperator";
 
-        public static readonly string Option = "Option";
+        public const string           Option = "Option";
 
-        public static readonly string OptionWithPrecedence = "OptionWithPrecedence";
+        public const string           OptionWithPrecedence = "OptionWithPrecedence";
 
         public static readonly string ScopeStart = "ScopeStart";
 
@@ -118,11 +118,11 @@
 
         public static readonly string Whitespace = "Whitespace";
 
-        public static readonly string ZeroOrMore = "ZeroOrMore";
+        public const string           ZeroOrMore = "ZeroOrMore";
 
         public static readonly string ZeroOrMoreOperator = "ZeroOrMoreOperator";
 
-        public static readonly string ZeroOrOne = "ZeroOrOne";
+        public const string           ZeroOrOne = "ZeroOrOne";
 
         public static readonly string ZeroOrOneOperator = "ZeroOrOneOperator";
     }

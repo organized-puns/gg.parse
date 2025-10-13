@@ -22,7 +22,7 @@ namespace gg.parse
         
         public abstract ParseResult Parse(T[] input, int start);
 
-        public override string ToString() => $"{Name}(id:{Id},out:{Output},pre:{Precedence})";
+        public override string ToString() => Name;//$"{Name}(id:{Id},out:{Output},pre:{Precedence})";
 
         public ParseResult BuildDataRuleResult(Range dataRange) 
         {
@@ -45,7 +45,7 @@ namespace gg.parse
         {
             return Output switch
             {
-                RuleOutput.Self => new ParseResult(true, dataRange.Length, [ new Annotation(this, dataRange, children) ]),
+                RuleOutput.Self => new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange, children) ]),
 
                 RuleOutput.Children => new ParseResult(true, dataRange.Length, children),
 

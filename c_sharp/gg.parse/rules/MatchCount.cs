@@ -19,6 +19,14 @@ namespace gg.parse.rules
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
+        public int Count => 1;
+
+        public RuleBase<T> this[int index]
+        {
+            get => Rule;
+            set => Rule = value;
+        }
+
         public override ParseResult Parse(T[] input, int start)
         {
             int count = 0;

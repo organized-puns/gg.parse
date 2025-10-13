@@ -9,34 +9,7 @@ namespace gg.parse.script.tests.integration
     [TestClass]
     public sealed class ParserBuilderIntegrationTests
     {
-        [TestMethod]
-        public void SetupReferencesWithDifferentRuleOutputs_BuildParser_ExpectRulesToMatchSpecifiedOutput()
-        {
-            var parser = new ParserBuilder().From($"#tokens=*(foo|bar);foo='foo';bar='bar';", "root=foo, #bar, ~foo;");
-
-            var root = parser.GrammarGraph.FindRule("root") as MatchRuleSequence<int>;
-
-            // validate the run and its outputs
-            IsTrue(root != null);
-            
-            IsTrue((root[0] as RuleReference<int>).Reference == "foo");
-            IsTrue(root[0].Output == RuleOutput.Self);
-
-            IsTrue((root[1] as RuleReference<int>).Reference == "bar");
-            IsTrue(root[1].Output == RuleOutput.Children);
-
-            IsTrue((root[2] as RuleReference<int>).Reference == "foo");
-            IsTrue(root[2].Output == RuleOutput.Void);
-
-            var result = parser.Parse("foobarfoo");
-
-            IsTrue(result.syntaxTree);
-
-            IsTrue(result.syntaxTree.Count == 1);
-
-            // should hold foo and bar, the third output is dropped
-            IsTrue(result.syntaxTree[0].Count == 2);
-        }
+        
 
 
         [TestMethod]

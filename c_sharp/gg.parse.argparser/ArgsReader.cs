@@ -1,12 +1,9 @@
-﻿
-using gg.parse.argparser;
+﻿using System.Reflection;
+
 using gg.parse.script;
 using gg.parse.util;
-using System.Globalization;
-using System.Reflection;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace gg.parse.json
+namespace gg.parse.argparser
 {
     public partial class ArgsReader<T>
     {
@@ -129,7 +126,7 @@ namespace gg.parse.json
                 try
                 {
                     object value = node.Count == 2
-                        ? ParseInstance.OfValue<T>(property.Info.PropertyType, node[1], tokens.Annotations, args)
+                        ? ParseInstance.OfValue<T>(property.Info.PropertyType, node[1][0], tokens.Annotations, args)
                         // assume its a bool
                         : true;
 

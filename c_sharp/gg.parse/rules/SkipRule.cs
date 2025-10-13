@@ -1,6 +1,8 @@
 ﻿
 
 
+using System.Data;
+
 namespace gg.parse.rules
 {
     /// <summary>
@@ -23,10 +25,18 @@ namespace gg.parse.rules
         public RuleBase<T> StopCondition
         {
             get;
-            init;
+            set;
         }
 
         public IEnumerable<RuleBase<T>> Rules => [StopCondition];
+
+        public RuleBase<T> this[int index]
+        {
+            get => StopCondition;
+            set => StopCondition = value;
+        }
+
+        public int Count => 1;
 
         public SkipRule(
             string name,

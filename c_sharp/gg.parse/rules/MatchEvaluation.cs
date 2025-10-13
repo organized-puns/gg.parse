@@ -7,10 +7,7 @@ namespace gg.parse.rules
 {
     public class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-
-        private RuleBase<T>[]? _options;
-
-        public RuleBase<T>? this[int index] => _options == null ? null : _options[index];
+        private RuleBase<T>[] _options;
 
         public RuleBase<T>[] RuleOptions 
         {
@@ -21,6 +18,20 @@ namespace gg.parse.rules
                 Assertions.Requires(value!.Any(v => v != null));
 
                 _options = value!;
+            }
+        }
+
+        public int Count => _options == null ? 0 : _options.Length;
+
+        public RuleBase<T> this[int index]
+        {
+            get => _options[index];
+            set
+            {
+                Assertions.RequiresNotNull(value!);
+                Assertions.RequiresNotNull(_options!);
+                
+                _options[index] = value!;
             }
         }
 

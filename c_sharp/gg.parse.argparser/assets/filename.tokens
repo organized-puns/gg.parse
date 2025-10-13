@@ -1,24 +1,18 @@
 
-include "common.tokens";
+include "properties.tokens";
 
-#file_name_tokens = *file_name_token;
+#file_name_tokens	= *( #file_name_token );
 
-#file_name_token = drive | base_name | directory_separator | parent_dir | period;
+file_name_token		= directory_separator | parent_dir | current_dir | colon | letter | digit | file_name_symbol;
 
-base_name = valid_name_char, *(valid_name_char);
+file_name_symbol	= { "_-~()[]{}+=@!#$%&'`." };
 
-allowed_symbols = { "_-~()[]{}+=@!#$%&'`." };
+colon				= ":";
 
-valid_name_char = letter | digit | allowed_symbols;
+parent_dir			= "..", if (directory_separator | eof);
 
-drive = ~letter, ~colon, ~directory_separator;
-
-colon = ":";
-
-period = ".";
-
-parent_dir = "..";
+current_dir			= ".", if (directory_separator | eof);
 
 directory_separator = '/' | '\\';
 
-quote = '"';
+quote				= '"';

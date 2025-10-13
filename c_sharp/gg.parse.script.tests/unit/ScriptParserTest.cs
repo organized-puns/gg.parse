@@ -26,7 +26,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(skipRule == parser.MatchSkipOperator);
 
             var fooLiteral = nodes[0][1][0].Rule;
-            IsTrue(fooLiteral.Name == CommonTokenNames.Literal);
+            IsTrue(fooLiteral.Name == ScriptParser.Names.Literal);
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(skipRule == parser.MatchFindOperator);
 
             var fooLiteral = nodes[0][1][0].Rule;
-            IsTrue(fooLiteral.Name == CommonTokenNames.Literal);
+            IsTrue(fooLiteral.Name == ScriptParser.Names.Literal);
         }
 
         [TestMethod]
@@ -109,7 +109,7 @@ namespace gg.parse.script.tests.unit
 
 
         [TestMethod]
-        public void ParseRule_ExpectSucess()
+        public void ParseRule_ExpectSuccess()
         {
             var parser = new ScriptParser();
 
@@ -122,7 +122,7 @@ namespace gg.parse.script.tests.unit
             var name = nodes[0].Children![0].Rule!.Name;
             IsTrue(name == "ruleName");
             name = nodes[0].Children[1].Rule!.Name;
-            IsTrue(name == "Literal");
+            IsTrue(name == ScriptParser.Names.Literal);
 
             // try parsing a set
             (tokens, nodes) = parser.Parse("rule = { \"abc\" };");
@@ -136,7 +136,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "CharacterRange");
+            IsTrue(name == ScriptParser.Names.CharacterRange);
 
             // try parsing a sequence
             (tokens, nodes) = parser.Parse("rule = \"abc\", 'def', { '123' };");
@@ -145,7 +145,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "Sequence");
+            IsTrue(name == ScriptParser.Names.Sequence);
 
             // try parsing an option
             (tokens, nodes) = parser.Parse("rule = \"abc\"|'def' | { '123' };");
@@ -154,7 +154,7 @@ namespace gg.parse.script.tests.unit
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
             
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "Option");
+            IsTrue(name == ScriptParser.Names.Option);
 
             // try parsing a group  
             (tokens, nodes) = parser.Parse("rule = ('123', {'foo'});");
@@ -163,22 +163,22 @@ namespace gg.parse.script.tests.unit
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "Sequence");
+            IsTrue(name == ScriptParser.Names.Sequence);
 
             name = nodes[0].Children[1].Children[0].Rule.Name;
-            IsTrue(name == "Literal");
+            IsTrue(name == ScriptParser.Names.Literal);
 
             name = nodes[0].Children[1].Children[1].Rule.Name;
-            IsTrue(name == "CharacterSet");
+            IsTrue(name == ScriptParser.Names.CharacterSet);
 
             // try parsing zero or more
             (tokens, nodes) = parser.Parse("rule = *('123'|{'foo'});");
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "ZeroOrMore");
+            IsTrue(name == ScriptParser.Names.ZeroOrMore);
 
             name = nodes[0].Children[1].Children[0].Rule.Name;
-            IsTrue(name == "Option");
+            IsTrue(name == ScriptParser.Names.Option);
 
             // try parsing a transitive rule
             (tokens, nodes) = parser.Parse("#rule = !('123',{'foo'});");
@@ -186,40 +186,40 @@ namespace gg.parse.script.tests.unit
             name = nodes[0].Children[0].Rule.Name;
 
             name = nodes[0].Children[0].Rule.Name;
-            IsTrue(name == "Token(TransitiveSelector)");
+            IsTrue(name == "TransitiveSelector");
 
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == "ruleName");
 
             name = nodes[0].Children[2].Rule.Name;
-            IsTrue(name == "Not");
+            IsTrue(name == ScriptParser.Names.Not);
 
             // try parsing a no output rule
             (tokens, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
 
             name = nodes[0].Children[0].Rule.Name;
-            IsTrue(name == "Token(NoProductSelector)");
+            IsTrue(name == "NoProductSelector");
 
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == "ruleName");
 
             name = nodes[0].Children[2].Rule.Name;
-            IsTrue(name == "ZeroOrOne");
+            IsTrue(name == ScriptParser.Names.ZeroOrOne);
 
             // try parsing an identifier
             (tokens, nodes) = parser.Parse("rule = +(one, two, three);");
 
             var node = nodes[0].Children[1];
             name = node.Rule.Name;
-            IsTrue(name == "OneOrMore");
+            IsTrue(name == ScriptParser.Names.OneOrMore);
 
             node = node.Children[0];
             name = node.Rule.Name;
-            IsTrue(name == "Sequence");
+            IsTrue(name == ScriptParser.Names.Sequence);
 
             node = node.Children[0];
             name = node.Rule.Name;
-            IsTrue(name == "Identifier");
+            IsTrue(name == ScriptParser.Names.Reference);
 
             
             // try parsing a try match 
@@ -227,14 +227,14 @@ namespace gg.parse.script.tests.unit
 
             IsTrue(nodes != null);
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "IfMatch");
+            IsTrue(name == ScriptParser.Names.If);
 
             // try parsing a try match with eoln
             (tokens, nodes) = parser.Parse("rule = if\n\"lit\";");
 
             IsTrue(nodes != null);
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "IfMatch");
+            IsTrue(name == ScriptParser.Names.If);
 
             // try parsing a try match with out space, should result in an unknown error
             try

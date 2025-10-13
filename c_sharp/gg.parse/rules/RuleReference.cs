@@ -1,12 +1,25 @@
-﻿using Range = gg.parse.util.Range;
+﻿using gg.parse.util;
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
     public class RuleReference<T> : RuleBase<T> where T : IComparable<T>
     {
+        private RuleBase<T>? _rule;
+
         public string Reference { get; init; }
 
-        public RuleBase<T>? Rule { get; set; }
+        public RuleBase<T>? Rule 
+        {
+            get => _rule;
+           
+            set
+            {
+                Assertions.RequiresNotNull(value!);
+
+                _rule = value;
+            }
+        }
 
         /// <summary>
         /// If set to true then the result of this rule will be based on the referenced rule's output.
@@ -29,7 +42,7 @@ namespace gg.parse.rules
             if (result.FoundMatch)
             {
                 // parse behaviour depends on whether this reference is part of a composition (eg sequence)
-                // in which case we take in account any output modifiers applied to this rule, but
+                // in which case we take in account any  output modifiers applied to this rule, but
                 // otherwise pass the results of the referced rule
                 if (DeferResultToReference)
                 {
@@ -38,7 +51,11 @@ namespace gg.parse.rules
                     return Output switch
                     {
                         RuleOutput.Self => result,
-                        RuleOutput.Children => new ParseResult(true, result.MatchLength, result.Annotations),
+                        RuleOutput.Children => new ParseResult(
+                            true, 
+                            result.MatchLength, 
+                            CollectChildAnnotations(result.Annotations)
+                        ),
                         _ => new ParseResult(true, result.MatchLength),
                     };
                 }
@@ -62,11 +79,24 @@ namespace gg.parse.rules
             return result;
         }
 
-        public override string ToString()
+        private static List<Annotation>? CollectChildAnnotations(List<Annotation>? annotations)
         {
-            return Rule == null
-                ? base.ToString()
-                : $"ref_to:{Rule.ToString()}({base.ToString()})";
+            if (annotations != null)
+            {
+                var result = new List<Annotation>();
+
+                annotations.ForEach(a =>
+                {
+                    if (a != null && a.Children != null && a.Children.Count > 0)
+                    {
+                        result.AddRange(a.Children);
+                    }
+                });
+
+                return result.Count > 0 ? result : null;
+            }
+
+            return null;
         }
     }
 }

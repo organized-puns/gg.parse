@@ -1,7 +1,6 @@
-﻿using System.Linq;
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.json.tests
+namespace gg.parse.argparser.tests
 {
     [TestClass]
     public class ArgsReaderTests
@@ -66,7 +65,7 @@ namespace gg.parse.json.tests
             var argReader = new ArgsReader<AttrClassWithArrayTypes>();
 
             var arrayTypes = argReader.Parse("-b:[true, true, false] --i:[42, -3] --FloatArrays:[[1, 2.0, 3.5], [4, -5.5, 6]]");
-
+            
             IsTrue(arrayTypes.Booleans.SequenceEqual([true, true, false]));
             IsTrue(arrayTypes.Ints.SequenceEqual([42, -3]));
             IsTrue(arrayTypes.FloatArrays[0].SequenceEqual([1f, 2f, 3.5f]));

@@ -113,7 +113,7 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    "include 'assets/json.grammar';#__main__=json;"
+                                    "include 'assets/json.grammar';__main__=#json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);
@@ -129,11 +129,11 @@ namespace gg.parse.script.tests.integration
             IsTrue(jsonParser.GrammarGraph.FindRule("object") != null);
 
             // check if it compiles json
-            var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
+            var (tokens, syntaxTree) = jsonParser.Parse("{ \"key\": 123 }");
 
-            IsTrue(result.FoundMatch);
+            IsTrue(syntaxTree.FoundMatch);
 
-            var objectNode = result[0][0];
+            var objectNode = syntaxTree[0][0];
 
             IsTrue(objectNode.Rule == jsonParser.GrammarGraph!.FindRule("object"));
             IsTrue(objectNode[0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));

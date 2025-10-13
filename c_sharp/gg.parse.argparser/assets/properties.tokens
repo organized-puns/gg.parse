@@ -8,22 +8,25 @@ include "common.tokens";
 
 #property_token_list = float | int 
 					| boolean | null 
-					| string | identifier 
+					| string  
 					| scope_start | scope_end 
 					| array_start | array_end 
-					| kv_separator | item_separator;
+					| kv_separator | item_separator
+					| identifier;
 
 boolean         = 'true' | 'false';
 
 null			= 'null';
 
-identifier	    = ("_" | letter ), *("_" | letter | digit);
+underscore		= "_";
 
 scope_start		= '{';
 scope_end		= '}';
 
 array_start		= '[';
 array_end		= ']';
+
+identifier		= (underscore | letter ), *(underscore | letter | digit);
 
 kv_separator	= ('=' | ':');
 item_separator	= ',';

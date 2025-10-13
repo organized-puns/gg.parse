@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace gg.parse.json
+namespace gg.parse.argparser
 {
     public partial class ArgsReader<T>
     {

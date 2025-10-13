@@ -1,4 +1,5 @@
-﻿using Range = gg.parse.util.Range;
+﻿using gg.parse.util;
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
@@ -8,6 +9,13 @@ namespace gg.parse.rules
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
+        public int Count => 1;
+
+        public RuleBase<T> this[int index]
+        {
+            get => Rule;
+            set => Rule = value;
+        }
         public MatchNot(string name, RuleOutput output, int precedence, RuleBase<T> rule)
             : base(name, output, precedence)
         {

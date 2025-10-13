@@ -75,10 +75,9 @@ namespace gg.parse.tests.examples
         [TestMethod]
         public void CreateParser_TestTokenization_ExpectAllInputToHaveTokens()
         {
-            var tokenizerSpec = File.ReadAllText("assets/json_tokens.ebnf");
-            var grammarSpec = File.ReadAllText("assets/json_grammar_basic.ebnf");
-
-            var jsonParser = new ParserBuilder().From(tokenizerSpec, grammarSpec);
+            var tokenizerSpec = File.ReadAllText("assets/json.tokens");
+            
+            var jsonParser = new ParserBuilder().From(tokenizerSpec);
 
             var generatedTokenizer = jsonParser.TokenGraph;
          

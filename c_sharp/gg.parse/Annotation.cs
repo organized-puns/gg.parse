@@ -45,7 +45,6 @@ namespace gg.parse
             ? null 
             : Children![index];
 
-
         public Annotation(IRule rule, Range range, List<Annotation>? children = null, Annotation? parent = null)
         {
             Rule = rule;
@@ -60,7 +59,8 @@ namespace gg.parse
         }
 
         public override string ToString() =>
-            $"Annotation(Rule:{Rule}, Range: {Range})";
+            $"({Rule}, {Range.Start}..{Range.End})";
+
         /// <summary>
         /// Checks if this annotation matches the predicate, if so adds it to the target. Then
         /// does the same for all its children (if any)

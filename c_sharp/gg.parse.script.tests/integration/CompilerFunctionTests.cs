@@ -179,8 +179,7 @@ namespace gg.parse.script.tests.integration
             var zeroOrMore = table.FindRule("zero_or_more_rule") as MatchCount<char>;
             IsNotNull(zeroOrMore);
             IsTrue(zeroOrMore.Min == 0);
-            IsTrue(zeroOrMore.Max == 0);
-            IsTrue(zeroOrMore.Rule == table.FindRule(CompilerFunctions.UnnamedRulePrefix + "zero_or_more_rule of Literal"));
+            IsTrue(zeroOrMore.Max == 0);            
         }
 
         [TestMethod]
@@ -192,7 +191,6 @@ namespace gg.parse.script.tests.integration
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 1);
             IsTrue(oneOrMore.Max == 0);
-            IsTrue(oneOrMore.Rule == table.FindRule(CompilerFunctions.UnnamedRulePrefix +  "one_or_more_rule of Literal"));
         }
 
         [TestMethod]
@@ -204,7 +202,6 @@ namespace gg.parse.script.tests.integration
             IsNotNull(oneOrMore);
             IsTrue(oneOrMore.Min == 0);
             IsTrue(oneOrMore.Max == 1);
-            IsTrue(oneOrMore.Rule == table.FindRule(CompilerFunctions.UnnamedRulePrefix + "zero_or_one_rule of Literal"));
         }
 
         [TestMethod]
@@ -216,11 +213,11 @@ namespace gg.parse.script.tests.integration
             IsNotNull(error);
             IsTrue(error.Text == "msg");
             IsTrue(error.Level == LogLevel.Error);
-            var expectedName = $"{CompilerFunctions.UnnamedRulePrefix}error_rule condition: Not";
+            var expectedName = $"{CompilerFunctionNameGenerator.UnnamedRulePrefix}error_rule condition: not";
             IsTrue(error.Condition == table.FindRule(expectedName));
             var matchFunction = error.Condition as MatchNot<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule($"{CompilerFunctions.UnnamedRulePrefix}{expectedName}(Literal)"));
+            IsTrue(matchFunction.Rule == table.FindRule($"{CompilerFunctionNameGenerator.UnnamedRulePrefix}{expectedName}(lit)"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 

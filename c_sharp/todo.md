@@ -2,6 +2,12 @@ Todo 0.1
 ---------------
 
 - Implement Arg parser
+	bug:
+	- rule = (#foo)
+	- foo = a | b | c;
+	somehow results in foo still appearing
+	
+	bug: see all xxx in the different grammars/tokens
 
 - Implement (json) annotations in its main program
 - Clean up unit tests and build proper examples

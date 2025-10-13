@@ -21,6 +21,14 @@ namespace gg.parse.rules
         public RuleBase<T> Rule { get; private set; }
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
+        
+        public int Count => 1;
+
+        public RuleBase<T> this[int index] 
+        { 
+            get => Rule; 
+            set => Rule = value; 
+        }
 
         public CallbackCondition Condition { get; init; }
 

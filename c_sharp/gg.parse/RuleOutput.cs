@@ -17,4 +17,24 @@
         /// </summary>
         Void
     }
+
+    public static class RuleOutputExtensions
+    {
+        public static string ToString(this RuleOutput output)
+        {
+            switch (output)
+            {
+                case RuleOutput.Self:
+                    return "self";
+                case RuleOutput.Children:
+                    return "children";
+                case RuleOutput.Void:
+                    return "void";
+            }
+
+            throw new NotImplementedException($"Missing ToString for case {output}.");
+        }
+    }
+
+
 }

@@ -6,7 +6,14 @@ namespace gg.parse.rules
     {
         private RuleBase<T>[] _options;
 
-        public RuleBase<T>? this[int index] => _options[index];
+        public RuleBase<T> this[int index]
+        {
+            get => _options[index];
+            set => _options[index] = value;
+        }
+
+        public int Count => _options.Length;
+
 
         public RuleBase<T>[] RuleOptions 
         {

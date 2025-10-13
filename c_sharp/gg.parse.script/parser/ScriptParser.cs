@@ -5,6 +5,35 @@ namespace gg.parse.script.parser
 {
     public class ScriptParser : CommonParser
     {
+        public static class Names
+        {
+            public const string Any = "any";
+
+            public const string CharacterRange = "char_range";
+            public const string CharacterSet = "char_set";
+
+            public const string Find = "find";
+
+            public const string Evaluation = "eval";
+
+            public const string If = "if";
+
+            public const string Literal = "lit";
+
+            public const string Not = "not";
+
+            public const string OneOrMore = "one_or_more";
+            public const string Option = "opt";
+
+            public const string Reference = "ref";
+
+            public const string Sequence = "seq";
+            public const string Skip = "skip";
+
+            public const string ZeroOrOne = "zero_or_one";
+            public const string ZeroOrMore = "zero_or_more";
+        }
+
         // xxx put in alphabetical order
         public MatchOneOf<int> MatchLiteral { get; private set; }
 
@@ -20,7 +49,7 @@ namespace gg.parse.script.parser
 
         public MatchSingleData<int> MatchPrecedence { get; private set; }
 
-        public MatchRuleSequence<int> MatchIdentifier { get; private set; }
+        public MatchRuleSequence<int> MatchReference { get; private set; }
 
         public MatchRuleSequence<int> MatchSequence { get; private set; }
 
@@ -265,18 +294,19 @@ namespace gg.parse.script.parser
         private RuleBase<int>[] RegisterDataMatchers()
         {
             // .
-            MatchAnyToken = Token(CommonTokenNames.AnyCharacter, CommonTokenNames.AnyCharacter);
+            // MatchAnyToken = Token(CommonTokenNames.AnyCharacter, CommonTokenNames.AnyCharacter);
+            MatchAnyToken = Token(Names.Any, CommonTokenNames.AnyCharacter);
 
             // "abc" or 'abc'
             MatchLiteral = OneOf(
-                "Literal",
+                Names.Literal,
                 Token(CommonTokenNames.SingleQuotedString),
                 Token(CommonTokenNames.DoubleQuotedString)
             );
 
             // { "abcf" }
             MatchCharacterSet = Sequence(
-                "CharacterSet",
+                Names.CharacterSet,
                 Token(CommonTokenNames.ScopeStart),
                 MatchLiteral,
                 Token(CommonTokenNames.ScopeEnd)
@@ -284,7 +314,7 @@ namespace gg.parse.script.parser
 
             // { 'a' .. 'z' }
             MatchCharacterRange = Sequence(
-                    "CharacterRange",
+                    Names.CharacterRange,
                     Token(CommonTokenNames.ScopeStart),
                     MatchLiteral,
                     Token(CommonTokenNames.Elipsis),
@@ -292,9 +322,9 @@ namespace gg.parse.script.parser
                     Token(CommonTokenNames.ScopeEnd)
             );
 
-            // foo or bar
-            MatchIdentifier = Sequence(
-                "Identifier",
+            // reference
+            MatchReference = Sequence(
+                Names.Reference,
                 CreateMatchBodyAnnotationProduction(),
                 IdentifierToken!
             );
@@ -304,7 +334,7 @@ namespace gg.parse.script.parser
                 MatchAnyToken!,
                 MatchCharacterSet,
                 MatchCharacterRange,
-                MatchIdentifier
+                MatchReference
             ];
         }
 
@@ -321,49 +351,49 @@ namespace gg.parse.script.parser
 
             // *(a | b | c)
             MatchZeroOrMoreOperator = Sequence(
-                "ZeroOrMore",
+                Names.ZeroOrMore,
                 Token(CommonTokenNames.ZeroOrMoreOperator),
                 unaryDataTermsOptions
             );
 
             // ?(a | b | c)
             MatchZeroOrOneOperator = Sequence(
-                "ZeroOrOne",
+                Names.ZeroOrOne,
                 Token(CommonTokenNames.ZeroOrOneOperator),
                 unaryDataTermsOptions
             );
 
             // +(a | b | c)
             MatchOneOrMoreOperator = Sequence(
-                "OneOrMore",
+                Names.OneOrMore,
                 Token(CommonTokenNames.OneOrMoreOperator),
                 unaryDataTermsOptions
             );
 
             // !(a | b | c)
             MatchNotOperator = Sequence(
-                "Not",
+                Names.Not,
                 Token(CommonTokenNames.NotOperator),
                 unaryDataTermsOptions
             );
 
             // if ( a | b | c)
             IfMatchOperator = Sequence(
-                "IfMatch",
+                Names.If,
                 Token(CommonTokenNames.If),
                 unaryDataTermsOptions
             );
 
             // >> a
             MatchFindOperator = Sequence(
-                "findOperator",
+                Names.Find,
                 Token(CommonTokenNames.Find),
                 unaryDataTermsOptions
             );
 
             // >>> a
             MatchSkipOperator = Sequence(
-                "skipOperator",
+                Names.Skip,
                 Token(CommonTokenNames.Skip),
                 unaryDataTermsOptions
             );
@@ -396,15 +426,15 @@ namespace gg.parse.script.parser
         private RuleBase<int>[] RegisterBinaryOperatorMatchers(MatchOneOf<int> unaryTerms)
         {
             // mainSequence contains both the match and error handling
-            (var mainSequence, MatchSequence) = CreateBinaryOperator("Sequence", CommonTokenNames.CollectionSeparator, unaryTerms);
+            (var mainSequence, MatchSequence) = CreateBinaryOperator(Names.Sequence, CommonTokenNames.CollectionSeparator, unaryTerms);
 
             // a | b | c
             // mainOption contains both the match and error handling
-            (var mainOption, MatchOption) = CreateBinaryOperator("Option", CommonTokenNames.Option, unaryTerms);
+            (var mainOption, MatchOption) = CreateBinaryOperator(Names.Option, CommonTokenNames.Option, unaryTerms);
 
             // a / b / c
             // mainEval contains both the match and error handling
-            (var mainEval, MatchEval) = CreateBinaryOperator("Evaluation", CommonTokenNames.OptionWithPrecedence, unaryTerms);
+            (var mainEval, MatchEval) = CreateBinaryOperator(Names.Evaluation, CommonTokenNames.OptionWithPrecedence, unaryTerms);
 
             return [mainSequence, mainOption, mainEval];
         }

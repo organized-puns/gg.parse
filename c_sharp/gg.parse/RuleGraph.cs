@@ -60,20 +60,24 @@ namespace gg.parse
 
         public TRule RegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
         {
-            if (FindRule(rule.Name) == null)
-            {
-                rule = RegisterRule(rule);
+            var existingRule = FindRule(rule.Name);
 
-                if (rule is IRuleComposition<T> ruleFunction)
+            if (existingRule == null)
+            {
+                RegisterRule(rule);
+
+                if (rule is IRuleComposition<T> ruleComposition)
                 {
-                    foreach (var subRule in ruleFunction.Rules)
+                    for (var i = 0; i < ruleComposition.Count; i++)
                     {
-                        RegisterRuleAndSubRules(subRule);
+                        ruleComposition[i] = RegisterRuleAndSubRules(ruleComposition[i]);
                     }
                 }
+
+                return rule;
             }
 
-            return rule;
+            return (TRule) existingRule;
         }
 
         public IEnumerator<RuleBase<T>> GetEnumerator()

@@ -32,12 +32,12 @@ namespace gg.parse.argparser
         {
             var arrayType = targetType.GetElementType();
 
-            if (annotation[0] == ArgParserNames.Array)
+            if (annotation == ArgParserNames.Array)
             {
-                var result = Array.CreateInstance(arrayType, annotation[0].Count);
+                var result = Array.CreateInstance(arrayType, annotation.Count);
                 var index = 0;
 
-                foreach (var element in annotation[0])
+                foreach (var element in annotation)
                 {
                     result.SetValue(OfValue<T>(arrayType, element, tokenList, text), index);
                     index++;
@@ -54,12 +54,12 @@ namespace gg.parse.argparser
             var keyType = targetType.GetGenericArguments()[0];
             var valueType = targetType.GetGenericArguments()[1];
 
-            if (annotation[0] == ArgParserNames.Dictionary)
+            if (annotation == ArgParserNames.Dictionary)
             {
                 var genericType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
                 var result = (IDictionary)Activator.CreateInstance(genericType);
 
-                foreach (var element in annotation[0])
+                foreach (var element in annotation)
                 {
                     var key = OfValue<T>(keyType, element[0], tokenList, text);
                     var value = OfValue<T>(valueType, element[1], tokenList, text);

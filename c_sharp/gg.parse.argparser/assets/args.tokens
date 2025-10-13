@@ -7,22 +7,27 @@ include "filename.tokens";
 
 #arg_tokens			= *(arg_token | ~white_space | unknown_arg_token);
 
-#arg_token			= 
-	arg_key
-	| float | int 
-	| boolean 
-	| null 
-	| string 
-	| scope_start | scope_end 
-	| array_start | array_end 
-	| kv_separator | item_separator 
-	| arg_identifier
-	| file_name_token;
+#arg_token			= float | int 
+						| arg_key_switch
+						| boolean 
+						| null 
+						| string 
+						| scope_start | scope_end 
+						| array_start | array_end 
+						| kv_separator | item_separator 
+						| identifier_or_file;
 
-arg_key				= ~arg_key_switch, identifier;
 arg_key_switch		= ("--" | "-");	
 
-arg_identifier		= identifier, !(colon | directory_separator | period | allowed_symbols);
+#identifier_or_file = (~starts_with_filename_token,	+(#file_name_token)) | identifier;
+
+starts_with_filename_token  = starts_with_relative_dir | starts_with_dir_separator | starts_with_filename_symbol | starts_with_drive;
+
+starts_with_drive			= if (letter, colon, directory_separator);
+starts_with_relative_dir	= if (parent_dir | current_dir);
+starts_with_dir_separator	= if directory_separator;
+starts_with_filename_symbol	= if file_name_symbol;
 
 // errors
 unknown_arg_token	= error "unknown token found." if *(!arg_token, .);
+

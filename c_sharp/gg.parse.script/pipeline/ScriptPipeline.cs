@@ -193,7 +193,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchCharacterSet, CompileCharacterSet)
                     .RegisterFunction(parser.MatchLog, CompileLog<char>)
                     .RegisterFunction(parser.MatchGroup, CompileGroup<char>)
-                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier<char>)
+                    .RegisterFunction(parser.MatchReference, CompileIdentifier<char>)
                     .RegisterFunction(parser.MatchLiteral, CompileLiteral)
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<char>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<char>)
@@ -217,7 +217,7 @@ namespace gg.parse.script.pipeline
             return compiler
                     .RegisterFunction(parser.MatchAnyToken, CompileAny<int>)
                     .RegisterFunction(parser.MatchGroup, CompileGroup<int>)
-                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier<int>)
+                    .RegisterFunction(parser.MatchReference, CompileIdentifier<int>)
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<int>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<int>)
                     .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
@@ -324,7 +324,9 @@ namespace gg.parse.script.pipeline
             {
                 var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 
-                if (tokenFunction.Output == RuleOutput.Self)
+                if (tokenFunction.Output == RuleOutput.Self
+                    // xxx must be a stronger test for this
+                    && !tokenFunction.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 {
                     target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, RuleOutput.Self));
                 }

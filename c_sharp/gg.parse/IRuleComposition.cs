@@ -9,6 +9,10 @@
         /// <summary>
         /// 0 or more rules which make up this composition. 
         /// </summary>
-        IEnumerable<RuleBase<T>> Rules { get; }
+        IEnumerable<RuleBase<T>>? Rules { get; }
+
+        int Count { get; }
+
+        RuleBase<T>? this[int index] { get; set; }
     }
 }

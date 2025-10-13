@@ -12,6 +12,14 @@ namespace gg.parse.rules
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
+        public int Count => 1;
+
+        public RuleBase<T> this[int index]
+        {
+            get => Rule;
+            set => Rule = value;
+        }
+
         public MatchCondition(
             string name, 
             RuleOutput output, 

@@ -28,10 +28,10 @@ namespace gg.parse.script.common
         }            
 
         public MatchSingleData<int> Token(string tokenName) =>
-            MatchSingle($"{RuleOutput.Void.GetToken()}Token({tokenName})", Tokenizer.FindRule(tokenName)!.Id);
+            MatchSingle($"{RuleOutput.Void.GetToken()}{tokenName}", Tokenizer.FindRule(tokenName)!.Id);
 
         public MatchSingleData<int> Token(string ruleName, string tokenName) =>
-            MatchSingle($"Token({ruleName})", Tokenizer.FindRule(tokenName)!.Id);
+            MatchSingle(ruleName, Tokenizer.FindRule(tokenName)!.Id);
 
     }
 }

@@ -102,7 +102,6 @@ namespace gg.parse
                 InvokeOnMatchingRuleNames(annotation.Children, actions);
             }
         }
-            
 
         /// <summary>
         /// Finds the first annotation in a DFS manner which matches the predicate.

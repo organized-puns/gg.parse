@@ -270,7 +270,7 @@ namespace gg.parse.script.tests.integration
 
             var sequence = parseResult[0]![1];
             IsTrue(sequence!.Children != null && sequence!.Children!.Count == 3);
-            IsTrue(sequence[0]!.Rule == tokenizerParser.MatchIdentifier);
+            IsTrue(sequence[0]!.Rule == tokenizerParser.MatchReference);
             IsTrue(sequence[1]!.Rule == tokenizerParser.MatchUnexpectedProductInBodyError);
             IsTrue(sequence[2]!.Rule == tokenizerParser.MatchUnexpectedProductInBodyError);
         }

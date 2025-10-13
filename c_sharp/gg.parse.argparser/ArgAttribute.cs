@@ -1,4 +1,4 @@
-﻿namespace gg.parse.json
+﻿namespace gg.parse.argparser
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class ArgAttribute : Attribute

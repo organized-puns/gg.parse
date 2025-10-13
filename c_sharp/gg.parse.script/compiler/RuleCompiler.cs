@@ -130,6 +130,7 @@ namespace gg.parse.script.compiler
                 var ruleBodyNode = node.Children[ruleHeader.Length];
                 var (compilationFunction, _) = FindCompilationFunction(ruleBodyNode.Rule.Id);
 
+                // validate a named rule doesn't get implemented twice
                 if (resultGraph.FindRule(ruleHeader.Name) == null)
                 {
                     var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
@@ -230,7 +231,7 @@ namespace gg.parse.script.compiler
             {
                 try
                 {
-                    if (rule is IRuleComposition<T> composition)
+                    if (rule is IRuleComposition<T> composition && composition.Rules != null)
                     {
                         foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                         {
