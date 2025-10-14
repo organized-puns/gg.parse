@@ -1,7 +1,7 @@
 ﻿namespace gg.parse.script.compiler
 {
     /// <summary>
-    /// Name, production and precedence of a rule 
+    /// Name, output and precedence of a rule 
     /// </summary>
     /// <param name="product"></param>
     /// <param name="name"></param>
@@ -9,7 +9,7 @@
     {
         public string Name { get; init; }
 
-        public IRule.Output Product { get; init; }
+        public RuleOutput Output { get; init; }
               
         public int Precedence { get; init; }
 
@@ -18,15 +18,18 @@
         /// </summary>
         public int Length { get; init; }
 
-        public RuleHeader(IRule.Output product, string name, int precedence, int length)
+        public bool IsTopLevel { get; init; }
+
+        public RuleHeader(RuleOutput output, string name, int precedence, int length, bool isTopLevel = true)
         {
             Name = name;
-            Product = product;
+            Output = output;
             Precedence = precedence;
             Length = length;
+            IsTopLevel = isTopLevel;
         }
 
-        public RuleHeader(IRule.Output product, string name)
+        public RuleHeader(RuleOutput product, string name)
             : this(product, name, 0, 0) { }
     }
 }

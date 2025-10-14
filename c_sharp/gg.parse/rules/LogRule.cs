@@ -1,6 +1,8 @@
 ﻿
 
 
+using System.Data;
+
 namespace gg.parse.rules
 {
     [Flags]
@@ -17,6 +19,7 @@ namespace gg.parse.rules
     {
         public LogRule<T> Rule { get; init; }
 
+
         public FatalConditionException(LogRule<T> rule)
             : base($"Fatal condition encountered while parsing {rule.Name}, parsing terminates at this point. See exception / inner exception for more details.")
         {
@@ -26,7 +29,6 @@ namespace gg.parse.rules
 
     public class LogRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-        private static readonly RuleBase<T>[] EmptyRuleComposition = [];
 
         public LogLevel Level { get; init; }
 
@@ -35,31 +37,27 @@ namespace gg.parse.rules
         /// </summary>
         public string? Text { get; init; }
 
-        private RuleBase<T> _condition;
-        private RuleBase<T>[] _rulesCollection;
-
+        private RuleBase<T>? _condition;
+        
         public RuleBase<T>? Condition
         {
             get => _condition;
-            init
-            {
-                if (value != null)
-                {
-                    _condition = value;
-                    _rulesCollection = [_condition];
-                }
-                else
-                {
-                    _rulesCollection = EmptyRuleComposition;
-                }
-            }
+            init => _condition = value;
         }
 
-        public IEnumerable<RuleBase<T>> Rules => _rulesCollection;
+        public IEnumerable<RuleBase<T>>? Rules => _condition == null ? null : [_condition];
+
+        public int Count => _condition == null ? 0 : 1;
+
+        public RuleBase<T>? this[int index]
+        {
+            get => _condition;
+            set => _condition = value;
+        }
 
         public LogRule(
             string name, 
-            IRule.Output product, 
+            RuleOutput product, 
             string? text, 
             RuleBase<T>? condition = null, 
             LogLevel level = LogLevel.Info

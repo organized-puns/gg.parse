@@ -1,11 +1,10 @@
-﻿#nullable disable
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using gg.parse.rules;
 using gg.parse.script.pipeline;
+
 
 namespace gg.parse.script.tests.integration
 {
@@ -114,7 +113,7 @@ namespace gg.parse.script.tests.integration
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    "include 'assets/json.grammar';#main=json;"
+                                    "include 'assets/json.grammar';__main__=#json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);
@@ -130,11 +129,14 @@ namespace gg.parse.script.tests.integration
             IsTrue(jsonParser.GrammarGraph.FindRule("object") != null);
 
             // check if it compiles json
-            var (_, result) = jsonParser.Parse("{ \"key\": 123 }");
+            var (tokens, syntaxTree) = jsonParser.Parse("{ \"key\": 123 }");
 
-            IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations![0].Children![0].Rule == jsonParser.GrammarGraph!.FindRule("object"));
-            IsTrue(result.Annotations![0].Children![0].Children![0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
+            IsTrue(syntaxTree.FoundMatch);
+
+            var objectNode = syntaxTree[0][0];
+
+            IsTrue(objectNode.Rule == jsonParser.GrammarGraph!.FindRule("object"));
+            IsTrue(objectNode[0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
         }
 
         
@@ -164,17 +166,17 @@ namespace gg.parse.script.tests.integration
             var scopeStart = objectRule.Rules.ElementAt(0) as RuleReference<int>;
 
             IsNotNull(scopeStart);
-            IsTrue(scopeStart.Production == IRule.Output.Void);
+            IsTrue(scopeStart.Output == RuleOutput.Void);
 
             // check if it compiles json
             var text = "{ \"key\": 123 }";
             var result = jsonParser.Parse(text);
 
-            IsTrue(result.astNodes.FoundMatch);
+            IsTrue(result.syntaxTree.FoundMatch);
 
-            Debug.WriteLine(ScriptUtils.AstToString(text, result.tokens.Annotations, result.astNodes.Annotations));
+            Debug.WriteLine(ScriptUtils.AstToString(text, result.tokens.Annotations, result.syntaxTree.Annotations));
 
-            var objectAnnotation = result.astNodes[0][0];
+            var objectAnnotation = result.syntaxTree[0][0];
 
             IsTrue(objectAnnotation.Rule == jsonParser.GrammarGraph.FindRule("object"));
 

@@ -1,0 +1,34 @@
+/* 
+ * Script for the tokens of input arguments
+ */
+
+include "common.tokens";
+
+#property_token	= property_token_list | white_space | unknown_property_error;
+
+#property_token_list = float | int 
+					| boolean | null 
+					| string  
+					| scope_start | scope_end 
+					| array_start | array_end 
+					| kv_separator | item_separator
+					| identifier;
+
+boolean         = 'true' | 'false';
+
+null			= 'null';
+
+underscore		= "_";
+
+scope_start		= '{';
+scope_end		= '}';
+
+array_start		= '[';
+array_end		= ']';
+
+identifier		= (underscore | letter ), *(underscore | letter | digit);
+
+kv_separator	= ('=' | ':');
+item_separator	= ',';
+
+unknown_property_error	= error "unknown token found." if *(!property_token_list, .);

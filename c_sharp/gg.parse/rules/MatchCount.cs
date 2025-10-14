@@ -1,13 +1,15 @@
-﻿namespace gg.parse.rules
+﻿using Range = gg.parse.util.Range;
+
+namespace gg.parse.rules
 {
     public class MatchCount<T>(
         string name, 
         RuleBase<T> rule, 
-        IRule.Output production = IRule.Output.Self, 
+        RuleOutput output = RuleOutput.Self, 
         int min = 1, 
         int max = 1, 
         int precedence = 0
-    ) : RuleBase<T>(name, production, precedence), IRuleComposition<T> where T : IComparable<T>
+    ) : RuleBase<T>(name, output, precedence), IRuleComposition<T> where T : IComparable<T>
     {
         public RuleBase<T> Rule { get; private set; } = rule;
         
@@ -16,6 +18,14 @@
         public int Max { get; } = max;
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
+
+        public int Count => 1;
+
+        public RuleBase<T> this[int index]
+        {
+            get => Rule;
+            set => Rule = value;
+        }
 
         public override ParseResult Parse(T[] input, int start)
         {
@@ -41,7 +51,7 @@
                 index += result.MatchLength;
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                    (Production == IRule.Output.Self || Production == IRule.Output.Children))
+                    (Output == RuleOutput.Self || Output == RuleOutput.Children))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

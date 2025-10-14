@@ -1,6 +1,9 @@
 ﻿
 using gg.parse.rules;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.tests.rulefunctions
 {
@@ -23,7 +26,7 @@ namespace gg.parse.tests.rulefunctions
             var matchNumber = new MatchSingleData<int>("number", 1);
             var matchOperator = new MatchSingleData<int>("operator", 2);
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 0, matchNumber, matchOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 0, matchNumber, matchOperator, matchNumber)
             {
                 Id = 42
             };
@@ -67,7 +70,7 @@ namespace gg.parse.tests.rulefunctions
                 Id = 2
             };
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 0, matchNumber, matchOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 0, matchNumber, matchOperator, matchNumber)
             {
                 Id = 42
             };
@@ -146,12 +149,12 @@ namespace gg.parse.tests.rulefunctions
                 Id = 3,
             };
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 10, matchNumber, matchAddOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 10, matchNumber, matchAddOperator, matchNumber)
             {
                 Id = 4,
             };
 
-            var multFunction = new MatchRuleSequence<int>("Multiply", IRule.Output.Self, 100, matchNumber, matchMultOperator, matchNumber)
+            var multFunction = new MatchRuleSequence<int>("Multiply", RuleOutput.Self, 100, matchNumber, matchMultOperator, matchNumber)
             {
                 Id = 5,
             };
@@ -231,12 +234,12 @@ namespace gg.parse.tests.rulefunctions
                 Id = 3,
             };
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 10, matchNumber, matchAddOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 10, matchNumber, matchAddOperator, matchNumber)
             {
                 Id = 4,
             };
 
-            var multFunction = new MatchRuleSequence<int>("Multiply", IRule.Output.Self, 100, matchNumber, matchMultOperator, matchNumber)
+            var multFunction = new MatchRuleSequence<int>("Multiply", RuleOutput.Self, 100, matchNumber, matchMultOperator, matchNumber)
             {
                 Id = 5,
             };
@@ -319,12 +322,12 @@ namespace gg.parse.tests.rulefunctions
                 Id = 3,
             };
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 10, matchNumber, matchAddOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 10, matchNumber, matchAddOperator, matchNumber)
             {
                 Id = 4,
             };
 
-            var multFunction = new MatchRuleSequence<int>("Multiply", IRule.Output.Self, 100, matchNumber, matchMultOperator, matchNumber)
+            var multFunction = new MatchRuleSequence<int>("Multiply", RuleOutput.Self, 100, matchNumber, matchMultOperator, matchNumber)
             {
                 Id = 5,
             };
@@ -411,17 +414,17 @@ namespace gg.parse.tests.rulefunctions
                 Id = 4,
             };
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 10, matchNumber, matchAddOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 10, matchNumber, matchAddOperator, matchNumber)
             {
                 Id = 5,
             };
 
-            var multFunction = new MatchRuleSequence<int>("Multiply", IRule.Output.Self, 100, matchNumber, matchMultOperator, matchNumber)
+            var multFunction = new MatchRuleSequence<int>("Multiply", RuleOutput.Self, 100, matchNumber, matchMultOperator, matchNumber)
             {
                 Id = 6,
             };
 
-            var minusFunction = new MatchRuleSequence<int>("Minus", IRule.Output.Self, 1, matchNumber, matchMinOperator, matchNumber)
+            var minusFunction = new MatchRuleSequence<int>("Minus", RuleOutput.Self, 1, matchNumber, matchMinOperator, matchNumber)
             {
                 Id = 7,
             };
@@ -497,17 +500,17 @@ namespace gg.parse.tests.rulefunctions
                 Id = 4,
             };
 
-            var addFunction = new MatchRuleSequence<int>("Add", IRule.Output.Self, 10, matchNumber, matchAddOperator, matchNumber)
+            var addFunction = new MatchRuleSequence<int>("Add", RuleOutput.Self, 10, matchNumber, matchAddOperator, matchNumber)
             {
                 Id = 5,
             };
 
-            var multFunction = new MatchRuleSequence<int>("Multiply", IRule.Output.Self, 100, matchNumber, matchMultOperator, matchNumber)
+            var multFunction = new MatchRuleSequence<int>("Multiply", RuleOutput.Self, 100, matchNumber, matchMultOperator, matchNumber)
             {
                 Id = 6,
             };
 
-            var minusFunction = new MatchRuleSequence<int>("Minus", IRule.Output.Self, 1, matchNumber, matchMinOperator, matchNumber)
+            var minusFunction = new MatchRuleSequence<int>("Minus", RuleOutput.Self, 1, matchNumber, matchMinOperator, matchNumber)
             {
                 Id = 7,
             };

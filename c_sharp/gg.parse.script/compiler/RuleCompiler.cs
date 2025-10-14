@@ -1,5 +1,6 @@
 ﻿
 using gg.parse.rules;
+using gg.parse.util;
 using System.Xml.Linq;
 
 namespace gg.parse.script.compiler
@@ -10,13 +11,13 @@ namespace gg.parse.script.compiler
     {
         public Dictionary<int, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
-        public (int functionId, IRule.Output product)[]? RuleOutputLookup { get; set; }
+        public (int functionId, RuleOutput product)[]? RuleOutputLookup { get; set; }
 
         public RuleCompiler()
         {
         }
 
-        public RuleCompiler((int functionId, IRule.Output product)[] outputLookup)
+        public RuleCompiler((int functionId, RuleOutput product)[] outputLookup)
         {
             RuleOutputLookup = outputLookup;
         }
@@ -129,6 +130,7 @@ namespace gg.parse.script.compiler
                 var ruleBodyNode = node.Children[ruleHeader.Length];
                 var (compilationFunction, _) = FindCompilationFunction(ruleBodyNode.Rule.Id);
 
+                // validate a named rule doesn't get implemented twice
                 if (resultGraph.FindRule(ruleHeader.Name) == null)
                 {
                     var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
@@ -149,9 +151,9 @@ namespace gg.parse.script.compiler
             }
         }
 
-        public bool TryGetProduct(int functionId, out IRule.Output product)
+        public bool TryMatchOutputModifier(int functionId, out RuleOutput output)
         {
-            product = IRule.Output.Self;
+            output = RuleOutput.Self;
 
             if (RuleOutputLookup != null)
             {
@@ -159,7 +161,7 @@ namespace gg.parse.script.compiler
                 {
                     if (functionId == RuleOutputLookup[i].functionId)
                     {
-                        product = RuleOutputLookup[i].product;
+                        output = RuleOutputLookup[i].product;
                         return true;
                     }
                 }
@@ -180,7 +182,7 @@ namespace gg.parse.script.compiler
             var idx = index;
 
             // annotation product is optional, (will default to Annotation)
-            if (TryGetProduct(ruleNodes[idx].Rule.Id, out var product))
+            if (TryMatchOutputModifier(ruleNodes[idx].Rule.Id, out var product))
             {
                 idx++;
             }
@@ -229,20 +231,20 @@ namespace gg.parse.script.compiler
             {
                 try
                 {
-                    if (rule is IRuleComposition<T> composition)
+                    if (rule is IRuleComposition<T> composition && composition.Rules != null)
                     {
                         foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                         {
                             var referredRule = FindRule(graph, referenceRule.Reference);
 
                             // note: we don't replace the rule we just set the reference. This allows
-                            // these subrules to have their own annotation production. If we replace these 
-                            // any production modifiers will affect the original rule
+                            // these subrules to have their own annotation output. If we replace these 
+                            // any output modifiers will affect the original rule
                             referenceRule.Rule = referredRule!;
 
                             // if the reference rule is part of a composition (sequence/option/oneormore/...)
-                            // then use the referred rule's name / production to show up in the result/ast tree
-                            // rather than this reference rule's name/production
+                            // then use the referred rule's name / output to show up in the result/ast tree
+                            // rather than this reference rule's name/output
                             referenceRule.DeferResultToReference = true;
                         }
                     }

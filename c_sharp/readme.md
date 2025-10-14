@@ -118,10 +118,18 @@ Adding tests:
 Good to remember (FAQ?):
 ------------------------
 
-- bug? Seems rule = #(a | b) or ~(...) is not parsing ? production operator issue with group?
+- bug? Seems rule = #(a | b) or ~(...) is not parsing ? output operator issue with group?
     IS _AS INTENDED_... groups by definition are always transitive and any other.
--   Data functions, eg {'a'..'b'} ALWAYS have production `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
-    IT SHOULD have a clear error though, something like "found production rule without identifier".
+-   Data functions, eg {'a'..'b'} ALWAYS have output `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
+    IT SHOULD have a clear error though, something like "found output rule without identifier".
 - DO NOT DO THIS: Remove condition from log, it can be replaced with sequence(condition, log). No it can't because the log RANGE will NOT cover the preceding sequence.
 - ScriptPipeline should also work without a script tokenizer ? No because the input of the parser are tokens
--   
+-   	- Have a sub category chaining where a broad category can be reduced to a smaller category without having to resort to overly complex parse rules
+	    See arg parser where we can never match an identifier (easily) without doing away with the broader category "base_name". Initially this could have 
+	    been overcome with more context to the arg_identifier but this still runs into problems when the context doesn't cover enough.
+		Specialization is not going to solve this either, consider the following (File.grammar / arg.grammar)
+			
+			key=value
+			is matched as a base_name (base file name) 
+			this needs to be solved in the grammar ? it's both filename token but it can also a key value
+				* keep key=value out of scope. It MUST be --key=value otherwise there is no resolution

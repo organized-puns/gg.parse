@@ -1,5 +1,4 @@
-﻿#nullable disable
-
+﻿
 using gg.parse.rules;
 
 using gg.parse.script.compiler;
@@ -10,6 +9,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using static gg.parse.script.compiler.CompilerFunctions;
 
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.tests.integration
 {
@@ -270,7 +270,7 @@ namespace gg.parse.script.tests.integration
 
                         // child capturing the token(s) defining the identifier 
                         new(new EmptyRule(indentifierId), new Range(1, 1), [
-                            // no production annotation, therefore defaults to annotation
+                            // no output annotation, therefore defaults to annotation
                             // identifier name
                             new (new EmptyRule(0), new Range(1,1))
                         ])
@@ -311,7 +311,7 @@ namespace gg.parse.script.tests.integration
             var indentifierId = 42;
             var noneProductId = 62;
 
-            var compiler = new RuleCompiler([(noneProductId, IRule.Output.Void)])
+            var compiler = new RuleCompiler([(noneProductId, RuleOutput.Void)])
                 .RegisterFunction(indentifierId, CompileIdentifier<char>);
 
             // compile a rule table which can tokenize foo
@@ -344,7 +344,7 @@ namespace gg.parse.script.tests.integration
 
                         // child capturing the token(s) defining the literal
                         new(new EmptyRule(indentifierId), new Range(1, 2), [
-                            // production
+                            // output
                             new (new EmptyRule(noneProductId), new Range(1,1)),
                             // name
                             new (new EmptyRule(2), new Range(2,1)),
@@ -361,7 +361,7 @@ namespace gg.parse.script.tests.integration
             var identifierRule = table.FindRule("rule");
 
             IsNotNull(identifierRule);
-            IsTrue(identifierRule.Production == IRule.Output.Void);
+            IsTrue(identifierRule.Output == RuleOutput.Void);
 
             // the compiled table's root should be able to parse a bar string 
             var testText = "bar";

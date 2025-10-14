@@ -4,6 +4,8 @@ namespace gg.parse
 {
     public readonly struct ParseResult(bool isSuccess, int dataRead, List<Annotation>? annotations = null) : IEnumerable<Annotation>
     {
+        public static implicit operator bool(ParseResult result) => result.FoundMatch;
+
         public static readonly ParseResult Success = new(true, 0, null);
         public static readonly ParseResult Unknown = new(true, -1, null);
         public static readonly ParseResult Failure = new(false, 0, null);
@@ -15,6 +17,8 @@ namespace gg.parse
         public List<Annotation>? Annotations { get; init; } = annotations;
 
         public Annotation? this [int index] => Annotations?[index];
+
+        public Annotation? this[string name] => Annotations?.FirstOrDefault(a => a.Rule != null && a.Rule.Name == name);   
 
         public int Count => Annotations?.Count ?? 0;
 
@@ -39,7 +43,7 @@ namespace gg.parse
             }
         }
 
-        public static implicit operator bool(ParseResult result) => result.FoundMatch;
+        
 
         public IEnumerator<Annotation> GetEnumerator()
         {
@@ -51,8 +55,6 @@ namespace gg.parse
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        
+        }       
     }
 }

@@ -11,7 +11,7 @@ namespace gg.parse.calculator.tests
         private static readonly string _grammarSpec = File.ReadAllText("assets/calculator.grammar");
 
         /// <summary>
-        /// Spot check for a bug which caused some of the rules' production to fail.
+        /// Spot check for a bug which caused some of the rules' output to fail.
         /// </summary>
         [TestMethod]
         public void CreateInterpreter_FindRules_ExpectRulesToValidate()
@@ -23,25 +23,25 @@ namespace gg.parse.calculator.tests
             var expressionRule = parser.FindRule("expression") as MatchOneOf<int>;
 
             IsNotNull(expressionRule);
-            IsTrue(expressionRule.Production == IRule.Output.Children);
+            IsTrue(expressionRule.Output == RuleOutput.Children);
             IsTrue(expressionRule.RuleOptions.Length == 3);
 
             var operationRef = expressionRule.RuleOptions[0] as RuleReference<int>;
 
             IsNotNull(operationRef);
-            IsTrue(operationRef.Production == IRule.Output.Self);            
+            IsTrue(operationRef.Output == RuleOutput.Self);            
             IsTrue(operationRef.Reference == "operation");
 
             var termRef = expressionRule.RuleOptions[1] as RuleReference<int>;
 
             IsNotNull(termRef);
-            IsTrue(termRef.Production == IRule.Output.Self);            
+            IsTrue(termRef.Output == RuleOutput.Self);            
             IsTrue(termRef.Reference == "term");
 
             var unknown = expressionRule.RuleOptions[2] as RuleReference<int>;
 
             IsNotNull(unknown);
-            IsTrue(unknown.Production == IRule.Output.Self);
+            IsTrue(unknown.Output == RuleOutput.Self);
             IsTrue(unknown.Reference == "unknown_expression");
         }      
 

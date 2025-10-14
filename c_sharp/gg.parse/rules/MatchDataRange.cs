@@ -4,10 +4,10 @@
         string name, 
         T minDataValue, 
         T maxDataValue, 
-        IRule.Output production = IRule.Output.Self,
+        RuleOutput output = RuleOutput.Self,
         int precedence = 0
     )
-        : RuleBase<T>(name, production, precedence) where T : IComparable<T>
+        : RuleBase<T>(name, output, precedence) where T : IComparable<T>
     {
         public T MinDataValue { get; } = minDataValue;
 

@@ -1,0 +1,18 @@
+
+include "properties.tokens";
+
+#file_name_tokens	= *( #file_name_token );
+
+file_name_token		= directory_separator | parent_dir | current_dir | colon | letter | digit | file_name_symbol;
+
+file_name_symbol	= { "_-~()[]{}+=@!#$%&'`." };
+
+colon				= ":";
+
+parent_dir			= "..", if (directory_separator | eof);
+
+current_dir			= ".", if (directory_separator | eof);
+
+directory_separator = '/' | '\\';
+
+quote				= '"';

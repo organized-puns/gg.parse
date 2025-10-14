@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace gg.parse
+namespace gg.parse.util
 {
     public readonly struct Range(int start, int length) 
     {

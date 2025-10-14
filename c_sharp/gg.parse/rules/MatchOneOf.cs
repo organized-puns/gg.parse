@@ -1,10 +1,19 @@
-﻿namespace gg.parse.rules
+﻿using gg.parse.util;
+
+namespace gg.parse.rules
 {
     public class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>[] _options;
 
-        public RuleBase<T>? this[int index] => _options[index];
+        public RuleBase<T> this[int index]
+        {
+            get => _options[index];
+            set => _options[index] = value;
+        }
+
+        public int Count => _options.Length;
+
 
         public RuleBase<T>[] RuleOptions 
         {
@@ -21,17 +30,17 @@
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
         public MatchOneOf(string name, params RuleBase<T>[] options)
-            : base(name, IRule.Output.Self)
+            : base(name, RuleOutput.Self)
         {
             RuleOptions = options;
         }
 
         public MatchOneOf(
             string name, 
-            IRule.Output production, 
+            RuleOutput output, 
             int precedence = 0, 
             params RuleBase<T>[] rules
-        ) : base(name, production, precedence)
+        ) : base(name, output, precedence)
         {
             RuleOptions = rules;
         }

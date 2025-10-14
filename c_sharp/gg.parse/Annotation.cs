@@ -1,7 +1,16 @@
-﻿namespace gg.parse
+﻿
+using System.Collections;
+using Range = gg.parse.util.Range;
+
+namespace gg.parse
 {
-    public class Annotation 
-    {        
+    public class Annotation : IEnumerable<Annotation>
+    {
+        public static implicit operator string(Annotation annotation) => annotation.Rule == null ? "" : annotation.Rule.Name;
+
+        /// <summary>
+        /// Range in the data which this annotation spans
+        /// </summary>
         public Range Range { get; set; }
         
         public int Start => Range.Start;
@@ -19,11 +28,22 @@
 
         public Annotation? Parent { get; set; }
 
+        /// <summary>
+        /// Shorthand for children.count, checks if children is null and returns 0 
+        /// otherwise returns Children.Count
+        /// </summary>
+        public int Count => Children == null ? 0 : Children.Count;
+
+        /// <summary>
+        /// short hand for Rule.Name
+        /// </summary>
+        public string Name => Rule.Name;
+
+
         public Annotation? this[int index] => 
             Children == null 
             ? null 
             : Children![index];
-
 
         public Annotation(IRule rule, Range range, List<Annotation>? children = null, Annotation? parent = null)
         {
@@ -39,7 +59,8 @@
         }
 
         public override string ToString() =>
-            $"Annotation(Rule:{Rule}, Range: {Range})";
+            $"({Rule}, {Range.Start}..{Range.End})";
+
         /// <summary>
         /// Checks if this annotation matches the predicate, if so adds it to the target. Then
         /// does the same for all its children (if any)
@@ -65,6 +86,18 @@
             }
 
             return target;
+        }
+
+        public IEnumerator<Annotation> GetEnumerator()
+        {
+            return Children == null
+                ? Enumerable.Empty<Annotation>().GetEnumerator()
+                : Children.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -1,33 +1,46 @@
 ﻿
 using gg.parse.rules;
+using gg.parse.util;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
 
-using static gg.parse.Assertions;
+using static gg.parse.util.Assertions;
 using static gg.parse.script.compiler.CompilerFunctions;
 
 namespace gg.parse.script.pipeline
 {
     public static class ScriptPipeline
     {
-        public static PipelineSession<char> RunTokenPipeline(string tokenizerDefinition, PipelineLogger? logger = null)
+        public static PipelineSession<char> RunTokenPipeline(
+            string tokenizerDefinition, 
+            PipelineLogger? logger = null,
+            HashSet<string>? includedPaths = null)
         {
             RequiresNotNullOrEmpty(tokenizerDefinition);
 
-            var session = InitializeSession<char>(tokenizerDefinition, logger);
+            var session = InitializeSession<char>(
+                tokenizerDefinition, 
+                logger,
+                includedPaths == null ? [] : [.. includedPaths!]);
             
             session.Compiler = CreateTokenizerCompiler(session.Parser!);
 
             return RunPipeline(session);
         }
 
-        public static PipelineSession<int> RunGrammarPipeline(string grammarDefinition, PipelineSession<char> tokenSession)
+        public static PipelineSession<int> RunGrammarPipeline(
+            string grammarDefinition, 
+            PipelineSession<char> tokenSession,
+            HashSet<string>? includedPaths = null)
         {
             RequiresNotNullOrEmpty(grammarDefinition);
             RequiresNotNull(tokenSession);
             RequiresNotNull(tokenSession.RuleGraph!);
 
-            var session = InitializeSession<int>(grammarDefinition, tokenSession.LogHandler);
+            var session = InitializeSession<int>(
+                grammarDefinition, 
+                tokenSession.LogHandler, 
+                includedPaths == null ? [] : [..includedPaths!]);
 
             session.RuleGraph = RegisterTokens(tokenSession.RuleGraph!, session.RuleGraph!);
             session.Compiler = CreateParserCompiler(session.Parser!);
@@ -58,6 +71,10 @@ namespace gg.parse.script.pipeline
             // parse results
             try
             {
+                // reset the root. Included files may have set a root but the root needs to be the 
+                // one of the topmost file included. The compiler will set it for us
+                session.RuleGraph.Root = null;
+
                 session.RuleGraph =
                     session
                         .Compiler!
@@ -82,12 +99,19 @@ namespace gg.parse.script.pipeline
             return session;
         }
 
-        public static PipelineSession<T> InitializeSession<T>(string script, PipelineLogger? logger = null)
+        public static PipelineSession<T> InitializeSession<T>(
+            string script, 
+            PipelineLogger? logger = null,
+            HashSet<string>? includePaths = null)
             where T : IComparable<T>
         {
             var tokenizer = new ScriptTokenizer();
             var pipelineLogger = logger ?? new PipelineLogger();
             var parser = new ScriptParser(tokenizer);
+
+            var sessionIncludePaths = includePaths ?? [];
+
+            sessionIncludePaths.Add(AppContext.BaseDirectory);
 
             var tokenizerSession = new PipelineSession<T>()
             {
@@ -95,7 +119,8 @@ namespace gg.parse.script.pipeline
                 Parser = parser,
                 LogHandler = pipelineLogger,
                 Text = script,
-                RuleGraph = new RuleGraph<T>()
+                RuleGraph = new RuleGraph<T>(),
+                IncludePaths = sessionIncludePaths
             };
 
             return tokenizerSession;
@@ -125,10 +150,10 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public static (int functionId, IRule.Output product)[] CreateRuleOutputMapping(ScriptParser parser) =>
+        public static (int functionId, RuleOutput product)[] CreateRuleOutputMapping(ScriptParser parser) =>
         [
-            (parser.MatchTransitiveSelector.Id, IRule.Output.Children),
-            (parser.MatchNoProductSelector.Id, IRule.Output.Void),
+            (parser.MatchTransitiveSelector.Id, RuleOutput.Children),
+            (parser.MatchNoProductSelector.Id, RuleOutput.Void),
         ];
 
         public static RuleCompiler CreateParserCompiler(ScriptParser parser)
@@ -168,7 +193,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchCharacterSet, CompileCharacterSet)
                     .RegisterFunction(parser.MatchLog, CompileLog<char>)
                     .RegisterFunction(parser.MatchGroup, CompileGroup<char>)
-                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier<char>)
+                    .RegisterFunction(parser.MatchReference, CompileIdentifier<char>)
                     .RegisterFunction(parser.MatchLiteral, CompileLiteral)
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<char>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<char>)
@@ -192,7 +217,7 @@ namespace gg.parse.script.pipeline
             return compiler
                     .RegisterFunction(parser.MatchAnyToken, CompileAny<int>)
                     .RegisterFunction(parser.MatchGroup, CompileGroup<int>)
-                    .RegisterFunction(parser.MatchIdentifier, CompileIdentifier<int>)
+                    .RegisterFunction(parser.MatchReference, CompileIdentifier<int>)
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<int>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<int>)
                     .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
@@ -236,6 +261,7 @@ namespace gg.parse.script.pipeline
             RequiresNotNull(session.Tokens!);
             RequiresNotNull(session.RuleGraph!);
 
+            // xxx replace by collect rules
             for (var i = 0; i < session.SyntaxTree!.Count;)
             {
                 var statement = session.SyntaxTree[i];
@@ -245,14 +271,13 @@ namespace gg.parse.script.pipeline
                     Requires(statement.Children != null && statement.Children.Count > 0);
 
                     var filename = statement.Children![0].GetText(session.Text!, session.Tokens!);
-                    var filePath = ResolveFile(filename, session.IncludePaths);
+                    var filePath = filename.ResolveFile(session.IncludePaths);
 
                     if (session.IncludedFiles.ContainsKey(filePath))
                     {
                         // if the associated graph is null, we have a circular dependency
                         if (session.IncludedFiles[filePath] == null)
                         {
-                            //throw new ScriptPipelineException($"Circular include detected {filePath}.");
                             session.LogHandler!.Log(LogLevel.Warning, $"Circular include detected {filePath}.");
                         }
                         
@@ -265,10 +290,12 @@ namespace gg.parse.script.pipeline
 
                         session.LogHandler!.Log(LogLevel.Debug, $"including: {filename}({filePath}).");
 
+                        session.IncludePaths = session.IncludePaths.AddFilePath(filePath);
+
                         var includeSession = RunPipeline(new PipelineSession<T>()
                         {
                            Text = File.ReadAllText(filePath),
-                           IncludePaths = [Path.GetDirectoryName(filePath), AppContext.BaseDirectory],
+                           IncludePaths = session.IncludePaths, 
                            Tokenizer = session.Tokenizer,
                            Parser = session.Parser,
                            LogHandler = session.LogHandler,
@@ -280,6 +307,7 @@ namespace gg.parse.script.pipeline
                         session.IncludedFiles[filePath] = includeSession.RuleGraph;
                     }
 
+                    // remove the include from the syntax tree
                     session.SyntaxTree.RemoveAt(i);
                 }
                 else
@@ -296,9 +324,11 @@ namespace gg.parse.script.pipeline
             {
                 var tokenFunction = tokenSource.FindRule(tokenFunctionName);
 
-                if (tokenFunction.Production == IRule.Output.Self)
+                if (tokenFunction.Output == RuleOutput.Self
+                    // xxx must be a stronger test for this
+                    && !tokenFunction.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 {
-                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, IRule.Output.Self));
+                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, RuleOutput.Self));
                 }
             }
 
@@ -306,33 +336,6 @@ namespace gg.parse.script.pipeline
         }
 
 
-        private static string ResolveFile(string fileName, string[] paths = null)
-        {
-            if (fileName[0] == '"' || fileName[0] == '\'')
-            {
-                fileName = fileName.Substring(1, fileName.Length - 2);
-            }
-
-            if (File.Exists(fileName))
-            {
-                return Path.GetFullPath(fileName);
-            }
-            else if (paths != null && paths.Length > 0)
-            {
-                foreach (var path in paths)
-                {
-                    var separator = path[^1] == '/' || path[^1] == '\\'
-                        ? ""
-                        : Path.DirectorySeparatorChar.ToString();
-
-                    if (File.Exists(path + separator + fileName))
-                    {
-                        return Path.GetFullPath(path + separator + fileName);
-                    }
-                }
-            }
-            
-            throw new ScriptPipelineException($"Trying to include {fileName} but doesn't seem to exist.");
-        }
+        
     }
 }

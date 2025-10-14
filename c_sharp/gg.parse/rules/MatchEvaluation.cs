@@ -1,13 +1,13 @@
-﻿using gg.parse;
+﻿
+using gg.parse.util;
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
     public class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-
-        private RuleBase<T>[]? _options;
-
-        public RuleBase<T>? this[int index] => _options == null ? null : _options[index];
+        private RuleBase<T>[] _options;
 
         public RuleBase<T>[] RuleOptions 
         {
@@ -21,10 +21,24 @@ namespace gg.parse.rules
             }
         }
 
+        public int Count => _options == null ? 0 : _options.Length;
+
+        public RuleBase<T> this[int index]
+        {
+            get => _options[index];
+            set
+            {
+                Assertions.RequiresNotNull(value!);
+                Assertions.RequiresNotNull(_options!);
+                
+                _options[index] = value!;
+            }
+        }
+
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
         public MatchEvaluation(string name, params RuleBase<T>[] options)
-            : base(name, IRule.Output.Self)
+            : base(name, RuleOutput.Self)
         {
             Assertions.Requires(options != null);
             Assertions.Requires(options!.Any(v => v != null));
@@ -32,8 +46,8 @@ namespace gg.parse.rules
             RuleOptions = options!;
         }
 
-        public MatchEvaluation(string name, IRule.Output production, int precedence, params RuleBase<T>[] options)
-            : base(name, production, precedence)
+        public MatchEvaluation(string name, RuleOutput output, int precedence, params RuleBase<T>[] options)
+            : base(name, output, precedence)
         {
             Assertions.Requires(options != null);
             Assertions.Requires(options!.Any(v => v != null));

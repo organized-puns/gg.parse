@@ -1,10 +1,20 @@
-﻿namespace gg.parse.rules
+﻿using gg.parse.util;
+
+using Range = gg.parse.util.Range;
+
+namespace gg.parse.rules
 {
     public class MatchRuleSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {
         private RuleBase<T>[] _rules;
 
-        public RuleBase<T>? this[int index] => SequenceRules[index];
+        public RuleBase<T> this[int index]
+        {
+            get => _rules[index];
+            set => _rules[index] = value;
+        }
+
+        public int Count => _rules.Length;
 
         public RuleBase<T>[] SequenceRules
         {
@@ -22,10 +32,10 @@
 
         public MatchRuleSequence(
             string name, 
-            IRule.Output production, 
+            RuleOutput output, 
             int precedence = 0,
             params RuleBase<T>[] rules
-        ) : base(name, production, precedence) 
+        ) : base(name, output, precedence) 
         {
             SequenceRules = rules;
         }
@@ -45,7 +55,7 @@
                 }
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                   (Production == IRule.Output.Self || Production == IRule.Output.Children))
+                   (Output == RuleOutput.Self || Output == RuleOutput.Children))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

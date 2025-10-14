@@ -1,8 +1,11 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-using System;
-using static gg.parse.Assertions;
+using gg.parse.util;
+
+using static gg.parse.util.Assertions;
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.pipeline
 {
@@ -61,7 +64,7 @@ namespace gg.parse.script.pipeline
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
-                    var message = $"({line}, {column}) {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
+                    var message = $"({line}, {column}) {log.Text} near: \"{text.Substring(annotation.Start, annotation.Length)}\".";
 
                     Log(log.Level, message);
                 }
@@ -84,20 +87,29 @@ namespace gg.parse.script.pipeline
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation, tokens, lineRanges);
-                    var message = $"({line}, {column}) {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
+                    var message = $"({line}, {column}) {log.Text} near \"{GetAnnotationText(annotation, text, tokens)}\".";
 
                     Log(log.Level, message);
                 }
             }
         }
 
-        public void ProcessException(ScriptException exception, bool logException = true)
+        public void ProcessException(Exception exception, bool logException = true)
         {
             if (logException)
             {
                 Log(LogLevel.Fatal, $"Exception: {exception}");
             }
 
+            if (exception is ScriptException se)
+            {
+                ProcessScriptException(se);
+            }
+        }
+
+        public void ProcessScriptException(ScriptException exception)
+        {
+            
             if (exception.Errors != null && exception.Text != null)
             {
                 if (exception.Tokens == null)

@@ -10,7 +10,7 @@ namespace gg.parse.script.pipeline
 
         public string? Text { get; set; }
 
-        public string[] IncludePaths { get; set; } = [];
+        public HashSet<string> IncludePaths { get; set; } = [];
 
         public Dictionary<string, RuleGraph<T>?> IncludedFiles { get; set; } = [];
 

@@ -6,8 +6,9 @@
 
 #term			     = unary_operation | number | group_variations;
 
-unary_operation      = (plus | minus), term;
+unary_operation      = sign, term;
 
+#sign				 = plus | minus;
 
 #group_variations    = group | group_err;
 

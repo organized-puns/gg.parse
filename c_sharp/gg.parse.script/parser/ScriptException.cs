@@ -33,20 +33,6 @@
             Text = text;
             Tokens = tokens;
         }
-
-        /*public void WriteErrors(Action<string> writeError)
-        {
-            if (Errors != null && Text != null)
-            {
-
-                if 
-                var errorMessages = Errors.Select(annotation => $"Parse error at: {annotation.GetText(Text, Tokens)}.");
-                foreach (var errorMessage in errorMessages)
-                {
-                    writeError(errorMessage);
-                }
-            }
-        }*/
     }
 }
 

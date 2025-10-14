@@ -1,0 +1,23 @@
+letter			= {'a' .. 'z'} | {'A' .. 'Z'};	
+digit           = { '0'..'9' };
+
+minus			= '-';
+plus			= '+';
+~sign           = plus | minus;
+float           = int, '.', +digit, ?(('e' | 'E'), int);
+int             = ?sign, +digit;
+
+// allow for both single - and double quoted strings
+~sq_string_char = !'"', .;
+~sq_string      = '"', *sq_string_char, '"';
+
+~dq_string_char = !"'", .;
+~dq_string      = "'", *dq_string_char, "'";
+
+string			= sq_string | dq_string;
+
+eof				= !.;
+
+space			= " ";
+
+white_space		= {" \t\r\n "};

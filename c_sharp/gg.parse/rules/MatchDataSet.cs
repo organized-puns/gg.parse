@@ -1,17 +1,19 @@
-﻿namespace gg.parse.rules
+﻿using Range = gg.parse.util.Range;
+
+namespace gg.parse.rules
 {
     public class MatchDataSet<T> : RuleBase<T> where T : IComparable<T>
     {
         public T[] MatchingValues { get; init; }
 
-        public MatchDataSet(string name, IRule.Output production, T[] setValues, int precedence = 0)
-            : base(name, production, precedence)
+        public MatchDataSet(string name, RuleOutput output, T[] setValues, int precedence = 0)
+            : base(name, output, precedence)
         {
             MatchingValues = setValues;
         }
 
         public MatchDataSet(string name, T[] matchingValues, int precedence = 0)
-            : base(name, IRule.Output.Self, precedence)
+            : base(name, RuleOutput.Self, precedence)
         {
             MatchingValues = matchingValues;
         }

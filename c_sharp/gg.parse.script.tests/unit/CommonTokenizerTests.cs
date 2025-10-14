@@ -57,10 +57,11 @@ namespace gg.parse.script.tests.unit
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.MatchString(name, '\''),
                 testNames: [null, "string", "#string", "~string" ],
-                validSamples: ["''", "'str''", "'str'", "'\\'str\\''"],
+                validSamples: ["''", "'str''", "'str'", "'\\'str\\''", "'\\\\'", "'\\abc'" ],
                 invalidSamples: ["", "'str", "'\\'", " 'str''"]
             );
         }
+
 
         [TestMethod]
         public void MultiLineCommentTests()
@@ -101,16 +102,16 @@ namespace gg.parse.script.tests.unit
 
                 if (name != null)
                 {
-                    var (expectedName, production) = name.SplitNameAndOutput();
+                    var (expectedName, output) = name.SplitNameAndOutput();
                     
                     IsTrue(rule.Name == expectedName);
-                    IsTrue(rule.Production == production);
+                    IsTrue(rule.Output == output);
                 }
                 else
                 {
                     // no name provided, there should be a non null default name
                     IsNotNull(rule.Name);
-                    IsTrue(rule.Production == IRule.Output.Void);
+                    IsTrue(rule.Output == RuleOutput.Void);
                 }
 
                 IsTrue(tokenizer.FindRule(rule.Name) == rule);
@@ -134,7 +135,7 @@ namespace gg.parse.script.tests.unit
                     IsTrue(result.FoundMatch);
                     IsTrue(result.MatchLength > 0);
 
-                    if (rule.Production == IRule.Output.Void)
+                    if (rule.Output == RuleOutput.Void)
                     {
                         IsTrue(result.Annotations == null);
                     }

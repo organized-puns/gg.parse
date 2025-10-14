@@ -1,0 +1,92 @@
+{
+  "name": "GG Parse Script Theme",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#1e1e1e",
+    "editor.foreground": "#d4d4d4",
+    "editor.lineNumberActiveForeground": "#c6c7c7",
+    "editorLineNumber.foreground": "#858585"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment.line.double-slash.mycustom",
+      "settings": {
+        "foreground": "#6a9955"
+      }
+    },
+    {
+      "scope": "comment.block.mycustom",
+      "settings": {
+        "foreground": "#6a9955"
+      }
+    },
+    {
+      "scope": "keyword.control.gg.parse",
+      "settings": {
+        "foreground": "#569cd6",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "punctuation.paren.open.gg.parse",
+      "settings": {
+        "foreground": "#d7ba7d"
+      }
+    },
+    {
+      "scope": "punctuation.paren.close.gg.parse",
+      "settings": {
+        "foreground": "#d7ba7d"
+      }
+    },
+    {
+      "scope": "punctuation.assignment.gg.parse",
+      "settings": {
+        "foreground": "#d7ba7d"
+      }
+    },
+    {
+      "scope": "punctuation.terminator.gg.parse",
+      "settings": {
+        "foreground": "#d7ba7d"
+      }
+    },
+    {
+      "scope": "keyword.operator.binary.gg.parse",
+      "settings": {
+        "foreground": "#c586c0"
+      }
+    },
+    {
+      "scope": "keyword.operator.unary.gg.parse",
+      "settings": {
+        "foreground": "#ce9178"
+      }
+    },
+    {
+      "scope": "keyword.operator.production.gg.parse",
+      "settings": {
+        "foreground": "#0d7dad"
+      }
+    },
+    {
+      "scope": "string.quoted.double.mycustom",
+      "settings": {
+        "foreground": "#bfefbf"
+      }
+    },
+    {
+      "scope": "string.quoted.single.mycustom",
+      "settings": {
+        "foreground": "#bfefbf"
+      }
+    },
+    {
+      "scope": "variable.other.gg.parse",
+      "settings": {
+        "foreground": "#efefff",
+        "fontStyle": "italic"
+      }
+    }
+  ]
+}

@@ -116,7 +116,7 @@ namespace gg.parse.script.tests.integration
                 new MatchCount<char>(
                     "#string_list", 
                     parser.TokenGraph.Root, 
-                    production: IRule.Output.Children, 
+                    output: RuleOutput.Children, 
                     min: 1, 
                     max: 0
                 )

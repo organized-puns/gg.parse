@@ -171,12 +171,12 @@ namespace gg.parse.calculator.tests
             IsTrue(additionRule.Name == "addition");
             IsTrue(additionRule.Precedence == 50);
 
-            IsTrue(addition[0]!.Rule!.Name == "unary_operation");
-            IsTrue(addition[0]![0]!.Rule!.Name == "minus");
-            IsTrue(addition[0]![1]!.Rule!.Name == "number");
+            IsTrue(addition[0].Rule.Name == "unary_operation");
+            IsTrue(addition[0][0].Rule.Name == "minus");
+            IsTrue(addition[0][1].Rule.Name == "number");
 
-            IsTrue(addition[1]!.Rule!.Name == "plus");
-            IsTrue(addition[2]!.Rule!.Name == "unary_operation");
+            IsTrue(addition[1].Rule.Name == "plus");
+            IsTrue(addition[2].Rule.Name == "unary_operation");
         }
 
         

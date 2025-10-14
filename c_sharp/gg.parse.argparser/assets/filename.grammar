@@ -1,0 +1,14 @@
+// Cross-platform filename grammar with relative paths 
+
+// filename can be quoted or unquoted. The former is often used in command line arguments
+// where spaces in the filename can lead to different outcomes
+
+// xxx this should move to tokens to put it on the same "level" as identifier
+filename					= ?(drive | ~directory_separator), path;
+
+drive						= letter, ~colon, ~directory_separator;
+
+path						= path_part, *(~directory_separator, path_part);
+
+path_part					= parent_dir | current_dir | +(letter | digit | file_name_symbol);
+

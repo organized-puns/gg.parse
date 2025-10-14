@@ -1,4 +1,10 @@
-﻿namespace gg.parse.rules
+﻿
+using gg.parse.util;
+
+using Range = gg.parse.util.Range;
+
+
+namespace gg.parse.rules
 {
     public class MatchCondition<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
@@ -6,12 +12,20 @@
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
+        public int Count => 1;
+
+        public RuleBase<T> this[int index]
+        {
+            get => Rule;
+            set => Rule = value;
+        }
+
         public MatchCondition(
             string name, 
-            IRule.Output production, 
+            RuleOutput output, 
             int precedence,
             RuleBase<T> rule
-        ) : base(name, production, precedence)
+        ) : base(name, output, precedence)
         {
             Assertions.RequiresNotNull(rule);
 
@@ -19,7 +33,7 @@
         }
 
         public MatchCondition(string name, RuleBase<T> rule)
-            : base(name, IRule.Output.Self)
+            : base(name, RuleOutput.Self)
         {
             Assertions.RequiresNotNull(rule);
 

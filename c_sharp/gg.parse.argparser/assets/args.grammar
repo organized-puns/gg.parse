@@ -1,0 +1,24 @@
+/* 
+ * Simple script for the grammar of arguments
+ * Allows for setting value in any of these forms:
+ * 
+ *  -p value
+ *  -p = value
+ *  --parameter_1 value
+ *  --parameter_1 = value
+ *  p1 = value
+ *  parameter_1 = value
+ */
+
+include "properties.grammar";
+include "filename.grammar";
+
+#root				= eof | ((arg_option | arg_value), *(arg_option | arg_value)) | unknown_arg_grammar;
+
+arg_option			= arg_key, ?(~kv_separator, arg_value);
+
+arg_value			= dictionary | array | float | int | boolean | null | string | filename | identifier;
+
+unknown_arg_grammar	= error "unknown grammar construct." if *(!(arg_option | arg_value), .);
+
+arg_key				= arg_key_switch, identifier;
