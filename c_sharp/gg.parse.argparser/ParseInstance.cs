@@ -34,13 +34,13 @@ namespace gg.parse.argparser
 
             if (annotation == ArgParserNames.Array)
             {
-                var result = Array.CreateInstance(arrayType, annotation.Count);
-                var index = 0;
+                // remove the start and end of the array from the count
+                var result = Array.CreateInstance(arrayType, annotation.Count-2);
 
-                foreach (var element in annotation)
+                // need to skip start and end, so start at 1 and end at -1 
+                for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.SetValue(OfValue<T>(arrayType, element, tokenList, text), index);
-                    index++;
+                    result.SetValue(OfValue<T>(arrayType, annotation[i], tokenList, text), i-1);
                 }
 
                 return result;
@@ -57,12 +57,14 @@ namespace gg.parse.argparser
             if (annotation == ArgParserNames.Dictionary)
             {
                 var genericType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
-                var result = (IDictionary)Activator.CreateInstance(genericType);
+                var result = (IDictionary) Activator.CreateInstance(genericType) 
+                    ?? throw new ArgumentException($"Can't create an instance of dictionary with key/value type <{keyType}, {valueType}>.");
 
-                foreach (var element in annotation)
+                // need to skip scope start and end, so start at 1 and end at -1
+                for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    var key = OfValue<T>(keyType, element[0], tokenList, text);
-                    var value = OfValue<T>(valueType, element[1], tokenList, text);
+                    var key = OfValue<T>(keyType, annotation[i][0], tokenList, text);
+                    var value = OfValue<T>(valueType, annotation[i][1], tokenList, text);
 
                     result.Add(key, value);
                 }

@@ -2,12 +2,18 @@ Todo 0.1
 ---------------
 
 - Implement Arg parser
-	bug:
-	- rule = (#foo)
-	- foo = a | b | c;
-	somehow results in foo still appearing
-	
-	bug: see all xxx in the different grammars/tokens
+	- fix dict bug
+	- add object, list, hashset to supported args
+- Implement properties file
+
+this is weird:
+array_item_list   = value, *(~item_separator, value);
+array			  = ~array_start, ?array_item_list, ~array_end;
+?array_item_list 
+	yields zero_or_one of the children of array_item_list
+	it should yield the children of zero_or_one of array_item_list
+
+value = a | b | c; should yield value(a) not a BUT value = (a | b | c ) | 'foo' should ield  value(a) or value('foo')
 
 - Implement (json) annotations in its main program
 - Clean up unit tests and build proper examples
@@ -15,7 +21,13 @@ Todo 0.1
 
 0.2     
 ---------
-
+- add output 'prune' 
+	such that:  
+	- output(self, parent_node(child1, child2.. childN)) =  parent_node(child1, child2.. childN)
+	- output(children, parent_node(child1, child2.. childN)) =  (child1, child2.. childN)
+	- output(prune, parent_node(child1, child2.. childN)) =  parent_node
+	- output(void, parent_node(child1, child2.. childN)) =  null
+	
 - change '~' to '-' and '#' to '..' (?) or `~` to '--' and '#' to '-'...
 
 - Having a literal in a grammar leads to very confusing errors. Should be handled better.

@@ -10,6 +10,9 @@ namespace gg.parse.argparser
         private static readonly List<PropertyArgs> _propertyDescriptors = CreatePropertyArgList();
               
         private ParserBuilder _parserBuilder;
+
+        public ParserBuilder Parser => _parserBuilder;
+
         
         public ArgsReader()
         {

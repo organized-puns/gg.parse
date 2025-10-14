@@ -1,26 +1,20 @@
-/* 
- * Simple EBNF notation for the grammar of json
- */
 
-properties		  = object | array | eof;
+properties		  = eof | *value;
 
-key				  = identifier;
+value			  = string | int | float | boolean | null | dictionary | array;
 
-value			  = string | int | float | boolean | null | object | dictionary | array;
+kvp_pair		  = value, ~kv_separator, value;
 
-key_value_pair    = key, ~kv_separator, value;
+kvp_list		  = kvp_pair, *(~item_separator, kvp_pair);
 
-#key_value_list	  = key_value_pair, *(~item_separator, key_value_pair);
+// to support empty dictionaries/objects we can't prune the scope start and end, ie
+// ~scope_start, ?kvp_list, ~scope_end won't work.
+dictionary		  = scope_start, ?kvp_list, scope_end;
 
-object			  = ~scope_start, ?key_value_list, ~scope_end;
+array_item_list   = value, *(~item_separator, value);
 
-dict_kvp_pair	  = value, ~kv_separator, value;
-
-value_value_list  = dict_kvp_pair, *(~item_separator, dict_kvp_pair);
-
-dictionary		  = ~scope_start, ?value_value_list, ~scope_end;
-
-#array_item_list  = value, *(~item_separator, value);
-array			  = ~array_start, ?array_item_list, ~array_end;
+// to support empty arrays/lists we can't prune the scope start and end, ie
+// ~array_start, ?array_item_list, ~array_end.
+array			  = array_start, ?array_item_list, array_end;
 
 
