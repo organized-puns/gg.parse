@@ -1,5 +1,7 @@
 ﻿using gg.parse.script.common;
+using gg.parse.script.parser;
 using gg.parse.util;
+using System.Diagnostics;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.argparser.tests
@@ -178,6 +180,8 @@ namespace gg.parse.argparser.tests
 
             [Arg(Index = 0, IsRequired = true)]
             public Example required;
+
+            private Example privateExample;
         }
 
         [TestMethod]
@@ -192,6 +196,47 @@ namespace gg.parse.argparser.tests
 
             IsTrue(structValue.required.x == 1.1f);
             IsTrue(structValue.required.y == 0);
+        }
+
+        /// <summary>
+        /// Example of how to handle errors during parsing.
+        /// </summary>
+        [TestMethod]
+        public void SetupParseError_Parse_ExpectHumanReadableError()
+        {
+            var argReader = new ArgsReader<AttrClassWithStructTypes>();
+
+            try
+            {
+                // no closing '}'
+                var structValue = argReader.Parse("-e={x: 0.42, y: -42  --Example=[1,2");
+
+                Fail();
+            }
+            catch (ScriptException ex)
+            {
+                Debug.WriteLine(argReader.GetErrorReport(ex));
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        [TestMethod]
+        public void SetupSemanticError_Parse_ExpectHumanReadableError()
+        {
+            var argReader = new ArgsReader<AttrClassWithStructTypes>();
+
+            try
+            {
+                // assign an int to a struct
+                var structValue = argReader.Parse("-e=42 -e='foo' --privateExample=true");
+
+                Fail();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(argReader.GetErrorReport(ex));
+            }
         }
     }
 }

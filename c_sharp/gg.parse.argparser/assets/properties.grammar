@@ -9,12 +9,26 @@ kvp_list		  = kvp_pair, *(~item_separator, kvp_pair);
 
 // to support empty dictionaries/objects we can't prune the scope start and end, ie
 // ~scope_start, ?kvp_list, ~scope_end won't work.
-dictionary		  = scope_start, ?kvp_list, scope_end;
+dictionary		  = scope_start, (
+						(
+							// valid dictionary
+							(?kvp_list, scope_end)
+							// missing closing }
+							| (error "missing '}'." if (?kvp_list, !scope_end))
+						)
+					);
 
 array_item_list   = value, *(~item_separator, value);
 
 // to support empty arrays/lists we can't prune the scope start and end, ie
 // ~array_start, ?array_item_list, ~array_end.
-array			  = array_start, ?array_item_list, array_end;
+array			  = array_start, (
+						(
+							// valid array
+							(?array_item_list, array_end)
+							// missing closing ]
+							| (error "missing ']'." if (?array_item_list, !array_end))
+						)
+					); 
 
 

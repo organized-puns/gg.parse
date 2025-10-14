@@ -19,6 +19,15 @@ namespace gg.parse.argparser
             _parserBuilder = new ParserBuilder().FromFile("assets/args.tokens", "assets/args.grammar");
         }
 
+        public string GetErrorReport(Exception e)
+        {
+            var parserErrors = Parser.LogHandler.ReceivedLogs.Where(l => l.level == rules.LogLevel.Error);
+
+            return parserErrors.Any()
+                ? string.Join("\n", parserErrors)
+                : e.Message;
+        }
+        
         public T Parse(string[] args) =>
             Parse(string.Join(" ", args));        
 
@@ -65,11 +74,11 @@ namespace gg.parse.argparser
             // validate if all required args were provided
             foreach (var arg in requiredArgs)
             {
-                errors.Add($"No argument provided for _required_ arg {arg.ArgPropertyInfo.Name}(${arg.KeyToString()}).");
+                errors.Add($"No argument provided for _required_ arg '{arg.ArgName}'({arg.KeyToString()}).");
             }
 
             return errors.Count > 0 
-                    ? throw new ArgumentException("Failed to read arguments:\n" + string.Join("\n", errors))
+                    ? throw new ArgumentException("Failed to read arguments:\n - " + string.Join("\n - ", errors))
                     : target;
         }
 

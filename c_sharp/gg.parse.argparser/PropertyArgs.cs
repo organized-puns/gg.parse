@@ -45,12 +45,12 @@ namespace gg.parse.argparser
 
             public string KeyToString()
             {
-                var key = ArgIndex >= 0 ? $"{ArgIndex}" : "";
+                var key = ArgIndex >= 0 ? $"index: {ArgIndex}" : "";
 
                 if (Attribute != null)
                 {
-                    key = !string.IsNullOrEmpty(Attribute.ShortName) ? $"{key}, -{Attribute.ShortName}" : key;
-                    key = !string.IsNullOrEmpty(Attribute.FullName) ? $"{key}, --{Attribute.FullName}" : key;
+                    key = !string.IsNullOrEmpty(Attribute.ShortName) ? $"{key}, short name: -{Attribute.ShortName}" : key;
+                    key = !string.IsNullOrEmpty(Attribute.FullName) ? $"{key}, full name: --{Attribute.FullName}" : key;
                 }
                 return key;
             }
@@ -67,6 +67,22 @@ namespace gg.parse.argparser
                 }
                 else
                 {
+                    throw new InvalidProgramException("PropertyArgs not initialized correctly.");
+                }
+            }
+
+            public string ArgName
+            {
+                get
+                {
+                    if (ArgPropertyInfo != null)
+                    {
+                        return ArgPropertyInfo.Name;
+                    }
+                    else if (ArgFieldInfo != null)
+                    {
+                        return ArgFieldInfo.Name;
+                    }
                     throw new InvalidProgramException("PropertyArgs not initialized correctly.");
                 }
             }

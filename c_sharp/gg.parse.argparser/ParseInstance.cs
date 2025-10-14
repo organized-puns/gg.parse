@@ -178,7 +178,7 @@ namespace gg.parse.argparser
                 return result;
             }
 
-            throw new ArgumentException($"Request object of {targetType} but provided value is not a object.");
+            throw new ArgumentException($"Looking for a value of type '{targetType}' but value found is not a object/dictionary but a '{annotation.Rule.Name}'.");
         }
 
         public static object OfBasicValue(Type targetType, string text)

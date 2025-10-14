@@ -1,17 +1,11 @@
-Todo 0.1
----------------
-
-- Implement Arg parser
-	- test errors
+Todo 0.1 first public release
+-----------------------------
 
 - Clean up unit tests and build proper examples
 - Add some more documentation, extend readme.
 
-0.2 Add Properties File    
------------------------
-- Implement properties file
-
-Fixes:
+0.2 Adjust and fix output in favor of 'prune':
+----------------------------------------------
 this is weird:
 array_item_list   = value, *(~item_separator, value);
 array			  = ~array_start, ?array_item_list, ~array_end;
@@ -34,6 +28,11 @@ Adjustments:
 
 - consider change '~' to '-' and '#' to '..' (?) or `~` to '--' and '#' to '-'...
 	? -c, -p -a 
+
+0.21 Add Properties File Example   
+------------------------------
+- Implement properties file
+
 
 0.3
 ---------

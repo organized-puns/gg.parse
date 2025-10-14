@@ -64,7 +64,7 @@ namespace gg.parse.script.pipeline
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
-                    var message = $"({line}, {column}) {log.Text}: {text.Substring(annotation.Start, annotation.Length)}";
+                    var message = $"({line}, {column}) {log.Text} near: \"{text.Substring(annotation.Start, annotation.Length)}\".";
 
                     Log(log.Level, message);
                 }
@@ -87,7 +87,7 @@ namespace gg.parse.script.pipeline
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapAnnotationRangeToLineColumn(annotation, tokens, lineRanges);
-                    var message = $"({line}, {column}) {log.Text}: {GetAnnotationText(annotation, text, tokens)}";
+                    var message = $"({line}, {column}) {log.Text} near \"{GetAnnotationText(annotation, text, tokens)}\".";
 
                     Log(log.Level, message);
                 }
