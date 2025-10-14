@@ -65,7 +65,7 @@ namespace gg.parse.argparser
             // validate if all required args were provided
             foreach (var arg in requiredArgs)
             {
-                errors.Add($"No argument provided for _required_ arg {arg.Info.Name}(${arg.KeyToString()}).");
+                errors.Add($"No argument provided for _required_ arg {arg.ArgPropertyInfo.Name}(${arg.KeyToString()}).");
             }
 
             return errors.Count > 0 
@@ -94,7 +94,7 @@ namespace gg.parse.argparser
                 {
                     property.SetValue(
                         target!,
-                        ParseInstance.OfValue<T>(property!.Info.PropertyType, node, tokens.Annotations!, args)
+                        ParseInstance.OfValue<T>(property!.ArgType, node[0], tokens.Annotations!, args)
                     );
                 }
                 catch (Exception ex)
@@ -118,9 +118,9 @@ namespace gg.parse.argparser
 
         private PropertyArgs? AssignOption(T target, Annotation node, string args, ParseResult tokens, List<string> errors)
         {
-            var (key, property) = FindKeyProperty(node[0]!, args, tokens);
+            var (key, argType) = FindKeyProperty(node[0]!, args, tokens);
 
-            if (property == null)
+            if (argType == null)
             {
                 errors.Add($"Can't match '{key}' to any known option.");
             }
@@ -129,13 +129,13 @@ namespace gg.parse.argparser
                 try
                 {
                     object value = node.Count == 2
-                        ? ParseInstance.OfValue<T>(property.Info.PropertyType, node[1][0], tokens.Annotations, args)
+                        ? ParseInstance.OfValue<T>(argType.ArgType, node[1][0], tokens.Annotations, args)
                         // assume its a bool
                         : true;
 
-                    property.SetValue(target!, value);
+                    argType.SetValue(target!, value);
 
-                    return property;
+                    return argType;
                 }
                 catch (Exception ex)
                 {
@@ -146,26 +146,33 @@ namespace gg.parse.argparser
             return null;
         }
 
-        
-
         private static List<PropertyArgs> CreatePropertyArgList()
         {
             var result = new List<PropertyArgs>();
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
+            var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Instance);
 
             for (int i = 0; i < properties.Length; i++)
             {
                 result.Add(new PropertyArgs()
                 {
-                    Info = properties[i],
-                    PropertyInfoIndex = i,
+                    ArgPropertyInfo = properties[i],
+                    ArgIndex = i,
                     Attribute = (ArgAttribute) Attribute.GetCustomAttribute(properties[i], typeof(ArgAttribute)),
                 });
             }
 
-            return result;
-        }        
+            for (int i = 0; i < fields.Length; i++)
+            {
+                result.Add(new PropertyArgs()
+                {
+                    ArgFieldInfo = fields[i],
+                    ArgIndex = i,
+                    Attribute = (ArgAttribute)Attribute.GetCustomAttribute(fields[i], typeof(ArgAttribute)),
+                });
+            }
 
-        
+            return result;
+        }               
     }
 }

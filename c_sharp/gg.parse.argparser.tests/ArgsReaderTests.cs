@@ -1,4 +1,5 @@
 ﻿using gg.parse.script.common;
+using gg.parse.util;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.argparser.tests
@@ -137,7 +138,11 @@ namespace gg.parse.argparser.tests
 
         public class AttrClassWithObjectTypes
         {
+            public string field = "";
+
             public SingleValueClass SingleValue { get; set; }
+
+            public HashSet<int> SetValues { get; set; }
         }
 
         [TestMethod]
@@ -148,6 +153,45 @@ namespace gg.parse.argparser.tests
             var objType = argReader.Parse("--SingleValue={Value: 'foo'}");
 
             IsTrue(objType.SingleValue.Value == "foo");
+
+            objType = argReader.Parse("--SetValues=[1, -2, 3]");
+
+            IsTrue(objType.SetValues.Contains(1));
+            IsTrue(objType.SetValues.Contains(-2));
+            IsTrue(objType.SetValues.Contains(3));
+
+            objType = argReader.Parse("--field='bar'");
+
+            IsTrue(objType.field == "bar");
+        }
+
+        public class AttrClassWithStructTypes
+        {
+            public struct Example
+            {
+                public float x;
+                public int y;
+            }
+
+            [Arg(ShortName = "e")]
+            public Example example;
+
+            [Arg(Index = 0, IsRequired = true)]
+            public Example required;
+        }
+
+        [TestMethod]
+        public void CreateReaderWithAttrClassWithStructTypes_Parse_ExpectValuesSet()
+        {
+            var argReader = new ArgsReader<AttrClassWithStructTypes>();
+
+            var structValue = argReader.Parse("-e={x: 0.42, y: -42} {x: 1.1, y: 0}");
+
+            IsTrue(structValue.example.x == 0.42f);
+            IsTrue(structValue.example.y == -42);
+
+            IsTrue(structValue.required.x == 1.1f);
+            IsTrue(structValue.required.y == 0);
         }
     }
 }

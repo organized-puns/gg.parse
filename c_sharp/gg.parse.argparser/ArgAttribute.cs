@@ -1,6 +1,6 @@
 ﻿namespace gg.parse.argparser
 {
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class ArgAttribute : Attribute
     {
         public int Index { get; set; } = -1;

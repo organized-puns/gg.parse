@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
@@ -25,11 +26,20 @@ namespace gg.parse.argparser
                 {
                     return OfList<T>(targetType, annotation, tokenList, text);
                 }
+                else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISet<>)))
+                {
+                    return OfSet<T>(targetType, annotation, tokenList, text);
+                }
 
                 throw new NotImplementedException($"No backing implementation for type {targetType}.");
             }
             else if (targetType != typeof(string) && targetType.IsClass)
             {
+                return OfObject<T>(targetType, annotation, tokenList, text);
+            }
+            else if (targetType.IsValueType && !targetType.IsEnum && !targetType.IsPrimitive)
+            {
+                // treat structs as objects
                 return OfObject<T>(targetType, annotation, tokenList, text);
             }
             else
@@ -81,6 +91,29 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Array<{listType}> but provided value is not a valid array.");
         }
 
+        public static object OfSet<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        {
+            var setType = targetType.GetGenericArguments()[0];
+
+            if (annotation == ArgParserNames.Array)
+            {
+                var genericType = typeof(HashSet<>).MakeGenericType(setType);
+                var result = Activator.CreateInstance(genericType)
+                    ?? throw new ArgumentException($"Can't create an instance of list with list type <{setType}>.");
+                var addMethod = genericType.GetMethod("Add");
+
+                // need to skip start and end, so start at 1 and end at -1 
+                for (var i = 1; i < annotation.Count - 1; i++)
+                {
+                    addMethod.Invoke(result, [OfValue<T>(setType, annotation[i], tokenList, text)]);
+                }
+
+                return result;
+            }
+
+            throw new ArgumentException($"Request Set<{setType}> but provided value is not a valid set (must be defined as an array).");
+        }
+
         public static IDictionary OfDictionary<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
         {
             var keyType = targetType.GetGenericArguments()[0];
@@ -120,11 +153,27 @@ namespace gg.parse.argparser
                     // key needs to be an identifier
                     var key      = annotation[i][0].GetText(text, tokenList);
                     var property = targetType.GetProperty(key);
-                    var value = OfValue<T>(property.PropertyType, annotation[i][1], tokenList, text);
 
-                    property.SetValue(result, value);
+                    if (property != null)
+                    {
+                        var value = OfValue<T>(property.PropertyType, annotation[i][1], tokenList, text);
+                        property.SetValue(result, value);
+                    }
+                    else
+                    {
+                        var field = targetType.GetField(key);
+
+                        if (field != null)
+                        {
+                            var value = OfValue<T>(field.FieldType, annotation[i][1], tokenList, text);
+                            field.SetValue(result, value);
+                        }
+                        else
+                        {
+                            throw new ArgumentException($"No field or property found for {key}.");
+                        }
+                    }   
                 }
-                
 
                 return result;
             }
