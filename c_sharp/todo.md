@@ -2,8 +2,8 @@ Todo 0.1
 ---------------
 
 - Implement Arg parser
-	- fix dict bug
-	- add object, list, hashset to supported args
+	- add hashset, struct to supported args
+	- test errors
 - Implement properties file
 
 this is weird:
@@ -12,6 +12,7 @@ array			  = ~array_start, ?array_item_list, ~array_end;
 ?array_item_list 
 	yields zero_or_one of the children of array_item_list
 	it should yield the children of zero_or_one of array_item_list
+	but not ?(a | b | c) -> should yield a, b, c not (a|b|c)
 
 value = a | b | c; should yield value(a) not a BUT value = (a | b | c ) | 'foo' should ield  value(a) or value('foo')
 

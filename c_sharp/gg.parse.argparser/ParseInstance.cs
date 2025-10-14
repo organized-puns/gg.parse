@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Globalization;
+using System.Reflection;
 
 namespace gg.parse.argparser
 {
@@ -13,14 +15,22 @@ namespace gg.parse.argparser
             }
             else if (targetType.IsGenericType)
             {
-                if (targetType.GetInterfaces().Any( i =>
-                        i.IsGenericType
-                        && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
+                var interfaces = targetType.GetInterfaces();
+
+                if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
                 {
                     return OfDictionary<T>(targetType, annotation, tokenList, text);
                 }
+                else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>)))
+                {
+                    return OfList<T>(targetType, annotation, tokenList, text);
+                }
 
                 throw new NotImplementedException($"No backing implementation for type {targetType}.");
+            }
+            else if (targetType != typeof(string) && targetType.IsClass)
+            {
+                return OfObject<T>(targetType, annotation, tokenList, text);
             }
             else
             {
@@ -49,6 +59,28 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
         }
 
+        public static IList OfList<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        {
+            var listType = targetType.GetGenericArguments()[0];
+
+            if (annotation == ArgParserNames.Array)
+            {
+                var genericType = typeof(List<>).MakeGenericType(listType);
+                var result = (IList)Activator.CreateInstance(genericType)
+                    ?? throw new ArgumentException($"Can't create an instance of list with list type <{listType}>.");
+                
+                // need to skip start and end, so start at 1 and end at -1 
+                for (var i = 1; i < annotation.Count - 1; i++)
+                {
+                    result.Add(OfValue<T>(listType, annotation[i], tokenList, text));
+                }
+
+                return result;
+            }
+
+            throw new ArgumentException($"Request Array<{listType}> but provided value is not a valid array.");
+        }
+
         public static IDictionary OfDictionary<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
         {
             var keyType = targetType.GetGenericArguments()[0];
@@ -73,6 +105,31 @@ namespace gg.parse.argparser
             }
 
             throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
+        }
+
+        public static object OfObject<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        {
+            if (annotation == ArgParserNames.Dictionary)
+            {
+                var result = Activator.CreateInstance(targetType)
+                    ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
+
+                // need to skip scope start and end, so start at 1 and end at -1
+                for (var i = 1; i < annotation.Count - 1; i++)
+                {
+                    // key needs to be an identifier
+                    var key      = annotation[i][0].GetText(text, tokenList);
+                    var property = targetType.GetProperty(key);
+                    var value = OfValue<T>(property.PropertyType, annotation[i][1], tokenList, text);
+
+                    property.SetValue(result, value);
+                }
+                
+
+                return result;
+            }
+
+            throw new ArgumentException($"Request object of {targetType} but provided value is not a object.");
         }
 
         public static object OfBasicValue(Type targetType, string text)

@@ -1,7 +1,7 @@
 
 properties		  = eof | *value;
 
-value			  = string | int | float | boolean | null | dictionary | array;
+value			  = string | int | float | boolean | null | dictionary | array | identifier;
 
 kvp_pair		  = value, ~kv_separator, value;
 

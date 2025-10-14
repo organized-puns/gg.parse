@@ -70,7 +70,7 @@ namespace gg.parse.argparser.tests
             var syntaxTree = arrayRule.Parse(tokens);
 
             var arrayTypes = argReader.Parse("-b:[true, true, false] --i:[42, -3] --FloatArrays:[[1, 2.0, 3.5], [4, -5.5, 6]]");
-            
+
             IsTrue(arrayTypes.Booleans.SequenceEqual([true, true, false]));
             IsTrue(arrayTypes.Ints.SequenceEqual([42, -3]));
             IsTrue(arrayTypes.FloatArrays[0].SequenceEqual([1f, 2f, 3.5f]));
@@ -79,7 +79,6 @@ namespace gg.parse.argparser.tests
             arrayTypes = argReader.Parse("-b:[]");
             IsTrue(arrayTypes.Booleans.Length == 0);
         }
-
 
         public class AttrClassWithDictionaryTypes
         {
@@ -104,13 +103,51 @@ namespace gg.parse.argparser.tests
 
             dictTypes = argReader.Parse("--str_int_arr_table:{ 'str1' : [1,2,3], 'str2': [-42]}");
 
-            IsTrue(dictTypes.StringIntArrayTable["str1"].SequenceEqual([1,2,3]));
+            IsTrue(dictTypes.StringIntArrayTable["str1"].SequenceEqual([1, 2, 3]));
             IsTrue(dictTypes.StringIntArrayTable["str2"].SequenceEqual([-42]));
 
             dictTypes = argReader.Parse("--IntDictTable:{ 42 : {true: 'true', false: 'false'}, -1: {} }");
-            
+
             IsTrue(dictTypes.IntDictTable[-1].Count == 0);
             IsTrue(dictTypes.IntDictTable[42][true] == "true");
+        }
+
+        public class AttrClassWithListTypes
+        {
+            public List<int> IntList { get; set; }
+
+            public List<Dictionary<int, string>> DictList { get; set; }
+        }
+
+        [TestMethod]
+        public void CreateReaderWithAttrClassWithListTypes_Parse_ExpectValuesSet()
+        {
+            var argReader = new ArgsReader<AttrClassWithListTypes>();
+
+            var dictTypes = argReader.Parse("--IntList=[1, -2, 3]");
+
+            IsTrue(dictTypes.IntList.SequenceEqual([1, -2, 3]));
+
+            dictTypes = argReader.Parse("--DictList=[{1: 'one', -2: 'two'}, {3: 'three'}]");
+
+            IsTrue(dictTypes.DictList[0][1] == "one");
+            IsTrue(dictTypes.DictList[0][-2] == "two");
+            IsTrue(dictTypes.DictList[1][3] == "three");
+        }
+
+        public class AttrClassWithObjectTypes
+        {
+            public SingleValueClass SingleValue { get; set; }
+        }
+
+        [TestMethod]
+        public void CreateReaderWithAttrClassWithObjectTypes_Parse_ExpectValuesSet()
+        {
+            var argReader = new ArgsReader<AttrClassWithObjectTypes>();
+
+            var objType = argReader.Parse("--SingleValue={Value: 'foo'}");
+
+            IsTrue(objType.SingleValue.Value == "foo");
         }
     }
 }
