@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.argparser", "gg.pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.argparser.tests", "gg.parse.argparser.tests\gg.parse.argparser.tests.csproj", "{DDDCC5BA-DB5F-4BC4-81DD-549884EDE4C8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{8D303D6A-1B65-421D-ADC4-18EE58F8021A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,7 @@ Global
 		{3A67D021-5C9B-4E9E-AA0D-4F8DE55687A1} = {4EED52E6-283D-4ED2-B0AA-508240E063E0}
 		{16506899-2707-484B-A4C5-CB665777C44A} = {3A67D021-5C9B-4E9E-AA0D-4F8DE55687A1}
 		{DDDCC5BA-DB5F-4BC4-81DD-549884EDE4C8} = {3A67D021-5C9B-4E9E-AA0D-4F8DE55687A1}
+		{8D303D6A-1B65-421D-ADC4-18EE58F8021A} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E5591AE-041B-4FA3-A767-84575C6450FC}

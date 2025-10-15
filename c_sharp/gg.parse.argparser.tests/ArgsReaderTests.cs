@@ -69,7 +69,7 @@ namespace gg.parse.argparser.tests
             var argReader = new ArgsReader<AttrClassWithArrayTypes>();
 
             var arrayRule = argReader.Parser.GrammarGraph.FindRule("array");
-            var tokens = argReader.Parser.TokenGraph.TokenizeText("[true, true, false]");
+            var tokens = argReader.Parser.TokenGraph.Tokenize("[true, true, false]");
             var syntaxTree = arrayRule.Parse(tokens);
 
             var arrayTypes = argReader.Parse("-b:[true, true, false] --i:[42, -3] --FloatArrays:[[1, 2.0, 3.5], [4, -5.5, 6]]");

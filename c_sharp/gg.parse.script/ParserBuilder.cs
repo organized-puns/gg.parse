@@ -66,6 +66,25 @@ namespace gg.parse.script
             return this;
         }
 
+        public ParseResult Tokenize(
+            string input,
+            bool failOnWarning = false,
+            bool throwExceptionsOnError = true)
+        {
+            Assertions.RequiresNotNull(TokenGraph!);
+            Assertions.RequiresNotNull(TokenGraph!.Root!);
+
+            try
+            {
+                return TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError);
+            }
+            catch (Exception e)
+            {
+                LogHandler?.ProcessException(e);
+                throw;
+            }
+        }
+
         public (ParseResult tokens, ParseResult syntaxTree) Parse(
             string input, 
             bool failOnWarning = false,
@@ -77,7 +96,7 @@ namespace gg.parse.script
             try
             {
                 return GrammarGraph == null
-                        ? (TokenGraph.TokenizeText(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
+                        ? (TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
                         : GrammarGraph.Parse(TokenGraph, input, failOnWarning, throwExceptionsOnError);
             }
             catch (Exception e)

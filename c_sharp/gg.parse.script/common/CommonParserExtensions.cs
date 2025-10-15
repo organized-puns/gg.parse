@@ -18,7 +18,7 @@ namespace gg.parse.script.common
         {
             if (!string.IsNullOrEmpty(text))
             {
-                var tokenizeResult = tokenizer.TokenizeText(text, failOnWarning, throwExceptionOnTokenizeErrors);
+                var tokenizeResult = tokenizer.Tokenize(text, failOnWarning, throwExceptionOnTokenizeErrors);
 
                 if (tokenizeResult.FoundMatch)
                 {
@@ -36,7 +36,7 @@ namespace gg.parse.script.common
             return (ParseResult.Failure, ParseResult.Failure);
         }
 
-        public static ParseResult TokenizeText(
+        public static ParseResult Tokenize(
             this RuleGraph<char> tokenizer, 
             string text, 
             bool failOnWarning = false,

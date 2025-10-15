@@ -1,100 +1,105 @@
-gg.parse (working towards an MVP)
-=================================
 
-!_Please Note_! the code base is under heavy development and lots of changes are being made while the documentation below is not up to date.
+gg.parse 
+=======================================================================================================================
+
+!_Please Note_! the code base is under development and changes frequently. The documentation below may be out of date.
 
 Quickstart
-----------------------
+-----------------------------------------------------------------------------------------------------------------------
 
-Simple tokenizer, parser and optionally compiler library for c# based on ebnf-like grammar definitions.
+The goal of the gg.parse project is to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
+tools to make parsing of simple and complex data easy to do, both programatically and via an interpreted scripting 
+language. Additionally the goal of this project is to provide an _easy to understand and use, light-weight_ framework.
 
 Core concepts:
 
-- Rule (RuleBase), implements a function to parse input (char[], int[]) and turn them into Annotation
-- Annotation, a description of some input and the rule which applies to that input
-- Rule Graph, a collection of rules and one root rule to parse input
-- A set of common rules (literal, sequence, not...)
-- A ebnf tokenizer which generates tokens and parser which generates an ast-tree
-- A compiler which takes a list of tokens and an ast tree and builds a RuleGraph based on said input
-- A facade-like class, `EbnfParser.cs` which combines all of the above in a single convenient class
+- A `_Rule_` implements a function to parse data (text) and create one or more `_Annotations_`.
+- An `_Annotation_` describes what data is intended to mean, as expressed by a rule. An annotation describes a specific 
+  part of the data by way of a `_Range_`. A range a position in the data and its length. Furthermore an annotation is a 
+  tree-node where its children may give further insight in the details of data in question.
+- A collection of `Rules` make up a `_Rule Graph_`. A `Rule Graph` can _parse_ data (commonly, but not necessarily 
+  text)  and map the data to one or more `Annotations`. Depending on the use case, the collection of `Annotations` 
+  can either be used as `Tokens` or an `Abstract Syntax Tree`.
+
+<img src="./doc/rules_and_annotations.png">
+
+Extended concepts:
+
+- A set of common rules (literal, sequence, not...) to quickly build tokenizers and parsers. 
+- A tokenizer/parser/compiler which can build a tokenizer and or parser based on a high-level ebnf-like script.
+- A facade-like class, `gg.parse.script.ParserBuilder`, which combines all of the above in a single convenient class.
 
 ## Example
 
-Read an ebnf(like) file defining json tokens and a json grammar and build an AST:
+Programmatically create a tokenizer to tokenizer (simplified) filenames in a text (see 
+`gg.parse.doc.examples.test\CreateFilenameTokenizer.cs`):
 
 ```csharp
-
-var jsonParser = new EbnfParser(	
-					File.ReadAllText("assets/json_tokens.ebnf"), 
-					File.ReadAllText("assets/json_grammar.ebnf"));
-
-if (jsonParser.TryBuildAstTree(File.ReadAllText("assets/example.json"), out tokens, out astTree))) 
-{
-	Console.Write(jsonParser.Dump(jsonFile, tokens, astTree));
-}
-```
-
-
-
-## Error handling
-
-Since the EbnfParser builds both a tokenizer and parser, there are two types of exceptions (in the current implementation) which are thrown as the inner-exception of an `EbnfException.cs`. 
-The latter identifies where an exception took place. a `TokenizeException.cs` exception is used when tokenization fails. A `ParseException.cs` is used when parsing fails.
-
-Note that the errors in this example are the "fall-back" error. This fall back error implies the EbnfParser either encounters a token for which it has no rules or it cannot find a mapping to a grammar rule. In both cases it throws its hands up in the air and reports "I don't know what to do with this". It's up to the ebnf specification to provide more detailed error (more on that later).
-
-Eg: tokenization in the input text of the tokenizer is invalid:
-
-```csharp
-
-    try
-    {
-        // & and ^ are no valid tokens, so this should raise an exception
-        var parser = new EbnfParser("& foo ^", null);
-    }
-    catch (EbnfException ebnfException)
-    {
-        // The message ebnfException will indicate where it went wrong 
-        // (in building the tokenizer)
-        var errors = (ebnfException.InnerException as TokenizeException).Errors;
-
-        Console.WriteLine(ebnfException.Message);
-
-        // write the two errors to Console, note that this is currently not very
-        // informative as the errors are Annotations with minimal information.
-        foreach (var error in errors)
+        public class FilenameTokenizer : CommonTokenizer
         {
-            Console.WriteLine(error);
+            public FilenameTokenizer()
+            {
+                var letter = OneOf(UpperCaseLetter(), LowerCaseLetter());
+                var number = InRange('0', '9');
+                var specialCharacters = InSet("_-~()[]{}+=@!#$%&'`.".ToArray());
+                var separator = InSet("\\/".ToArray());
+                var drive = Sequence("drive", letter, Literal(":"), separator);
+                var pathPart = OneOrMore("path_part", OneOf(letter, number, specialCharacters));
+                var pathChain = ZeroOrMore("#path_chain", Sequence("#path_chain_part", separator, pathPart));
+                var path = Sequence("path", pathPart, pathChain);
+                var filename = Sequence("filename", drive, path);
+                var findFilename = Skip(filename, failOnEoF: false);
+
+                Root = OneOrMore("#filenames", Sequence("#find_filename", findFilename, filename));
+            }
         }
-    }
+
+        ...
+
+        var filename = "c:\\users\\text.txt";
+        var data = $"find the filename {filename} in this line.";           
+        var tokens = new FilenameTokenizer().Tokenize(data);
+            
+        IsTrue(tokens[0].GetText(data) == filename);
+
+        IsTrue(tokens[0] == "filename");
+        IsTrue(tokens[0][0] == "drive");
+        IsTrue(tokens[0][1] == "path");
+        IsTrue(tokens[0][1][0] == "path_part");
+        IsTrue(tokens[0][1][1] == "path_part");
 ```
 
-Eg: forgetting a ; after a rule in the grammar can be handled with
-
+Doing the same using a script (see `gg.parse.doc.examples.test\CreateFilenameTokenizer.cs`):
 
 ```csharp
-    try
-    {
-        var parser = new EbnfParser("foo='bar';", 
-                                // first rule, is_bar, has no ;
-                                "is_bar=foo is_not_bar = !bar;");
-    }
-    catch (EbnfException ebnfException)
-    {
-        // The message ebnfException will indicate where it went wrong 
-        // (in building the parser)
-        var errors = (ebnfException.InnerException as ParseException).Errors;
 
-        Console.WriteLine(ebnfException.Message);
+    public static readonly string _filenameScript =
+        "#filenames         = +(find_filename, filename);\n" +
+        "~find_filename     = >>> filename;\n" +
+        "filename           = drive, path;\n" +
+        "drive              = letter, ':', separator;\n" +
+        "path               = path_part, *(~separator, path_part);\n" +
+        "path_part          = +(letter | number | special_character);\n" +
+        "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
+        "number             = {'0'..'9'};\n" +
+        "separator          = {'\\\\/'};\n" +
+        "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
 
-        // write the two errors to Console, note that this is currently not very
-        // informative as the errors are Annotations with minimal information.
-        foreach (var error in errors)
-        {
-            Console.WriteLine(error);
-        }
-    }
+    ...
+
+    var filename = "c:\\users\\text.txt";
+    var data = $"find the filename {filename} in this line.";
+    var tokens = new ParserBuilder().From(_filenameScript).Tokenize(data);
+
+    IsTrue(tokens[0].GetText(data) == filename);
+
+    IsTrue(tokens[0] == "filename");
+    IsTrue(tokens[0][0] == "drive");
+    IsTrue(tokens[0][1] == "path");
+    IsTrue(tokens[0][1][0] == "path_part");
+    IsTrue(tokens[0][1][1] == "path_part");
 ```
+
 
 ## Extending the EBNF Parser
 

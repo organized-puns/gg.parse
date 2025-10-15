@@ -18,6 +18,8 @@
 
         public static readonly string DataSequence = "DataSequence";
 
+        public static readonly string DataRange = "data_range";
+
         public static readonly string Digit = "Digit";
 
         public static readonly string DigitSequence = "DigitSequence";
