@@ -39,6 +39,10 @@ namespace gg.parse.rules
 
         private RuleBase<T>? _condition;
         
+        /// <summary>
+        /// Condition to capture this log. Tangentially also a way to correctly indicate
+        /// the range where an error/warning applies to.
+        /// </summary>
         public RuleBase<T>? Condition
         {
             get => _condition;

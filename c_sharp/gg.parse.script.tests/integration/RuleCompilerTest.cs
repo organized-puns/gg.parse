@@ -17,7 +17,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithTheSameName_Compile_ExpectException()
         {
-            var litId = 42;
+            var litId = new EmptyRule(42);
             var compiler = new RuleCompiler()
                     .RegisterFunction(litId, CompileLiteral);
 
@@ -47,7 +47,7 @@ namespace gg.parse.script.tests.integration
                             new (new EmptyRule(1), new Range(0, 1)), 
 
                             // child capturing the token(s) defining the literal
-                            new (new EmptyRule(litId), new Range(1, 1))
+                            new (litId, new Range(1, 1))
                         ]),
 
                         new Annotation(new EmptyRule(2), new(2, 2), [
@@ -55,7 +55,7 @@ namespace gg.parse.script.tests.integration
                             new (new EmptyRule(1), new Range(2, 1)), 
 
                             // child capturing the token(s) defining the literal
-                            new (new EmptyRule(litId), new Range(3, 1))
+                            new (litId, new Range(3, 1))
                         ])
                     ]
                 );
@@ -72,7 +72,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void CreateRuleWithCustomPrecedence_Compile_ExpectRuleToHaveSamePrecedence()
         {
-            var litId = 42;
+            var litId = new EmptyRule(42);
             var rulePrecedence = 142;
             var compiler = new RuleCompiler()
                     .RegisterFunction(litId, CompileLiteral);
@@ -104,7 +104,7 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(2), new Range(1, 1)), 
 
                         // child capturing the token(s) defining the literal
-                        new(new EmptyRule(litId), new Range(3, 1))
+                        new(litId, new Range(3, 1))
                     ])
                 ]
             );

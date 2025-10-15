@@ -1,8 +1,6 @@
 ﻿
 using gg.parse.rules;
-
 using gg.parse.script.compiler;
-
 using gg.parse.tests;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -25,9 +23,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestRegisterAndCompileLiteral()
         {
-            var litId = 42;
-            var compiler = new RuleCompiler()
-                    .RegisterFunction(litId, CompileLiteral);
+            var litRule = new EmptyRule(42);
+            var compiler = new RuleCompiler().RegisterFunction(litRule, CompileLiteral);
 
             // compile a rule table which can tokenize 'foo'
             var table = compiler.Compile<char>(
@@ -48,7 +45,7 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the token(s) defining the literal
-                        new(new EmptyRule(litId), new Range(1, 1))
+                        new(litRule, new Range(1, 1))
                     ])
                 ]
             );
@@ -90,7 +87,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestRegisterAndCompileCharacterSet()
         {
-            var setId = 42;
+            var setId = new EmptyRule(42);
             var compiler = new RuleCompiler()
                 .RegisterFunction(setId, CompileCharacterSet);
 
@@ -112,7 +109,7 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the token(s) defining the sequence of set {'abc'}
-                        new(new EmptyRule(setId), new Range(1, 1), [
+                        new(setId, new Range(1, 1), [
                             // token(s) defining the set literal 'abc'
                             new(new EmptyRule(1), new Range(1, 1))
                         ])
@@ -161,7 +158,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestRegisterAndCompileCharacterRange()
         {
-            var rangeId = 42;
+            var rangeId = new EmptyRule(42);
             var compiler = new RuleCompiler()
                    .RegisterFunction(rangeId, CompileCharacterRange);
             
@@ -188,11 +185,11 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the token(s) defining the literal
-                        new(new EmptyRule(rangeId), new Range(1, 2), [
+                        new(rangeId, new Range(1, 2), [
                             // min
-                            new(new EmptyRule(rangeId), new Range(1, 1)),
+                            new(rangeId, new Range(1, 1)),
                             // max
-                            new(new EmptyRule(rangeId), new Range(2, 1)),
+                            new(rangeId, new Range(2, 1)),
                         ])
                     ])
                 ]
@@ -239,7 +236,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestCompileIdentifier()
         {
-            var indentifierId = 42;
+            var indentifierId = new EmptyRule(42);
             var compiler = new RuleCompiler()
                     .RegisterFunction(indentifierId, CompileIdentifier<char>);
 
@@ -269,7 +266,7 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the token(s) defining the identifier 
-                        new(new EmptyRule(indentifierId), new Range(1, 1), [
+                        new(indentifierId, new Range(1, 1), [
                             // no output annotation, therefore defaults to annotation
                             // identifier name
                             new (new EmptyRule(0), new Range(1,1))
@@ -308,7 +305,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestCompileIdentifierWithProduct()
         {
-            var indentifierId = 42;
+            var indentifierId = new EmptyRule(42);
             var noneProductId = 62;
 
             var compiler = new RuleCompiler([(noneProductId, RuleOutput.Void)])
@@ -343,7 +340,7 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the token(s) defining the literal
-                        new(new EmptyRule(indentifierId), new Range(1, 2), [
+                        new(indentifierId, new Range(1, 2), [
                             // output
                             new (new EmptyRule(noneProductId), new Range(1,1)),
                             // name
@@ -381,9 +378,9 @@ namespace gg.parse.script.tests.integration
         public void TestRegisterAndCompileGroup()
         {
 
-            var literalId = 42;
-            var sequenceId = 64;
-            var groupId = 128;
+            var literalId = new EmptyRule(42);
+            var sequenceId = new EmptyRule(64);
+            var groupId = new EmptyRule(128);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -403,13 +400,13 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // group
-                        new (new EmptyRule(groupId), new Range(1, 2),[
+                        new (groupId, new Range(1, 2),[
                             // child capturing the sequence
-                            new(new EmptyRule(sequenceId), new Range(1, 2), [
+                            new(sequenceId, new Range(1, 2), [
                                 // foo literal
-                                new(new EmptyRule(literalId), new Range(1, 1)),
+                                new(literalId, new Range(1, 1)),
                                 // bar literal
-                                new(new EmptyRule(literalId), new Range(2, 1))
+                                new(literalId, new Range(2, 1))
                             ])
                         ])
                     ])
@@ -445,8 +442,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestRegisterAndCompileSequence()
         {
-            var literalId = 42;
-            var sequenceId = 64;
+            var literalId = new EmptyRule(42);
+            var sequenceId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -463,11 +460,11 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the sequence
-                        new(new EmptyRule(sequenceId), new Range(1, 2), [
+                        new(sequenceId, new Range(1, 2), [
                             // foo literal
-                            new(new EmptyRule(literalId), new Range(1, 1)),
+                            new(literalId, new Range(1, 1)),
                             // bar literal
-                            new(new EmptyRule(literalId), new Range(2, 1))
+                            new(literalId, new Range(2, 1))
                         ])
                     ])
                 ]
@@ -502,8 +499,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestRegisterAndCompileOption()
         {
-            var literalId = 42;
-            var optionId = 64;
+            var literalId = new EmptyRule(42);
+            var optionId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -520,11 +517,11 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the sequence
-                        new(new EmptyRule(optionId), new Range(1, 2), [
+                        new(optionId, new Range(1, 2), [
                             // foo literal
-                            new(new EmptyRule(literalId), new Range(1, 1)),
+                            new(literalId, new Range(1, 1)),
                             // bar literal
-                            new(new EmptyRule(literalId), new Range(2, 1))
+                            new(literalId, new Range(2, 1))
                         ])
                     ])
                 ]
@@ -570,8 +567,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestRegisterAndCompileSingleUnaryEvaluation()
         {
-            var literalId = 42;
-            var evalId = 64;
+            var literalId = new EmptyRule(42);
+            var evalId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -589,11 +586,11 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // child capturing the sequence
-                        new(new EmptyRule(evalId), new Range(1, 3), [
+                        new(evalId, new Range(1, 3), [
                             // add literal
-                            new(new EmptyRule(literalId), new Range(1, 1)),
+                            new(literalId, new Range(1, 1)),
                             // mult literal
-                            new(new EmptyRule(literalId), new Range(3, 1))
+                            new(literalId, new Range(3, 1))
                         ])
                     ])
                 ]
@@ -652,8 +649,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestNotFunction()
         {
-            var literalId = 42;
-            var notId = 64;
+            var literalId = new EmptyRule(42);
+            var notId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -671,9 +668,9 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // not function
-                        new (new EmptyRule(notId), new Range(1, 2),[
+                        new (notId, new Range(1, 2),[
                             // foo literal
-                            new(new EmptyRule(literalId), new Range(2, 1))
+                            new(literalId, new Range(2, 1))
                         ])
                     ])
                 ]
@@ -716,8 +713,8 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestTryMatchFunction()
         {
-            var literalId = 42;
-            var tryMatchId = 64;
+            var literalId = new EmptyRule(42);
+            var tryMatchId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -734,9 +731,9 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // try match function
-                        new (new EmptyRule(tryMatchId), new Range(1, 2),[
+                        new (tryMatchId, new Range(1, 2),[
                             // foo literal
-                            new(new EmptyRule(literalId), new Range(2, 1))
+                            new(literalId, new Range(2, 1))
                         ])
                     ])
                 ]
@@ -773,7 +770,7 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void TestAnyFunction()
         {
-            var anyId = 64;
+            var anyId = new EmptyRule(64);
             var compiler = new RuleCompiler()
                 .RegisterFunction(anyId, CompileAny<char>);
 
@@ -787,7 +784,7 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // any function
-                        new (new EmptyRule(anyId), new Range(1, 1))
+                        new (anyId, new Range(1, 1))
                     ])
                 ]);
 
@@ -828,9 +825,9 @@ namespace gg.parse.script.tests.integration
         [TestMethod]
         public void SetUpCompileContext_Compile_ExpectValidLogRule()
         {
-            var logId = 64;
-            var literalId = 128;
-            var logLevelId = 256;
+            var logId = new EmptyRule(64);
+            var literalId = new EmptyRule(128);
+            var logLevelId = new EmptyRule(256);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -850,10 +847,10 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // error
-                        new (new EmptyRule(logId), new Range(1, 3), [
-                            new (new EmptyRule(logLevelId), new Range(1, 1)),    // log level
-                            new (new EmptyRule(literalId), new Range(2, 1)),     // message
-                            new (new EmptyRule(literalId), new Range(4, 1)),     // condition
+                        new (logId, new Range(1, 3), [
+                            new (logLevelId, new Range(1, 1)),    // log level
+                            new (literalId, new Range(2, 1)),     // message
+                            new (literalId, new Range(4, 1)),     // condition
                         ])
                     ])
                 ]);
@@ -877,8 +874,8 @@ namespace gg.parse.script.tests.integration
 
         private void TestRegisterAndCompileCountFunction(CompileFunction function, char operatorChar, int min, int max)
         {
-            var literalId = 42;
-            var countId = 64;
+            var literalId = new EmptyRule(42);
+            var countId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
                 .RegisterFunction(literalId, CompileLiteral)
@@ -896,9 +893,9 @@ namespace gg.parse.script.tests.integration
                         new(new EmptyRule(0), new Range(0, 1)), 
 
                         // count function
-                        new (new EmptyRule(countId), new Range(1, 2),[
+                        new (countId, new Range(1, 2),[
                             // foo literal
-                            new(new EmptyRule(literalId), new Range(2, 1))
+                            new(literalId, new Range(2, 1))
                         ])
                     ])
                 ]);

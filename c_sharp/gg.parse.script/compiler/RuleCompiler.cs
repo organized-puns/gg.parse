@@ -9,7 +9,7 @@ namespace gg.parse.script.compiler
 
     public class RuleCompiler
     {
-        public Dictionary<int, (CompileFunction function, string? name)> Functions { get; private set; } = [];
+        public Dictionary<IRule, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, RuleOutput product)[]? RuleOutputLookup { get; set; }
 
@@ -23,11 +23,11 @@ namespace gg.parse.script.compiler
         }
 
 
-        public RuleCompiler RegisterFunction(int parseFunctionId, CompileFunction function, string? name = null)
+        public RuleCompiler RegisterFunction(IRule rule, CompileFunction function, string? name = null)
         {
             Assertions.Requires(function != null);
 
-            Functions.Add(parseFunctionId, (function!, name ?? $"function_id:{parseFunctionId}"));
+            Functions.Add(rule, (function!, name ?? $"{rule.Name}"));
             return this;
         }
 
@@ -36,20 +36,20 @@ namespace gg.parse.script.compiler
             Assertions.Requires(rule != null);
             Assertions.Requires(function != null);
 
-            Functions.Add(rule!.Id, (function!, rule.Name ?? $"function_id:{rule.Id}"));
+            Functions.Add(rule!, (function!, rule.Name ?? $"function_id:{rule.Id}"));
             return this;
         }
 
-        public (CompileFunction function, string? name) FindCompilationFunction(int parseFunctionId)
+        public (CompileFunction function, string? name) FindCompilationFunction(IRule rule)
         {
-            if (Functions.TryGetValue(parseFunctionId, out var compilationFunction))
+            if (Functions.TryGetValue(rule, out var compilationFunction))
             {
                 return compilationFunction;
             }
 
             throw new CompilationException(
-                $"Cannot find a compilation function referred to by rule id {parseFunctionId}", 
-                ruleId: parseFunctionId);
+                $"Cannot find a compilation function referred to by rule {rule.Name}",
+                rule: rule);
         }
 
         public RuleGraph<T> Compile<T>(
@@ -128,7 +128,7 @@ namespace gg.parse.script.compiler
             else
             {
                 var ruleBodyNode = node.Children[ruleHeader.Length];
-                var (compilationFunction, _) = FindCompilationFunction(ruleBodyNode.Rule.Id);
+                var (compilationFunction, _) = FindCompilationFunction(ruleBodyNode.Rule);
 
                 // validate a named rule doesn't get implemented twice
                 if (resultGraph.FindRule(ruleHeader.Name) == null)

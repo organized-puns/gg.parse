@@ -10,7 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0. Solution Items", "0. Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		readme.md = readme.md
-		todo.md = todo.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Core", "1. Core", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
@@ -35,7 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Annotation", "Annotation", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Script", "2. Script", "{1C9627FC-D171-4982-BDCC-6F865EA40B75}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{6590C2FC-290E-4E88-938B-23B7BF5BE0DF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocExamples", "DocExamples", "{6590C2FC-290E-4E88-938B-23B7BF5BE0DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.doc.examples.test", "gg.parse.doc.examples.test\gg.parse.doc.examples.test.csproj", "{14964C8C-D6C8-46D1-85AD-A7164A99B3F4}"
 EndProject
@@ -46,6 +45,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.argparser.tests", "gg.parse.argparser.tests\gg.parse.argparser.tests.csproj", "{DDDCC5BA-DB5F-4BC4-81DD-549884EDE4C8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{8D303D6A-1B65-421D-ADC4-18EE58F8021A}"
+	ProjectSection(SolutionItems) = preProject
+		doc\extending_parse_script.md = doc\extending_parse_script.md
+		doc\match-any-data.md = doc\match-any-data.md
+		doc\match-evaluation.md = doc\match-evaluation.md
+		doc\todo.md = doc\todo.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

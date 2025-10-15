@@ -9,7 +9,7 @@ Quickstart
 
 The goal of the gg.parse project is to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
 tools to make parsing of simple and complex data easy to do, both programatically and via an interpreted scripting 
-language. Additionally the goal of this project is to provide an _easy to understand and use, light-weight_ framework.
+language. Furthermore this project aims to provide an _easy to understand and use, light-weight_ framework.
 
 Core concepts:
 
@@ -100,41 +100,28 @@ Doing the same using a script (see `gg.parse.doc.examples.test\CreateFilenameTok
     IsTrue(tokens[0][1][1] == "path_part");
 ```
 
+Project structure
+-----------------
 
-## Extending the EBNF Parser
+The project consists of 3 main topics:
 
-- Create a new rule class
-- Optionally create a tokenname for the rule in `CommonTokenNames.cs`
-- Optionally create a shorthand for the rule in `CommonRules.cs`
-- Add the rule to the `EbnfTokenizer.cs` constructor
-- Add the new tokens to the `EbnfTokenParser.cs` and create a matching function property
-- Don't forget to add the matching function to `ruleTerms.RuleOptions` in the `EbnfTokenParser.cs` constructor
-- Create a corresponding Compile rule in `CompilerFunctions.cs`
-- Register this compile rule to the `RegisterTokenizerCompilerFunctions` / `RegisterGrammarCompilerFunctions`
- 
-Adding tests:
+1. Core: Core classes (eg IRule, RuleGraph and Annotation) as well as the basic rules (eg Sequence, Data matchers)
+2. Script: Everything related to the scripting framework: parsers, tokenizers and the compiler.
+3. Examples: Various examples to demonstrate (and test) the framework.
 
-- Add a new `MyNewFunctionTest.cs` to the testproject `/rules` and perform the appropriate tests
-- Add a new test method to `EbnfTokenizerTests.cs` to test token parsing.
-- Add a new test method to `EbnfTokenParserTests.cs` to test token parsing or add it to `ParseRule_ExpectSucess`.
-- Add a compiler test in `RuleCompilerTests.cs`
-- Add an integration test, add the rule in an .ebnf, parse/compile and test.
+Each of these main topics has each own corresponding test project.
+  
+More information
+----------------
 
-Good to remember (FAQ?):
-------------------------
+[Extending parse script](./doc/extending_parse_script.md) steps required to add a new rule to the script.
 
-- bug? Seems rule = #(a | b) or ~(...) is not parsing ? output operator issue with group?
-    IS _AS INTENDED_... groups by definition are always transitive and any other.
--   Data functions, eg {'a'..'b'} ALWAYS have output `none` because have them annotated is just overhead (that is to say I can't think of a good use case at the moment).
-    IT SHOULD have a clear error though, something like "found output rule without identifier".
-- DO NOT DO THIS: Remove condition from log, it can be replaced with sequence(condition, log). No it can't because the log RANGE will NOT cover the preceding sequence.
-- ScriptPipeline should also work without a script tokenizer ? No because the input of the parser are tokens
--   	- Have a sub category chaining where a broad category can be reduced to a smaller category without having to resort to overly complex parse rules
-	    See arg parser where we can never match an identifier (easily) without doing away with the broader category "base_name". Initially this could have 
-	    been overcome with more context to the arg_identifier but this still runs into problems when the context doesn't cover enough.
-		Specialization is not going to solve this either, consider the following (File.grammar / arg.grammar)
-			
-			key=value
-			is matched as a base_name (base file name) 
-			this needs to be solved in the grammar ? it's both filename token but it can also a key value
-				* keep key=value out of scope. It MUST be --key=value otherwise there is no resolution
+[To do list](./doc/todo.md) a list of all planned or unplanned tasks.
+
+Rule References
+---------------
+
+- [Match Any (.)](./doc/match-any-data.md)
+- [Match Evaluation (a/b/c)](./doc/match-evaluation.md)
+
+

@@ -1,10 +1,17 @@
-Todo 0.1 first public release
+Todo 
+========
+
+Overview of all open items in order of priority. Badly defined.
+
+first public release
 -----------------------------
 
+- Add missing names to CompilerFunctionNameGenerator functions
 - Clean up unit tests and build proper examples
 - Add some more documentation, extend readme.
+- Add to nuget
 
-0.2 Adjust and fix output in favor of 'prune':
+Adjust and fix output in favor of 'prune':
 ----------------------------------------------
 this is weird:
 array_item_list   = value, *(~item_separator, value);
@@ -29,52 +36,62 @@ Adjustments:
 - consider change '~' to '-' and '#' to '..' (?) or `~` to '--' and '#' to '-'...
 	? -c, -p -a 
 
-0.21 Add Properties File Example   
+Fix ambiguous root
+------------------
+Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
+
+Add Properties File Example   
 ------------------------------
-- Implement properties file
+Implement properties file
 
+Add annotation example
+-----------------------
+Implement (json) annotations in its main program
 
-0.3
----------
-- Implement (json) annotations in its main program
+Fix/extend literal
+------------------
 
-0.4
----------
+Having a literal in a grammar leads to very confusing errors. Should be handled better.
+Add literalRule which allows for case senstive matching or not
 
-- Having a literal in a grammar leads to very confusing errors. Should be handled better.
-- Add literalRule which allows for case senstive matching or not
-- Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
-
-- include 'inclusive' property to skip rules eg inclusive find +-> -->, inclusive skip +->> -->>
+Adjust find/skip
+----------------
+include 'inclusive' property to skip rules eg inclusive find +-> -->, inclusive skip +->> -->>
 	  or find, find_including, skip, skip_including  
 		or >>, +>>, >>>, +>>>, ->|, |->, ->>|, |->> stop_at, stop_after, skip_to, skip_after	 
 
-- Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
 
-0.5
+Add repeat 
+----------
+Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
+
+Add transpiling
 ---------
+Transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
-- transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
+Add extend to parser
+--------------------
+Add Extend() to existing parser, similar to merge
 
-0.6
----------
-- Add Extend() to existing parser 
-
-- add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has
+Matcher example
+---------------
+add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has
      all common tokens defined
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
 
-0.7
+Compare performance against regex
+
+Namespaces
 --------
-- add optional namespaces to avoid grammar / token name clash 
+Add optional namespaces to avoid grammar / token name clash 
 
-0.8
----------
-- Implement a function console
+Example, small function console
+-------------------------------
+Implement a function console
 
-0.9
-----------
+Recreate bootstrap in script
+---------------------------
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)
 	see if sequence can go without ,
@@ -86,12 +103,10 @@ Adjustments:
 - add alternative for "= / :"
 - replace any with _, disallow identifier to start with '_' ?
 
-0.10
----------
-- Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc
+Add symbols to log
+-------------------
 
-alpha (featured complete, buggy, ugly mess)
--------------------------------------------
+Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc to log
 
 ???
 ---

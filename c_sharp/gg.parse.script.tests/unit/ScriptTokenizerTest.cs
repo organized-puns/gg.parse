@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using gg.parse.script.common;
 using gg.parse.script.parser;

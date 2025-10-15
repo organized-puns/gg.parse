@@ -1,5 +1,4 @@
 ﻿using gg.parse.rules;
-using System.Linq;
 
 namespace gg.parse.script.common
 {

@@ -115,7 +115,6 @@ namespace gg.parse.script.tests.unit
                 }
 
                 IsTrue(tokenizer.FindRule(rule.Name) == rule);
-                IsTrue(tokenizer.FindRule(rule.Id) == rule);
 
                 // invoke the rule again - make sure the rule is not added again
                 ruleFactory(tokenizer, name);

@@ -1,17 +1,27 @@
-﻿using gg.parse.util;
-using System.Collections;
+﻿using System.Collections;
+
+using gg.parse.util;
 
 namespace gg.parse
 {
+    /// <summary>
+    /// Graph of Rules. Has one rule which is designated as a Root
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class RuleGraph<T> : IEnumerable<RuleBase<T>> where T : IComparable<T>
     {
         private int _nextRuleId = 0;
 
         private readonly Dictionary<string, RuleBase<T>> _nameRuleLookup = [];
-        private readonly Dictionary<int, RuleBase<T>> _idRuleLookup = [];
-
+        
+        /// <summary>
+        /// When calling parsing data using the graph the root is used as a starting point.
+        /// </summary>
         public RuleBase<T>? Root { get; set; }
 
+        /// <summary>
+        /// Returns an enumerable of all registered rules' names.
+        /// </summary>
         public IEnumerable<string> RuleNames => _nameRuleLookup.Keys;
 
         /// <summary>
@@ -26,12 +36,9 @@ namespace gg.parse
             Assertions.RequiresNotNullOrEmpty(rule.Name);
             Assertions.Requires(!_nameRuleLookup.ContainsKey(rule.Name), 
                 $"Rule with name '{rule.Name}' already exists in the rule table.");
-            Assertions.Requires(!_idRuleLookup.ContainsKey(rule.Id),
-                $"Rule with id '{rule.Id}' already exists in the rule table.");
 
             _nameRuleLookup[rule.Name] = rule;
             rule.Id = _nextRuleId++;
-            _idRuleLookup[rule.Id] = rule;  
 
             return rule;
         }
@@ -53,10 +60,6 @@ namespace gg.parse
             return _nameRuleLookup.TryGetValue(name, out var rule) ? rule : null;
         }
 
-        public RuleBase<T>? FindRule(int id)
-        {
-            return _idRuleLookup.TryGetValue(id, out var rule) ? rule : null;
-        }
 
         public TRule RegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
         {
@@ -82,12 +85,12 @@ namespace gg.parse
 
         public IEnumerator<RuleBase<T>> GetEnumerator()
         {
-            return _idRuleLookup.Values.GetEnumerator();
+            return _nameRuleLookup.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _idRuleLookup.Values.GetEnumerator();
+            return _nameRuleLookup.Values.GetEnumerator();
         }       
 
         public TRule FindOrRegister<TRule>(

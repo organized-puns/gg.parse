@@ -31,10 +31,7 @@ namespace gg.parse.script.compiler
         }
 
         public (CompileFunction?, string?) FindFunction(IRule rule) =>
-            Compiler.FindCompilationFunction(rule.Id);
-
-        public (CompileFunction?, string?) FindFunction(int functionId) =>
-            Compiler.FindCompilationFunction(functionId);
+            Compiler.FindCompilationFunction(rule);
 
         public Range GetTextRange(Range tokenRange) =>
             Tokens!.CombinedRange(tokenRange);

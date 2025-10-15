@@ -119,7 +119,7 @@ namespace gg.parse.script.compiler
                 for (var i = 0; i < body.Children.Count; i++)
                 {
                     var elementBody = body.Children[i];
-                    var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule.Id];
+                    var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule];
 
                     var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, i); 
                     var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0, false);
@@ -176,7 +176,7 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode!.Children != null);
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
-            var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule.Id];
+            var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule];
             var groupDeclaration = new RuleHeader(header.Output, header.Name, 0, 0);
 
             return compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
@@ -194,7 +194,7 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var elementBody = bodyNode.Children[0];
-            var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule.Id];
+            var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
 
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
 
@@ -254,7 +254,7 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var elementBody = bodyNode.Children[0];
-            var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule.Id];
+            var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule];
             var elementHeader = new RuleHeader(RuleOutput.Self, $"{UnnamedRulePrefix}{header.Name}({elementName})");
 
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>

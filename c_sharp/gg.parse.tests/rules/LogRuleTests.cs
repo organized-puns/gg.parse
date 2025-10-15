@@ -1,5 +1,4 @@
-﻿#nullable disable
-
+﻿
 using gg.parse.rules;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;

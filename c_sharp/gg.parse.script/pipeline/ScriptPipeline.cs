@@ -135,18 +135,7 @@ namespace gg.parse.script.pipeline
             }
             catch (CompilationException ce)
             {
-                var rule = parser.FindRule(ce.RuleId);
-
-                if (rule == null)
-                {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId},"
-                        +" and no corresponding rule was found in the parser. Please check the compiler configuration.");
-                }
-                else
-                {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with" 
-                        + "i d={ce.RuleId}({rule.Name}).", ce);
-                }
+                throw new ScriptPipelineException($"Compiler is missing a function for rule '{ce.Rule.Name}'.");
             }
         }
 
@@ -165,16 +154,7 @@ namespace gg.parse.script.pipeline
             }
             catch (CompilationException ce)
             {
-                var rule = parser.FindRule(ce.RuleId);
-
-                if (rule == null)
-                {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId}, and no corresponding rule was found in the parser. Please check the compiler configuration.");
-                }
-                else
-                {
-                    throw new ScriptPipelineException($"Compiler is missing a function for rule with id={ce.RuleId}({rule.Name}).", ce);
-                }
+                throw new ScriptPipelineException($"Compiler is missing a function for rule '{ce.Rule.Name}'.", ce);
             }
         }
 
