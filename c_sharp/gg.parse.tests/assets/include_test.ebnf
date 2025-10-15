@@ -1,5 +1,0 @@
-
-include "string_tokenization.ebnf";
-
-// dummy root
-token_root = .;

@@ -1,3 +1,0 @@
-﻿// Test file used to check if a circular include trips the circular exception
-
-include "assets/include_circular_2.ebnf";
