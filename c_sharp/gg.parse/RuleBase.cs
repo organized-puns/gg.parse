@@ -1,6 +1,4 @@
-﻿using gg.parse.util;
-
-using Range = gg.parse.util.Range;
+﻿using Range = gg.parse.util.Range;
 
 namespace gg.parse
 {
@@ -22,7 +20,7 @@ namespace gg.parse
         
         public abstract ParseResult Parse(T[] input, int start);
 
-        public override string ToString() => Name;//$"{Name}(id:{Id},out:{Output},pre:{Precedence})";
+        public override string ToString() => Name;
 
         public ParseResult BuildDataRuleResult(Range dataRange) 
         {

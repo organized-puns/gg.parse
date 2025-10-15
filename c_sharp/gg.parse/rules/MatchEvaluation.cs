@@ -23,7 +23,7 @@ namespace gg.parse.rules
 
         public int Count => _options == null ? 0 : _options.Length;
 
-        public RuleBase<T> this[int index]
+        public RuleBase<T>? this[int index]
         {
             get => _options[index];
             set

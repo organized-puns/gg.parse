@@ -6,7 +6,7 @@ namespace gg.parse.rules
     {
         private RuleBase<T>[] _options;
 
-        public RuleBase<T> this[int index]
+        public RuleBase<T>? this[int index]
         {
             get => _options[index];
             set => _options[index] = value;

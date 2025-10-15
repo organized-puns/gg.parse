@@ -45,39 +45,5 @@
             // take the substring of the name minus the output token
             return (name.Substring(Math.Max(0, start) + length).Trim(), product);
         }
-
-
-        /// Note: this will only return true because of the current assumption that the product character
-        /// will always start at 0 and defaults to AnnotationProduct.Annotation. Should this change in the future
-        /// we can more easily revert.
-        public static bool TryGetOutput(this string name, out RuleOutput output, out int start, out int length)
-        {
-            output = RuleOutput.Self;
-            length = 0;
-
-            start = name.IndexOf(ChildrenToken);
-
-            if (start == 0)
-            {
-                output = RuleOutput.Children;
-                length = ChildrenToken.Length;
-                return true;
-            }
-
-            start = name.IndexOf(VoidToken);
-
-            if (start == 0)
-            {
-                output = RuleOutput.Void;
-                length = VoidToken.Length;
-
-                return true;
-            }
-
-            start = 0;
-
-            return true;
-        }
-
     }
 }

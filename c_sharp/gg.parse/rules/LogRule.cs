@@ -1,9 +1,4 @@
-﻿
-
-
-using System.Data;
-
-namespace gg.parse.rules
+﻿namespace gg.parse.rules
 {
     [Flags]
     public enum LogLevel

@@ -191,9 +191,6 @@ namespace gg.parse
             return results.Count > 0;
         }
 
-        public static bool ContainsRule(this List<Annotation> annotations, IRule rule, out List<Annotation> results) =>
-            Contains(annotations, new Func<Annotation, bool>(a => a.Rule == rule), out results);
-
         public static string Substring(this string str, Annotation annotation) => str.Substring(annotation.Range);
 
         public static string Substring(this string str, Range range) => str.Substring(range.Start, range.Length);

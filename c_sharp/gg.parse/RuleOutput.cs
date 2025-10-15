@@ -35,6 +35,4 @@
             throw new NotImplementedException($"Missing ToString for case {output}.");
         }
     }
-
-
 }

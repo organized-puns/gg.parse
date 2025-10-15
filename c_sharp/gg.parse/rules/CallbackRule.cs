@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace gg.parse.rules
 {
     public  delegate void RuleCallbackAction<T>(IRule rule, T[] data, ParseResult? result = null) where T : IComparable<T>;

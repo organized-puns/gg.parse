@@ -1,11 +1,17 @@
 ﻿
 using System.Collections;
+
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
 {
     public class Annotation : IEnumerable<Annotation>
     {
+        /// <summary>
+        /// Allows matching the annotation against a string based on the set rule. Applicable in a lot of cases where
+        /// we compare token names or grammar rules.
+        /// </summary>
+        /// <param name="annotation"></param>
         public static implicit operator string(Annotation annotation) => annotation.Rule == null ? "" : annotation.Rule.Name;
 
         /// <summary>

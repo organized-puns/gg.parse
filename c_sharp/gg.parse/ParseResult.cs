@@ -35,15 +35,13 @@ namespace gg.parse
         {
             if (FoundMatch)
             {
-                return $"match, length={MatchLength}, count={(Annotations == null ? 0 : Annotations.Count)}";
+                return $"match found, length={MatchLength}, count={(Annotations == null ? 0 : Annotations.Count)}";
             }
             else
             {
                 return $"no match, length={MatchLength}";
             }
         }
-
-        
 
         public IEnumerator<Annotation> GetEnumerator()
         {

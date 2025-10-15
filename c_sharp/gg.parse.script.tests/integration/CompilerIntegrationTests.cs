@@ -1,7 +1,7 @@
 ﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-using gg.parse.rules;
 using gg.parse.script.pipeline;
+using gg.parse.script.compiler;
 
 namespace gg.parse.script.tests.integration
 {

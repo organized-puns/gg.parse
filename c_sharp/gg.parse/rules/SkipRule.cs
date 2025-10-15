@@ -1,9 +1,4 @@
-﻿
-
-
-using System.Data;
-
-namespace gg.parse.rules
+﻿namespace gg.parse.rules
 {
     /// <summary>
     /// Rule which skips data until some EndCondition is met or EoF is encountered. 
