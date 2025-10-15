@@ -1,7 +1,8 @@
-﻿using gg.parse.script.compiler;
-using gg.parse.util;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
+
+using gg.parse.script.compiler;
+using gg.parse.util;
 
 namespace gg.parse.script
 {
@@ -123,8 +124,6 @@ namespace gg.parse.script
                 return input;
 
             var result = new StringBuilder();
-
-            // capitalize first 
             bool capitalizeNext = true;
 
             foreach (char c in input)

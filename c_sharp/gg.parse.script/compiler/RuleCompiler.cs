@@ -1,7 +1,6 @@
 ﻿
 using gg.parse.rules;
 using gg.parse.util;
-using System.Xml.Linq;
 
 namespace gg.parse.script.compiler
 {
@@ -22,21 +21,12 @@ namespace gg.parse.script.compiler
             RuleOutputLookup = outputLookup;
         }
 
-
-        public RuleCompiler RegisterFunction(IRule rule, CompileFunction function, string? name = null)
-        {
-            Assertions.Requires(function != null);
-
-            Functions.Add(rule, (function!, name ?? $"{rule.Name}"));
-            return this;
-        }
-
         public RuleCompiler RegisterFunction(IRule rule, CompileFunction function)
         {
             Assertions.Requires(rule != null);
             Assertions.Requires(function != null);
 
-            Functions.Add(rule!, (function!, rule.Name ?? $"function_id:{rule.Id}"));
+            Functions.Add(rule!, (function!, rule!.Name));
             return this;
         }
 

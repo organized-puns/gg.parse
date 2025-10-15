@@ -1,7 +1,6 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-using gg.parse.util;
 
 using static gg.parse.util.Assertions;
 
@@ -178,7 +177,13 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        private string GetAnnotationText(Annotation annotation, string text, List<Annotation> tokens, int minStringLength = 8, int maxStringLength = 60)
+        private static string GetAnnotationText(
+            Annotation annotation, 
+            string text, 
+            List<Annotation> tokens, 
+            int minStringLength = 8, 
+            int maxStringLength = 60
+        )
         {
             Requires(minStringLength < maxStringLength);
             Requires(maxStringLength > 4);
@@ -203,7 +208,7 @@ namespace gg.parse.script.pipeline
             return annotationText;
         }
 
-        private List<Range> CollectLineRanges(string text)
+        private static List<Range> CollectLineRanges(string text)
         {
             var result = new List<Range>();
             var start = 0;

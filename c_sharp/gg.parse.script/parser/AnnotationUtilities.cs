@@ -23,8 +23,6 @@ namespace gg.parse.script.parser
             return new Func<Annotation, bool>(
                 a => a.Rule is LogRule<T> logRule && (logRule.Level & errorLevel) > 0
             );
-        }
-
-        
+        }        
     }
 }

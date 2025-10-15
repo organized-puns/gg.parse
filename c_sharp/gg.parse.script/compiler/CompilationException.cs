@@ -4,12 +4,12 @@
     {
         public Annotation? Annotation { get; init; }
 
-        public IRule Rule { get; init; }
+        public IRule? Rule { get; init; }
 
         public CompilationException(
             string message,
             Annotation? annotation = null,
-            IRule rule = null)
+            IRule? rule = null)
             : base(message) 
         { 
             Annotation = annotation;    

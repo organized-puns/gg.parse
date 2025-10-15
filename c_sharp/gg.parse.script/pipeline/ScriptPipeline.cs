@@ -314,8 +314,5 @@ namespace gg.parse.script.pipeline
 
             return target;
         }
-
-
-        
     }
 }

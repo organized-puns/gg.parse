@@ -32,6 +32,5 @@ namespace gg.parse.script.common
 
         public MatchSingleData<int> Token(string ruleName, string tokenName) =>
             MatchSingle(ruleName, Tokenizer.FindRule(tokenName)!.Id);
-
     }
 }

@@ -110,7 +110,6 @@ namespace gg.parse.script.common
         public MatchOneOf<T> OneOf(params RuleBase<T>[] rules) =>
             OneOf(null, rules);
 
-
         public MatchCount<T> OneOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.OneOrMore}({rule.Name})",

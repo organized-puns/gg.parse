@@ -1,5 +1,6 @@
 ﻿using gg.parse.script.parser;
 using gg.parse.util;
+
 using ParseOutput = (gg.parse.ParseResult tokeninzeResult, gg.parse.ParseResult parseResult);
 
 namespace gg.parse.script.common
