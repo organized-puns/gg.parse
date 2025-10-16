@@ -1,8 +1,7 @@
-﻿using gg.parse.script.parser;
-using gg.parse.script.pipeline;
+﻿using gg.parse.script.pipeline;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.parser
 {
     [TestClass]
     public class PipelineLogTests

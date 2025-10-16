@@ -1,8 +1,7 @@
-﻿using System.Diagnostics;
-using gg.parse.rules;
+﻿using gg.parse.rules;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.parserbuilder
 {
     [TestClass]
     public class OutputModifierTests

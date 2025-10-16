@@ -5,7 +5,7 @@ using gg.parse.script.parser;
 using gg.parse.script.compiler;
 using gg.parse.script.pipeline;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.compiler
 {
     [TestClass]
     public class CompilerFunctionTests

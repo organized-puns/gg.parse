@@ -5,7 +5,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using Range = gg.parse.util.Range;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.parser
 {
     [TestClass]
     public class AstBuilderParserTests

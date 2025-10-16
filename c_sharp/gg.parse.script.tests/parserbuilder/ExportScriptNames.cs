@@ -1,12 +1,13 @@
 ﻿using gg.parse.script.parser;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.parserbuilder
 {
     [TestClass]
     public class ExportScriptNames
     {
         // xxx apply to common tokenizer / parser
         // export the names so we address results by reference
+        // only turn this on when needed
         /*[TestMethod]
         public void ExportNames()
         {

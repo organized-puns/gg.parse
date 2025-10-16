@@ -1,9 +1,8 @@
 ﻿using gg.parse.script.common;
 using gg.parse.script.parser;
-
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.script.tests
+namespace gg.parse.script.tests.parser
 {
     // xxx create common test function / currently contains a lot of copy paste
     [TestClass]
