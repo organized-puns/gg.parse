@@ -48,7 +48,7 @@ namespace gg.parse
                 var start = startIndex;
                 var length = 0;
 
-                for (var i = 0; i < tokensRange.Length; i++)
+                for (var i = 0; i < tokensRange.Length && i < tokens.Count; i++)
                 {
                     // need to take in account possible white space
                     var token = tokens[tokensRange.Start + i];

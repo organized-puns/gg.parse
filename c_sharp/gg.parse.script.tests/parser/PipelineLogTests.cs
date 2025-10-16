@@ -11,7 +11,7 @@ namespace gg.parse.script.tests.parser
         {
             var result = new List<string>();
             
-            var logger = new PipelineLogger()
+            var logger = new ScriptLogger()
             {
                 Out = (l, s) => result.Add(s),
             };
@@ -29,7 +29,7 @@ namespace gg.parse.script.tests.parser
         {
             var result = new List<string>();
 
-            var logger = new PipelineLogger()
+            var logger = new ScriptLogger()
             {
                 Out = (level, message) => result.Add(message),
             };
@@ -49,7 +49,7 @@ namespace gg.parse.script.tests.parser
         {
             var result = new List<string>();
 
-            var logger = new PipelineLogger()
+            var logger = new ScriptLogger()
             {
                 Out = (level, message) => result.Add(message),
                 FailOnWarning = true

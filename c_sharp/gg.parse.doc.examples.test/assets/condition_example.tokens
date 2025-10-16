@@ -1,0 +1,3 @@
+// simple script example of how to use a MatchCondition
+// example of an if foo then / else 
+is_foo = (if 'foo', info 'foo found') | info 'foo was not found';

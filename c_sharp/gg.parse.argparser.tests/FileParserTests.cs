@@ -17,7 +17,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupLoadTokensAndGrammar_ExpectNoExceptions()
         {
-            var logger = new PipelineLogger()
+            var logger = new ScriptLogger()
             {
                 Out = (level, message) => Debug.WriteLine(message)
             };

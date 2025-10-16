@@ -8,7 +8,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.pipeline
 {
-    public class PipelineLogger   
+    public class ScriptLogger   
     {
         // Note: not thread safe, application will need to deal with this
         public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
@@ -22,7 +22,7 @@ namespace gg.parse.script.pipeline
 
         public Action<LogLevel, string>? Out { get; set; } = null;
 
-        public PipelineLogger(bool storeLogs = true, int maxStoredLogs = -1)
+        public ScriptLogger(bool storeLogs = true, int maxStoredLogs = -1)
         {
             if (storeLogs)
             {
@@ -63,7 +63,7 @@ namespace gg.parse.script.pipeline
                 foreach (var (annotation, log) in logList)
                 {
                     var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
-                    var message = $"({line}, {column}) {log.Text} near: \"{text.Substring(annotation.Start, annotation.Length)}\".";
+                    var message = $"({line}, {column}) {log.Text} near: \"{GetTokenText(annotation, text)}\".";
 
                     Log(log.Level, message);
                 }
@@ -192,6 +192,7 @@ namespace gg.parse.script.pipeline
 
             if (annotationText.Length < minStringLength)
             {
+                // check if there is a parent
                 if (annotation.Parent != null)
                 {
                     return GetAnnotationText(annotation.Parent, text, tokens, minStringLength, maxStringLength);
@@ -201,6 +202,41 @@ namespace gg.parse.script.pipeline
             }
 
             if (annotation.Length >= maxStringLength)
+            {
+                return annotationText.Substring(maxStringLength - 4) + " ...";
+            }
+
+            return annotationText;
+        }
+
+        private static string GetTokenText(
+            Annotation token,
+            string text,
+            int minStringLength = 8,
+            int maxStringLength = 60
+        )
+        {
+            Requires(minStringLength < maxStringLength);
+            Requires(maxStringLength > 4);
+
+            var textLength = token.Length == 0
+                ? Math.Min(minStringLength, text.Length)
+                : token.Length;
+
+            var annotationText = text.Substring(token.Start, textLength);
+
+            if (annotationText.Length < minStringLength)
+            {
+                // check if there is a parent
+                if (token.Parent != null)
+                {
+                    return GetTokenText(token.Parent, text, minStringLength, maxStringLength);
+                }
+
+                return annotationText;
+            }
+
+            if (annotationText.Length >= maxStringLength)
             {
                 return annotationText.Substring(maxStringLength - 4) + " ...";
             }

@@ -21,7 +21,7 @@ namespace gg.parse.calculator
             );
 
             // set up a logger to handle errors and warnings
-            var logger = new PipelineLogger()
+            var logger = new ScriptLogger()
             {
                 Out = (level, message) =>
                 {

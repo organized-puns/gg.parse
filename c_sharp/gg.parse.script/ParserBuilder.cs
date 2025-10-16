@@ -10,7 +10,7 @@ namespace gg.parse.script
 
         public RuleGraph<int>? GrammarGraph { get; set; }
 
-        public PipelineLogger? LogHandler { get; set; }
+        public ScriptLogger? LogHandler { get; set; }
 
         public PipelineSession<char>? TokenSession { get; private set; }
 
@@ -20,7 +20,7 @@ namespace gg.parse.script
         public ParserBuilder FromFile(
             string tokensFilename, 
             string? grammarFilename = null, 
-            PipelineLogger? logger = null,
+            ScriptLogger? logger = null,
             HashSet<string>? includePaths = null)
         {
             var sessionIncludePaths = includePaths ?? [AppContext.BaseDirectory];
@@ -48,10 +48,10 @@ namespace gg.parse.script
         public ParserBuilder From(
             string tokenDefinition, 
             string? grammarDefinition = null, 
-            PipelineLogger? logger = null,
+            ScriptLogger? logger = null,
             HashSet<string>? includePaths = null)
         {
-            LogHandler = logger ?? new PipelineLogger();
+            LogHandler = logger ?? new ScriptLogger();
 
             TokenSession = ScriptPipeline.RunTokenPipeline(tokenDefinition, LogHandler, includePaths);
 
@@ -69,14 +69,22 @@ namespace gg.parse.script
         public ParseResult Tokenize(
             string input,
             bool failOnWarning = false,
-            bool throwExceptionsOnError = true)
+            bool throwExceptionsOnError = true,
+            bool processLogsOnResult = false)
         {
             Assertions.RequiresNotNull(TokenGraph!);
             Assertions.RequiresNotNull(TokenGraph!.Root!);
 
             try
             {
-                return TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError);
+                var result = TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError);
+
+                if (processLogsOnResult && LogHandler != null && result.Annotations != null)
+                {
+                    LogHandler.ProcessTokenAnnotations(input, result.Annotations);
+                }
+
+                return result;
             }
             catch (Exception e)
             {
@@ -88,16 +96,32 @@ namespace gg.parse.script
         public (ParseResult tokens, ParseResult syntaxTree) Parse(
             string input, 
             bool failOnWarning = false,
-            bool throwExceptionsOnError = true)
+            bool throwExceptionsOnError = true,
+            bool processLogsOnResult = false)
         {
             Assertions.RequiresNotNull(TokenGraph!);
             Assertions.RequiresNotNull(TokenGraph!.Root!);
 
             try
             {
-                return GrammarGraph == null
+                var (tokens, syntaxTree) = GrammarGraph == null
                         ? (TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
                         : GrammarGraph.Parse(TokenGraph, input, failOnWarning, throwExceptionsOnError);
+
+                if (processLogsOnResult && LogHandler != null)
+                {
+                    if (tokens.Annotations != null)
+                    {
+                        LogHandler.ProcessTokenAnnotations(input, tokens.Annotations);
+
+                        if (syntaxTree.Annotations != null)
+                        {
+                            LogHandler.ProcessAstAnnotations(input, tokens.Annotations, syntaxTree.Annotations);
+                        }
+                    }
+                }
+
+                return (tokens, syntaxTree);
             }
             catch (Exception e)
             {

@@ -13,7 +13,7 @@ namespace gg.parse.script.pipeline
     {
         public static PipelineSession<char> RunTokenPipeline(
             string tokenizerDefinition, 
-            PipelineLogger? logger = null,
+            ScriptLogger? logger = null,
             HashSet<string>? includedPaths = null)
         {
             RequiresNotNullOrEmpty(tokenizerDefinition);
@@ -101,12 +101,12 @@ namespace gg.parse.script.pipeline
 
         public static PipelineSession<T> InitializeSession<T>(
             string script, 
-            PipelineLogger? logger = null,
+            ScriptLogger? logger = null,
             HashSet<string>? includePaths = null)
             where T : IComparable<T>
         {
             var tokenizer = new ScriptTokenizer();
-            var pipelineLogger = logger ?? new PipelineLogger();
+            var pipelineLogger = logger ?? new ScriptLogger();
             var parser = new ScriptParser(tokenizer);
 
             var sessionIncludePaths = includePaths ?? [];
