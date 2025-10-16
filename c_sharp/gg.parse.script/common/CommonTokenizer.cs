@@ -34,24 +34,38 @@ namespace gg.parse.script.common
         public MatchRuleSequence<char> Float() =>
             Float(null);
 
-        public MatchRuleSequence<char> Float(string? name) =>
-            FindOrRegister(name,
+        public MatchRuleSequence<char> Float(string? name)
+        {
+            var optionalSign = ZeroOrOne(Sign());
+            var exponentSymbol = InSet(['e', 'E']);
+            var exponent = Sequence(exponentSymbol, optionalSign, DigitSequence());
+            var digits = DigitSequence();
+
+            return FindOrRegister(name,
                 CommonTokenNames.Float,
                 (ruleName, product) =>
                     RegisterRule(new MatchRuleSequence<char>(
                         ruleName,
                         product,
                         precedence: 0,
-                        ZeroOrOne(Sign()),
-                        DigitSequence(),
-                        MatchSingle('.'),
-                        DigitSequence(),
-                        ZeroOrOne(
-                            Sequence(InSet(['e', 'E']), ZeroOrOne(Sign()), DigitSequence())
+                        Sequence("#float_sequence",
+                            optionalSign,
+                            digits,
+                            OneOf(
+                                // captures cases with a floating point like 1.2 or -3.4e5
+                                Sequence(
+                                    MatchSingle('.'),
+                                    digits,
+                                    OneOf(exponent, Not(exponentSymbol))
+                                ),
+                                // captures cases without a floating point eg 3e-5 or -53E+5
+                                exponent
+                            )
                         )
                     )
                 )
             );
+        }
 
         public MatchRuleSequence<char> Identifier(string? name = null) =>
             FindOrRegister(name, 

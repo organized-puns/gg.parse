@@ -19,6 +19,17 @@ namespace gg.parse.script.tests.unit
         }
 
         [TestMethod]
+        public void BooleanTokenTests()
+        {
+            RunTokenizerTest(
+                ruleFactory: (tokenizer, name) => tokenizer.Boolean(name),
+                testNames: [null, "bool", "~bool", "#bool"],
+                validSamples: ["true", "false"],
+                invalidSamples: ["", " T", "True", " false"]
+            );
+        }
+
+        [TestMethod]
         public void IdentifierTokenTests()
         {
             RunTokenizerTest(
@@ -37,6 +48,28 @@ namespace gg.parse.script.tests.unit
                 testNames: [null, "int", "~int", "#int"],
                 validSamples: ["123", "-123", "1", "-009", "+123456789"],
                 invalidSamples: ["", "*123", "a123", "_000", " 123"]
+            );
+        }
+
+        [TestMethod]
+        public void FloatTokenTests()
+        {
+            RunTokenizerTest(
+                ruleFactory: (tokenizer, name) => tokenizer.Float(name),
+                testNames: [null, "float", "~float", "#float"],
+                validSamples: ["123.0", "-123.1", "1e3", "-2.0E-43", "+12345.6789", "123.3E+3"],
+                invalidSamples: ["", "*123.2", "a123.3", "_00.0", "123.", "123.3e", "123.3E+x"]
+            );
+        }
+
+        [TestMethod]
+        public void LiteralTokenTests()
+        {
+            RunTokenizerTest(
+                ruleFactory: (tokenizer, name) => tokenizer.Literal(name, "foo"),
+                testNames: [null, "literal", "~literal", "#literal"],
+                validSamples: ["foo"],
+                invalidSamples: ["", "*foo", "Foo", "fo", "bar"]
             );
         }
 
