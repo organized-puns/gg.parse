@@ -1,14 +1,11 @@
-﻿
-using gg.parse.rules;
-
+﻿using gg.parse.rules;
 using gg.parse.script.common;
 using gg.parse.script.parser;
-
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using Range = gg.parse.util.Range;
 
-namespace gg.parse.script.tests.integration
+namespace gg.parse.script.tests
 {
     [TestClass]
     public class AstBuilderParserTests

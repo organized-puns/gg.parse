@@ -1,12 +1,12 @@
 ﻿#nullable disable
 
+using gg;
 using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.pipeline;
-
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.script.tests.integration
+namespace gg.parse.script.tests
 {
     [TestClass]
     public class ScriptPipelineExceptionTests

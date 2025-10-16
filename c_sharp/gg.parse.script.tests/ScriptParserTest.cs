@@ -4,7 +4,7 @@ using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.script.tests.unit
+namespace gg.parse.script.tests
 {
     [TestClass]
     public class ScriptParserTest

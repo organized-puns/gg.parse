@@ -2,7 +2,7 @@
 
 using gg.parse.script.common;
 
-namespace gg.parse.script.tests.unit
+namespace gg.parse.script.tests
 {
     [TestClass]
     public class CommonTokenizerTests

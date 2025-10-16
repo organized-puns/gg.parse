@@ -3,7 +3,7 @@
 using gg.parse.script.pipeline;
 using gg.parse.script.compiler;
 
-namespace gg.parse.script.tests.integration
+namespace gg.parse.script.tests
 {
     /// <summary>
     /// High level integration tests targeting compiler execution.

@@ -6,7 +6,7 @@ using gg.parse.rules;
 using gg.parse.script.pipeline;
 
 
-namespace gg.parse.script.tests.integration
+namespace gg.parse.script.tests
 {
     /// <summary>
     /// See if include statements work as intended

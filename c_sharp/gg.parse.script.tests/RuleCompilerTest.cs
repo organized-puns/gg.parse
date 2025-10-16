@@ -9,7 +9,7 @@ using static gg.parse.script.compiler.CompilerFunctions;
 
 using Range = gg.parse.util.Range;
 
-namespace gg.parse.script.tests.integration
+namespace gg.parse.script.tests
 {
     [TestClass]
     public class RuleCompilerTest

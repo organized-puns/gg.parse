@@ -1,6 +1,6 @@
 ﻿using gg.parse.rules;
 
-namespace gg.parse.script.tests.integration
+namespace gg.parse.script.tests
 {
     /// <summary>
     /// Various test based on a somewhat complex string tokenization script, specifically
