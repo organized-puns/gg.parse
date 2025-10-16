@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.util;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
@@ -13,7 +14,7 @@ namespace gg.parse
         /// <param name="annotations"></param>
         /// <returns></returns>
         public static int[] SelectRuleIds(this IEnumerable<Annotation> annotations) =>
-            annotations.Select(t => t.Rule.Id).ToArray();
+            [.. annotations.Select(t => t.Rule.Id)];
 
         public static string GetText(this Annotation annotation, string text)
         {
@@ -28,6 +29,8 @@ namespace gg.parse
 
         public static string GetText(this Annotation grammarAnnotation, string text, ParseResult tokens)
         {
+            Assertions.RequiresNotNull(tokens.Annotations);
+
             var range = CombinedRange(tokens.Annotations, grammarAnnotation.Range);
             return text.Substring(range.Start, range.Length);
         }

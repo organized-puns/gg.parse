@@ -44,7 +44,7 @@ namespace gg.parse.argparser.tests
             {
                 builder.FromFile(TokenFileName, GrammarFileName, logger: logger);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // add a catch so we can inspect the logger's logs in case the grammar or tokenizers fails to 
                 // parse

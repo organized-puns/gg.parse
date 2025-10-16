@@ -67,11 +67,6 @@ namespace gg.parse.argparser.tests
         public void CreateReaderWithAttrClassWithArrayTypes_Parse_ExpectValuesSet()
         {
             var argReader = new ArgsReader<AttrClassWithArrayTypes>();
-
-            var arrayRule = argReader.Parser.GrammarGraph.FindRule("array");
-            var tokens = argReader.Parser.TokenGraph.Tokenize("[true, true, false]");
-            var syntaxTree = arrayRule.Parse(tokens);
-
             var arrayTypes = argReader.Parse("-b:[true, true, false] --i:[42, -3] --FloatArrays:[[1, 2.0, 3.5], [4, -5.5, 6]]");
 
             IsTrue(arrayTypes.Booleans.SequenceEqual([true, true, false]));
@@ -180,8 +175,6 @@ namespace gg.parse.argparser.tests
 
             [Arg(Index = 0, IsRequired = true)]
             public Example required;
-
-            private Example privateExample;
         }
 
         [TestMethod]

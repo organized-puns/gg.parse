@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.util;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
@@ -16,7 +17,11 @@ namespace gg.parse.rules
         public RuleBase<T>? this[int index]
         {
             get => Rule;
-            set => Rule = value;
+            set 
+            {
+                Assertions.RequiresNotNull(value);
+                Rule = value;
+            }
         }
         public MatchNot(string name, RuleOutput output, int precedence, RuleBase<T> rule)
             : base(name, output, precedence)

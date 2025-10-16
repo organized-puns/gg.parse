@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.util;
+
 namespace gg.parse.rules
 {
     /// <summary>
@@ -28,10 +30,15 @@ namespace gg.parse.rules
 
         public IEnumerable<RuleBase<T>> Rules => [StopCondition];
 
-        public RuleBase<T> this[int index]
+        public RuleBase<T>? this[int index]
         {
             get => StopCondition;
-            set => StopCondition = value;
+            
+            set
+            {
+                Assertions.RequiresNotNull(value);
+                StopCondition = value;
+            }
         }
 
         public int Count => 1;
@@ -43,7 +50,7 @@ namespace gg.parse.rules
             RuleBase<T> condition,
             bool failOnEof = true
         ) 
-            : base(name, product)
+            : base(name, product, precedence)
         {
             StopCondition = condition;
             FailOnEoF = failOnEof;

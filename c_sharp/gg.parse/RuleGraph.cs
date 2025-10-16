@@ -76,7 +76,7 @@ namespace gg.parse
                 {
                     for (var i = 0; i < ruleComposition.Count; i++)
                     {
-                        ruleComposition[i] = RegisterRuleAndSubRules(ruleComposition[i]);
+                        ruleComposition[i] = RegisterRuleAndSubRules(ruleComposition[i]!);
                     }
                 }
 

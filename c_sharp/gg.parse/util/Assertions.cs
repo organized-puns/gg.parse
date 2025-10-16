@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace gg.parse.util
 {
     public class AssertionException : Exception
@@ -47,7 +49,7 @@ namespace gg.parse.util
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void RequiresNotNull(object o, string message)
+        public static void RequiresNotNull([NotNull] object? o, string message)
         {
             if (o == null)
             {
@@ -56,7 +58,7 @@ namespace gg.parse.util
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void RequiresNotNull(object o)
+        public static void RequiresNotNull([NotNull] object? o)
         {
             RequiresNotNull(o, "Contract violation, object cannot be null");
         }
@@ -77,7 +79,7 @@ namespace gg.parse.util
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void RequiresNull(object o)
+        public static void RequiresNull(object? o)
         {
             Requires(o == null, "Contract violation, object should be null.");
         }
@@ -101,14 +103,14 @@ namespace gg.parse.util
         public static void RequiresNotNullOrEmpty<T>(IEnumerable<T> a, string message)
         {
             RequiresNotNull(a, message);
-            Requires(a.Count() > 0, message);
+            Requires(a.Any(), message);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         public static void RequiresNotNullOrEmpty<T>(IEnumerable<T> a)
         {
             RequiresNotNull(a, "Contract violation, enumeration cannot be null.");
-            Requires(a.Count() > 0, "Contract violation, enumeration must have at least one element.");
+            Requires(a.Any(), "Contract violation, enumeration must have at least one element.");
         }
 
         [System.Diagnostics.Conditional("DEBUG")]

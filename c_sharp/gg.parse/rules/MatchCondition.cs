@@ -15,10 +15,14 @@ namespace gg.parse.rules
 
         public int Count => 1;
 
-        public RuleBase<T> this[int index]
+        public RuleBase<T>? this[int index]
         {
             get => Rule;
-            set => Rule = value;
+            set
+            {
+                Assertions.RequiresNotNull(value);
+                Rule = value;
+            }
         }
 
         public MatchCondition(

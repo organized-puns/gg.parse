@@ -3,7 +3,7 @@
 
 
 using gg.parse.util;
-
+using System.Diagnostics.CodeAnalysis;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
@@ -12,15 +12,16 @@ namespace gg.parse.rules
     {
         private RuleBase<T>[] _options;
 
+        [DisallowNull]
         public RuleBase<T>[] RuleOptions 
         {
-            get => _options!;
+            get => _options;
             set
             {
-                Assertions.Requires(value != null);
+                Assertions.RequiresNotNull(value);
                 Assertions.Requires(value!.Any(v => v != null));
 
-                _options = value!;
+                _options = value;
             }
         }
 
@@ -43,10 +44,10 @@ namespace gg.parse.rules
         public MatchEvaluation(string name, params RuleBase<T>[] options)
             : base(name, RuleOutput.Self)
         {
-            Assertions.Requires(options != null);
+            Assertions.RequiresNotNull(options);
             Assertions.Requires(options!.Any(v => v != null));
 
-            RuleOptions = options!;
+            _options = options;
         }
 
         public MatchEvaluation(string name, RuleOutput output, int precedence, params RuleBase<T>[] options)
@@ -55,7 +56,7 @@ namespace gg.parse.rules
             Assertions.Requires(options != null);
             Assertions.Requires(options!.Any(v => v != null));
 
-            RuleOptions = options!;
+            _options = options!;
         }
 
         /// <summary>
@@ -137,14 +138,14 @@ namespace gg.parse.rules
                         // reached a node with a lower precedence, so the new match becomes the right child of that node
                         nextMatch.Parent = parent;
                         nextMatch.Children![0].Parent = nextMatch;
-                        parent.Children[2] = nextMatch;
+                        parent.Children![2] = nextMatch;
                     }
                     else
                     {
                         // reached the root, the root becomes the left side of the new match
                         // and the new match becomes the new root
                         root.Parent = nextMatch;
-                        nextMatch.Children[0] = root;
+                        nextMatch.Children![0] = root;
                         root = nextMatch;
                     }
                     
@@ -168,7 +169,7 @@ namespace gg.parse.rules
             return ParseResult.Failure;
         }
 
-        private Range UpdateRanges(Annotation node)
+        private static Range UpdateRanges(Annotation node)
         {
             return node.Children == null || node.Children.Count == 0
                 ? node.Range

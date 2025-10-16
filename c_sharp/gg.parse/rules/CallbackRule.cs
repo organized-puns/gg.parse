@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
+#pragma warning disable IDE0290 // Use primary constructor
 
+using gg.parse.util;
 
 namespace gg.parse.rules
 {
@@ -26,19 +28,25 @@ namespace gg.parse.rules
         
         public int Count => 1;
 
-        public RuleBase<T> this[int index] 
-        { 
-            get => Rule; 
-            set => Rule = value; 
+        public RuleBase<T>? this[int index]
+        {
+            get => Rule;
+            set
+            {
+                Assertions.RequiresNotNull(value);
+                Rule = value;
+            }
         }
 
         public CallbackCondition Condition { get; init; }
 
-        public RuleCallbackAction<T> ParseStartCallback { get; init; }
+        public RuleCallbackAction<T>? ParseStartCallback { get; init; }
 
-        public RuleCallbackAction<T> ResultCallback { get; init; }
+        public RuleCallbackAction<T>? ResultCallback { get; init; }
+
 
         public CallbackRule(
+
             string name, 
             RuleBase<T> rule,            
             RuleCallbackAction<T> callback, 
@@ -57,26 +65,30 @@ namespace gg.parse.rules
            
             var result = Rule.Parse(input, start);
 
-            switch (Condition)
+            if (ResultCallback != null)
             {
-                case CallbackCondition.Success:
-                    if (result)
-                    {
+                switch (Condition)
+                {
+                    case CallbackCondition.Success:
+                        if (result)
+                        {
+                            ResultCallback(this, input, result);
+                        }
+                        break;
+                    case CallbackCondition.Failure:
+                        if (!result)
+                        {
+                            ResultCallback(this, input, result);
+                        }
+                        break;
+                    case CallbackCondition.Any:
                         ResultCallback(this, input, result);
-                    }
-                    break;
-                case CallbackCondition.Failure:
-                    if (!result)
-                    {
-                        ResultCallback(this, input, result);
-                    }
-                    break;
-                case CallbackCondition.Any:
-                    ResultCallback(this, input, result);
-                    break;
-            }           
+                        break;
+                }
+            }
 
             return result;
         }
     }
 }
+#pragma warning restore IDE0290 // Use primary constructor

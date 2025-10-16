@@ -342,7 +342,7 @@ namespace gg.parse.calculator.tests
             IsTrue(astResult[0][2].Rule.Name == "number");
         }
 
-        private ParserBuilder CreateParser()
+        private static ParserBuilder CreateParser()
         {
             var parser = new ParserBuilder();
             
@@ -350,7 +350,7 @@ namespace gg.parse.calculator.tests
             {
                 return parser.From(_tokenizerSpec, _grammarSpec);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 foreach (var message in parser.LogHandler.ReceivedLogs)
                 {

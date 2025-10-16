@@ -5,7 +5,7 @@ namespace gg.parse.util
 {
     public readonly struct Range(int start, int length) 
     {
-        public static readonly Range Undefined = new Range(0, -1);
+        public static readonly Range Undefined = new(0, -1);
 
         public int Start { get; init; } = start;
 
@@ -36,6 +36,20 @@ namespace gg.parse.util
             var minStart = ranges.Min(r => r.Start);
             var maxEnd = ranges.Max(r => r.End);
             return new Range(minStart, maxEnd - minStart);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Start, Length);
+        }
+        public static bool operator ==(Range left, Range right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Range left, Range right)
+        {
+            return !(left == right);
         }
     }
 }
