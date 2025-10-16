@@ -3,12 +3,16 @@ Todo
 
 Overview of all open items in order of priority. Badly defined.
 
+Ongoing items
+-------------
+
+- Add documentation, clean up and build proper examples
+
 first public release
 -----------------------------
 
 - Add missing names to CompilerFunctionNameGenerator functions
-- Clean up unit tests and build proper examples
-- Add some more documentation, extend readme.
+- Fix all warnings
 - Add to nuget
 
 Adjust and fix output in favor of 'prune':

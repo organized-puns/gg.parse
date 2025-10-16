@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
 
 namespace gg.parse.util
 {
@@ -17,7 +18,7 @@ namespace gg.parse.util
             return $"Range(Start: {Start}, Length: {Length})";
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
+        public override bool Equals(object? obj)
         {
             return obj != null
                 && obj is Range r

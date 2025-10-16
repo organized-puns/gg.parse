@@ -1,24 +1,15 @@
-﻿using System.Text;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using System.Text;
 using System.Text.RegularExpressions;
 
 using gg.parse.script.compiler;
-using gg.parse.util;
 
 namespace gg.parse.script
 {
     public static class ScriptUtils
     {
-        public static string AstToString(ParserBuilder parser)
-        {
-            Assertions.RequiresNotNull(parser);
-            Assertions.RequiresNotNull(parser!.GrammarSession!);
-            Assertions.RequiresNotNull(parser.GrammarSession!.Text!);
-            Assertions.RequiresNotNull(parser.GrammarSession!.Tokens!);
-            Assertions.RequiresNotNull(parser.GrammarSession!.SyntaxTree!);
-
-            return AstToString(parser.GrammarSession.Text!, parser.GrammarSession.Tokens!, parser.GrammarSession.SyntaxTree!);
-        }
-
         public static string AstToString(string text, List<Annotation> tokens, List<Annotation> astNodes, string indentStr = "   ")
         {
             var builder = new StringBuilder();

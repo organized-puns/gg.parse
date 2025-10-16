@@ -1,4 +1,6 @@
-﻿
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
@@ -12,8 +14,6 @@ namespace gg.parse
         /// <returns></returns>
         public static int[] SelectRuleIds(this IEnumerable<Annotation> annotations) =>
             annotations.Select(t => t.Rule.Id).ToArray();
-
-
 
         public static string GetText(this Annotation annotation, string text)
         {

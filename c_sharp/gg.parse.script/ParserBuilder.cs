@@ -1,4 +1,7 @@
-﻿using gg.parse.script.common;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using gg.parse.script.common;
 using gg.parse.script.pipeline;
 using gg.parse.util;
 

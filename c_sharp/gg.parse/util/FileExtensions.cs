@@ -1,4 +1,7 @@
-﻿namespace gg.parse.util
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse.util
 {
     public static class FileExtensions
     {

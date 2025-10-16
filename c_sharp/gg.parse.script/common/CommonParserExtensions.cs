@@ -1,4 +1,7 @@
-﻿using gg.parse.script.parser;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using gg.parse.script.parser;
 using gg.parse.util;
 
 using ParseOutput = (gg.parse.ParseResult tokeninzeResult, gg.parse.ParseResult parseResult);

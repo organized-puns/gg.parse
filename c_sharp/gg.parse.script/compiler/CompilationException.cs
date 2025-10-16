@@ -1,4 +1,7 @@
-﻿namespace gg.parse.script.compiler
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse.script.compiler
 {
     public class CompilationException : Exception 
     {

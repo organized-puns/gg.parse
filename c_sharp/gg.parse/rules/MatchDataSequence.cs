@@ -1,4 +1,7 @@
-﻿namespace gg.parse.rules
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse.rules
 {
     public class MatchDataSequence<T>(
         string name, 

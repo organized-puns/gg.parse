@@ -1,4 +1,7 @@
-﻿
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+
 namespace gg.parse.rules
 {
     public  delegate void RuleCallbackAction<T>(IRule rule, T[] data, ParseResult? result = null) where T : IComparable<T>;

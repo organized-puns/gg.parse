@@ -1,4 +1,8 @@
-﻿namespace gg.parse.script.common
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+
+namespace gg.parse.script.common
 {
     public static class CommonTokenNames
     {

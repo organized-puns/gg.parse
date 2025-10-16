@@ -1,4 +1,7 @@
-﻿using Range = gg.parse.util.Range;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {

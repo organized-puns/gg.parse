@@ -1,4 +1,7 @@
-﻿namespace gg.parse.rules
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse.rules
 {
     /// <summary>
     /// Rule which skips data until some EndCondition is met or EoF is encountered. 

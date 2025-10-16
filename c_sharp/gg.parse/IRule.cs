@@ -1,4 +1,7 @@
-﻿namespace gg.parse
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse
 {
     public partial interface IRule 
     {
