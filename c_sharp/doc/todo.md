@@ -1,22 +1,50 @@
 Todo 
 ========
 
-Overview of all open items in order of priority. Badly defined.
+Overview of all open items in order of priority for the upcoming release (0.1). Often badly defined.
 
-Ongoing items
+```mermaid
+---
+config:
+  kanban:
+    ticketBaseUrl: 'https://github.com/mermaid-js/mermaid/issues/#TICKET#'
+---
+kanban
+  Backlog
+    [Add missing names to CompilerFunctionNameGenerator functions]   
+    [Add to nuget]
+    [Validate github PR permssions]
+  In progress
+    [Create Documentation]
+    [Add rule examples]
+    [Fix all warnings]
+  Done
+```
+
+Details
 -------------
 
-- Add documentation, clean up and build proper examples
+Version 0.2
+-----------
+```mermaid
+---
+config:
+  kanban:
+    ticketBaseUrl: 'https://github.com/mermaid-js/mermaid/issues/#TICKET#'
+---
+kanban
+  Backlog
+    [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
+    [2. Change rule output in favor of 'prune']
+  Bugs
+    [1. output passthrough unintuitive, possibly wrong]
+    [3. fix ambiguous root]
+  In progress
+```
 
-first public release
------------------------------
+Details:
 
-- Add missing names to CompilerFunctionNameGenerator functions
-- Fix all warnings
-- Add to nuget
-
-Adjust and fix output in favor of 'prune':
-----------------------------------------------
+### 1. output passthrough unintuitive
 this is weird:
 array_item_list   = value, *(~item_separator, value);
 array			  = ~array_start, ?array_item_list, ~array_end;
@@ -29,6 +57,7 @@ value = a | b | c; should yield value(a) not a BUT value = (a | b | c ) | 'foo' 
 
 - better compile name generation, have parser names comply with generated names
 
+### 2. Adjust and fix output in favor of 'prune':
 Adjustments:
 - replace output with 'prune' 
 	such that:  
@@ -40,62 +69,57 @@ Adjustments:
 - consider change '~' to '-' and '#' to '..' (?) or `~` to '--' and '#' to '-'...
 	? -c, -p -a 
 
-Fix ambiguous root
-------------------
+### 3. Fix ambiguous root
 Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
 
-Add Properties File Example   
-------------------------------
-Implement properties file
+Future backlog
+--------------
 
-Add annotation example
------------------------
-Implement (json) annotations in its main program
+### Improve callback support
 
-Fix/extend literal
-------------------
-
-Having a literal in a grammar leads to very confusing errors. Should be handled better.
-Add literalRule which allows for case senstive matching or not
-
-Adjust find/skip
-----------------
+### Adjust find/skip
 include 'inclusive' property to skip rules eg inclusive find +-> -->, inclusive skip +->> -->>
 	  or find, find_including, skip, skip_including  
 		or >>, +>>, >>>, +>>>, ->|, |->, ->>|, |->> stop_at, stop_after, skip_to, skip_after	 
 
-
-Add repeat 
-----------
+### Add repeat 
 Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
 
-Add transpiling
----------
+
+### Add Properties File Example   
+Implement properties file
+
+### Add annotation example
+
+### Implement (json) annotations in its main program
+
+### Fix/extend literal
+
+Having a literal in a grammar leads to very confusing errors. Should be handled better.
+Add literalRule which allows for case senstive matching or not
+
+
+### Add transpiling
 Transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
-Add extend to parser
---------------------
+### Add extend to parser
 Add Extend() to existing parser, similar to merge
 
-Matcher example
----------------
+### Matcher example
 add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has
      all common tokens defined
 	eg var ip4AddressMatcher = BuildMatcher("byte, '.', byte, '.', byte, '.', byte, '.', optional(':', word)")
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
 
-Compare performance against regex
+### Compare performance against regex
 
-Namespaces
---------
+### Namespaces
 Add optional namespaces to avoid grammar / token name clash 
 
-Example, small function console
--------------------------------
+### Example, small function console
 Implement a function console
 
-Recreate bootstrap in script
----------------------------
+### Recreate bootstrap in script
 - Do All of the following based on ebnf assets, not in the bootstrap
 	implement alternatives for short hand (see json_grammar_test.ebnf)
 	see if sequence can go without ,
@@ -107,10 +131,11 @@ Recreate bootstrap in script
 - add alternative for "= / :"
 - replace any with _, disallow identifier to start with '_' ?
 
-Add symbols to log
--------------------
+### Add symbols to log
 
 Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc to log
+
+
 
 ???
 ---

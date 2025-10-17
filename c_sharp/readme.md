@@ -1,5 +1,4 @@
-
-gg.parse 
+gg.parse 0.1
 =======================================================================================================================
 
 !_Please Note_! the code base is under development and changes frequently. The documentation below may be out of date.
@@ -7,18 +6,24 @@ gg.parse
 License
 -------
 
-[MIT](./license)
+[MIT](./license.md)
 
-Quickstart
------------------------------------------------------------------------------------------------------------------------
+Goals, use cases and otherwise
+------------------------------
 
 The goal of the gg.parse project is to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
 tools to make parsing of simple and complex data easy to do, both programatically and via an interpreted scripting 
 language. Furthermore this project aims to provide an _easy to understand and use, light-weight_ framework.
 
+gg.parse is an LL(k) parser. [There are many parsers](./doc/on-parsers.md) out there but this one is, according to the license, ours as well. 
+
+Quickstart
+-----------------------------------------------------------------------------------------------------------------------
+
+
 Core concepts:
 
-- A `_Rule_` implements a function to parse data (text) and create one or more `_Annotations_`.
+- A _`Rule`_ implements a function to parse data (text) and create one or more _`Annotations`_.
 - An `_Annotation_` describes what data is intended to mean, as expressed by a rule. An annotation describes a specific 
   part of the data by way of a `_Range_`. A range a position in the data and its length. Furthermore an annotation is a 
   tree-node where its children may give further insight in the details of data in question.
