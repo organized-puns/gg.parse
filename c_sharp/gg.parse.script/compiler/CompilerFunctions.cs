@@ -258,8 +258,9 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var elementBody = bodyNode.Children[0];
-            var (compilationFunction, elementName) = session.Compiler.Functions[elementBody.Rule];
-            var elementHeader = new RuleHeader(RuleOutput.Self, $"{UnnamedRulePrefix}{header.Name}({elementName})");
+            var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
+            var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
+            var elementHeader = new RuleHeader(RuleOutput.Self, elementName);
 
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
                 ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
@@ -338,12 +339,13 @@ namespace gg.parse.script.compiler
 
             if (bodyNode.Children.Count == 3)
             {
-                var conditionBody = bodyNode.Children[2];
-                var (compilationFunction, elementName) = session.FindFunction(conditionBody.Rule);
-                var conditionHeader = new RuleHeader(RuleOutput.Self, $"{UnnamedRulePrefix}{header.Name} condition: {elementName}");
+                var elementBody = bodyNode.Children[2];
+                var (compilationFunction, _) = session.FindFunction(elementBody.Rule);
+                var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
+                var conditionHeader = new RuleHeader(RuleOutput.Self, elementName);
 
-                condition = compilationFunction(conditionHeader, conditionBody, session) as RuleBase<T>
-                    ?? throw new CompilationException("Cannot compile condition for Log.", annotation: conditionBody);
+                condition = compilationFunction(conditionHeader, elementBody, session) as RuleBase<T>
+                    ?? throw new CompilationException("Cannot compile condition for Log.", annotation: elementBody);
             }
 
             return new LogRule<T>(header.Name, header.Output, message, condition, logLevel);

@@ -11,7 +11,6 @@ config:
 ---
 kanban
   Backlog
-    [Add missing names to CompilerFunctionNameGenerator functions]   
     [Add to nuget]
     [Validate github PR permssions]
   In progress
@@ -19,6 +18,7 @@ kanban
     [Add rule examples]
     [Fix all warnings]
   Done
+    [Add missing names to CompilerFunctionNameGenerator functions]   
 ```
 
 Details

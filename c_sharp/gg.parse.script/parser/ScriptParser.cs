@@ -23,14 +23,22 @@ namespace gg.parse.script.parser
 
             public const string Literal = "lit";
 
+            public const string Log = "log";
+            public const string LogLevel = "log_lvl";
+            public const string LogLevelDebug = "log_lvl_debug";
+            public const string LogLevelError = "log_lvl_error";
+            public const string LogLevelFatal = "log_lvl_fatal";            
+            public const string LogLevelInfo = "log_lvl_info";
+            public const string LogLevelWarning = "log_lvl_warning";
+
             public const string Not = "not";
 
             public const string OneOrMore = "one_or_more";
-            public const string Option = "opt";
+            public const string Option = "option";
 
             public const string Reference = "ref";
 
-            public const string Sequence = "seq";
+            public const string Sequence = "sequence";
             public const string Skip = "skip";
 
             public const string ZeroOrOne = "zero_or_one";
@@ -551,12 +559,12 @@ namespace gg.parse.script.parser
         private MatchRuleSequence<int> CreateMatchLog(MatchOneOf<int> condition)
         {
             var matchLogLevel = OneOf(
-                "LogLevel",
-                Token(CommonTokenNames.LogFatal, CommonTokenNames.LogFatal),
-                Token(CommonTokenNames.LogError, CommonTokenNames.LogError),
-                Token(CommonTokenNames.LogWarning, CommonTokenNames.LogWarning),
-                Token(CommonTokenNames.LogInfo, CommonTokenNames.LogInfo),
-                Token(CommonTokenNames.LogDebug, CommonTokenNames.LogDebug)
+                Names.LogLevel,
+                Token(Names.LogLevelFatal, CommonTokenNames.LogFatal),
+                Token(Names.LogLevelError, CommonTokenNames.LogError),
+                Token(Names.LogLevelWarning, CommonTokenNames.LogWarning),
+                Token(Names.LogLevelInfo, CommonTokenNames.LogInfo),
+                Token(Names.LogLevelDebug, CommonTokenNames.LogDebug)
             );
 
             var matchText = MatchLiteral;
@@ -571,7 +579,7 @@ namespace gg.parse.script.parser
             );
 
             return Sequence(
-                "MatchLog",
+                Names.Log,
                 matchLogLevel,
                 matchText,
                 matchOptionalCondition

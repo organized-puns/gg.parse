@@ -213,11 +213,11 @@ namespace gg.parse.script.tests.compiler
             IsNotNull(error);
             IsTrue(error.Text == "msg");
             IsTrue(error.Level == LogLevel.Error);
-            var expectedName = $"{CompilerFunctionNameGenerator.UnnamedRulePrefix}error_rule condition: not";
+            var expectedName = ".not(.lit('bar'))";
             IsTrue(error.Condition == table.FindRule(expectedName));
             var matchFunction = error.Condition as MatchNot<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule($"{CompilerFunctionNameGenerator.UnnamedRulePrefix}{expectedName}(lit)"));
+            IsTrue(matchFunction.Rule == table.FindRule(".lit('bar')"));
             IsTrue(matchFunction.Rule is MatchDataSequence<char>);
         }
 

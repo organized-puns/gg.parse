@@ -24,7 +24,7 @@ namespace gg.parse.script.compiler
                     return $"{UnnamedRulePrefix}{ScriptParser.Names.CharacterSet}('{session.GetText(annotation[0].Range)}')";
 
                 case ScriptParser.Names.Literal:
-                    return $"{UnnamedRulePrefix}{ScriptParser.Names.Literal}('{session.GetText(annotation.Range)}')";
+                    return $"{UnnamedRulePrefix}{ScriptParser.Names.Literal}({session.GetText(annotation.Range)})";
 
                 case ScriptParser.Names.Any:
                     return $"{UnnamedRulePrefix}{ScriptParser.Names.Any}";
@@ -52,6 +52,13 @@ namespace gg.parse.script.compiler
                     var modifierString = RuleOutputExtensions.ToString(modifier);
 
                     return $"{UnnamedRulePrefix}{modifierString}_{ScriptParser.Names.Reference}({GetReferenceName(annotation, session)})";
+
+                case ScriptParser.Names.Log:
+                    if (annotation.Children != null && annotation.Count >= 2)
+                    {
+                        return $"{UnnamedRulePrefix}{ScriptParser.Names.Log}({annotation[0][0].Name}, '{session.GetText(annotation[1].Range)}')";
+                    }
+                    break;
 
                 default:
                     break;
