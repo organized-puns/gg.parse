@@ -47,15 +47,18 @@ namespace gg.parse.script.compiler
         public RuleGraph<T> Compile<T>(
             string text, 
             List<Annotation> tokens, 
-            List<Annotation>? syntaxTree = null,
+            List<Annotation> syntaxTree,
             RuleGraph<T>? resultGraph = null) where T : IComparable<T>
         {
+            Assertions.RequiresNotNull(tokens);
+            Assertions.RequiresNotNull(syntaxTree);
+
             return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? new RuleGraph<T>());
         }
 
         private RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
         {
-            foreach (var node in session.SyntaxTree)
+            foreach (var node in session.SyntaxTree!)
             {
                 try
                 {
@@ -206,9 +209,7 @@ namespace gg.parse.script.compiler
         {
             var referredRule = graph.FindRule(name);
 
-            return referredRule == null 
-                ? throw new CompilationException($"Cannot find rule refered to by name: {name}.") 
-                : referredRule;
+            return referredRule ?? throw new CompilationException($"Cannot find rule refered to by name: {name}.");
         }
 
         /// <summary>

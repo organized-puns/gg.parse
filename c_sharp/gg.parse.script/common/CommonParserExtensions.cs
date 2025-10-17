@@ -78,11 +78,11 @@ namespace gg.parse.script.common
             bool failOnWarning = false,
             bool throwExceptionOnErrors = true)
         {
-            RuleBase<int> rule;
+            RuleBase<int>? rule;
 
             if (!string.IsNullOrEmpty(usingRule))
             {
-                rule = parser.FindRule(usingRule!);
+                rule = parser.FindRule(usingRule);
 
                 if (rule == null)
                 {

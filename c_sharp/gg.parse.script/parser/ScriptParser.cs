@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
+#nullable disable
 
 using gg.parse.rules;
 using gg.parse.script.common;
@@ -621,3 +622,4 @@ namespace gg.parse.script.parser
         }
     }
 }
+#nullable enable

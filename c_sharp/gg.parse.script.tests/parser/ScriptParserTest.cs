@@ -180,10 +180,8 @@ namespace gg.parse.script.tests.parser
             IsTrue(name == ScriptParser.Names.Option);
 
             // try parsing a transitive rule
-            (tokens, nodes) = parser.Parse("#rule = !('123',{'foo'});");
-
-            name = nodes[0].Children[0].Rule.Name;
-
+            (_, nodes) = parser.Parse("#rule = !('123',{'foo'});");
+           
             name = nodes[0].Children[0].Rule.Name;
             IsTrue(name == "TransitiveSelector");
 
@@ -194,7 +192,7 @@ namespace gg.parse.script.tests.parser
             IsTrue(name == ScriptParser.Names.Not);
 
             // try parsing a no output rule
-            (tokens, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
+            (_, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
 
             name = nodes[0].Children[0].Rule.Name;
             IsTrue(name == "NoProductSelector");

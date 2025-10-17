@@ -20,10 +20,8 @@ namespace gg.parse.json
 
     public class JsonParser : CommonGraphWrapper<int>
     {
-        
         public JsonTokenizer Tokenizer { get; init; }
      
-
         private RuleOutput _defaultProduct = RuleOutput.Self;
 
         public JsonParser() 
@@ -169,7 +167,9 @@ namespace gg.parse.json
 
         public ParseResult Parse(List<Annotation> tokens)
         {
-            return Root.Parse(tokens.Select(t => t.Rule.Id).ToArray(), 0);
+            return Root != null
+                ? Root.Parse(tokens.Select(t => t.Rule.Id).ToArray(), 0)
+                : throw new InvalidProgramException("Cannot call parse without defining a Root first."); 
         }
 
         public string AnnotateTextUsingHtml(

@@ -41,6 +41,8 @@ namespace gg.parse.rules
 
         public override ParseResult Parse(T[] input, int start)
         {
+            Assertions.RequiresNotNull(Rule);
+
             var result = Rule.Parse(input, start);
 
             if (result.FoundMatch)

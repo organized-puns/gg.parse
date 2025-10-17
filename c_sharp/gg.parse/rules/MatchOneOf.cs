@@ -12,7 +12,11 @@ namespace gg.parse.rules
         public RuleBase<T>? this[int index]
         {
             get => _options[index];
-            set => _options[index] = value;
+            set
+            {
+                Assertions.RequiresNotNull(value);
+                _options[index] = value;
+            }
         }
 
         public int Count => _options.Length;
@@ -35,7 +39,7 @@ namespace gg.parse.rules
         public MatchOneOf(string name, params RuleBase<T>[] options)
             : base(name, RuleOutput.Self)
         {
-            RuleOptions = options;
+            _options = options;
         }
 
         public MatchOneOf(
@@ -45,7 +49,7 @@ namespace gg.parse.rules
             params RuleBase<T>[] rules
         ) : base(name, output, precedence)
         {
-            RuleOptions = rules;
+            _options = rules;
         }
 
         public override ParseResult Parse(T[] input, int start)

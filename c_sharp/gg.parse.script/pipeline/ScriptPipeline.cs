@@ -54,9 +54,10 @@ namespace gg.parse.script.pipeline
             where T : IComparable<T>
         {
             RequiresNotNull(session);
-            RequiresNotNull(session.LogHandler!);
-            RequiresNotNull(session.Compiler!);
-            RequiresNotNullOrEmpty(session.Text!);
+            RequiresNotNull(session.LogHandler);
+            RequiresNotNull(session.Compiler);
+            RequiresNotNull(session.RuleGraph);
+            RequiresNotNullOrEmpty(session.Text);
 
             (session.Tokens, session.SyntaxTree) = ParseSessionText(session);
 
@@ -217,14 +218,14 @@ namespace gg.parse.script.pipeline
             where T : IComparable<T>
         {
             RequiresNotNull(session);
-            RequiresNotNull(session.Tokenizer!);
-            RequiresNotNull(session.Parser!);
-            RequiresNotNull(session.LogHandler!);
-            RequiresNotNullOrEmpty(session.Text!);
+            RequiresNotNull(session.Tokenizer);
+            RequiresNotNull(session.Parser);
+            RequiresNotNull(session.LogHandler);
+            RequiresNotNullOrEmpty(session.Text);
 
             try
             {
-                return session!.Parser!.Parse(session.Text!, failOnWarning: session.LogHandler!.FailOnWarning);
+                return session.Parser.Parse(session.Text, failOnWarning: session.LogHandler.FailOnWarning);
             }
             catch (ScriptException pe)
             {

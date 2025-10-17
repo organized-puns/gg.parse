@@ -265,9 +265,22 @@ namespace gg.parse.script.compiler
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
                 ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
 
-            return creationParams == null || creationParams.Length == 0
-                ? (TRule)Activator.CreateInstance(typeof(TRule), header.Name, header.Output, header.Precedence, unaryRule)
-                : (TRule)Activator.CreateInstance(typeof(TRule), [header.Name, header.Output, header.Precedence, unaryRule, ..creationParams]);
+            TRule? result; 
+            if (creationParams == null || creationParams.Length == 0)
+            {
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, header.Output, header.Precedence, unaryRule);
+            }
+            else
+            {
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, header.Output, header.Precedence, unaryRule, .. creationParams]);
+            }
+
+            if (result == null)
+            {
+                throw new CompilationException($"Unable to create a rule of type {typeof(TRule)} with the provided parameters.");
+            }
+
+            return result;
         }
 
         public static RuleBase<T> CompileNot<T>(

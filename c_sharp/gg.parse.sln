@@ -47,11 +47,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{8D303D6A-1B65-421D-ADC4-18EE58F8021A}"
 	ProjectSection(SolutionItems) = preProject
 		doc\extending_parse_script.md = doc\extending_parse_script.md
-		doc\match-any-data.md = doc\match-any-data.md
 		license.md = license.md
+		doc\match-any-data.md = doc\match-any-data.md
 		doc\match-condition.md = doc\match-condition.md
 		doc\match-evaluation.md = doc\match-evaluation.md
 		doc\todo.md = doc\todo.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{88442D88-84A6-4B21-8268-FA5B330675CF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Global

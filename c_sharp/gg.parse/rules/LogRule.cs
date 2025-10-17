@@ -17,7 +17,6 @@ namespace gg.parse.rules
     {
         public LogRule<T> Rule { get; init; }
 
-
         public FatalConditionException(LogRule<T> rule)
             : base($"Fatal condition encountered while parsing {rule.Name}, parsing terminates at this point. See exception / inner exception for more details.")
         {

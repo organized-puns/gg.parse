@@ -24,7 +24,7 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 2);
+                IsTrue(e.Errors.Count == 2);
                 IsTrue(e.Errors.ElementAt(0).Start == 0);
                 IsTrue(e.Errors.ElementAt(0).Length == 2);
                 IsTrue(e.Errors.ElementAt(1).Start == 6);
@@ -60,7 +60,7 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 1);
+                IsTrue(e.Errors.Count == 1);
                 IsTrue(e.Errors.ElementAt(0).Start == 2);
                 IsTrue(e.Errors.ElementAt(0).Length == 1);
 
@@ -140,7 +140,7 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 1);
+                IsTrue(e.Errors.Count == 1);
 
                 var error = e.Errors.ElementAt(0);
 

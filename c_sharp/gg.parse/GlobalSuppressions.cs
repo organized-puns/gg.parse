@@ -5,9 +5,3 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: 
-    SuppressMessage("Style", "IDE0290:Use primary constructor", 
-    Justification = "It applies case by case", 
-    Scope = "member", 
-    Target = "~M:gg.parse.rules.SkipRule`1.#ctor(System.String,gg.parse.RuleOutput,System.Int32,gg.parse.RuleBase{`0},System.Boolean)")
-]

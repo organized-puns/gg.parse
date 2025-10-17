@@ -55,7 +55,7 @@ namespace gg.parse.script.tests.compiler
 
             IsNotNull(litRule);
             IsTrue(litRule.Output == RuleOutput.Self);
-            IsTrue(litRule.DataArray.SequenceEqual("foo".ToArray()));
+            IsTrue(litRule.DataArray.SequenceEqual([.. "foo"]));
         }
 
         [TestMethod]

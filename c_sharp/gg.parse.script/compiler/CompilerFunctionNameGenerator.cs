@@ -74,7 +74,7 @@ namespace gg.parse.script.compiler
             var text = session.GetText(annotation.Range);
 
             return (text.StartsWith(RuleExtensions.VoidToken) || text.StartsWith(RuleExtensions.ChildrenToken))
-                ? text.Substring(1)
+                ? text[1..]
                 : text;
         }
 

@@ -64,7 +64,7 @@ namespace gg.parse.util
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void RequiresNotNullOrEmpty(string s, string message)
+        public static void RequiresNotNullOrEmpty([NotNull] string s, string message)
         {
             if (string.IsNullOrEmpty(s))
             {
@@ -73,7 +73,7 @@ namespace gg.parse.util
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void RequiresNotNullOrEmpty(string s)
+        public static void RequiresNotNullOrEmpty([NotNull] string s)
         {
             RequiresNotNullOrEmpty(s, "Contract violation, string cannot be null or empty");
         }

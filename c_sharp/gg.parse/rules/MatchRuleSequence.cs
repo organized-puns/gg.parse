@@ -40,7 +40,7 @@ namespace gg.parse.rules
             params RuleBase<T>[] rules
         ) : base(name, output, precedence) 
         {
-            SequenceRules = rules;
+            _rules = rules;
         }
 
         public override ParseResult Parse(T[] input, int start)
