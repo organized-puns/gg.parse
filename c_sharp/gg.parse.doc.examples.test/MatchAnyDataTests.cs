@@ -6,7 +6,6 @@ namespace gg.parse.doc.examples.test
 {
     /// <summary>
     /// Used in MatchAnyData documentation example.
-    /// See <see href="../../gg.parse.doc/match-any-data.md"/>
     /// </summary>
 
     [TestClass]

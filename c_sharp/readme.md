@@ -131,8 +131,14 @@ More information
 Rule References
 ---------------
 
+Data rules
 - [Match Any (.)](./doc/match-any-data.md)
+
+Meta rules
 - [Match Evaluation (a/b/c)](./doc/match-evaluation.md)
+- [Match Count *,+, ?](./doc/match-count.md)
+
+Look-ahead rules
 - [Match Condition (if ...)](./doc/match-condition.md)
 
 

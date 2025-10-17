@@ -71,6 +71,7 @@ namespace gg.parse.script
 
         public ParseResult Tokenize(
             string input,
+            string? usingRule = null,
             bool failOnWarning = false,
             bool throwExceptionsOnError = true,
             bool processLogsOnResult = false)
@@ -80,7 +81,20 @@ namespace gg.parse.script
 
             try
             {
-                var result = TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError);
+                ParseResult result;
+
+                if (string.IsNullOrEmpty(usingRule))
+                {
+                    result = TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError);
+                }
+                else
+                {
+                    var rule = TokenGraph.FindRule(usingRule);
+
+                    result = rule != null
+                        ? rule.Parse(input)
+                        : throw new ArgumentException($"No rule {usingRule} defined in the token graph");
+                }
 
                 if (processLogsOnResult && LogHandler != null && result.Annotations != null)
                 {
@@ -97,7 +111,8 @@ namespace gg.parse.script
         }
 
         public (ParseResult tokens, ParseResult syntaxTree) Parse(
-            string input, 
+            string input,
+            string? usingRule = null,
             bool failOnWarning = false,
             bool throwExceptionsOnError = true,
             bool processLogsOnResult = false)
@@ -109,7 +124,7 @@ namespace gg.parse.script
             {
                 var (tokens, syntaxTree) = GrammarGraph == null
                         ? (TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
-                        : GrammarGraph.Parse(TokenGraph, input, failOnWarning, throwExceptionsOnError);
+                        : GrammarGraph.Parse(TokenGraph, input, usingRule, failOnWarning, throwExceptionsOnError);
 
                 if (processLogsOnResult && LogHandler != null)
                 {

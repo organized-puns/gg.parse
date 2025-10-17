@@ -10,7 +10,6 @@ namespace gg.parse.doc.examples.test
 {
     /// <summary>
     /// Used in MatchCondition documentation example.
-    /// See <see href="../../../doc/gg.parse.doc/match-any-data.md"/>
     /// </summary>
 
     [TestClass]

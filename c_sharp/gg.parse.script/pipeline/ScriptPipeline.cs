@@ -224,7 +224,7 @@ namespace gg.parse.script.pipeline
 
             try
             {
-                return session!.Parser!.Parse(session.Text!, session.LogHandler!.FailOnWarning);
+                return session!.Parser!.Parse(session.Text!, failOnWarning: session.LogHandler!.FailOnWarning);
             }
             catch (ScriptException pe)
             {

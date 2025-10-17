@@ -16,6 +16,7 @@ namespace gg.parse.script.common
                 this RuleGraph<int> parser, 
                 RuleGraph<char> tokenizer, 
                 string text, 
+                string? usingRule = null,
                 bool failOnWarning = false,
                 bool throwExceptionOnTokenizeErrors = true
             )
@@ -29,7 +30,8 @@ namespace gg.parse.script.common
                     if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)
                     {
                         return (tokenizeResult,
-                                parser.ParseGrammar(text, tokenizeResult.Annotations, failOnWarning));
+                                parser.ParseGrammar(text, tokenizeResult.Annotations, usingRule, failOnWarning));
+                      
                     }
                 }
 
@@ -72,10 +74,27 @@ namespace gg.parse.script.common
             this RuleGraph<int> parser, 
             string text, 
             in List<Annotation> tokens,
+            string? usingRule = null,
             bool failOnWarning = false,
             bool throwExceptionOnErrors = true)
         {
-            var astResult = parser.Root!.Parse(tokens);
+            RuleBase<int> rule;
+
+            if (!string.IsNullOrEmpty(usingRule))
+            {
+                rule = parser.FindRule(usingRule!);
+
+                if (rule == null)
+                {
+                    throw new ArgumentException($"No rule {usingRule} defined");
+                }
+            }
+            else
+            {
+                rule = parser.Root!;
+            }
+
+            var astResult = rule.Parse(tokens);
 
             if (astResult.FoundMatch)
             {

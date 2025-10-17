@@ -24,9 +24,18 @@ namespace gg.parse.script.common
         /// <returns></returns>
         /// <exception cref="TokenizeException">Thrown when the tokenization step results in errors.</exception>
         /// <exception cref="ScriptException">Thrown when parsing reports error.</exception>
-        public (List<Annotation>? tokens, List<Annotation>? astNodes) Parse(string text, bool failOnWarning = false)
+        public (List<Annotation>? tokens, List<Annotation>? astNodes) Parse(
+            string text, 
+            string? usingRule = null,
+            bool failOnWarning = false
+        )
         { 
-            var (tokeninzeResult, parseResult) = this.Parse(Tokenizer, text, failOnWarning);
+            var (tokeninzeResult, parseResult) = this.Parse(
+                Tokenizer, 
+                text, 
+                usingRule: usingRule, 
+                failOnWarning: failOnWarning
+            );
             return (tokeninzeResult.Annotations, parseResult.Annotations);
         }            
 

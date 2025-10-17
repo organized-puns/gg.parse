@@ -35,6 +35,12 @@ namespace gg.parse.script.pipeline
             MaxStoredLogs = maxStoredLogs;
         }
 
+        public ScriptLogger(Action<LogLevel, string> outputAction, bool storeLogs = true, int maxStoredLogs = -1)
+            : this(storeLogs, maxStoredLogs)
+        {
+            Out = outputAction;
+        }
+
         public void Log(LogLevel level, string message)
         {
             if (ReceivedLogs != null)
@@ -223,7 +229,7 @@ namespace gg.parse.script.pipeline
             Requires(maxStringLength > 4);
 
             var textLength = token.Length == 0
-                ? Math.Min(minStringLength, text.Length)
+                ? Math.Max(0, Math.Min(minStringLength, (text.Length - token.Start)))
                 : token.Length;
 
             var annotationText = text.Substring(token.Start, textLength);

@@ -10,10 +10,14 @@
 
   <ItemGroup>
     <None Remove="assets\condition_example.tokens" />
+    <None Remove="assets\match_count_example.tokens" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="assets\condition_example.tokens">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\match_count_example.tokens">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
