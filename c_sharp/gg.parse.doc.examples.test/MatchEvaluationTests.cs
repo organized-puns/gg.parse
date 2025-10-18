@@ -90,7 +90,7 @@ namespace gg.parse.doc.examples.test
         /// <param name="multPrecedence"></param>
         /// <param name="addPrecedence"></param>
         /// <returns></returns>
-        private (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
+        private static (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
         {
             var whitespace = new MatchDataSet<char>("whitespace", setValues: " \t\r\n".ToCharArray(), output: RuleOutput.Void);
 

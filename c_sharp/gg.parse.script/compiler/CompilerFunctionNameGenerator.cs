@@ -65,11 +65,12 @@ namespace gg.parse.script.compiler
                     return $"{UnnamedRulePrefix}{modifierString}_{ScriptParser.Names.Reference}({GetReferenceName(annotation, session)})";
 
                 case ScriptParser.Names.Log:
-                    if (annotation.Children != null && annotation.Count >= 2)
-                    {
-                        return $"{UnnamedRulePrefix}{ScriptParser.Names.Log}({annotation[0][0].Name}, '{session.GetText(annotation[1].Range)}')";
-                    }
-                    break;
+                    Assertions.Requires(annotation.Count >= 2);
+                    Assertions.RequiresNotNull(annotation[0]);
+                    Assertions.RequiresNotNull(annotation[0]![0]);
+                    Assertions.RequiresNotNull(annotation[1]);
+                    
+                    return $"{UnnamedRulePrefix}{ScriptParser.Names.Log}({annotation[0]![0]!.Name}, '{session.GetText(annotation[1]!.Range)}')";
 
                 default:
                     break;

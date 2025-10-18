@@ -9,7 +9,7 @@ namespace gg.parse.argparser
     {
         private static readonly List<PropertyArgs> _propertyDescriptors = CreatePropertyArgList();
               
-        private ParserBuilder _parserBuilder;
+        private readonly ParserBuilder _parserBuilder;
 
         public ParserBuilder Parser => _parserBuilder;
 
@@ -21,9 +21,10 @@ namespace gg.parse.argparser
 
         public string GetErrorReport(Exception e)
         {
-            var parserErrors = Parser.LogHandler.ReceivedLogs.Where(l => l.level == rules.LogLevel.Error);
+            
+            var parserErrors = Parser.LogHandler?.ReceivedLogs?.Where(l => l.level == rules.LogLevel.Error);
 
-            return parserErrors.Any()
+            return parserErrors != null && parserErrors.Any()
                 ? string.Join("\n", parserErrors)
                 : e.Message;
         }
@@ -56,7 +57,7 @@ namespace gg.parse.argparser
                 switch (node)
                 {
                     case ArgParserNames.ArgOption:
-                        if ((property = AssignOption(target, node, args, tokens, errors)) != null)
+                        if ((property = ArgsReader<T>.AssignOption(target, node, args, tokens, errors)) != null)
                         {
                             requiredArgs.Remove(property);
                         }
@@ -115,7 +116,7 @@ namespace gg.parse.argparser
             return property;
         }
 
-        private (string? key, PropertyArgs? property) FindKeyProperty(Annotation keyNode, string text, ParseResult tokens)
+        private static (string? key, PropertyArgs? property) FindKeyProperty(Annotation keyNode, string text, ParseResult tokens)
         {
             var key = keyNode!.GetText(text, tokens).Replace("-", "");
 
@@ -125,8 +126,15 @@ namespace gg.parse.argparser
                 ));
         }
 
-        private PropertyArgs? AssignOption(T target, Annotation node, string args, ParseResult tokens, List<string> errors)
+        private static PropertyArgs? AssignOption(T target, Annotation node, string args, ParseResult tokens, List<string> errors)
         {
+            // validate all the required node elements are present
+            Assertions.RequiresNotNull(tokens.Annotations);
+            Assertions.RequiresNotNull(node);
+            Assertions.RequiresNotNull(node[0]);
+            Assertions.RequiresNotNull(node[1]);
+            Assertions.RequiresNotNull(node[1]![0]);
+
             var (key, argType) = FindKeyProperty(node[0]!, args, tokens);
 
             if (argType == null)
@@ -138,7 +146,9 @@ namespace gg.parse.argparser
                 try
                 {
                     object value = node.Count == 2
-                        ? ParseInstance.OfValue<T>(argType.ArgType, node[1][0], tokens.Annotations, args)
+                        // assumed structure is -a=b where node[0] is a key, node[1] = value and node[1][0]
+                        // the actual value type
+                        ? ParseInstance.OfValue<T>(argType.ArgType, node[1]![0]!, tokens.Annotations, args)
                         // assume its a bool
                         : true;
 
@@ -160,6 +170,7 @@ namespace gg.parse.argparser
             var result = new List<PropertyArgs>();
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty);
             var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Instance);
+            var argAttributeType = typeof(ArgAttribute);
 
             for (int i = 0; i < properties.Length; i++)
             {
@@ -167,7 +178,7 @@ namespace gg.parse.argparser
                 {
                     ArgPropertyInfo = properties[i],
                     ArgIndex = i,
-                    Attribute = (ArgAttribute) Attribute.GetCustomAttribute(properties[i], typeof(ArgAttribute)),
+                    Attribute = Attribute.GetCustomAttribute(properties[i], argAttributeType) as ArgAttribute,
                 });
             }
 
@@ -177,7 +188,7 @@ namespace gg.parse.argparser
                 {
                     ArgFieldInfo = fields[i],
                     ArgIndex = i,
-                    Attribute = (ArgAttribute)Attribute.GetCustomAttribute(fields[i], typeof(ArgAttribute)),
+                    Attribute = Attribute.GetCustomAttribute(fields[i], argAttributeType) as ArgAttribute
                 });
             }
 

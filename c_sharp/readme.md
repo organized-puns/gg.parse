@@ -39,8 +39,7 @@ gg.parse is an LL(k) parser. [There are many parsers](./doc/on-parsers.md) out t
 Quickstart
 -----------------------------------------------------------------------------------------------------------------------
 
-
-Core concepts:
+### Core concepts:
 
 - A _`Rule`_ implements a function to parse data (text) and create one or more _`Annotations`_.
 - An _`Annotation`_ describes what data is intended to mean, as expressed by a rule. An annotation describes a specific 
@@ -51,13 +50,13 @@ Core concepts:
   can either be used as `Tokens` or an `Abstract Syntax Tree`.
 
 
-Extended concepts:
+### Extended concepts:
 
 - A set of common rules (literal, sequence, not...) to quickly build tokenizers and parsers. 
 - A tokenizer/parser/compiler which can build a tokenizer and or parser based on a high-level ebnf-like script.
 - A facade-like class, `gg.parse.script.ParserBuilder`, which combines all of the above in a single convenient class.
 
-## Example
+### Example
 
 Programmatically create a tokenizer to tokenizer (simplified) filenames in a text (see 
 `gg.parse.doc.examples.test\CreateFilenameTokenizer.cs`):
@@ -101,6 +100,7 @@ Doing the same using a script (see `gg.parse.doc.examples.test\CreateFilenameTok
 
 ```csharp
 
+    // note this can also be read from a separate file
     public static readonly string _filenameScript =
         "#filenames         = +(find_filename, filename);\n" +
         "~find_filename     = >>> filename;\n" +

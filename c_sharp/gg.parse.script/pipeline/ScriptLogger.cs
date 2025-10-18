@@ -212,7 +212,7 @@ namespace gg.parse.script.pipeline
 
             if (annotation.Length >= maxStringLength)
             {
-                return annotationText.Substring(maxStringLength - 4) + " ...";
+                return string.Concat(annotationText.AsSpan(maxStringLength - 4), " ...");
             }
 
             return annotationText;
@@ -247,7 +247,7 @@ namespace gg.parse.script.pipeline
 
             if (annotationText.Length >= maxStringLength)
             {
-                return annotationText.Substring(maxStringLength - 4) + " ...";
+                return string.Concat(annotationText.AsSpan(maxStringLength - 4), " ...");
             }
 
             return annotationText;
@@ -274,7 +274,7 @@ namespace gg.parse.script.pipeline
 
         public static (int line, int column) MapRangeToLineColumn(Range textRange, List<Range> lineRanges)
         {
-            var line = 0;
+            int line;
 
             for (line = 0; line < lineRanges.Count; line++)
             {

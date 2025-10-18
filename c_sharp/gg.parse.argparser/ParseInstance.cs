@@ -105,7 +105,7 @@ namespace gg.parse.argparser
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    addMethod.Invoke(result, [OfValue<T>(setType, annotation[i], tokenList, text)]);
+                    addMethod!.Invoke(result, [OfValue<T>(setType, annotation[i]!, tokenList, text)]);
                 }
 
                 return result;
@@ -189,7 +189,7 @@ namespace gg.parse.argparser
             }
             else if (targetType == typeof(string))
             {
-                if (text.StartsWith('"') || text.StartsWith("'"))
+                if (text.StartsWith('"') || text.StartsWith('\''))
                 {
                     return text.Substring(1, text.Length - 2);
                 }

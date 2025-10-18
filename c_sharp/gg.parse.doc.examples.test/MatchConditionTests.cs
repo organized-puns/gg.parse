@@ -18,7 +18,7 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchCondition_SuccessExample()
         {
-            var fooRule = new MatchDataSequence<char>("match_foo", "foo".ToArray());
+            var fooRule = new MatchDataSequence<char>("match_foo", [.."foo"]);
             var isFooRule = new MatchCondition<char>("match_foo_condition", fooRule);
 
             IsTrue(isFooRule.Parse("foo", 0));
@@ -29,7 +29,7 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchCondition_FailureExample()
         {
-            var fooRule = new MatchDataSequence<char>("match_foo", "foo".ToArray());
+            var fooRule = new MatchDataSequence<char>("match_foo", [.."foo"]);
             var isFooRule = new MatchCondition<char>("match_foo_condition", fooRule);
 
             // input is empty
