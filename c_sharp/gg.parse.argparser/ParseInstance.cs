@@ -1,4 +1,5 @@
-﻿using System;
+﻿using gg.parse.util;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -52,37 +53,42 @@ namespace gg.parse.argparser
         {
             var arrayType = targetType.GetElementType();
 
-            if (annotation == ArgParserNames.Array)
+            if (arrayType != null && annotation == ArgParserNames.Array)
             {
                 // remove the start and end of the array from the count
-                var result = Array.CreateInstance(arrayType, annotation.Count-2);
+                var result = Array.CreateInstance(arrayType, annotation.Count - 2);
 
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.SetValue(OfValue<T>(arrayType, annotation[i], tokenList, text), i-1);
+                    result.SetValue(OfValue<T>(arrayType, annotation[i]!, tokenList, text), i - 1);
                 }
 
                 return result;
             }
 
-            throw new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
+            throw arrayType == null 
+                ? new ArgumentException($"Request Array but provided target type ({targetType}) is not contain an element type.")
+                : new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
         }
 
         public static IList OfList<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
         {
+            Assertions.RequiresNotNull(targetType);
+            Assertions.RequiresNotNull(annotation);           
+
             var listType = targetType.GetGenericArguments()[0];
 
             if (annotation == ArgParserNames.Array)
             {
                 var genericType = typeof(List<>).MakeGenericType(listType);
-                var result = (IList)Activator.CreateInstance(genericType)
+                var result = Activator.CreateInstance(genericType) as IList
                     ?? throw new ArgumentException($"Can't create an instance of list with list type <{listType}>.");
                 
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.Add(OfValue<T>(listType, annotation[i], tokenList, text));
+                    result.Add(OfValue<T>(listType, annotation[i]!, tokenList, text));
                 }
 
                 return result;
@@ -116,20 +122,23 @@ namespace gg.parse.argparser
 
         public static IDictionary OfDictionary<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
         {
+            Assertions.RequiresNotNull(targetType);
+            Assertions.RequiresNotNull(annotation);
+
             var keyType = targetType.GetGenericArguments()[0];
             var valueType = targetType.GetGenericArguments()[1];
 
             if (annotation == ArgParserNames.Dictionary)
             {
                 var genericType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
-                var result = (IDictionary) Activator.CreateInstance(genericType) 
+                var result = Activator.CreateInstance(genericType) as IDictionary
                     ?? throw new ArgumentException($"Can't create an instance of dictionary with key/value type <{keyType}, {valueType}>.");
 
                 // need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    var key = OfValue<T>(keyType, annotation[i][0], tokenList, text);
-                    var value = OfValue<T>(valueType, annotation[i][1], tokenList, text);
+                    var key = OfValue<T>(keyType, annotation[i]![0]!, tokenList, text);
+                    var value = OfValue<T>(valueType, annotation[i]![1]!, tokenList, text);
 
                     result.Add(key, value);
                 }
@@ -150,13 +159,15 @@ namespace gg.parse.argparser
                 // need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
+                    Assertions.RequiresNotNull(annotation[i]);
+
                     // key needs to be an identifier
-                    var key      = annotation[i][0].GetText(text, tokenList);
+                    var key      = annotation[i]![0]!.GetText(text, tokenList);
                     var property = targetType.GetProperty(key);
 
                     if (property != null)
                     {
-                        var value = OfValue<T>(property.PropertyType, annotation[i][1], tokenList, text);
+                        var value = OfValue<T>(property.PropertyType, annotation[i]![1]!, tokenList, text);
                         property.SetValue(result, value);
                     }
                     else
@@ -165,7 +176,9 @@ namespace gg.parse.argparser
 
                         if (field != null)
                         {
-                            var value = OfValue<T>(field.FieldType, annotation[i][1], tokenList, text);
+                            Assertions.Requires(annotation[i]!.Count >= 2);
+
+                            var value = OfValue<T>(field.FieldType, annotation[i]![1]!, tokenList, text);
                             field.SetValue(result, value);
                         }
                         else
@@ -191,7 +204,9 @@ namespace gg.parse.argparser
             {
                 if (text.StartsWith('"') || text.StartsWith('\''))
                 {
+#pragma warning disable IDE0057 // Use range operator
                     return text.Substring(1, text.Length - 2);
+#pragma warning restore IDE0057 // Use range operator
                 }
 
                 return text;

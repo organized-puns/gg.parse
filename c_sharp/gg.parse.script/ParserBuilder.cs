@@ -98,7 +98,7 @@ namespace gg.parse.script
 
                 if (processLogsOnResult && LogHandler != null && result.Annotations != null)
                 {
-                    LogHandler.ProcessTokenAnnotations(input, result.Annotations);
+                    LogHandler.ProcessTokens(input, result.Annotations);
                 }
 
                 return result;
@@ -130,11 +130,11 @@ namespace gg.parse.script
                 {
                     if (tokens.Annotations != null)
                     {
-                        LogHandler.ProcessTokenAnnotations(input, tokens.Annotations);
+                        LogHandler.ProcessTokens(input, tokens.Annotations);
 
                         if (syntaxTree.Annotations != null)
                         {
-                            LogHandler.ProcessAstAnnotations(input, tokens.Annotations, syntaxTree.Annotations);
+                            LogHandler.ProcessSyntaxTree(input, tokens.Annotations, syntaxTree.Annotations);
                         }
                     }
                 }

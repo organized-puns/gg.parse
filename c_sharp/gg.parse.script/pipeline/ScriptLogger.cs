@@ -56,49 +56,37 @@ namespace gg.parse.script.pipeline
             Out?.Invoke(level, message);
         }
 
-        public void ProcessTokenAnnotations(string text, List<Annotation> tokens)
+        public void ProcessTokens(string text, List<Annotation> tokens)
         {
-            var logAnnotations = tokens.Select(a =>
-                                    a!.SelectNotNull(ax =>
-                                        ax.Rule is LogRule<char> rule
-                                            ? new Tuple<Annotation, LogRule<char>>(ax, rule)
-                                            : null
-                                    ));
-
+            var logs = tokens
+                .WhereDfs(node => node.Rule is LogRule<char> rule)
+                .Select(node => new Tuple<Annotation, LogRule<char>>(node, (LogRule<char>)node.Rule));
+            
             var lineRanges = CollectLineRanges(text);
 
-            foreach (var logList in logAnnotations)
+            foreach (var (annotation, log) in logs)
             {
-                foreach (var (annotation, log) in logList)
-                {
-                    var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
-                    var message = $"({line}, {column}) {log.Text} near: \"{GetTokenText(annotation, text)}\".";
+                var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
+                var message = $"({line}, {column}) {log.Text} near: \"{GetTokenText(annotation, text)}\".";
 
-                    Log(log.Level, message);
-                }
+                Log(log.Level, message);
             }
         }
 
-        public void ProcessAstAnnotations(string text, List<Annotation> tokens, List<Annotation> astNodes) 
+        public void ProcessSyntaxTree(string text, List<Annotation> tokens, List<Annotation> syntaxTree) 
         {
-            var logAnnotations = astNodes.Select(a => 
-                                    a!.SelectNotNull( ax =>
-                                        ax.Rule is LogRule<int> rule 
-                                            ? new Tuple<Annotation, LogRule<int>>(ax, rule)
-                                            : null
-                                    ));
+            var logs = syntaxTree
+                        .WhereDfs(node => node.Rule is LogRule<int> rule)
+                        .Select(node => new Tuple<Annotation, LogRule<int>>(node, (LogRule<int>)node.Rule));
 
             var lineRanges = CollectLineRanges(text);
 
-            foreach (var logList in logAnnotations) 
+            foreach (var (annotation, log) in logs) 
             {
-                foreach (var (annotation, log) in logList)
-                {
-                    var (line, column) = MapAnnotationRangeToLineColumn(annotation, tokens, lineRanges);
-                    var message = $"({line}, {column}) {log.Text} near \"{GetAnnotationText(annotation, text, tokens)}\".";
+                var (line, column) = MapAnnotationRangeToLineColumn(annotation, tokens, lineRanges);
+                var message = $"({line}, {column}) {log.Text} near \"{GetAnnotationText(annotation, text, tokens)}\".";
 
-                    Log(log.Level, message);
-                }
+                Log(log.Level, message);
             }
         }
 
@@ -122,11 +110,11 @@ namespace gg.parse.script.pipeline
             {
                 if (exception.Tokens == null)
                 {
-                    ProcessTokenAnnotations(exception.Text, exception.Errors);
+                    ProcessTokens(exception.Text, exception.Errors);
                 }
                 else
                 {
-                    ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+                    ProcessSyntaxTree(exception.Text, exception.Tokens, exception.Errors);
                 }
             }
             else
@@ -141,7 +129,7 @@ namespace gg.parse.script.pipeline
 
             if (exception.Errors != null && exception.Text != null && exception.Tokens != null)
             {
-                ProcessAstAnnotations(exception.Text, exception.Tokens, exception.Errors);
+                ProcessSyntaxTree(exception.Text, exception.Tokens, exception.Errors);
             }
             else
             {

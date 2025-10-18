@@ -21,7 +21,7 @@ namespace gg.parse
 
         public Annotation? this [int index] => Annotations?[index];
 
-        public Annotation? this[string name] => Annotations?.FirstOrDefault(a => a.Rule != null && a.Rule.Name == name);   
+        public Annotation? this[string name] => Annotations?.FirstOrDefaultDfs(a => a.Rule != null && a.Rule.Name == name);   
 
         public int Count => Annotations?.Count ?? 0;
 

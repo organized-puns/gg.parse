@@ -61,41 +61,11 @@ namespace gg.parse
             Children = children;
             Parent = parent;
 
-            if (children != null)
-            {
-                children.ForEach(c => c.Parent = this);
-            }
+            children?.ForEach(c => c.Parent = this);
         }
 
         public override string ToString() =>
             $"({Rule}, {Range.Start}..{Range.End})";
-
-        /// <summary>
-        /// Checks if this annotation matches the predicate, if so adds it to the target. Then
-        /// does the same for all its children (if any)
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <param name="target"></param>
-        /// <returns>target</returns>
-        public List<Annotation> Collect(Func<Annotation, bool> predicate, List<Annotation>? target = null)
-        {
-            target ??= [];
-
-            if (predicate(this))
-            {
-                target.Add(this);
-            }
-
-            if (Children != null && Children.Count > 0)
-            {
-                foreach (var child in Children)
-                {
-                    child.Collect(predicate, target);
-                }
-            }
-
-            return target;
-        }
 
         public IEnumerator<Annotation> GetEnumerator()
         {

@@ -100,11 +100,13 @@ namespace gg.parse.argparser
             }
             else
             {
+                Assertions.Requires(node.Count >= 1);
+                Assertions.RequiresNotNull(node[0]);
                 try
                 {
                     property.SetValue(
                         target!,
-                        ParseInstance.OfValue<T>(property!.ArgType, node[0], tokens.Annotations!, args)
+                        ParseInstance.OfValue<T>(property!.ArgType, node[0]!, tokens.Annotations!, args)
                     );
                 }
                 catch (Exception ex)
@@ -174,22 +176,14 @@ namespace gg.parse.argparser
 
             for (int i = 0; i < properties.Length; i++)
             {
-                result.Add(new PropertyArgs()
-                {
-                    ArgPropertyInfo = properties[i],
-                    ArgIndex = i,
-                    Attribute = Attribute.GetCustomAttribute(properties[i], argAttributeType) as ArgAttribute,
-                });
+                var attribute = Attribute.GetCustomAttribute(properties[i], argAttributeType) as ArgAttribute;
+                result.Add(new PropertyArgs(properties[i], null, i, attribute));
             }
 
             for (int i = 0; i < fields.Length; i++)
             {
-                result.Add(new PropertyArgs()
-                {
-                    ArgFieldInfo = fields[i],
-                    ArgIndex = i,
-                    Attribute = Attribute.GetCustomAttribute(fields[i], argAttributeType) as ArgAttribute
-                });
+                var attribute = Attribute.GetCustomAttribute(fields[i], argAttributeType) as ArgAttribute;
+                result.Add(new PropertyArgs(null, fields[i], i, attribute));
             }
 
             return result;

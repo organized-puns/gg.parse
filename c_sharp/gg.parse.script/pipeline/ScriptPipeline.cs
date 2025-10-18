@@ -69,10 +69,10 @@ namespace gg.parse.script.pipeline
             MergeIncludes(session);
 
             // send logs created by parsing to handler.out in a curated format
-            session.LogHandler!.ProcessAstAnnotations(session.Text!, session.Tokens, session.SyntaxTree);
+            session.LogHandler!.ProcessSyntaxTree(session.Text!, session.Tokens, session.SyntaxTree);
             
             // remove logs from the annotations
-            session.SyntaxTree = session.SyntaxTree.Filter(a => a.Rule is not LogRule<int>);
+            session.SyntaxTree = session.SyntaxTree.Prune(a => a.Rule is not LogRule<int>);
 
             // combine the rule graph from the includes with the rulegraph with the one based on the current
             // parse results
@@ -90,7 +90,7 @@ namespace gg.parse.script.pipeline
                             session.Tokens,
                             session.SyntaxTree,
                             session.RuleGraph
-                );
+                        );
             }
             catch (AggregateException ae)
             {

@@ -6,7 +6,7 @@ namespace gg.parse.tests.core
     public class AnnotationExtensionsTests
     {
         [TestMethod]
-        public void CreateAnnotationWithChildren_FilterByRuleId_ExpectResultToMatchRuleId()
+        public void CreateAnnotationWithChildren_PruneByRuleId_ExpectResultToMatchRuleId()
         {
             var annotation = new Annotation(new EmptyRule(1), new(0, 1), [
                 new Annotation(new EmptyRule(2), new(0,0), [
@@ -19,7 +19,7 @@ namespace gg.parse.tests.core
             ]);
 
             // filter for rules with an even ruleId
-            var filteredChildren = annotation.FilterChildren(a => a.Rule.Id % 2 == 0);
+            var filteredChildren = annotation.Prune(a => a.Rule.Id % 2 == 0);
 
             IsTrue(filteredChildren != null);
             IsTrue(filteredChildren[0]!.Rule.Id == 2);
@@ -31,11 +31,11 @@ namespace gg.parse.tests.core
         }
 
         [TestMethod]
-        public void CreateAnnotationCollectionWithChildren_FilterByRuleId_ExpectResultToMatchRuleId()
+        public void CreateAnnotationCollectionWithChildren_PruneByRuleId_ExpectResultToMatchRuleId()
         {
             var annotations = new List<Annotation>() {
-                new Annotation(new EmptyRule(1), new(0, 1)),
-                new Annotation(new EmptyRule(2), new(0, 1), [
+                new(new EmptyRule(1), new(0, 1)),
+                new(new EmptyRule(2), new(0, 1), [
                     new Annotation(new EmptyRule(2), new(0,0), [
                         new Annotation(new EmptyRule(3), new(0,0))
                     ]),
@@ -44,13 +44,13 @@ namespace gg.parse.tests.core
                         new Annotation(new EmptyRule(6), new(0,0))
                     ]),
                 ]),
-                new Annotation(new EmptyRule(8), new(0, 1), [
+                new(new EmptyRule(8), new(0, 1), [
                     new Annotation(new EmptyRule(10), new(0,0), [])
                 ])
             };
 
             // filter for rules with an even ruleId
-            var filteredChildren = annotations.Filter(a => a.Rule.Id % 2 == 0);
+            var filteredChildren = annotations.Prune(a => a.Rule.Id % 2 == 0);
 
             IsTrue(filteredChildren != null);
             IsTrue(filteredChildren.Count == 2);

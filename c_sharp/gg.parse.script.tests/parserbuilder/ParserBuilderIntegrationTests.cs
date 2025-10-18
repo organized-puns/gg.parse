@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+
+using gg.parse.util;
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.pipeline;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parserbuilder
@@ -36,7 +39,7 @@ namespace gg.parse.script.tests.parserbuilder
             }
             catch (ScriptPipelineException ex)
             {
-                IsTrue(ex.InnerException is AggregateException aex && aex.InnerExceptions.Count() == 3);
+                IsTrue(ex.InnerException is AggregateException aex && aex.InnerExceptions.Count == 3);
             }
         }
 
@@ -71,7 +74,7 @@ namespace gg.parse.script.tests.parserbuilder
 
             var testStringWithoutBar = "123ba345ar567";
 
-            (tokensResult, barParseResult) = parser.Parse(testStringWithoutBar);
+            (tokensResult, _) = parser.Parse(testStringWithoutBar);
 
             IsFalse(tokensResult.FoundMatch);
         }

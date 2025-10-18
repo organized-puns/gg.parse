@@ -4,15 +4,16 @@ namespace gg.parse.argparser
 {
     public partial class ArgsReader<T>
     {
-        private class PropertyArgs
+        private class PropertyArgs(PropertyInfo? propertyInfo, FieldInfo? fieldInfo, int index, ArgAttribute? attribute)
         {
-            public PropertyInfo ArgPropertyInfo { get; init; }
+            public PropertyInfo? ArgPropertyInfo { get; init; } = propertyInfo;
 
-            public FieldInfo ArgFieldInfo { get; init; }
+            public FieldInfo? ArgFieldInfo { get; init; } = fieldInfo;
 
-            public int ArgIndex { get; init; }
+            public int ArgIndex { get; init; } = index;
 
-            public ArgAttribute? Attribute { get; init; }
+            public ArgAttribute? Attribute { get; init; } = attribute;
+                        
 
             public bool MatchesFullName(string key)
             {

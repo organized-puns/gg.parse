@@ -16,9 +16,9 @@ kanban
   In progress
     [Create Documentation]
     [Add rule examples]
-    [Fix all warnings]
   Done
     [Add missing names to CompilerFunctionNameGenerator functions]   
+	[Fix all warnings]
 ```
 
 Details
