@@ -8,6 +8,7 @@ using gg.parse.script.parser;
 
 using static gg.parse.util.Assertions;
 using static gg.parse.script.compiler.CompilerFunctions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace gg.parse.script.pipeline
 {
@@ -37,14 +38,14 @@ namespace gg.parse.script.pipeline
         {
             RequiresNotNullOrEmpty(grammarDefinition);
             RequiresNotNull(tokenSession);
-            RequiresNotNull(tokenSession.RuleGraph!);
+            RequiresNotNull(tokenSession.RuleGraph);
 
             var session = InitializeSession<int>(
                 grammarDefinition, 
                 tokenSession.LogHandler, 
                 includedPaths == null ? [] : [..includedPaths!]);
 
-            session.RuleGraph = RegisterTokens(tokenSession.RuleGraph!, session.RuleGraph!);
+            session.RuleGraph!.RegisterTokens(tokenSession.RuleGraph!);
             session.Compiler = CreateParserCompiler(session.Parser!);
 
             return RunPipeline(session);
@@ -57,9 +58,12 @@ namespace gg.parse.script.pipeline
             RequiresNotNull(session.LogHandler);
             RequiresNotNull(session.Compiler);
             RequiresNotNull(session.RuleGraph);
-            RequiresNotNullOrEmpty(session.Text);
+            RequiresNotNullOrEmpty(session.Text!);
 
             (session.Tokens, session.SyntaxTree) = ParseSessionText(session);
+
+            RequiresNotNull(session.Tokens);
+            RequiresNotNull(session.SyntaxTree);
 
             // merge the sessions' rulegraph with all the included files
             MergeIncludes(session);
@@ -101,7 +105,7 @@ namespace gg.parse.script.pipeline
             
             return session;
         }
-
+        
         public static PipelineSession<T> InitializeSession<T>(
             string script, 
             ScriptLogger? logger = null,
@@ -116,7 +120,7 @@ namespace gg.parse.script.pipeline
 
             sessionIncludePaths.Add(AppContext.BaseDirectory);
 
-            var tokenizerSession = new PipelineSession<T>()
+            var session = new PipelineSession<T>()
             {
                 Tokenizer = tokenizer,
                 Parser = parser,
@@ -126,7 +130,7 @@ namespace gg.parse.script.pipeline
                 IncludePaths = sessionIncludePaths
             };
 
-            return tokenizerSession;
+            return session;
         }
 
         public static RuleCompiler CreateTokenizerCompiler(ScriptParser parser)
@@ -138,7 +142,14 @@ namespace gg.parse.script.pipeline
             }
             catch (CompilationException ce)
             {
-                throw new ScriptPipelineException($"Compiler is missing a function for rule '{ce.Rule.Name}'.");
+                if (ce.Rule == null)
+                {
+                    throw new ScriptPipelineException($"Unknown compiler exception while registering compiler functions for the tokens.", ce);
+                }
+                else
+                {
+                    throw new ScriptPipelineException($"Compiler is missing a function for token rule '{ce.Rule.Name}'.", ce);
+                }
             }
         }
 
@@ -157,7 +168,14 @@ namespace gg.parse.script.pipeline
             }
             catch (CompilationException ce)
             {
-                throw new ScriptPipelineException($"Compiler is missing a function for rule '{ce.Rule.Name}'.", ce);
+                if (ce.Rule == null)
+                {
+                    throw new ScriptPipelineException($"Unknown compiler exception while registering compiler functions for the grammar.", ce);
+                }
+                else
+                {
+                    throw new ScriptPipelineException($"Compiler is missing a function for grammar rule '{ce.Rule.Name}'.", ce);
+                }
             }
         }
 
@@ -221,7 +239,7 @@ namespace gg.parse.script.pipeline
             RequiresNotNull(session.Tokenizer);
             RequiresNotNull(session.Parser);
             RequiresNotNull(session.LogHandler);
-            RequiresNotNullOrEmpty(session.Text);
+            RequiresNotNullOrEmpty(session.Text!);
 
             try
             {
@@ -300,22 +318,14 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        private static RuleGraph<int> RegisterTokens(RuleGraph<char> tokenSource, RuleGraph<int> target)
+        private static void RegisterTokens(this RuleGraph<int> target, RuleGraph<char> tokenSource)
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
-            foreach (var tokenFunctionName in tokenSource.RuleNames)
-            {
-                var tokenFunction = tokenSource.FindRule(tokenFunctionName);
-
-                if (tokenFunction.Output == RuleOutput.Self
-                    // xxx must be a stronger test for this
-                    && !tokenFunction.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
-                {
-                    target.RegisterRule(new MatchSingleData<int>($"{tokenFunctionName}", tokenFunction.Id, RuleOutput.Self));
-                }
-            }
-
-            return target;
+            tokenSource
+                .Where( f => f.Output == RuleOutput.Self
+                    && !f.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
+                .ForEach( f =>
+                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, RuleOutput.Self)));
         }
     }
 }

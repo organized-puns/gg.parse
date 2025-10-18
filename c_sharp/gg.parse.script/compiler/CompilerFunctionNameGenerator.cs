@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.script.parser;
+using gg.parse.util;
 
 namespace gg.parse.script.compiler
 {
@@ -15,13 +16,23 @@ namespace gg.parse.script.compiler
             string parentName, 
             int index)
         {
+            Assertions.RequiresNotNull(annotation);
+
             switch (annotation)
             {
                 case ScriptParser.Names.CharacterRange:
-                    return $"{UnnamedRulePrefix}{ScriptParser.Names.CharacterRange}('{session.GetText(annotation[0].Range)}, {session.GetText(annotation[1].Range)}')";
+                    Assertions.Requires(annotation.Count >= 2);
+                    Assertions.RequiresNotNull(annotation[0]);
+                    Assertions.RequiresNotNull(annotation[1]);
+
+                    return $"{UnnamedRulePrefix}{ScriptParser.Names.CharacterRange}"
+                        + $"('{session.GetText(annotation[0]!.Range)}, {session.GetText(annotation[1]!.Range)}')";
 
                 case ScriptParser.Names.CharacterSet:
-                    return $"{UnnamedRulePrefix}{ScriptParser.Names.CharacterSet}('{session.GetText(annotation[0].Range)}')";
+                    Assertions.Requires(annotation.Count >= 1);
+
+                    return $"{UnnamedRulePrefix}{ScriptParser.Names.CharacterSet}"
+                        + $"('{session.GetText(annotation[0]!.Range)}')";
 
                 case ScriptParser.Names.Literal:
                     return $"{UnnamedRulePrefix}{ScriptParser.Names.Literal}({session.GetText(annotation.Range)})";

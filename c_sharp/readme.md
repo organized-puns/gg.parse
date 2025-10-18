@@ -3,6 +3,25 @@ gg.parse 0.1
 
 !_Please Note_! the code base is under development and changes frequently. The documentation below may be out of date.
 
+gg.parse is a c# project aiming to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
+tools to make parsing of simple and complex data easy to do.
+
+## Table of Contents
+- [License](#license)
+- [Goals](#goals-use-cases-and-otherwise)
+- [Quickstart](#quickstart)
+- [Project structure](#project-structure)
+- [Rule references](#rule-references)
+  - [Data rules](#data-rules)
+    - [Match any](#match-any)
+    - [Match range](#match-data-range-az)
+  - [Meta rules](#meta-rules)
+    - [Match count](#match-count--)
+    - [Match evaluation](#match-evaluation--abc)
+  - [Look ahead rules](#look-ahead-rules)
+    - [Match condition](#match-condition--if-)
+- [More information](#more-information)
+
 License
 -------
 
@@ -24,14 +43,13 @@ Quickstart
 Core concepts:
 
 - A _`Rule`_ implements a function to parse data (text) and create one or more _`Annotations`_.
-- An `_Annotation_` describes what data is intended to mean, as expressed by a rule. An annotation describes a specific 
-  part of the data by way of a `_Range_`. A range a position in the data and its length. Furthermore an annotation is a 
+- An _`Annotation`_ describes what data is intended to mean, as expressed by a rule. An annotation describes a specific 
+  part of the data by way of a _`Range`_. A range a position in the data and its length. Furthermore an annotation is a 
   tree-node where its children may give further insight in the details of data in question.
-- A collection of `Rules` make up a `_Rule Graph_`. A `Rule Graph` can _parse_ data (commonly, but not necessarily 
+- A collection of `Rules` make up a _`Rule Graph`_. A `Rule Graph` can _parse_ data (commonly, but not necessarily 
   text)  and map the data to one or more `Annotations`. Depending on the use case, the collection of `Annotations` 
   can either be used as `Tokens` or an `Abstract Syntax Tree`.
 
-<img src="./doc/rules_and_annotations.png">
 
 Extended concepts:
 
@@ -121,24 +139,25 @@ The project consists of 3 main topics:
 
 Each of these main topics has each own corresponding test project.
   
+
+Rule References
+---------------
+
+### Data rules
+#### [Match Any](./doc/match-any-data.md) (.)
+#### [Match Data Range](./doc/match-data-range.md) ({'a'..'z'})
+
+### Meta rules
+#### [Match Evaluation](./doc/match-evaluation.md)  (a/b/c)
+#### [Match Count](./doc/match-count.md) (*,+, ?)
+
+### Look-ahead rules
+#### [Match Condition](./doc/match-condition.md)  (if ...)
+
+
 More information
 ----------------
 
 [Extending parse script](./doc/extending_parse_script.md) steps required to add a new rule to the script.
 
 [To do list](./doc/todo.md) a list of all planned or unplanned tasks.
-
-Rule References
----------------
-
-Data rules
-- [Match Any (.)](./doc/match-any-data.md)
-
-Meta rules
-- [Match Evaluation (a/b/c)](./doc/match-evaluation.md)
-- [Match Count *,+, ?](./doc/match-count.md)
-
-Look-ahead rules
-- [Match Condition (if ...)](./doc/match-condition.md)
-
-

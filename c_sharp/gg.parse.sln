@@ -50,6 +50,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{8D303D6A-1B6
 		license.md = license.md
 		doc\match-any-data.md = doc\match-any-data.md
 		doc\match-condition.md = doc\match-condition.md
+		doc\match-count.md = doc\match-count.md
 		doc\match-evaluation.md = doc\match-evaluation.md
 		doc\todo.md = doc\todo.md
 	EndProjectSection
