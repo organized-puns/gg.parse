@@ -12,13 +12,14 @@ config:
 kanban
   Backlog
     [Add to nuget]
-    [Validate github PR permssions]
   In progress
     [Create Documentation]
     [Add rule examples]
   Done
     [Add missing names to CompilerFunctionNameGenerator functions]   
 	[Fix all warnings]
+	[Validate github PR permssions]
+
 ```
 
 Details
