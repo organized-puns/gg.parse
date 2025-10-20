@@ -1,4 +1,4 @@
-name: Run Unit Tests
+name: Run Debug Unit Tests
 
 on:
   pull_request:
@@ -20,12 +20,15 @@ jobs:
         dotnet-version: '8.0.x'  
         
     - name: Restore dependencies
+      working-directory: ./c_sharp
       run: dotnet restore
     
     - name: Build solution
+      working-directory: ./c_sharp
       run: dotnet build --configuration Debug --no-restore
     
     - name: Run unit tests
+      working-directory: ./c_sharp
       run: dotnet test --no-build --configuration Debug --verbosity normal --logger "trx;LogFileName=test-results.trx"
     
     - name: Publish test results
