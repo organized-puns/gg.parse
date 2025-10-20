@@ -22,7 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'  
+        dotnet-version: '9.0.x'  
         
     - name: Restore dependencies
       working-directory: ./c_sharp
@@ -30,7 +30,7 @@ jobs:
     
     - name: Build solution
       working-directory: ./c_sharp
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore --warnaserror
     
     - name: Run unit tests
       working-directory: ./c_sharp

@@ -21,7 +21,9 @@ namespace gg.parse.script.compiler
         public static RuleBase<char> CompileLiteral(RuleHeader header, Annotation bodyNode, CompileSession context)
         {
             var literalText = context.GetText(bodyNode.Range);
+#pragma warning disable IDE0057 // Use range operator
             var unescapedLiteralText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
+#pragma warning restore IDE0057 // Use range operator
 
             if (string.IsNullOrEmpty(unescapedLiteralText))
             {
@@ -44,9 +46,11 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("Text defining the MatchDataSet text is null or empty", annotation: bodyNode);
             }
 
+#pragma warning disable IDE0057 // Use range operator
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
+#pragma warning restore IDE0057 // Use range operator
 
-            return new MatchDataSet<char>(header.Name, header.Output, setText.ToArray(), header.Precedence);
+            return new MatchDataSet<char>(header.Name, header.Output, [.. setText], header.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterRange(RuleHeader declaration, Annotation bodyNode, CompileSession context)
@@ -89,7 +93,7 @@ namespace gg.parse.script.compiler
             var hasOutputModifier = (bodyNode.Children != null && bodyNode.Children.Count > 1);
             var referenceName = hasOutputModifier
                     // ref name contains a output - take the name only 
-                    ? session.GetText(bodyNode.Children[1].Range)
+                    ? session.GetText(bodyNode.Children![1].Range)
                     // no operator, use the entire span
                     : session.GetText(bodyNode.Range);
 
@@ -105,7 +109,7 @@ namespace gg.parse.script.compiler
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasOutputModifier)
             {
-                session.Compiler.TryMatchOutputModifier(bodyNode.Children[0]!.Rule.Id, out modifier);
+                session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out modifier);
             }
 
             return new RuleReference<T>(declaration.Name, referenceName, modifier, declaration.Precedence);
@@ -182,8 +186,10 @@ namespace gg.parse.script.compiler
 
             var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule];
             var groupDeclaration = new RuleHeader(header.Output, header.Name, 0, 0);
+            var result = compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
 
-            return compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
+            // xxx needs more info
+            return result ?? throw new CompilationException("Failed to compile group");
         }
 
         public static RuleBase<T> CompileCount<T>(
@@ -320,7 +326,7 @@ namespace gg.parse.script.compiler
         public static RuleBase<T> CompileAny<T>(RuleHeader header, Annotation _, CompileSession __) 
             where T : IComparable<T>
         {
-            Assertions.Requires(header != null);
+            Assertions.RequiresNotNull(header);
 
             return new MatchAnyData<T>(header.Name, header.Output, precedence: header.Precedence);
         }
@@ -346,7 +352,9 @@ namespace gg.parse.script.compiler
                     annotation: bodyNode);
             }
 
+#pragma warning disable IDE0057 // Use range operator
             message = message.Substring(1, message.Length - 2);
+#pragma warning restore IDE0057 // Use range operator
 
             RuleBase<T>? condition = null;
 
@@ -354,11 +362,19 @@ namespace gg.parse.script.compiler
             {
                 var elementBody = bodyNode.Children[2];
                 var (compilationFunction, _) = session.FindFunction(elementBody.Rule);
-                var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
-                var conditionHeader = new RuleHeader(RuleOutput.Self, elementName);
 
-                condition = compilationFunction(conditionHeader, elementBody, session) as RuleBase<T>
-                    ?? throw new CompilationException("Cannot compile condition for Log.", annotation: elementBody);
+                if (compilationFunction != null)
+                {
+                    var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
+                    var conditionHeader = new RuleHeader(RuleOutput.Self, elementName);
+
+                    condition = compilationFunction(conditionHeader, elementBody, session) as RuleBase<T>
+                        ?? throw new CompilationException("Cannot compile condition for Log.", annotation: elementBody);
+                }
+                else
+                {
+                    throw new CompilationException($"Could not find a compilation function for rule: '{elementBody.Rule}'");
+                }
             }
 
             return new LogRule<T>(header.Name, header.Output, message, condition, logLevel);

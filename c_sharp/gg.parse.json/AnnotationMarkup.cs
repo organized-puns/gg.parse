@@ -49,7 +49,6 @@ namespace gg.parse.json
         }
 
         public static string AnnotateTextUsingHtml(
-            this RuleGraph<char> ruleTable,
             string sourceText,
             List<Annotation> tokens,
             Dictionary<string, string> styleLookup) 
@@ -78,7 +77,7 @@ namespace gg.parse.json
 
                 if (annotation.Range.Start > outputIndex)
                 {
-                    builder.Append(sourceText.Substring(outputIndex, annotation.Range.Start - outputIndex));
+                    builder.Append(sourceText.AsSpan(outputIndex, annotation.Range.Start - outputIndex));
                     outputIndex = annotation.Range.Start;
                 }
 

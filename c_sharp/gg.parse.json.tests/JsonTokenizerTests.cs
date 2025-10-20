@@ -25,14 +25,14 @@ namespace gg.parse.json.tests
         public void TestJsonFile_ExpectLotsOfAnnotations()
         {
             var tokenizer = new JsonTokenizer();
-            var ((isSuccess, charactersRead, annotations), text) = tokenizer.ParseFile("assets/example.json");
+            var ((isSuccess, _, annotations), text) = tokenizer.ParseFile("assets/example.json");
 
             Assert.IsTrue(isSuccess);
 
             Directory.CreateDirectory("output");
 
             File.WriteAllText("output/jsontokenizer_example_annotation.html",
-                tokenizer.AnnotateTextUsingHtml(text, annotations, AnnotationMarkup.CreateTokenStyleLookup()));
+                AnnotationMarkup.AnnotateTextUsingHtml(text, annotations, AnnotationMarkup.CreateTokenStyleLookup()));
         }
     }
 }

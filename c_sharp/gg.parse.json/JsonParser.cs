@@ -1,6 +1,7 @@
-﻿using gg.parse.script.common;
+﻿using System.Text;
 
-using System.Text;
+using gg.parse.script.common;
+using gg.parse.util;
 
 namespace gg.parse.json
 {
@@ -21,8 +22,12 @@ namespace gg.parse.json
     public class JsonParser : CommonGraphWrapper<int>
     {
         public JsonTokenizer Tokenizer { get; init; }
-     
+
+        // xxx replace using this "global"
+
+#pragma warning disable IDE0044 // Add readonly modifier
         private RuleOutput _defaultProduct = RuleOutput.Self;
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public JsonParser() 
             : this(new JsonTokenizer())
@@ -31,6 +36,8 @@ namespace gg.parse.json
 
         public JsonParser(JsonTokenizer tokenizer)
         {
+            Assertions.RequiresNotNull(tokenizer);
+
             Tokenizer = tokenizer;
 
             _defaultProduct = RuleOutput.Self;
@@ -97,13 +104,16 @@ namespace gg.parse.json
             Root = OneOf("#JsonRoot", jsonObject, jsonArray);
         }
 
-        public int TokenId(string name) => Tokenizer.FindRule(name).Id;
+        public int TokenId(string name) => Tokenizer!.FindRule(name)!.Id;
 
         public RuleBase<int> Token(string tokenName) => Token(tokenName, _defaultProduct);
         
         public RuleBase<int> Token(string tokenName, RuleOutput product)
         {
             var rule = Tokenizer.FindRule(tokenName);
+
+            Assertions.RequiresNotNull(rule);
+
             return MatchSingle($"{product.GetToken()}Token({rule.Name})", rule.Id);
         }
 
@@ -130,7 +140,7 @@ namespace gg.parse.json
 
                         if (astResults.FoundMatch)
                         {
-                            return (tokenResults.Annotations, astResults.Annotations);
+                            return (tokenResults.Annotations, astResults.Annotations!);
                         }
                     }
                     else
@@ -147,7 +157,7 @@ namespace gg.parse.json
             throw new ArgumentException("Invalid input");
         }
 
-        public Dictionary<string, string> CreateAstStyleLookup()
+        public static Dictionary<string, string> CreateAstStyleLookup()
         {
             return new Dictionary<string, string>
             {
@@ -168,11 +178,11 @@ namespace gg.parse.json
         public ParseResult Parse(List<Annotation> tokens)
         {
             return Root != null
-                ? Root.Parse(tokens.Select(t => t.Rule.Id).ToArray(), 0)
+                ? Root.Parse([.. tokens.Select(t => t.Rule.Id)], 0)
                 : throw new InvalidProgramException("Cannot call parse without defining a Root first."); 
         }
 
-        public string AnnotateTextUsingHtml(
+        public static string AnnotateTextUsingHtml(
             string text,
             List<Annotation> tokens,
             List<Annotation> astNodes,
@@ -207,13 +217,13 @@ namespace gg.parse.json
             return builder.ToString();
         }
 
-        private int AppendAnnotation(string text, StringBuilder builder, Annotation annotation, int writePosition, List<Annotation> tokens)
+        private static int AppendAnnotation(string text, StringBuilder builder, Annotation annotation, int writePosition, List<Annotation> tokens)
         {
             var textStart = tokens[annotation.Range.Start].Start;
 
             if (textStart > writePosition)
             {
-                builder.Append(text.Substring(writePosition, textStart - writePosition));
+                builder.Append(text.AsSpan(writePosition, textStart - writePosition));
                 writePosition = textStart;
             }
 
@@ -249,7 +259,7 @@ namespace gg.parse.json
                     for (var tokenIndex = lastReadToken; tokenIndex < annotation.End; tokenIndex++)
                     {
                         var token = tokens[tokenIndex];
-                        builder.Append(text.Substring(writePosition, token.End - writePosition));
+                        builder.Append(text[writePosition..token.End]);
                         writePosition = token.End;
                     }
                 }

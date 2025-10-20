@@ -37,7 +37,7 @@ namespace gg.parse.json
             Root = ZeroOrMore("#jsonTokenizer", OneOf("#whiteSpaceTokenOrError", Whitespace(), jsonTokens, error));
         }
 
-        public ParseResult Tokenize(string text) => Root.Parse(text);
+        public ParseResult Tokenize(string text) => Root!.Parse(text);
 
         public (ParseResult, string) ParseFile(string path)
         {
