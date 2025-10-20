@@ -72,7 +72,7 @@ namespace gg.parse.script.pipeline
             session.LogHandler!.ProcessSyntaxTree(session.Text!, session.Tokens, session.SyntaxTree);
             
             // remove logs from the annotations
-            session.SyntaxTree = session.SyntaxTree.Prune(a => a.Rule is not LogRule<int>);
+            session.SyntaxTree = session.SyntaxTree.Prune(a => a.Rule is LogRule<int>);
 
             // combine the rule graph from the includes with the rulegraph with the one based on the current
             // parse results

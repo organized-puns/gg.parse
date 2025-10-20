@@ -18,8 +18,8 @@ namespace gg.parse.tests.core
                 ]),
             ]);
 
-            // filter for rules with an even ruleId
-            var filteredChildren = annotation.Prune(a => a.Rule.Id % 2 == 0);
+            // prune annotations where the rule's id is odd
+            var filteredChildren = annotation.Prune(a => a.Rule.Id % 2 == 1);
 
             IsTrue(filteredChildren != null);
             IsTrue(filteredChildren[0]!.Rule.Id == 2);
@@ -49,8 +49,8 @@ namespace gg.parse.tests.core
                 ])
             };
 
-            // filter for rules with an even ruleId
-            var filteredChildren = annotations.Prune(a => a.Rule.Id % 2 == 0);
+            // prune annotations where the rule's id is odd
+            var filteredChildren = annotations.Prune(a => a.Rule.Id % 2 == 1);
 
             IsTrue(filteredChildren != null);
             IsTrue(filteredChildren.Count == 2);

@@ -110,7 +110,7 @@ namespace gg.parse
         /// nodes that do not match the filter. 
         /// </summary>
         /// <param name="annotations"></param>
-        /// <param name="predicate"></param>
+        /// <param name="predicate">Remove an annotation if it matches the given predicate</param>
         /// <returns></returns>
         public static List<Annotation> Prune(this List<Annotation> annotations, Func<Annotation, bool> predicate)
         {
@@ -118,7 +118,9 @@ namespace gg.parse
 
             annotations.ForEach(a =>
             {
-                if (predicate(a))
+                // invert the stated goals - keep everything that does not
+                // match the predicate in order to keep the original the same 
+                if (!predicate(a))
                 {
                     result.Add(a.Prune(predicate));
                 }
