@@ -30,7 +30,7 @@ namespace gg.parse.tests.core
             IsTrue(filteredChildren[1]![0]!.Rule.Id == 6);
         }
 
-        // testing minor change to see if github rule protections are in place
+        // testing minor change to see if github rule protections are in place  (2) 
 
         [TestMethod]
         public void CreateAnnotationCollectionWithChildren_PruneByRuleId_ExpectResultToMatchRuleId()
