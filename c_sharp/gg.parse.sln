@@ -64,8 +64,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8F4D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{5078236F-F891-461B-80D9-D9B588C4E100}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\unittests-debug.yml = .github\workflows\unittests-debug.yml
-		.github\workflows\unittests-release.yml = .github\workflows\unittests-release.yml
+		..\.github\workflows\unittests-debug.yml = ..\.github\workflows\unittests-debug.yml
+		..\.github\workflows\unittests-release.yml = ..\.github\workflows\unittests-release.yml
 	EndProjectSection
 EndProject
 Global
