@@ -30,6 +30,8 @@ namespace gg.parse.tests.core
             IsTrue(filteredChildren[1]![0]!.Rule.Id == 6);
         }
 
+        // test
+
         [TestMethod]
         public void CreateAnnotationCollectionWithChildren_PruneByRuleId_ExpectResultToMatchRuleId()
         {
