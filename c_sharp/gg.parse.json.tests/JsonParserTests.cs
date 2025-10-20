@@ -1,8 +1,4 @@
-﻿
-
-using gg.parse.json;
-
-namespace gg.parse.tests.examples
+﻿namespace gg.parse.json.tests
 {
     [TestClass]
     public class JsonParserTests
@@ -80,7 +76,12 @@ namespace gg.parse.tests.examples
 
             var missingValue = "{\"key\": }";
             var tokens = tokenizer.Tokenize(missingValue).Annotations;
+
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
             var result = parser.Parse(tokens);
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
+
+            // xxx missing assert
 
         }
 
@@ -91,7 +92,7 @@ namespace gg.parse.tests.examples
             var keyStrValue = "{\"key\": \"value\"}";
             var (tokens, astNodes) = parser.Parse(keyStrValue);
 
-            var html = parser.AnnotateTextUsingHtml(keyStrValue, tokens, astNodes, parser.CreateAstStyleLookup());
+            var html = JsonParser.AnnotateTextUsingHtml(keyStrValue, tokens, astNodes, JsonParser.CreateAstStyleLookup());
 
             Directory.CreateDirectory("output");
 
@@ -104,7 +105,7 @@ namespace gg.parse.tests.examples
             var parser = new JsonParser();
             var (tokens, astNodes, text) = parser.ParseFile("assets/example.json");
 
-            var html = parser.AnnotateTextUsingHtml(text, tokens, astNodes, parser.CreateAstStyleLookup());
+            var html = JsonParser.AnnotateTextUsingHtml(text, tokens, astNodes, JsonParser.CreateAstStyleLookup());
 
             Directory.CreateDirectory("output");
 
