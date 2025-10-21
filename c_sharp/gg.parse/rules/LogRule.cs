@@ -10,7 +10,8 @@ namespace gg.parse.rules
         Error = 2,
         Warning = 4,
         Info = 8,
-        Debug = 16
+        Debug = 16,
+        Any = Fatal | Error | Warning | Info | Debug
     }
 
     public class FatalConditionException<T> : Exception where T : IComparable<T>

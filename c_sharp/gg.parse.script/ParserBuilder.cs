@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.rules;
 using gg.parse.script.common;
 using gg.parse.script.pipeline;
 using gg.parse.util;
@@ -145,6 +146,23 @@ namespace gg.parse.script
             {
                 LogHandler?.ProcessException(e);
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Convenience method to write the received logs during parsing / compilation
+        /// to the given output action
+        /// </summary>
+        /// <param name="output"></param>
+        /// <param name="includedLevels"></param>
+        public void WriteLogs(Action<LogLevel,string> output, LogLevel includedLevels = LogLevel.Any)
+        {
+            if (LogHandler != null && LogHandler.ReceivedLogs != null)
+            {
+                LogHandler
+                    .ReceivedLogs
+                    .Where(log => (log.level & includedLevels) > 0)
+                    .ForEach(log => output(log.level, log.message));
             }
         }
     }

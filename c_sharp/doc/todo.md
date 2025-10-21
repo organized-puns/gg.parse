@@ -11,15 +11,15 @@ config:
 ---
 kanban
   Backlog
-    [Add to nuget]	
   In progress
     [Create Documentation]
     [Add rule examples]
-	[Add tests to check in rules]
   Done
+	[Add to nuget]	
     [Add missing names to CompilerFunctionNameGenerator functions]   
 	[Fix all warnings]
 	[Validate github PR permssions]
+	[Add tests to check in rules]
 
 ```
 
