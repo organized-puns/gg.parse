@@ -1,6 +1,10 @@
 gg.parse 0.1
 =======================================================================================================================
 
+```bash
+dotnet add package gg.parse.script --version 0.1.0
+```
+
 !_Please Note_! the code base is under development and changes frequently. The documentation below may be out of date.
 
 gg.parse is a c# project aiming to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
