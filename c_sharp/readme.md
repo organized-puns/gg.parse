@@ -150,6 +150,7 @@ Rule References
 ### Data rules
 #### [Match Any](./doc/match-any-data.md) (.)
 #### [Match Data Range](./doc/match-data-range.md) ({'a'..'z'})
+#### [Match Data Sequence](./doc/match-data-sequence.md) ('abc')
 
 ### Meta rules
 #### [Match Evaluation](./doc/match-evaluation.md)  (a/b/c)
