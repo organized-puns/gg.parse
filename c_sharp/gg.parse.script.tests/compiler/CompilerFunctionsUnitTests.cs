@@ -308,7 +308,7 @@ namespace gg.parse.script.tests.compiler
             var indentifierId = new EmptyRule(42);
             var noneProductId = 62;
 
-            var compiler = new RuleCompiler([(noneProductId, RuleOutput.Void)])
+            var compiler = new RuleCompiler([(noneProductId, AnnotationPruning.All)])
                 .RegisterFunction(indentifierId, CompileIdentifier<char>);
 
             // compile a rule table which can tokenize foo
@@ -358,7 +358,7 @@ namespace gg.parse.script.tests.compiler
             var identifierRule = table.FindRule("rule");
 
             IsNotNull(identifierRule);
-            IsTrue(identifierRule.Output == RuleOutput.Void);
+            IsTrue(identifierRule.Prune == AnnotationPruning.All);
 
             // the compiled table's root should be able to parse a bar string 
             var testText = "bar";
@@ -921,7 +921,7 @@ namespace gg.parse.script.tests.compiler
             }
             catch (AggregateException ae)
             {
-                IsTrue(ae.InnerExceptions.Count() == 1);
+                IsTrue(ae.InnerExceptions.Count == 1);
                 IsTrue(ae.InnerExceptions.ElementAt(0) is CompilationException);
             }
         }
@@ -977,7 +977,7 @@ namespace gg.parse.script.tests.compiler
             IsTrue(literalFunction.Precedence == rulePrecedence);
         }
 
-        private void TestRegisterAndCompileCountFunction(CompileFunction function, char operatorChar, int min, int max)
+        private static void TestRegisterAndCompileCountFunction(CompileFunction function, char operatorChar, int min, int max)
         {
             var literalId = new EmptyRule(42);
             var countId = new EmptyRule(64);

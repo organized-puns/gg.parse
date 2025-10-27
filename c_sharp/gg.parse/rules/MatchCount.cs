@@ -9,7 +9,7 @@ namespace gg.parse.rules
     public class MatchCount<T>(
         string name, 
         RuleBase<T> rule, 
-        RuleOutput output = RuleOutput.Self, 
+        AnnotationPruning output = AnnotationPruning.None, 
         int min = 1, 
         int max = 1, 
         int precedence = 0
@@ -59,7 +59,7 @@ namespace gg.parse.rules
                 index += result.MatchLength;
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                    (Output == RuleOutput.Self || Output == RuleOutput.Children))
+                    (Prune == AnnotationPruning.None || Prune == AnnotationPruning.Root))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

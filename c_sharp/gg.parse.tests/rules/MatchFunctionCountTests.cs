@@ -13,7 +13,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidSingleInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
-            var rule = new MatchCount<int>("TestRule", function, RuleOutput.Self, 1, 3);
+            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.None, 1, 3);
 
             function.Id = 1;
             rule.Id = 2;
@@ -33,7 +33,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidMultipleInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchCount<int>("TestRule", function, RuleOutput.Self, 1, 2);
+            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.None, 1, 2);
 
             function.Id = 1;
             rule.Id = 2;
@@ -59,7 +59,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidMultipleTransitiveInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchCount<int>("TestRule", function, RuleOutput.Children, 1, 2);
+            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.Root, 1, 2);
 
             function.Id = 1;
             rule.Id = 2;
@@ -83,7 +83,7 @@ namespace gg.parse.tests.rulefunctions
         public void MatchFunctionCount_ValidMultipleNoneInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
-            var rule = new MatchCount<int>("TestRule", function, RuleOutput.Void, 1, 2);
+            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.All, 1, 2);
 
             function.Id = 1;
             rule.Id = 2;

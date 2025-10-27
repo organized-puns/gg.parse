@@ -12,7 +12,7 @@ namespace gg.parse.script.compiler
     {
         public string Name { get; init; }
 
-        public RuleOutput Output { get; init; }
+        public AnnotationPruning Output { get; init; }
               
         public int Precedence { get; init; }
 
@@ -23,7 +23,7 @@ namespace gg.parse.script.compiler
 
         public bool IsTopLevel { get; init; }
 
-        public RuleHeader(RuleOutput output, string name, int precedence, int length, bool isTopLevel = true)
+        public RuleHeader(AnnotationPruning output, string name, int precedence, int length, bool isTopLevel = true)
         {
             Name = name;
             Output = output;
@@ -32,7 +32,7 @@ namespace gg.parse.script.compiler
             IsTopLevel = isTopLevel;
         }
 
-        public RuleHeader(RuleOutput product, string name)
+        public RuleHeader(AnnotationPruning product, string name)
             : this(product, name, 0, 0) { }
     }
 }

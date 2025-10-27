@@ -33,7 +33,7 @@ namespace gg.parse.rules
         /// </summary>
         public bool DeferResultToReference { get; set; } = false;
 
-        public RuleReference(string name, string reference, RuleOutput product = RuleOutput.Self, int precedence = 0)
+        public RuleReference(string name, string reference, AnnotationPruning product = AnnotationPruning.None, int precedence = 0)
             : base(name, product, precedence) 
         {
             Reference = reference;
@@ -54,10 +54,10 @@ namespace gg.parse.rules
                 {
                     // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 
                     // the rule output so pass back the result based on this' product
-                    return Output switch
+                    return Prune switch
                     {
-                        RuleOutput.Self => result,
-                        RuleOutput.Children => new ParseResult(
+                        AnnotationPruning.None => result,
+                        AnnotationPruning.Root => new ParseResult(
                             true, 
                             result.MatchLength, 
                             CollectChildAnnotations(result.Annotations)
@@ -72,11 +72,11 @@ namespace gg.parse.rules
                     // eg let's say the user states foo = 'bar'; bar = foo; in this case the rule 'bar' has its own name
                     // so the results should include 'bar' as the rule name, not 'foo'. Bar may still have any output
                     // modifiers eg "#bar = foo;" in which case foo will show up.
-                    return Output switch
+                    return Prune switch
                     {
-                        RuleOutput.Self => new ParseResult(true, result.MatchLength,
+                        AnnotationPruning.None => new ParseResult(true, result.MatchLength,
                                                                        [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]),
-                        RuleOutput.Children => result,
+                        AnnotationPruning.Root => result,
                         _ => new ParseResult(true, result.MatchLength),
                     };
                 }

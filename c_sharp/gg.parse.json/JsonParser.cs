@@ -26,7 +26,7 @@ namespace gg.parse.json
         // xxx replace using this "global"
 
 #pragma warning disable IDE0044 // Add readonly modifier
-        private RuleOutput _defaultProduct = RuleOutput.Self;
+        private AnnotationPruning _defaultProduct = AnnotationPruning.None;
 #pragma warning restore IDE0044 // Add readonly modifier
 
         public JsonParser() 
@@ -40,7 +40,7 @@ namespace gg.parse.json
 
             Tokenizer = tokenizer;
 
-            _defaultProduct = RuleOutput.Self;
+            _defaultProduct = AnnotationPruning.None;
 
             var key = MatchSingle(JsonNodeNames.Key, TokenId(CommonTokenNames.String));
             var stringValue = MatchSingle(JsonNodeNames.String, TokenId(CommonTokenNames.String));
@@ -52,7 +52,7 @@ namespace gg.parse.json
             // value = string | int | float | bool | null
             var value = OneOf(JsonNodeNames.Value, stringValue, intValue, floatValue, boolValue, nullValue);
 
-            _defaultProduct = RuleOutput.Void;
+            _defaultProduct = AnnotationPruning.All;
             
             var keyValueSeparator = Token(CommonTokenNames.KeyValueSeparator);
             var objectStart = Token(CommonTokenNames.ScopeStart);
@@ -108,13 +108,13 @@ namespace gg.parse.json
 
         public RuleBase<int> Token(string tokenName) => Token(tokenName, _defaultProduct);
         
-        public RuleBase<int> Token(string tokenName, RuleOutput product)
+        public RuleBase<int> Token(string tokenName, AnnotationPruning product)
         {
             var rule = Tokenizer.FindRule(tokenName);
 
             Assertions.RequiresNotNull(rule);
 
-            return MatchSingle($"{product.GetToken()}Token({rule.Name})", rule.Id);
+            return MatchSingle($"{product.GetTokenString()}Token({rule.Name})", rule.Id);
         }
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);

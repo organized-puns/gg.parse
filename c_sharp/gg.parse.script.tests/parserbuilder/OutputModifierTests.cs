@@ -20,13 +20,13 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(root != null);
 
             IsTrue((root[0] as RuleReference<char>).Reference == "foo");
-            IsTrue(root[0].Output == RuleOutput.Self);
+            IsTrue(root[0].Prune == AnnotationPruning.None);
 
             IsTrue((root[1] as RuleReference<char>).Reference == "foo");
-            IsTrue(root[1].Output == RuleOutput.Children);
+            IsTrue(root[1].Prune == AnnotationPruning.Root);
 
             IsTrue((root[2] as RuleReference<char>).Reference == "foo");
-            IsTrue(root[2].Output == RuleOutput.Void);
+            IsTrue(root[2].Prune == AnnotationPruning.All);
 
             var (result, _) = parser.Parse("foofoofoo");
 
@@ -49,13 +49,13 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(root != null);
 
             IsTrue((root[0] as RuleReference<int>).Reference == "foo");
-            IsTrue(root[0].Output == RuleOutput.Self);
+            IsTrue(root[0].Prune == AnnotationPruning.None);
 
             IsTrue((root[1] as RuleReference<int>).Reference == "bar");
-            IsTrue(root[1].Output == RuleOutput.Children);
+            IsTrue(root[1].Prune == AnnotationPruning.Root);
 
             IsTrue((root[2] as RuleReference<int>).Reference == "foo");
-            IsTrue(root[2].Output == RuleOutput.Void);
+            IsTrue(root[2].Prune == AnnotationPruning.All);
 
             var result = parser.Parse("foobarfoo");
 
@@ -82,13 +82,13 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(root != null);
 
             IsTrue((root[0] as RuleReference<char>).Reference == "foo");
-            IsTrue(root[0].Output == RuleOutput.Self);
+            IsTrue(root[0].Prune == AnnotationPruning.None);
 
             IsTrue((root[1] as RuleReference<char>).Reference == "foo");
-            IsTrue(root[1].Output == RuleOutput.Children);
+            IsTrue(root[1].Prune == AnnotationPruning.Root);
 
             IsTrue((root[2] as RuleReference<char>).Reference == "foo");
-            IsTrue(root[2].Output == RuleOutput.Void);
+            IsTrue(root[2].Prune == AnnotationPruning.All);
 
             var (result, _) = parser.Parse("foobarfoo");
 

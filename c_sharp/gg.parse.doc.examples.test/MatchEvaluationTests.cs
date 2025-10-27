@@ -92,16 +92,16 @@ namespace gg.parse.doc.examples.test
         /// <returns></returns>
         private static (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
         {
-            var whitespace = new MatchDataSet<char>("whitespace", setValues: " \t\r\n".ToCharArray(), output: RuleOutput.Void);
+            var whitespace = new MatchDataSet<char>("whitespace", setValues: " \t\r\n".ToCharArray(), output: AnnotationPruning.All);
 
             var digit = new MatchDataRange<char>("digit", '0', '9');
-            var number = new MatchCount<char>("number", rule: digit, min: 1, max: 0, output: RuleOutput.Self);
+            var number = new MatchCount<char>("number", rule: digit, min: 1, max: 0, output: AnnotationPruning.None);
 
             var plus = new MatchSingleData<char>("plus", '+');
             var mult = new MatchSingleData<char>("mult", '*');
 
-            var tokenEnumeration = new MatchOneOf<char>("tokens", rules: [whitespace, number, plus, mult], output: RuleOutput.Children);
-            var tokenStream = new MatchCount<char>("tokenStream", rule: tokenEnumeration, min: 1, max: 0, output: RuleOutput.Children);
+            var tokenEnumeration = new MatchOneOf<char>("tokens", rules: [whitespace, number, plus, mult], output: AnnotationPruning.Root);
+            var tokenStream = new MatchCount<char>("tokenStream", rule: tokenEnumeration, min: 1, max: 0, output: AnnotationPruning.Root);
 
             var tokenizer = new RuleGraph<char>();
 
@@ -119,10 +119,10 @@ namespace gg.parse.doc.examples.test
             var plusToken = new MatchSingleData<int>(PlusTokenName, plus.Id);
             var multToken = new MatchSingleData<int>(MultTokenName, mult.Id);
 
-            var addOperation = new MatchRuleSequence<int>(AddOpName, output: RuleOutput.Self, precedence: addPrecedence, numberToken, plusToken, numberToken);
-            var multOperation = new MatchRuleSequence<int>(MultOpName, output: RuleOutput.Self, precedence: multPrecedence, numberToken, multToken, numberToken);
+            var addOperation = new MatchRuleSequence<int>(AddOpName, output: AnnotationPruning.None, precedence: addPrecedence, numberToken, plusToken, numberToken);
+            var multOperation = new MatchRuleSequence<int>(MultOpName, output: AnnotationPruning.None, precedence: multPrecedence, numberToken, multToken, numberToken);
 
-            var evaluation = new MatchEvaluation<int>(EvaluationName, output: RuleOutput.Self, precedence: 0, addOperation, multOperation);
+            var evaluation = new MatchEvaluation<int>(EvaluationName, output: AnnotationPruning.None, precedence: 0, addOperation, multOperation);
 
             var parser = new RuleGraph<int>();
 

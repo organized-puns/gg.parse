@@ -153,10 +153,10 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public static (int functionId, RuleOutput product)[] CreateRuleOutputMapping(ScriptParser parser) =>
+        public static (int functionId, AnnotationPruning product)[] CreateRuleOutputMapping(ScriptParser parser) =>
         [
-            (parser.MatchTransitiveSelector.Id, RuleOutput.Children),
-            (parser.MatchNoProductSelector.Id, RuleOutput.Void),
+            (parser.MatchTransitiveSelector.Id, AnnotationPruning.Root),
+            (parser.MatchNoProductSelector.Id, AnnotationPruning.All),
         ];
 
         public static RuleCompiler CreateParserCompiler(ScriptParser parser)
@@ -322,10 +322,10 @@ namespace gg.parse.script.pipeline
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             tokenSource
-                .Where( f => f.Output == RuleOutput.Self
+                .Where( f => f.Prune == AnnotationPruning.None
                     && !f.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 .ForEach( f =>
-                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, RuleOutput.Self)));
+                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
         }
     }
 }

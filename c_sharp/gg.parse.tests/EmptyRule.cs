@@ -5,14 +5,14 @@
         public string Name { get; init; }
         public int Id { get; set; }
         public int Precedence { get; init; }
-        public RuleOutput Output { get; init; }
+        public AnnotationPruning Prune { get; init; }
 
-        public EmptyRule(int id, string name = "DummyRule", int precedence = 0, RuleOutput product = RuleOutput.Self)
+        public EmptyRule(int id, string name = "DummyRule", int precedence = 0, AnnotationPruning product = AnnotationPruning.None)
         {
             Id = id;
             Name = name;
             Precedence = precedence;
-            Output = product;
+            Prune = product;
         }
 
         public object Clone() => MemberwiseClone();

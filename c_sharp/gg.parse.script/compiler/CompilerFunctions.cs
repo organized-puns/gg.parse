@@ -130,7 +130,7 @@ namespace gg.parse.script.compiler
                     var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule];
 
                     var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, i); 
-                    var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0, false);
+                    var elementHeader = new RuleHeader(AnnotationPruning.None, elementName, 0, 0, false);
 
                     elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
                             ?? throw new CompilationException("Cannot compile rule definition for sequence.", annotation: elementBody);
@@ -143,7 +143,7 @@ namespace gg.parse.script.compiler
             var output =
                 header.IsTopLevel
                     ? header.Output
-                    : RuleOutput.Children;
+                    : AnnotationPruning.Root;
 
             return (TRule) Activator.CreateInstance(
                 typeof(TRule), 
@@ -208,7 +208,7 @@ namespace gg.parse.script.compiler
 
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
 
-            var elementHeader = new RuleHeader(RuleOutput.Children, elementName, 0, 0, false);
+            var elementHeader = new RuleHeader(AnnotationPruning.Root, elementName, 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {
@@ -222,7 +222,7 @@ namespace gg.parse.script.compiler
             var output =
                 header.IsTopLevel
                     ? header.Output
-                    : RuleOutput.Children;
+                    : AnnotationPruning.Root;
 
             return new MatchCount<T>(header.Name, countRule, output, min, max, header.Precedence);
         }
@@ -266,7 +266,7 @@ namespace gg.parse.script.compiler
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
-            var elementHeader = new RuleHeader(RuleOutput.Self, elementName);
+            var elementHeader = new RuleHeader(AnnotationPruning.None, elementName);
 
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
                 ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
@@ -366,7 +366,7 @@ namespace gg.parse.script.compiler
                 if (compilationFunction != null)
                 {
                     var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
-                    var conditionHeader = new RuleHeader(RuleOutput.Self, elementName);
+                    var conditionHeader = new RuleHeader(AnnotationPruning.None, elementName);
 
                     condition = compilationFunction(conditionHeader, elementBody, session) as RuleBase<T>
                         ?? throw new CompilationException("Cannot compile condition for Log.", annotation: elementBody);

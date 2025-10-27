@@ -10,7 +10,7 @@ namespace gg.parse.script.compiler
     public class NopRule<T> : RuleBase<T> where T: IComparable<T>
     {
         public NopRule(string name) 
-            : base(name, RuleOutput.Void)
+            : base(name, AnnotationPruning.All)
         {
         }
 

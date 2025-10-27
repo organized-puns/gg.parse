@@ -12,7 +12,7 @@ namespace gg.parse.script.parser
         {
             var scriptTokens =
                 OneOf(
-                    "#scriptTokens",
+                    "-r scriptTokens",
 
                     // make sure keywords are matched before the Identifier
                     // otherwise no keywords will be found as Identifier will also match them
@@ -31,10 +31,10 @@ namespace gg.parse.script.parser
                 );
 
             Root = ZeroOrMore(
-                    "#root",
+                    "-r root",
 
                     OneOf(
-                        "#rootOptions", 
+                        "-r rootOptions", 
 
                         scriptTokens,
 
@@ -59,10 +59,10 @@ namespace gg.parse.script.parser
 
         private MatchRuleSequence<char> MatchScriptKeyword() =>
             Sequence(
-                    "#matchKeyword",
+                    "-r matchKeyword",
                     IfMatch(LowerCaseLetter()),
                     OneOf(
-                        "#keywordList",
+                        "-r keywordList",
 
                         Keyword(CommonTokenNames.LogFatal, "fatal"),
                         Keyword(CommonTokenNames.LogError, "error"),
@@ -76,7 +76,7 @@ namespace gg.parse.script.parser
 
         private MatchOneOf<char> MatchScriptLiteral() =>
             OneOf(
-                "#matchToken",
+                "-r matchToken",
 
                 Literal(CommonTokenNames.Assignment, "="),
                 Literal(CommonTokenNames.ScopeStart, "{"),

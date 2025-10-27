@@ -16,11 +16,11 @@ boolean         = 'true' | 'false';
 null			= 'null';
 
 // allow for both single - and double quoted strings
-~sq_string_char = !'"', .;
-~sq_string      = '"', *sq_string_char, '"';
+-a sq_string_char = !'"', .;
+-a sq_string      = '"', *sq_string_char, '"';
 
-~dq_string_char = !"'", .;
-~dq_string      = "'", *dq_string_char, "'";
+-a dq_string_char = !"'", .;
+-a dq_string      = "'", *dq_string_char, "'";
 
 string			= sq_string | dq_string;
 
@@ -33,7 +33,7 @@ array_end		= ']';
 kv_separator	= ':';
 item_separator	= ',';
 
-~white_space	= { ' \t\r\n' };
+-a white_space	= { ' \t\r\n' };
 
 // errors
 unknown_token	= error "unknown token found." if *(!json_token, .);

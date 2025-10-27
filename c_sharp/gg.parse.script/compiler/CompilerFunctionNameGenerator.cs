@@ -53,14 +53,14 @@ namespace gg.parse.script.compiler
                     return CreateBinaryName(annotation, session, annotation.Name);
                 
                 case ScriptParser.Names.Reference:
-                    var modifier = RuleOutput.Self;
+                    var modifier = AnnotationPruning.None;
                     
                     if ((annotation.Children != null && annotation.Children.Count > 1))
                     {
                         session.Compiler.TryMatchOutputModifier(annotation.Children[0]!.Rule.Id, out modifier);
                     }
                     
-                    var modifierString = RuleOutputExtensions.ToString(modifier);
+                    var modifierString = AnnotationPruningToken.ToString(modifier);
 
                     return $"{UnnamedRulePrefix}{modifierString}_{ScriptParser.Names.Reference}({GetReferenceName(annotation, session)})";
 
@@ -85,7 +85,7 @@ namespace gg.parse.script.compiler
         {
             var text = session.GetText(annotation.Range);
 
-            return (text.StartsWith(RuleExtensions.VoidToken) || text.StartsWith(RuleExtensions.ChildrenToken))
+            return (text.StartsWith(AnnotationPruningToken.All) || text.StartsWith(AnnotationPruningToken.Root))
                 ? text[1..]
                 : text;
         }

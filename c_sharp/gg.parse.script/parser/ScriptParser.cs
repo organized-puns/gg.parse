@@ -591,7 +591,7 @@ namespace gg.parse.script.parser
         {
             InvalidProductInHeaderError = Error(
                 "InvalidProductInHeaderError",
-                $"Expected either '{RuleOutput.Void.GetToken()}' or '{RuleOutput.Children.GetToken()}' but found something else entirely.",
+                $"Expected either '{AnnotationPruning.All.GetTokenString()}' or '{AnnotationPruning.Root.GetTokenString()}' but found something else entirely.",
                 Any()
             );
 

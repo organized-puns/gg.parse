@@ -7,7 +7,7 @@ namespace gg.parse.rules
         string name, 
         T minDataValue, 
         T maxDataValue, 
-        RuleOutput output = RuleOutput.Self,
+        AnnotationPruning output = AnnotationPruning.None,
         int precedence = 0
     )
         : RuleBase<T>(name, output, precedence) where T : IComparable<T>

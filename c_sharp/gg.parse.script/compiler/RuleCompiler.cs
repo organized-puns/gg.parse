@@ -12,13 +12,13 @@ namespace gg.parse.script.compiler
     {
         public Dictionary<IRule, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
-        public (int functionId, RuleOutput product)[]? RuleOutputLookup { get; set; }
+        public (int functionId, AnnotationPruning product)[]? RuleOutputLookup { get; set; }
 
         public RuleCompiler()
         {
         }
 
-        public RuleCompiler((int functionId, RuleOutput product)[] outputLookup)
+        public RuleCompiler((int functionId, AnnotationPruning product)[] outputLookup)
         {
             RuleOutputLookup = outputLookup;
         }
@@ -146,9 +146,9 @@ namespace gg.parse.script.compiler
             }
         }
 
-        public bool TryMatchOutputModifier(int functionId, out RuleOutput output)
+        public bool TryMatchOutputModifier(int functionId, out AnnotationPruning output)
         {
-            output = RuleOutput.Self;
+            output = AnnotationPruning.None;
 
             if (RuleOutputLookup != null)
             {

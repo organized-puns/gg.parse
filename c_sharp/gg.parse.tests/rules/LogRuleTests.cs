@@ -14,7 +14,7 @@ namespace gg.parse.tests.rules
         [TestMethod]
         public void CreateLogRuleWithoutConditions_Parse_ShouldMatchAnyInput()
         {
-            var logRule = new LogRule<char>("log", RuleOutput.Self, "description");
+            var logRule = new LogRule<char>("log", AnnotationPruning.None, "description");
 
             IsTrue(logRule.Condition == null);
             IsTrue(logRule.Level == LogLevel.Info);
@@ -37,7 +37,7 @@ namespace gg.parse.tests.rules
         public void CreateLogRuleWithLiteralCondition_Parse_ShouldMatchLiteral()
         {
             var matchFoo = new MatchDataSequence<char>("matchFoo", "foo".ToCharArray());
-            var logRule = new LogRule<char>("log", RuleOutput.Self, "description", matchFoo, LogLevel.Error);
+            var logRule = new LogRule<char>("log", AnnotationPruning.None, "description", matchFoo, LogLevel.Error);
 
             IsTrue(logRule.Condition == matchFoo);
             IsTrue(logRule.Level == LogLevel.Error);
@@ -65,7 +65,7 @@ namespace gg.parse.tests.rules
         public void CreateLogRuleWithFatalCondition_Parse_ShouldThrowExceptionWhenConditionIsMet()
         {
             var matchFoo = new MatchDataSequence<char>("matchFoo", "foo".ToCharArray());
-            var logRule = new LogRule<char>("log", RuleOutput.Self, "description", matchFoo, LogLevel.Fatal);
+            var logRule = new LogRule<char>("log", AnnotationPruning.None, "description", matchFoo, LogLevel.Fatal);
 
             IsTrue(logRule.Condition == matchFoo);
             IsTrue(logRule.Level == LogLevel.Fatal);

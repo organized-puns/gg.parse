@@ -14,6 +14,7 @@ kanban
   In progress
     [Create Documentation]
     [Add rule examples]
+	[Change rule output in favor of 'prune']
   Done
 	[Add to nuget]	
     [Add missing names to CompilerFunctionNameGenerator functions]   

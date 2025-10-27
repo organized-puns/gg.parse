@@ -40,7 +40,7 @@ namespace gg.parse.script.common
         }            
 
         public MatchSingleData<int> Token(string tokenName) =>
-            MatchSingle($"{RuleOutput.Void.GetToken()}{tokenName}", Tokenizer.FindRule(tokenName)!.Id);
+            MatchSingle($"{AnnotationPruning.All.GetTokenString()}{tokenName}", Tokenizer.FindRule(tokenName)!.Id);
 
         public MatchSingleData<int> Token(string ruleName, string tokenName) =>
             MatchSingle(ruleName, Tokenizer.FindRule(tokenName)!.Id);

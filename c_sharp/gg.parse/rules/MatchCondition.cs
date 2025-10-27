@@ -27,7 +27,7 @@ namespace gg.parse.rules
 
         public MatchCondition(
             string name, 
-            RuleOutput output, 
+            AnnotationPruning output, 
             int precedence,
             RuleBase<T> rule
         ) : base(name, output, precedence)
@@ -38,7 +38,7 @@ namespace gg.parse.rules
         }
 
         public MatchCondition(string name, RuleBase<T> rule)
-            : base(name, RuleOutput.Self)
+            : base(name, AnnotationPruning.None)
         {
             Assertions.RequiresNotNull(rule);
 

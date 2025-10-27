@@ -166,7 +166,7 @@ namespace gg.parse.script.tests.parserbuilder
             var scopeStart = objectRule.Rules.ElementAt(0) as RuleReference<int>;
 
             IsNotNull(scopeStart);
-            IsTrue(scopeStart.Output == RuleOutput.Void);
+            IsTrue(scopeStart.Prune == AnnotationPruning.All);
 
             // check if it compiles json
             var text = "{ \"key\": 123 }";

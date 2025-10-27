@@ -116,7 +116,7 @@ namespace gg.parse.script.tests.parserbuilder
                 new MatchCount<char>(
                     "#string_list", 
                     parser.TokenGraph.Root, 
-                    output: RuleOutput.Children, 
+                    output: AnnotationPruning.Root, 
                     min: 1, 
                     max: 0
                 )
