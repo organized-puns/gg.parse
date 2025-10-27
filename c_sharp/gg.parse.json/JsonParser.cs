@@ -72,28 +72,28 @@ namespace gg.parse.json
                     "missing json value",
                     Skip(stopCondition: objRecovery, failOnEoF: false)
                 );
-            var valueMissingMatch = Sequence("#value_missing", key, keyValueSeparator, errorValueMissing);
-            var separatorMissingMatch = Sequence("#kv_sep_missing", key, errorValueMissing);
-            var keyValue = OneOf("#kvp_with_recovery", keyValueMatch, valueMissingMatch, separatorMissingMatch);
+            var valueMissingMatch = Sequence("-r value_missing", key, keyValueSeparator, errorValueMissing);
+            var separatorMissingMatch = Sequence("-r kv_sep_missing", key, errorValueMissing);
+            var keyValue = OneOf("-r kvp_with_recovery", keyValueMatch, valueMissingMatch, separatorMissingMatch);
 
-            var nextKeyValue = Sequence("#NextKeyValue", comma, keyValue);
-            var keyValueList = Sequence("#KeyValueList", keyValue, ZeroOrMore("#KeyValueListRest", nextKeyValue));
+            var nextKeyValue = Sequence("-r NextKeyValue", comma, keyValue);
+            var keyValueList = Sequence("-r KeyValueList", keyValue, ZeroOrMore("-r KeyValueListRest", nextKeyValue));
             
             // jsonObj = scope_start ?(kv_list) scope_end
             var jsonObject = Sequence(
                 JsonNodeNames.Object, 
                 objectStart, 
-                ZeroOrOne("#ObjectProperties", keyValueList), 
+                ZeroOrOne("-r ObjectProperties", keyValueList), 
                 objectEnd
             );
 
             // jsonArray = array_start ?(value *(collection_separator value)) array_end
-            var nextValue = Sequence("#NextValue", comma, value);
-            var valueList = Sequence("#ValueList", value, ZeroOrMore("#ValueListRest", nextValue));
+            var nextValue = Sequence("-r NextValue", comma, value);
+            var valueList = Sequence("-r ValueList", value, ZeroOrMore("-r ValueListRest", nextValue));
             var jsonArray = Sequence(
                 JsonNodeNames.Array,                 
                 arrayStart, 
-                ZeroOrOne("#ArrayValues", valueList), 
+                ZeroOrOne("-r ArrayValues", valueList), 
                 arrayEnd
             );
 
@@ -101,7 +101,7 @@ namespace gg.parse.json
 
             // todo error(s)
 
-            Root = OneOf("#JsonRoot", jsonObject, jsonArray);
+            Root = OneOf("-r JsonRoot", jsonObject, jsonArray);
         }
 
         public int TokenId(string name) => Tokenizer!.FindRule(name)!.Id;

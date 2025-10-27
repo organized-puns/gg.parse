@@ -1,4 +1,7 @@
-﻿namespace gg.parse.json.tests
+﻿using gg.parse.rules;
+using gg.parse.script;
+
+namespace gg.parse.json.tests
 {
     [TestClass]
     public class JsonParserTests
@@ -110,6 +113,50 @@
             Directory.CreateDirectory("output");
 
             File.WriteAllText("output/astfile_example_annotation.html", html);
+        }
+
+
+        [TestMethod]
+        public void CreateParser_TestTokenization_ExpectAllInputToHaveTokens()
+        {
+            var tokenizerSpec = File.ReadAllText("assets/json.tokens");
+
+            var jsonParser = new ParserBuilder().From(tokenizerSpec);
+
+            var generatedTokenizer = jsonParser.TokenGraph;
+
+            // test the full set of tokens
+            var validTokens = "{ } [ ] , : \"key\" 123 123.0 true false null @";
+
+            var tokens = generatedTokenizer.Root.Parse([.. validTokens], 0);
+
+            Assert.IsTrue(tokens.FoundMatch);
+            Assert.IsTrue(tokens.Annotations != null);
+            Assert.IsTrue(tokens.Annotations.Count == 13);
+            Assert.IsTrue(generatedTokenizer.FindRule("scope_start") != null);
+            Assert.IsTrue(generatedTokenizer.FindRule("scope_end") != null);
+            Assert.IsTrue(generatedTokenizer.FindRule("unknown_token") != null);
+            Assert.IsTrue(tokens.Annotations[0].Rule == generatedTokenizer.FindRule("scope_start"));
+            Assert.IsTrue(tokens.Annotations[1].Rule == generatedTokenizer.FindRule("scope_end"));
+            Assert.IsTrue(tokens.Annotations[12].Rule == generatedTokenizer.FindRule("unknown_token"));
+        }
+
+
+        [TestMethod]
+        public void CreateParser_TestWhiteSpaceRule_ExpectToMatchWhiteSpaceChars()
+        {
+            var tokenizerSpec = File.ReadAllText("assets/json.tokens");
+            var grammarSpec = File.ReadAllText("assets/json.grammar");
+
+            var jsonParser = new ParserBuilder().From(tokenizerSpec, grammarSpec);
+
+            var tokenizer = jsonParser.TokenGraph;
+            var whiteSpaceRule = tokenizer.FindRule("white_space") as MatchDataSet<char>;
+
+            Assert.IsTrue(whiteSpaceRule != null);
+            Assert.IsTrue(whiteSpaceRule.Prune == AnnotationPruning.All);
+            Assert.IsTrue(whiteSpaceRule.MatchingValues.Length == 4);
+            Assert.IsTrue(whiteSpaceRule.MatchingValues.SequenceEqual(" \t\r\n".ToArray()));
         }
     }
 }

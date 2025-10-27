@@ -10,7 +10,7 @@ namespace gg.parse.json
         public JsonTokenizer()
         {
             var jsonTokens = OneOf(
-                    "#jsonTokens",
+                    "-r jsonTokens",
 
                     Float(CommonTokenNames.Float),
                     Integer(CommonTokenNames.Integer),
@@ -34,7 +34,7 @@ namespace gg.parse.json
                     Skip(jsonTokens, failOnEoF: false)
                 );
 
-            Root = ZeroOrMore("#jsonTokenizer", OneOf("#whiteSpaceTokenOrError", Whitespace(), jsonTokens, error));
+            Root = ZeroOrMore("-r jsonTokenizer", OneOf("-r whiteSpaceTokenOrError", Whitespace(), jsonTokens, error));
         }
 
         public ParseResult Tokenize(string text) => Root!.Parse(text);
