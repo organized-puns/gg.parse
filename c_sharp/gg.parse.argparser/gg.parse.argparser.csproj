@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="assets\common.tokens" />
     <None Remove="assets\filename.grammar" />
     <None Remove="assets\filename.tokens" />
     <None Remove="assets\properties.tokens" />

@@ -3,12 +3,12 @@ properties		  = eof | *value;
 
 value			  = string | int | float | boolean | null | dictionary | array | identifier;
 
-kvp_pair		  = value, ~kv_separator, value;
+kvp_pair		  = value, -a kv_separator, value;
 
-kvp_list		  = kvp_pair, *(~item_separator, kvp_pair);
+kvp_list		  = kvp_pair, *(-a item_separator, kvp_pair);
 
 // to support empty dictionaries/objects we can't prune the scope start and end, ie
-// ~scope_start, ?kvp_list, ~scope_end won't work.
+// -a scope_start, ?kvp_list, -a scope_end won't work.
 dictionary		  = scope_start, (
 						(
 							// valid dictionary
@@ -18,10 +18,10 @@ dictionary		  = scope_start, (
 						)
 					);
 
-array_item_list   = value, *(~item_separator, value);
+array_item_list   = value, *(-a item_separator, value);
 
 // to support empty arrays/lists we can't prune the scope start and end, ie
-// ~array_start, ?array_item_list, ~array_end.
+// -a array_start, ?array_item_list, -a array_end.
 array			  = array_start, (
 						(
 							// valid array
@@ -30,5 +30,3 @@ array			  = array_start, (
 							| (error "missing ']'." if (?array_item_list, !array_end))
 						)
 					); 
-
-

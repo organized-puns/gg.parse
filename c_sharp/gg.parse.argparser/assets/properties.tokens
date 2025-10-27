@@ -4,9 +4,9 @@
 
 include "common.tokens";
 
-#property_token	= property_token_list | white_space | unknown_property_error;
+-r property_token	= property_token_list | white_space | unknown_property_error;
 
-#property_token_list = float | int 
+-r property_token_list = float | int 
 					| boolean | null 
 					| string  
 					| scope_start | scope_end 

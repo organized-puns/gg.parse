@@ -17,7 +17,7 @@ namespace gg.parse.doc.examples.test
                 var letter = OneOf(UpperCaseLetter(), LowerCaseLetter());
                 var number = InRange('0', '9');
                 var specialCharacters = InSet("_-~()[]{}+=@!#$%&'`.".ToArray());
-                var separator = InSet("\\/".ToArray());
+                var separator = InSet([.. "\\/"]);
                 var drive = Sequence("drive", letter, Literal(":"), separator);
                 var pathPart = OneOrMore("path_part", OneOf(letter, number, specialCharacters));
                 var pathChain = ZeroOrMore("-r path_chain", Sequence("-r path_chain_part", separator, pathPart));

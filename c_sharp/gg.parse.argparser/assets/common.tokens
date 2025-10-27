@@ -3,16 +3,16 @@ digit           = { '0'..'9' };
 
 minus			= '-';
 plus			= '+';
-~sign           = plus | minus;
+-a sign         = plus | minus;
 float           = int, '.', +digit, ?(('e' | 'E'), int);
 int             = ?sign, +digit;
 
 // allow for both single - and double quoted strings
-~sq_string_char = !'"', .;
-~sq_string      = '"', *sq_string_char, '"';
+-a sq_string_char = !'"', .;
+-a sq_string      = '"', *sq_string_char, '"';
 
-~dq_string_char = !"'", .;
-~dq_string      = "'", *dq_string_char, "'";
+-a dq_string_char = !"'", .;
+-a dq_string      = "'", *dq_string_char, "'";
 
 string			= sq_string | dq_string;
 

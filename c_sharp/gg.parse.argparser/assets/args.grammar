@@ -13,9 +13,9 @@
 include "properties.grammar";
 include "filename.grammar";
 
-#root				= eof | ((arg_option | arg_value), *(arg_option | arg_value)) | unknown_arg_grammar;
+-r root				= eof | ((arg_option | arg_value), *(arg_option | arg_value)) | unknown_arg_grammar;
 
-arg_option			= arg_key, ?(~kv_separator, arg_value);
+arg_option			= arg_key, ?(-a kv_separator, arg_value);
 
 arg_value			= dictionary | array | float | int | boolean | null | string | filename | identifier;
 
