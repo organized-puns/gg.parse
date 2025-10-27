@@ -91,8 +91,8 @@ namespace gg.parse.script.tests.parser
 
             var expectedNames = new string[]
             {
-                CommonTokenNames.Find,
-                CommonTokenNames.Skip
+                CommonTokenNames.FindOperator,
+                CommonTokenNames.SkipOperator
             };
 
             for (var i = 0; i < expectedNames.Length; i++)

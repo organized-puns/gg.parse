@@ -106,7 +106,7 @@ namespace gg.parse.script.tests.parser
 
                 IsTrue(error.Start == 0);
                 IsTrue(error.Length == 1);
-                IsTrue(error.Rule.Id == scriptParser.InvalidProductInHeaderError.Id);
+                IsTrue(error.Rule.Id == scriptParser.InvalidPruneTokenInHeaderError.Id);
 
                 IsTrue(builder
                         .LogHandler!

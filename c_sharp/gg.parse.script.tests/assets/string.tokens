@@ -1,6 +1,6 @@
 // example of somewhat complex string tokenization with error handling
 
-#string_options				= string | err_string_eoln | err_string_eof;
+-r string_options			= string | err_string_eoln | err_string_eof;
 
 -a EOF						= !.;
 -a EOLN						= ("\r\n" | "\n");	
@@ -19,5 +19,4 @@ log_err_string_eoln			= error "string opened with \" but not properly closed bef
 
 -r is_string_eof_err		= str_delim, string_chars, EOF;
 err_string_eof				= error "string opened with \" but not properly closed before the end of the input." if is_string_eof_err;
-// no recovery possible  after EOF
 

@@ -155,8 +155,8 @@ namespace gg.parse.script.pipeline
 
         public static (int functionId, AnnotationPruning product)[] CreateRuleOutputMapping(ScriptParser parser) =>
         [
-            (parser.MatchTransitiveSelector.Id, AnnotationPruning.Root),
-            (parser.MatchNoProductSelector.Id, AnnotationPruning.All),
+            (parser.MatchPruneRootToken.Id, AnnotationPruning.Root),
+            (parser.MatchPruneAllToken.Id, AnnotationPruning.All),
         ];
 
         public static RuleCompiler CreateParserCompiler(ScriptParser parser)
@@ -199,7 +199,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<char>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<char>)
                     .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
-                    .RegisterFunction(parser.MatchOption, CompileOption<char>)
+                    .RegisterFunction(parser.MatchOneOf, CompileOption<char>)
                     .RegisterFunction(parser.MatchSequence, CompileSequence<char>)
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
@@ -222,7 +222,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<int>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<int>)
                     .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
-                    .RegisterFunction(parser.MatchOption, CompileOption<int>)
+                    .RegisterFunction(parser.MatchOneOf, CompileOption<int>)
                     .RegisterFunction(parser.MatchSequence, CompileSequence<int>)
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<int>)
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<int>)

@@ -136,12 +136,12 @@ namespace gg.parse.script.common
             MatchSingle(null, data);
 
         public MatchSingleData<T> MatchSingle(string? name, T data) =>
-            FindOrRegister(name, $"{CommonTokenNames.SingleData}({data.ToString()})",
+            FindOrRegister(name, $"{CommonTokenNames.SingleData}({data})",
                         (ruleName, output) => RegisterRule(
                             new MatchSingleData<T>(ruleName, data, output)));
 
         public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
-            FindOrRegister(name, $"{CommonTokenNames.Skip}({stopCondition.ToString()}, {failOnEoF})",
+            FindOrRegister(name, $"{CommonTokenNames.SkipOperator}({stopCondition}, {failOnEoF})",
                         (ruleName, output) => RegisterRule(
                             new SkipRule<T>(ruleName, output, 0, stopCondition, failOnEoF)));
 

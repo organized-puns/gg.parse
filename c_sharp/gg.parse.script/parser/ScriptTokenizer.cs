@@ -85,7 +85,7 @@ namespace gg.parse.script.parser
                 Literal(CommonTokenNames.Elipsis, ".."),
                 // needs to be behind elipsis, elipsis being the more specific one
                 Literal(CommonTokenNames.AnyCharacter, "."),
-                Literal(CommonTokenNames.Option, "|"),
+                Literal(CommonTokenNames.OneOf, "|"),
                 Literal(CommonTokenNames.GroupStart, "("),
                 Literal(CommonTokenNames.GroupEnd, ")"),
                 Literal(CommonTokenNames.CollectionSeparator, ","),
@@ -95,11 +95,12 @@ namespace gg.parse.script.parser
                 Literal(CommonTokenNames.ArrayStart, "["),
                 Literal(CommonTokenNames.ArrayEnd, "]"),
                 Literal(CommonTokenNames.NotOperator, "!"),
-                Literal(CommonTokenNames.TransitiveSelector, "#"),
-                Literal(CommonTokenNames.NoProductSelector, "~"),
+                Literal(CommonTokenNames.PruneRoot, AnnotationPruningToken.Root),
+                Literal(CommonTokenNames.PruneAll, AnnotationPruningToken.All),
+                Literal(CommonTokenNames.PruneChildren, AnnotationPruningToken.Children),
                 Literal(CommonTokenNames.OptionWithPrecedence, "/"),
-                Literal(CommonTokenNames.Skip, ">>>"),
-                Literal(CommonTokenNames.Find, ">>")
+                Literal(CommonTokenNames.SkipOperator, ">>>"),
+                Literal(CommonTokenNames.FindOperator, ">>")
             );
      }
 }
