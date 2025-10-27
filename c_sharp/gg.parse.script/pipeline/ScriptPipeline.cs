@@ -155,8 +155,10 @@ namespace gg.parse.script.pipeline
 
         public static (int functionId, AnnotationPruning product)[] CreateRuleOutputMapping(ScriptParser parser) =>
         [
-            (parser.MatchPruneRootToken.Id, AnnotationPruning.Root),
+            // xxx Ids can be replaced with names
             (parser.MatchPruneAllToken.Id, AnnotationPruning.All),
+            (parser.MatchPruneChildrenToken.Id, AnnotationPruning.Children),
+            (parser.MatchPruneRootToken.Id, AnnotationPruning.Root)
         ];
 
         public static RuleCompiler CreateParserCompiler(ScriptParser parser)

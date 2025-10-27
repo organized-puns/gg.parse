@@ -12,7 +12,7 @@ namespace gg.parse.script.compiler
     {
         public string Name { get; init; }
 
-        public AnnotationPruning Output { get; init; }
+        public AnnotationPruning Prune { get; init; }
               
         public int Precedence { get; init; }
 
@@ -23,10 +23,10 @@ namespace gg.parse.script.compiler
 
         public bool IsTopLevel { get; init; }
 
-        public RuleHeader(AnnotationPruning output, string name, int precedence, int length, bool isTopLevel = true)
+        public RuleHeader(AnnotationPruning prune, string name, int precedence, int length, bool isTopLevel = true)
         {
             Name = name;
-            Output = output;
+            Prune = prune;
             Precedence = precedence;
             Length = length;
             IsTopLevel = isTopLevel;

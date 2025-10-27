@@ -48,7 +48,7 @@ namespace gg.parse.rules
             if (result.FoundMatch)
             {
                 // parse behaviour depends on whether this reference is part of a composition (eg sequence)
-                // in which case we take in account any  output modifiers applied to this rule, but
+                // in which case we take in account any prune modifiers applied to this rule, but
                 // otherwise pass the results of the referced rule
                 if (DeferResultToReference)
                 {
@@ -57,6 +57,11 @@ namespace gg.parse.rules
                     return Prune switch
                     {
                         AnnotationPruning.None => result,
+                        AnnotationPruning.Children => new ParseResult(
+                            true,
+                            result.MatchLength,
+                            CollectRootAnnotations(result.Annotations)
+                        ),
                         AnnotationPruning.Root => new ParseResult(
                             true, 
                             result.MatchLength, 
@@ -67,16 +72,33 @@ namespace gg.parse.rules
                 }
                 else
                 {
-                    // this rule is a named rule we _assume+ the user wants this rule to show up in the result/asttree
+                    // this rule is a named rule we _assume_ the user wants this rule to show up in the result/asttree
                     // rather than the referred rule (for whatever the motivations are of the user).
                     // eg let's say the user states foo = 'bar'; bar = foo; in this case the rule 'bar' has its own name
                     // so the results should include 'bar' as the rule name, not 'foo'. Bar may still have any output
                     // modifiers eg "#bar = foo;" in which case foo will show up.
                     return Prune switch
                     {
-                        AnnotationPruning.None => new ParseResult(true, result.MatchLength,
-                                                                       [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]),
+                        // insert this reference in the result tree as its root
+                        AnnotationPruning.None => 
+                            new ParseResult(
+                                true, 
+                                result.MatchLength,
+                                [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]
+                            ),
+
+                        // only return this reference with no children
+                        AnnotationPruning.Children => 
+                            new ParseResult(
+                                true, 
+                                result.MatchLength,
+                                [new Annotation(this, new Range(start, result.MatchLength))]
+                            ),
+
+                        // remove this reference from the result tree
                         AnnotationPruning.Root => result,
+
+                        // remove every annotation from the result tree
                         _ => new ParseResult(true, result.MatchLength),
                     };
                 }
@@ -96,6 +118,33 @@ namespace gg.parse.rules
                     if (a != null && a.Children != null && a.Children.Count > 0)
                     {
                         result.AddRange(a.Children);
+                    }
+                });
+
+                return result.Count > 0 ? result : null;
+            }
+
+            return null;
+        }
+
+        private static List<Annotation>? CollectRootAnnotations(List<Annotation>? annotations)
+        {
+            if (annotations != null)
+            {
+                var result = new List<Annotation>();
+
+                annotations.ForEach(a =>
+                {
+                    if (a != null)
+                    {
+                        if (a.Children == null || a.Children.Count == 0)
+                        {
+                            result.Add(a);
+                        }
+                        else
+                        {
+                            result.Add(new Annotation(a.Rule, a.Range));
+                        }
                     }
                 });
 

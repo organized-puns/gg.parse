@@ -1,4 +1,5 @@
 ﻿using gg.parse.rules;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parserbuilder
@@ -6,11 +7,16 @@ namespace gg.parse.script.tests.parserbuilder
     [TestClass]
     public class OutputModifierTests
     {
+        // short hands for annotation pruning tokens
+        private const string pa = AnnotationPruningToken.All;
+        private const string pc = AnnotationPruningToken.Children;
+        private const string pr = AnnotationPruningToken.Root;
+
         [TestMethod]
         public void SetupReferencesWithDifferentRuleOutputs_TokenizeInput_ExpectRulesToMatchSpecifiedOutput()
         {
             var parser = new ParserBuilder().From(
-                "root = foo, #foo, ~foo;" +
+                $"root = foo, {pr}foo, {pa}foo, {pc}foo;" +
                 "foo = 'foo';"
             );
 
@@ -28,20 +34,23 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue((root[2] as RuleReference<char>).Reference == "foo");
             IsTrue(root[2].Prune == AnnotationPruning.All);
 
-            var (result, _) = parser.Parse("foofoofoo");
+            IsTrue((root[3] as RuleReference<char>).Reference == "foo");
+            IsTrue(root[3].Prune == AnnotationPruning.Children);
+
+            var (result, _) = parser.Parse("foofoofoofoo");
 
             IsTrue(result);
-            IsTrue(result.MatchLength == 9);
+            IsTrue(result.MatchLength == 12);
 
-            // the only foo to show up is the first one, the second returns the children of foo 
+            // the only foo to show up is the first and last one, the second returns the children of foo 
             // which a data sequence doesn't have and the third will drop the results (void)
-            IsTrue(result[0].Count == 1);           
+            IsTrue(result[0].Count == 2);           
         }
 
         [TestMethod]
         public void SetupReferencesWithDifferentRuleOutputs_ParseInput_ExpectRulesToMatchSpecifiedOutput()
         {
-            var parser = new ParserBuilder().From($"#tokens=*(foo|bar);foo='foo';bar='bar';", "root=foo, #bar, ~foo;");
+            var parser = new ParserBuilder().From($"{pr}tokens=*(foo|bar);foo='foo';bar='bar';", $"root=foo, {pr}bar, {pa}foo;");
 
             var root = parser.GrammarGraph.FindRule("root") as MatchRuleSequence<int>;
 
@@ -72,7 +81,7 @@ namespace gg.parse.script.tests.parserbuilder
         public void XSetupReferencesWithDifferentRuleOutputs_TokenizeInput_ExpectRulesToMatchSpecifiedOutput()
         {
             var parser = new ParserBuilder().From(
-                "root = foo, #foo, ~foo;" +
+                $"root = foo, {pr}foo, {pa}foo;" +
                 "foo = 'foo' | 'bar';"
             );
 

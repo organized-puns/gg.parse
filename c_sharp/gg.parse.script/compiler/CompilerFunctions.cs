@@ -30,7 +30,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("Literal text is empty (somehow...).", annotation: bodyNode);
             }
 
-            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Output, header.Precedence);
+            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Prune, header.Precedence);
         }        
 
         public static RuleBase<char> CompileCharacterSet( RuleHeader header, Annotation bodyNode, CompileSession session)
@@ -50,7 +50,7 @@ namespace gg.parse.script.compiler
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 #pragma warning restore IDE0057 // Use range operator
 
-            return new MatchDataSet<char>(header.Name, header.Output, [.. setText], header.Precedence);
+            return new MatchDataSet<char>(header.Name, header.Prune, [.. setText], header.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterRange(RuleHeader declaration, Annotation bodyNode, CompileSession context)
@@ -80,7 +80,7 @@ namespace gg.parse.script.compiler
                 declaration.Name, 
                 minText[1], 
                 maxText[1], 
-                declaration.Output, 
+                declaration.Prune, 
                 declaration.Precedence
             );
         }
@@ -102,7 +102,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("ReferenceName text is empty (somehow...).", annotation: bodyNode);
             }
 
-            var modifier = declaration.Output;
+            var modifier = declaration.Prune;
 
             // xxx should raise a warning if product is anything else than annotation eg
             // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
@@ -142,7 +142,7 @@ namespace gg.parse.script.compiler
             // The latter would result in much more overhead in specifying the parsers.
             var output =
                 header.IsTopLevel
-                    ? header.Output
+                    ? header.Prune
                     : AnnotationPruning.Root;
 
             return (TRule) Activator.CreateInstance(
@@ -185,7 +185,7 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule];
-            var groupDeclaration = new RuleHeader(header.Output, header.Name, 0, 0);
+            var groupDeclaration = new RuleHeader(header.Prune, header.Name, 0, 0);
             var result = compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
 
             // xxx needs more info
@@ -221,7 +221,7 @@ namespace gg.parse.script.compiler
             // toplevel rule (ie rule = a, b, c) we use the user specified output.
             var output =
                 header.IsTopLevel
-                    ? header.Output
+                    ? header.Prune
                     : AnnotationPruning.Root;
 
             return new MatchCount<T>(header.Name, countRule, output, min, max, header.Precedence);
@@ -274,11 +274,11 @@ namespace gg.parse.script.compiler
             TRule? result; 
             if (creationParams == null || creationParams.Length == 0)
             {
-                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, header.Output, header.Precedence, unaryRule);
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, header.Prune, header.Precedence, unaryRule);
             }
             else
             {
-                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, header.Output, header.Precedence, unaryRule, .. creationParams]);
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, header.Prune, header.Precedence, unaryRule, .. creationParams]);
             }
 
             if (result == null)
@@ -328,7 +328,7 @@ namespace gg.parse.script.compiler
         {
             Assertions.RequiresNotNull(header);
 
-            return new MatchAnyData<T>(header.Name, header.Output, precedence: header.Precedence);
+            return new MatchAnyData<T>(header.Name, header.Prune, precedence: header.Precedence);
         }
 
         public static RuleBase<T> CompileLog<T>(
@@ -377,7 +377,7 @@ namespace gg.parse.script.compiler
                 }
             }
 
-            return new LogRule<T>(header.Name, header.Output, message, condition, logLevel);
+            return new LogRule<T>(header.Name, header.Prune, message, condition, logLevel);
         }
     }
 }

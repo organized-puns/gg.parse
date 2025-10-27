@@ -12,6 +12,10 @@ namespace gg.parse.script.tests.parserbuilder
     [TestClass]
     public sealed class ParserBuilderIntegrationTests
     {
+        // short hands for annotation pruning tokens
+        private const string pa = AnnotationPruningToken.All;
+        private const string pc = AnnotationPruningToken.Children;
+        private const string pr = AnnotationPruningToken.Root;
 
         [TestMethod]
         public void CreateEmptyRule_Compile_ExpectNopToShowUp()
@@ -85,8 +89,8 @@ namespace gg.parse.script.tests.parserbuilder
         {
             var searchTerm = "bar";
             var tokenizer = new ParserBuilder().From(
-                $"#find_all_bars = +( find_bar, '{searchTerm}' );" +
-                $"~find_bar      = >> '{searchTerm}';"
+                $"{pr}find_all_bars = +( find_bar, '{searchTerm}' );" +
+                $"{pa}find_bar      = >> '{searchTerm}';"
             );
 
             var testStringWithBar = "123ba345bar567 bar ";

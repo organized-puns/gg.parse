@@ -113,7 +113,7 @@ namespace gg.parse.script.tests.parserbuilder
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    "include 'assets/json.grammar';__main__=#json;"
+                                    "include 'assets/json.grammar';__main__=-r json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);
@@ -148,8 +148,8 @@ namespace gg.parse.script.tests.parserbuilder
         {
             var jsonParser = new ParserBuilder()
                                 .From(
-                                    "include 'assets/json.tokens';#token_main = json_tokens;",
-                                    "include 'assets/json.grammar'; # main = json;"
+                                    "include 'assets/json.tokens';-r token_main = json_tokens;",
+                                    "include 'assets/json.grammar'; -r main = json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);

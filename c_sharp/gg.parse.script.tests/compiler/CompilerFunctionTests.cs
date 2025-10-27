@@ -61,7 +61,7 @@ namespace gg.parse.script.tests.compiler
         [TestMethod]
         public void TokenizeParseCompileSetRule_ExpectSuccess()
         {
-            var table = Compile("~set_rule = {'abc'};");
+            var table = Compile("-a set_rule = {'abc'};");
 
             var setRule = table.FindRule("set_rule") as MatchDataSet<char>;
 
@@ -85,7 +85,7 @@ namespace gg.parse.script.tests.compiler
         [TestMethod]
         public void TokenizeParseCompileSequenceRule_ExpectSuccess()
         {
-            var table = Compile("#sequence_rule = 'foo', 'bar';");
+            var table = Compile("-r sequence_rule = 'foo', 'bar';");
 
             var sequenceRule = table.FindRule("sequence_rule") as MatchRuleSequence<char>;
 
@@ -234,7 +234,7 @@ namespace gg.parse.script.tests.compiler
         [TestMethod]
         public void SetupTokenizeParseCompileWithPrecedence_TestPrecedence_ExpectPredenceToMatchInput()
         {
-            var table = Compile("rule1 100= .;#rule2 200 = .; ~ rule_three -1 = .;");
+            var table = Compile("rule1 100= .;-r rule2 200 = .; -a rule_three -1 = .;");
 
             var rule1 = table.FindRule("rule1") as MatchAnyData<char>;
             IsNotNull(rule1);
