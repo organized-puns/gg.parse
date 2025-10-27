@@ -156,7 +156,7 @@ namespace gg.parse.json.tests
             Assert.IsTrue(whiteSpaceRule != null);
             Assert.IsTrue(whiteSpaceRule.Prune == AnnotationPruning.All);
             Assert.IsTrue(whiteSpaceRule.MatchingValues.Length == 4);
-            Assert.IsTrue(whiteSpaceRule.MatchingValues.SequenceEqual(" \t\r\n".ToArray()));
+            Assert.IsTrue(whiteSpaceRule.MatchingValues.SequenceEqual([.. " \t\r\n"]));
         }
     }
 }

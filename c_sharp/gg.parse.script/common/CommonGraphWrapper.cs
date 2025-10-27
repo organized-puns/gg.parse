@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.rules;
+using gg.parse.script.parser;
 
 namespace gg.parse.script.common
 {

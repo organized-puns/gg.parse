@@ -60,7 +60,7 @@ namespace gg.parse.script.compiler
                         session.Compiler.TryMatchOutputModifier(annotation.Children[0]!.Rule.Id, out modifier);
                     }
                     
-                    var modifierString = AnnotationPruningToken.ToString(modifier);
+                    var modifierString = modifier.ToString().ToLower();
 
                     return $"{UnnamedRulePrefix}{modifierString}_{ScriptParser.Names.Reference}({GetReferenceName(annotation, session)})";
 

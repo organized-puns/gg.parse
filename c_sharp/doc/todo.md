@@ -11,39 +11,28 @@ config:
 ---
 kanban
   Backlog
+    [output passthrough unintuitive, possibly wrong]
+    [fix ambiguous root]
+    [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
+  
   In progress
     [Create Documentation]
     [Add rule examples]
-	[Change rule output in favor of 'prune']
+	[Document Pruning]
+	
   Done
 	[Add to nuget]	
     [Add missing names to CompilerFunctionNameGenerator functions]   
 	[Fix all warnings]
 	[Validate github PR permssions]
 	[Add tests to check in rules]
+	[Change rule output in favor of 'prune']
 
 ```
 
 Details
 -------------
 
-Version 0.2
------------
-```mermaid
----
-config:
-  kanban:
-    ticketBaseUrl: 'https://github.com/mermaid-js/mermaid/issues/#TICKET#'
----
-kanban
-  Backlog
-    [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
-    [2. Change rule output in favor of 'prune']
-  Bugs
-    [1. output passthrough unintuitive, possibly wrong]
-    [3. fix ambiguous root]
-  In progress
-```
 
 Details:
 
@@ -58,25 +47,14 @@ array			  = ~array_start, ?array_item_list, ~array_end;
 
 value = a | b | c; should yield value(a) not a BUT value = (a | b | c ) | 'foo' should ield  value(a) or value('foo')
 
-- better compile name generation, have parser names comply with generated names
-
-### 2. Adjust and fix output in favor of 'prune':
-Adjustments:
-- replace output with 'prune' 
-	such that:  
-	- prune(none, parent_node(child1, child2.. childN)) =  parent_node(child1, child2.. childN)
-	- prune(parent, parent_node(child1, child2.. childN)) =  (child1, child2.. childN)
-	- prune(children, parent_node(child1, child2.. childN)) =  parent_node
-	- prune(all, parent_node(child1, child2.. childN)) =  null
-
-- consider change '~' to '-' and '#' to '..' (?) or `~` to '--' and '#' to '-'...
-	? -c, -p -a 
-
 ### 3. Fix ambiguous root
 Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
 
 Future backlog
 --------------
+
+### Add replace rule to parser
+Add ReplaceRule(oldRuleName, newRule) to parser
 
 ### Improve callback support
 
@@ -107,6 +85,7 @@ Transpile / build c# from rule table output, so there can be a compiled version 
 
 ### Add extend to parser
 Add Extend() to existing parser, similar to merge
+
 
 ### Matcher example
 add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has

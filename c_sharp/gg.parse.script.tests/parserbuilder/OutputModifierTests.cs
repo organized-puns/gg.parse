@@ -1,4 +1,5 @@
 ﻿using gg.parse.rules;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -66,15 +67,15 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue((root[2] as RuleReference<int>).Reference == "foo");
             IsTrue(root[2].Prune == AnnotationPruning.All);
 
-            var result = parser.Parse("foobarfoo");
+            var (_, syntaxTree) = parser.Parse("foobarfoo");
 
-            IsTrue(result.syntaxTree);
+            IsTrue(syntaxTree);
 
-            IsTrue(result.syntaxTree.Count == 1);
+            IsTrue(syntaxTree.Count == 1);
 
             // the only foo to show up is the first one, the second returns the children of foo 
             // which a data sequence doesn't have and the third will drop the results (void)
-            IsTrue(result.syntaxTree[0].Count == 1);
+            IsTrue(syntaxTree[0].Count == 1);
         }
 
         [TestMethod]
