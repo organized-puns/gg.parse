@@ -174,7 +174,7 @@ namespace gg.parse.script.tests.parserbuilder
 
             IsTrue(result.syntaxTree.FoundMatch);
 
-            Debug.WriteLine(ScriptUtils.AstToString(text, result.tokens.Annotations, result.syntaxTree.Annotations));
+            Debug.WriteLine(ScriptUtils.PrettyPrintSyntaxTree(text, result.tokens.Annotations, result.syntaxTree.Annotations));
 
             var objectAnnotation = result.syntaxTree[0][0];
 

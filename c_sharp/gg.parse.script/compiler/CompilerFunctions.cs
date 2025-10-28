@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 using gg.parse.rules;
 using gg.parse.util;
 
-using static gg.parse.script.compiler.CompilerFunctionNameGenerator;
-
 namespace gg.parse.script.compiler
 {
     /// <summary>
@@ -208,6 +206,7 @@ namespace gg.parse.script.compiler
 
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
 
+            // xxx this is weird, should be pruning none ?
             var elementHeader = new RuleHeader(AnnotationPruning.Root, elementName, 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
