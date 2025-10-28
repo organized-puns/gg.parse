@@ -13,7 +13,7 @@ key_value_pair     = key, -a kv_separator, value;
 
 key_value_list	   = key_value_pair, *(-a item_separator, key_value_pair);
 
-object			   = -a scope_start, ?key_value_list, -a scope_end;
+object			   = -a scope_start, ?(-r key_value_list), -a scope_end;
 
--r array_item_list = value, *(-a item_separator, value);
-array			   = -a array_start, ?array_item_list, -a array_end;
+array_item_list	   = value, *(-a item_separator, value);
+array			   = -a array_start, ?(-r array_item_list), -a array_end;

@@ -6,7 +6,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 namespace gg.parse.script.tests.parserbuilder
 {
     [TestClass]
-    public class OutputModifierTests
+    public class PruneModifierTests
     {
         // short hands for annotation pruning tokens
         private const string pa = AnnotationPruningToken.All;
@@ -111,6 +111,49 @@ namespace gg.parse.script.tests.parserbuilder
 
             // the second foo is declared with 'children' in root, so the foo literal should appear
             // in the result
+            IsTrue(result[0][1].Rule is MatchDataSequence<char>);
+        }
+
+        /// <summary>
+        /// Inline count rules are were created incorrectly with their subrules set to prune root. Instead
+        /// it was fixed so they return with subrule pruning set to none. This verifies that fix.
+        /// </summary>
+        [TestMethod]
+        public void CreateCountDataRuleInsideBinaryRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
+        {
+            var builder = new ParserBuilder().From("sequence = +'foo', +'bar';");
+            var (result, _) = builder.Parse("foobar");
+
+            IsTrue(result);
+
+            // named rule should be a sequence
+            IsTrue(result[0].Rule is MatchRuleSequence<char>);
+
+            // + rule should be pruned, foo and bar should be added
+            IsTrue(result[0].Count == 2);
+            IsTrue(result[0][0].Rule is MatchDataSequence<char>);
+            IsTrue(result[0][1].Rule is MatchDataSequence<char>);
+        }
+
+        /// <summary>
+        /// Extension of the previous test where there is a binary inside the count. 
+        /// Count should pass 'none' pruning to its children, since it's child is an inline binary
+        /// function, this should set its pruning to root, so in the end we're left with just the literals.
+        /// </summary>
+        [TestMethod]
+        public void CreateCountBinaryRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
+        {
+            var builder = new ParserBuilder().From("sequence = +('fooz' | 'foo'), +('barz' | 'bar');");
+            var (result, _) = builder.Parse("foozbarz");
+
+            IsTrue(result);
+
+            // named rule should be a sequence
+            IsTrue(result[0].Rule is MatchRuleSequence<char>);
+
+            // + rule should be pruned, foo and bar should be added
+            IsTrue(result[0].Count == 2);
+            IsTrue(result[0][0].Rule is MatchDataSequence<char>);
             IsTrue(result[0][1].Rule is MatchDataSequence<char>);
         }
     }

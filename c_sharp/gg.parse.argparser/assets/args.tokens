@@ -5,9 +5,9 @@
 include "properties.tokens";
 include "filename.tokens";
 
--r arg_tokens			= *(arg_token | -a white_space | unknown_arg_token);
+-r arg_tokens			= *(-r arg_token | -a white_space | unknown_arg_token);
 
--r arg_token			= float | int 
+arg_token				= float | int 
 						| arg_key_switch
 						| boolean 
 						| null 

@@ -113,7 +113,10 @@ namespace gg.parse.script.tests.parserbuilder
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    "include 'assets/json.grammar';__main__=-r json;"
+                                    // xxx note we're doing 'root = -r json' however 'json'
+                                    // shows up as the first node anyway. This is not correct
+                                    // we should get its children
+                                    "include 'assets/json.grammar';root =-r json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);

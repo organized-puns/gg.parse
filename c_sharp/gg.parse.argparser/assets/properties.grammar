@@ -3,7 +3,7 @@ properties		  = eof | *value;
 
 value			  = string | int | float | boolean | null | dictionary | array | identifier;
 
-kvp_pair		  = value, -a kv_separator, value;
+kvp_pair		  = -r value, -a kv_separator, -r value;
 
 kvp_list		  = kvp_pair, *(-a item_separator, kvp_pair);
 
@@ -12,20 +12,20 @@ kvp_list		  = kvp_pair, *(-a item_separator, kvp_pair);
 dictionary		  = scope_start, (
 						(
 							// valid dictionary
-							(?kvp_list, scope_end)
+							(?-r kvp_list, scope_end)
 							// missing closing }
 							| (error "missing '}'." if (?kvp_list, !scope_end))
 						)
 					);
 
-array_item_list   = value, *(-a item_separator, value);
+array_item_list   = -r value, *(-a item_separator, -r value);
 
 // to support empty arrays/lists we can't prune the scope start and end, ie
 // -a array_start, ?array_item_list, -a array_end.
 array			  = array_start, (
 						(
 							// valid array
-							(?array_item_list, array_end)
+							(?-r array_item_list, array_end)
 							// missing closing ]
 							| (error "missing ']'." if (?array_item_list, !array_end))
 						)

@@ -206,8 +206,7 @@ namespace gg.parse.script.compiler
 
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
 
-            // xxx this is weird, should be pruning none ?
-            var elementHeader = new RuleHeader(AnnotationPruning.Root, elementName, 0, 0, false);
+            var elementHeader = new RuleHeader(AnnotationPruning.None, elementName, 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {

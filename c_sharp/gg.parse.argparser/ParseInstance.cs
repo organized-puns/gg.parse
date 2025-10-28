@@ -58,7 +58,7 @@ namespace gg.parse.argparser
                 // remove the start and end of the array from the count
                 var result = Array.CreateInstance(arrayType, annotation.Count - 2);
 
-                // need to skip start and end, so start at 1 and end at -1 
+                // need to skip the array start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
                     result.SetValue(OfValue<T>(arrayType, annotation[i]!, tokenList, text), i - 1);

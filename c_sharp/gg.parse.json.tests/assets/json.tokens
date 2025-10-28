@@ -2,7 +2,7 @@
  * Simple EBNF notation for the tokens json
  */
 
--r json_tokens	= *valid_token;
+-r json_tokens	= *(-r valid_token);
 
 valid_token		= json_token | white_space | unknown_token;
 

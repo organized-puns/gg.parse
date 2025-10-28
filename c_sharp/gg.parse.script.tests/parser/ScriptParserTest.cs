@@ -747,6 +747,8 @@ namespace gg.parse.script.tests.parser
             // no modifier selector
             IsTrue(sequenceNode[3][0].Rule == parser.IdentifierToken);
         }
+
+        
     }
 }
 

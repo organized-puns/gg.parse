@@ -25,27 +25,32 @@ namespace gg.parse
 
         public override string ToString() => Name;
 
-        public ParseResult BuildDataRuleResult(Range dataRange) 
-        {
-            return Prune switch
+
+        public ParseResult BuildDataRuleResult(Range dataRange) =>
+        
+            Prune switch
             {
                 AnnotationPruning.All =>
                     new ParseResult(true, dataRange.Length),
 
                 // in case of a data rule, all remaining cases produce the root as data rules should not have
                 // children.
-                AnnotationPruning.Children =>
-                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
+                AnnotationPruning.Children =>                
+                    new ParseResult(true, dataRange.Length),
+                //new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
                 AnnotationPruning.None => 
                     new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
-                AnnotationPruning.Root => 
-                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),               
+                // data rules do not have children as they are not composed of other rules
+                // so when their children being asked, nothing is left
+                AnnotationPruning.Root =>
+                    new ParseResult(true, dataRange.Length),
+                //new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),               
 
                 _ => throw new NotImplementedException($"No implementation to build a data rule result for enum value {Prune}."),
             };
-        }
+        
 
         public ParseResult BuildResult(Range dataRange, List<Annotation>? children = null)
         {
