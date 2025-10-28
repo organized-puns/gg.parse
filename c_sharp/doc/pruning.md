@@ -130,10 +130,12 @@ Because most of the time the handling code is not interested in processing the i
    Debug.WriteLine(ScriptUtils.PrettyPrintTokens(text, tokens.Annotations));
 ```
 
-So to recap:
+To recap:
 
 * top-level rules: `AnnotationPruning.None`, pass everything
-* rule references: Depends on the pruning modifier, if none is provided `AnnotationPruning.None`
-* inline meta-rules: `AnnotationPruning.Root` for the rule itself, `AnnotationPruning.None` for its children
+* rule references: Depends on the pruning modifier, if none is provided `AnnotationPruning.None`.
+* inline composition-rules: `AnnotationPruning.Root` for the rule itself, `AnnotationPruning.None` for its children. This includes `MatchRuleSequence<T>` (ie `a,b,c`), MatchOneOf<T> (ie `a | b | c`) and `MatchEvaluation' (ie `a / b / c`)
+* inline count-rules: `AnnotationPruning.Root` for the rule itself, `AnnotationPruning.None` for its children. This includes all variations of MatchCount<T>, ie `zero-or-one +`, `zero-or-more *` and `one-or-more +`
+* look-ahead rules: `AnnotationPruning.All` for both itself and its children. This includes `MatchNot<T>`, `MatchCondition<T> (if ...)`, `SkipRule<T> (>> and >>>)`.
 
-For more details have a look at `gg.parse.script.compiler.CompilerFunctions`.
+For more details have a look at how these are implemented in `gg.parse.script.compiler.CompilerFunctions`.

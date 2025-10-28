@@ -261,23 +261,27 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode!.Children != null);
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
+            // prune all if this is an inline rule as lookaheads never have a size
+            // if it's a toplevel, it is up to the user 
+            var pruning = header.IsTopLevel ? header.Prune : AnnotationPruning.All;
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
-            var elementHeader = new RuleHeader(AnnotationPruning.None, elementName);
+            var elementHeader = new RuleHeader(pruning, elementName);
 
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
-                ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
+                ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);           
 
             TRule? result; 
             if (creationParams == null || creationParams.Length == 0)
             {
-                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, header.Prune, header.Precedence, unaryRule);
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, pruning, header.Precedence, unaryRule);
             }
             else
             {
-                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, header.Prune, header.Precedence, unaryRule, .. creationParams]);
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, pruning, header.Precedence, unaryRule, .. creationParams]);
             }
+
 
             if (result == null)
             {

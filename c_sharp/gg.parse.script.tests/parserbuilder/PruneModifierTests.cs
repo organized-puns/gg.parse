@@ -156,5 +156,48 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(result[0][0].Rule is MatchDataSequence<char>);
             IsTrue(result[0][1].Rule is MatchDataSequence<char>);
         }
+
+        /// <summary>
+        /// Lookahead rules should be pruned by default if it's inlined.
+        /// </summary>
+        [TestMethod]
+        public void CreateInlineLookaheadRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
+        {
+            var builder = new ParserBuilder().From("sequence = !'bar', 'foo';");
+            var (result, _) = builder.Parse("foo");
+
+            IsTrue(result);
+
+            // named rule should be a sequence
+            IsTrue(result[0].Rule is MatchRuleSequence<char>);
+
+            // !'bar' rule should be pruned, only foo should remain
+            IsTrue(result[0].Count == 1);
+            IsTrue(result[0][0].Rule is MatchDataSequence<char>);
+        }
+
+        /// <summary>
+        /// Lookahead rules should be pruned by default unless it's a toplevel rule.
+        /// </summary>
+        [TestMethod]
+        public void CreateTopLevelLookaheadRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
+        {
+            var builder = new ParserBuilder().From("sequence = not_bar, 'foo'; not_bar = !'bar';");
+            var (result, _) = builder.Parse("foo");
+
+            IsTrue(result);
+
+            // named rule should be a sequence
+            IsTrue(result[0].Rule is MatchRuleSequence<char>);
+
+            // !'bar' rule should be pruned, only foo should remain
+            IsTrue(result[0].Count == 2);
+
+            // should contain !bar
+            IsTrue(result[0][0].Rule is MatchNot<char>);
+
+            // 'foo'
+            IsTrue(result[0][1].Rule is MatchDataSequence<char>);
+        }
     }
 }

@@ -234,12 +234,13 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(anonymousRule.RuleOptions.Length == 2);
             IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
-            // the anonymous parts (lookahead functions) of the rule should by default return self 
+            // the anonymous parts (lookahead functions) of the rule should by default prune everything
             IsTrue(anonymousRule[0] is MatchCondition<char>);
-            IsTrue(anonymousRule[0].Prune == AnnotationPruning.None);
+            IsTrue(anonymousRule[0].Prune == AnnotationPruning.All);
 
+            // !bar is a lookahead so it should prune all as well
             IsTrue(anonymousRule[1] is MatchNot<char>);
-            IsTrue(anonymousRule[1].Prune == AnnotationPruning.None);
+            IsTrue(anonymousRule[1].Prune == AnnotationPruning.All);
         }
     }
 }
