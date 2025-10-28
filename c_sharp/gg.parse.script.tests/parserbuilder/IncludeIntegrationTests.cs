@@ -113,9 +113,6 @@ namespace gg.parse.script.tests.parserbuilder
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    // xxx note we're doing 'root = -r json' however 'json'
-                                    // shows up as the first node anyway. This is not correct
-                                    // we should get its children
                                     "include 'assets/json.grammar';root =-r json;"
                                 );
 
@@ -169,7 +166,7 @@ namespace gg.parse.script.tests.parserbuilder
             var scopeStart = objectRule.Rules.ElementAt(0) as RuleReference<int>;
 
             IsNotNull(scopeStart);
-            IsTrue(scopeStart.Prune == AnnotationPruning.All);
+            IsTrue(scopeStart.ReferencePruning == AnnotationPruning.All);
 
             // check if it compiles json
             var text = "{ \"key\": 123 }";

@@ -30,19 +30,19 @@ namespace gg.parse.calculator.tests
 
             IsNotNull(operationRef);
             IsTrue(operationRef.Prune == AnnotationPruning.None);            
-            IsTrue(operationRef.Reference == "operation");
+            IsTrue(operationRef.ReferenceName == "operation");
 
             var termRef = expressionRule.RuleOptions[1] as RuleReference<int>;
 
             IsNotNull(termRef);
             IsTrue(termRef.Prune == AnnotationPruning.None);            
-            IsTrue(termRef.Reference == "term");
+            IsTrue(termRef.ReferenceName == "term");
 
             var unknown = expressionRule.RuleOptions[2] as RuleReference<int>;
 
             IsNotNull(unknown);
             IsTrue(unknown.Prune == AnnotationPruning.None);
-            IsTrue(unknown.Reference == "unknown_expression");
+            IsTrue(unknown.ReferenceName == "unknown_expression");
         }      
 
         [TestMethod]

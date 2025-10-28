@@ -1,6 +1,6 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.parser;
-
+using System.Diagnostics;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parserbuilder
@@ -26,16 +26,16 @@ namespace gg.parse.script.tests.parserbuilder
             // validate the run and its outputs
             IsTrue(root != null);
 
-            IsTrue((root[0] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[0] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[0].Prune == AnnotationPruning.None);
 
-            IsTrue((root[1] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[1] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[1].Prune == AnnotationPruning.Root);
 
-            IsTrue((root[2] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[2] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[2].Prune == AnnotationPruning.All);
 
-            IsTrue((root[3] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[3] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[3].Prune == AnnotationPruning.Children);
 
             var (result, _) = parser.Parse("foofoofoofoo");
@@ -58,13 +58,13 @@ namespace gg.parse.script.tests.parserbuilder
             // validate the run and its outputs
             IsTrue(root != null);
 
-            IsTrue((root[0] as RuleReference<int>).Reference == "foo");
+            IsTrue((root[0] as RuleReference<int>).ReferenceName == "foo");
             IsTrue(root[0].Prune == AnnotationPruning.None);
 
-            IsTrue((root[1] as RuleReference<int>).Reference == "bar");
+            IsTrue((root[1] as RuleReference<int>).ReferenceName == "bar");
             IsTrue(root[1].Prune == AnnotationPruning.Root);
 
-            IsTrue((root[2] as RuleReference<int>).Reference == "foo");
+            IsTrue((root[2] as RuleReference<int>).ReferenceName == "foo");
             IsTrue(root[2].Prune == AnnotationPruning.All);
 
             var (_, syntaxTree) = parser.Parse("foobarfoo");
@@ -91,13 +91,13 @@ namespace gg.parse.script.tests.parserbuilder
             // validate the run and its outputs
             IsTrue(root != null);
 
-            IsTrue((root[0] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[0] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[0].Prune == AnnotationPruning.None);
 
-            IsTrue((root[1] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[1] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[1].Prune == AnnotationPruning.Root);
 
-            IsTrue((root[2] as RuleReference<char>).Reference == "foo");
+            IsTrue((root[2] as RuleReference<char>).ReferenceName == "foo");
             IsTrue(root[2].Prune == AnnotationPruning.All);
 
             var (result, _) = parser.Parse("foobarfoo");
@@ -198,6 +198,141 @@ namespace gg.parse.script.tests.parserbuilder
 
             // 'foo'
             IsTrue(result[0][1].Rule is MatchDataSequence<char>);
+        }
+
+        /// <summary>
+        /// Rule reference can have modifiers both on the rule header and in the rule body.
+        /// When defined as a top level rule, this can get complicated as we get a cartesian product
+        /// of the header's modifier and the body's modifier. This test verifies all combinations work as expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateTopLevelRuleReference_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
+        {
+            var modifiers = new (string root, string options)[]
+            {
+                ("", ""),
+                ("", "-a"),
+                ("", "-r"),
+                ("", "-c"),
+
+                ("-r", ""),
+                ("-r", "-a"),
+                ("-r", "-r"),
+                ("-r", "-c"),
+
+                ("-a", ""),
+
+                ("-c", ""),
+                ("-c", "-a"),
+                ("-c", "-r"),
+                ("-c", "-c"),
+            };
+
+            var validateResult = new Action<ParseResult>[]
+            {
+                // 0. ("", ""),
+                (result) => 
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0][0] == "options");
+                    IsTrue(result[0][0][0].Rule is MatchDataSequence<char>);
+                },
+
+                // 1. ("", "-a"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0].Count == 0);
+                },
+
+                // 2. ("", "-r"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0][0].Rule is MatchDataSequence<char>);
+                },
+
+                // 3. ("", "-c"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0][0] == "options");
+                    IsTrue(result[0][0].Count == 0);
+                },
+
+                // 4. ("-r", ""),
+                (result) =>
+                {
+                    IsTrue(result[0] == "options");
+                    IsTrue(result[0][0].Rule is MatchDataSequence<char>);
+                },
+
+                // 5. ("-r", "-a"),
+                (result) =>
+                {
+                    IsTrue(result.Count == 0);
+                },
+
+                // 6. ("-r", "-r"),
+                (result) =>
+                {
+                    IsTrue(result[0].Rule is MatchDataSequence<char>);
+                },
+
+                // 6. ("-r", "-c"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "options");
+                    IsTrue(result[0].Count == 0);
+                },
+
+                // 7. ("-a", ""),
+                (result) =>
+                {
+                    IsTrue(result.Annotations == null);
+                },
+
+                // 8. ("-c", ""),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0].Count == 0);
+                },
+
+                // 9. ("-c", "-a"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0].Count == 0);
+                },
+
+                // 10. ("-c", "-r"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0].Count == 0);
+                },
+
+                // 11. ("-c", "-c"),
+                (result) =>
+                {
+                    IsTrue(result[0] == "root");
+                    IsTrue(result[0].Count == 0);
+                },
+            };
+
+            for (var i = 0; i < modifiers.Length; i++)
+            {
+                var (pruneRoot, pruneOptions) = modifiers[i];
+                var builder = new ParserBuilder().From($"{pruneRoot} root = {pruneOptions} options; options = 'a' | 'b';");
+                var (result, _) = builder.Parse("a");
+
+                IsTrue(result);
+
+                Debug.WriteLine($"{i} '{pruneRoot}', '{pruneOptions}':\n{ScriptUtils.PrettyPrintTokens("a", result.Annotations)}");
+
+                validateResult[i](result);
+            }
         }
     }
 }

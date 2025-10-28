@@ -228,7 +228,7 @@ namespace gg.parse.script.compiler
                     {
                         foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                         {
-                            var referredRule = FindRule(graph, referenceRule.Reference);
+                            var referredRule = FindRule(graph, referenceRule.ReferenceName);
 
                             // note: we don't replace the rule we just set the reference. This allows
                             // these subrules to have their own annotation output. If we replace these 
@@ -238,12 +238,12 @@ namespace gg.parse.script.compiler
                             // if the reference rule is part of a composition (sequence/option/oneormore/...)
                             // then use the referred rule's name / output to show up in the result/ast tree
                             // rather than this reference rule's name/output
-                            referenceRule.DeferResultToReference = true;
+                            referenceRule.IsTopLevel = false;
                         }
                     }
                     else if (rule is RuleReference<T> reference)
                     {
-                        reference.Rule = FindRule(graph, reference.Reference);
+                        reference.Rule = FindRule(graph, reference.ReferenceName);
                     }
                 }
                 catch (Exception ex)

@@ -100,17 +100,17 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("ReferenceName text is empty (somehow...).", annotation: bodyNode);
             }
 
-            var modifier = declaration.Prune;
+            var referencePruning = AnnotationPruning.None;
 
             // xxx should raise a warning if product is anything else than annotation eg
             // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasOutputModifier)
             {
-                session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out modifier);
+                session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out referencePruning);
             }
 
-            return new RuleReference<T>(declaration.Name, referenceName, modifier, declaration.Precedence);
+            return new RuleReference<T>(declaration.Name, referenceName, declaration.Prune, declaration.Precedence, referencePruning);
         }
 
         public static TRule CompileBinaryOperator<T, TRule>(RuleHeader header, Annotation body, CompileSession session) 
