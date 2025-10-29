@@ -156,6 +156,7 @@ Rule References
 ### Meta rules
 #### [Match Evaluation](./doc/match-evaluation.md)  (a/b/c)
 #### [Match Count](./doc/match-count.md) (*,+, ?)
+#### [Rule reference](./doc/rule-reference.md) (foo)
 
 ### Look-ahead rules
 #### [Match Condition](./doc/match-condition.md)  (if ...)
