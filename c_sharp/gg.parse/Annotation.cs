@@ -20,6 +20,7 @@ namespace gg.parse
         /// <summary>
         /// Range in the data which this annotation spans
         /// </summary>
+        // xxx set => init ?
         public Range Range { get; set; }
         
         public int Start => Range.Start;
@@ -35,6 +36,7 @@ namespace gg.parse
 
         public List<Annotation>? Children { get; init; }
 
+        // xxx make init ?
         public Annotation? Parent { get; set; }
 
         /// <summary>

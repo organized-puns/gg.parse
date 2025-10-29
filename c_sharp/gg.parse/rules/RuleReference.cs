@@ -110,82 +110,73 @@ namespace gg.parse.rules
         /// <returns></returns>
         private ParseResult GetTopLevelResult(ParseResult result, int start)
         {
-            switch (Prune)
+            return Prune switch
             {
-                case AnnotationPruning.All:
-                    return new ParseResult(true, result.MatchLength);
-
-                case AnnotationPruning.Children:
-                    return new ParseResult(
-                       true,
-                       result.MatchLength,
-                       [new Annotation(this, new Range(start, result.MatchLength))]
-                    );
-                case AnnotationPruning.Root:
-                    return GetTopLevelResultWithoutRoot(result, start);
-                case AnnotationPruning.None:
-                    return GetTopLevelResultWithRoot(result, start);
-                default:
-                    throw new NotImplementedException();
-            }
+                AnnotationPruning.All => new ParseResult(true, result.MatchLength),
+                AnnotationPruning.Children => 
+                    new ParseResult(
+                        true,
+                        result.MatchLength,
+                        [new Annotation(this, new Range(start, result.MatchLength))]
+                    ),
+                AnnotationPruning.Root => GetTopLevelResultWithoutRoot(result),
+                AnnotationPruning.None => GetTopLevelResultWithRoot(result, start),
+                _ => throw new NotImplementedException(),
+            };
         }
 
-        private ParseResult GetTopLevelResultWithoutRoot(ParseResult result, int start)
+        private ParseResult GetTopLevelResultWithoutRoot(ParseResult result)
         {
-            switch (ReferencePrune)
+            return ReferencePrune switch
             {
-                case AnnotationPruning.All:
-                    return new ParseResult(true, result.MatchLength);
-                case AnnotationPruning.Children:
-                    return new ParseResult(
+                AnnotationPruning.All => new ParseResult(true, result.MatchLength),
+                AnnotationPruning.Children => 
+                    new ParseResult(
                         true,
                         result.MatchLength,
                         CollectRootAnnotations(result.Annotations)
-                    );
-                case AnnotationPruning.Root:
-                    return new ParseResult(
+                    ),
+                AnnotationPruning.Root => 
+                    new ParseResult(
                         true,
                         result.MatchLength,
                         CollectChildAnnotations(result.Annotations)
-                    );
-                case AnnotationPruning.None:
-                    return result;
-                default:
-                    throw new NotImplementedException();
-            }
+                    ),
+                AnnotationPruning.None => result,
+                _ => throw new NotImplementedException(),
+            };
         }
 
         private ParseResult GetTopLevelResultWithRoot(ParseResult result, int start)
         {
-            switch (ReferencePrune)
+            return ReferencePrune switch
             {
-                case AnnotationPruning.All:
-                    return new ParseResult(
-                       true,
-                       result.MatchLength,
-                       [new Annotation(this, new Range(start, result.MatchLength))]
-                    );
-                case AnnotationPruning.Children:
-                    return new ParseResult(
+                AnnotationPruning.All => 
+                    new ParseResult(
+                        true,
+                        result.MatchLength,
+                        [new Annotation(this, new Range(start, result.MatchLength))]
+                    ),
+                AnnotationPruning.Children => 
+                    new ParseResult(
                         true,
                         result.MatchLength,
                         [new Annotation(this, new Range(start, result.MatchLength), CollectRootAnnotations(result.Annotations))]
-                    );
-                case AnnotationPruning.Root:
-                    return new ParseResult(
+                    ),
+                AnnotationPruning.Root => 
+                    new ParseResult(
                         true,
                         result.MatchLength,
                         [new Annotation(this, new Range(start, result.MatchLength), CollectChildAnnotations(result.Annotations))]
-                    );
-                case AnnotationPruning.None:
-                    return new ParseResult(
+                    ),
+                AnnotationPruning.None => 
+                    new ParseResult(
                         true,
                         result.MatchLength,
                         [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]
-                    );
-                default:
-                    throw new NotImplementedException();
-            }
+                    ),
+                _ => throw new NotImplementedException(),
+            };
         }
 
         private static List<Annotation>? CollectChildAnnotations(List<Annotation>? annotations)
