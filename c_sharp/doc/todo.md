@@ -34,20 +34,6 @@ kanban
 Details
 -------------
 
-
-Details:
-
-### 1. output passthrough unintuitive
-this is weird:
-array_item_list   = value, *(~item_separator, value);
-array			  = ~array_start, ?array_item_list, ~array_end;
-?array_item_list 
-	yields zero_or_one of the children of array_item_list
-	it should yield the children of zero_or_one of array_item_list
-	but not ?(a | b | c) -> should yield a, b, c not (a|b|c)
-
-value = a | b | c; should yield value(a) not a BUT value = (a | b | c ) | 'foo' should ield  value(a) or value('foo')
-
 ### 3. Fix ambiguous root
 Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
 
