@@ -358,7 +358,7 @@ namespace gg.parse.script.tests.compiler
             var identifierRule = table.FindRule("rule") as RuleReference<char>;
 
             IsNotNull(identifierRule);
-            IsTrue(identifierRule.ReferencePruning == AnnotationPruning.All);
+            IsTrue(identifierRule.ReferencePrune == AnnotationPruning.All);
 
             // the compiled table's root should be able to parse a bar string 
             var testText = "bar";

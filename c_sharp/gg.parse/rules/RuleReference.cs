@@ -13,7 +13,7 @@ namespace gg.parse.rules
 
         public string ReferenceName { get; init; }
 
-        public AnnotationPruning ReferencePruning { get; init; }
+        public AnnotationPruning ReferencePrune { get; init; }
 
         public RuleBase<T>? Rule 
         {
@@ -45,7 +45,7 @@ namespace gg.parse.rules
         : base(name, prune, precedence) 
         {
             ReferenceName = reference;
-            ReferencePruning = referencePruning;
+            ReferencePrune = referencePruning;
         }
 
         public override ParseResult Parse(T[] input, int start)
@@ -67,7 +67,7 @@ namespace gg.parse.rules
                 {
                     // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 
                     // the rule output so pass back the result based on the reference pruning
-                    return ReferencePruning switch
+                    return ReferencePrune switch
                     {
                         AnnotationPruning.None => result,
                         AnnotationPruning.Children => new ParseResult(
@@ -132,7 +132,7 @@ namespace gg.parse.rules
 
         private ParseResult GetTopLevelResultWithoutRoot(ParseResult result, int start)
         {
-            switch (ReferencePruning)
+            switch (ReferencePrune)
             {
                 case AnnotationPruning.All:
                     return new ParseResult(true, result.MatchLength);
@@ -157,7 +157,7 @@ namespace gg.parse.rules
 
         private ParseResult GetTopLevelResultWithRoot(ParseResult result, int start)
         {
-            switch (ReferencePruning)
+            switch (ReferencePrune)
             {
                 case AnnotationPruning.All:
                     return new ParseResult(

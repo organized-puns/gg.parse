@@ -11,16 +11,17 @@ config:
 ---
 kanban
   Backlog
-    [output passthrough unintuitive, possibly wrong]
+    [Add rule reference documentation]
     [fix ambiguous root]
     [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
   
   In progress
     [Create Documentation]
     [Add rule examples]
-	[Document Pruning]
 	
   Done
+	[Document Pruning]
+	[output passthrough unintuitive, possibly wrong]
 	[Add to nuget]	
     [Add missing names to CompilerFunctionNameGenerator functions]   
 	[Fix all warnings]
