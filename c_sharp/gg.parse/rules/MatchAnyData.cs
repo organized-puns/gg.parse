@@ -8,7 +8,7 @@ namespace gg.parse.rules
 {
     public class MatchAnyData<T>(
         string name, 
-        RuleOutput output = RuleOutput.Self, 
+        AnnotationPruning output = AnnotationPruning.None, 
         int precedence = 0
      ) : RuleBase<T>(name, output, precedence) where T : IComparable<T>
     {

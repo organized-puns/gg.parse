@@ -45,7 +45,7 @@ namespace gg.parse.rules
 
         public SkipRule(
             string name,
-            RuleOutput product,
+            AnnotationPruning product,
             int precedence,
             RuleBase<T> condition,
             bool failOnEof = true

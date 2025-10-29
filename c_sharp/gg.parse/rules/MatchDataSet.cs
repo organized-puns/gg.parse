@@ -9,14 +9,14 @@ namespace gg.parse.rules
     {
         public T[] MatchingValues { get; init; }
 
-        public MatchDataSet(string name, RuleOutput output, T[] setValues, int precedence = 0)
+        public MatchDataSet(string name, AnnotationPruning output, T[] setValues, int precedence = 0)
             : base(name, output, precedence)
         {
             MatchingValues = setValues;
         }
 
         public MatchDataSet(string name, T[] matchingValues, int precedence = 0)
-            : base(name, RuleOutput.Self, precedence)
+            : base(name, AnnotationPruning.None, precedence)
         {
             MatchingValues = matchingValues;
         }

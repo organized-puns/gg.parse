@@ -7,7 +7,7 @@ language. Furthermore this project aims to provide an _easy to understand and us
 
 gg.parse has no lofty ambitions, it's a c# side project lacking formal rigor and only indirectly draws from the wealth of knowledge of the deep knowledge available in the computer science literature.
 
-If you're looking for a parser which may or many not qualify as 
+If you're looking for a parser which may  qualify as 
 "production ready", you might want to consider one of the following:
 
 - [**LLLPG**](https://ecsharp.net/lllpg/) A C# parser generator with EBNF-style syntax.

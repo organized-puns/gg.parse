@@ -1,18 +1,24 @@
-﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+﻿using gg.parse.script.common;
 
-using gg.parse.script.common;
+using gg.parse.script.parser;
+
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.common
 {
+    /// <summary>
+    /// Go over the common tokenizer rules and validate they behave as expected.
+    /// </summary>
     [TestClass]
     public class CommonTokenizerTests
     {
+
         [TestMethod]
         public void DigitSequenceTokenTests()
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.DigitSequence(name),
-                testNames: [null, "digitSequence", "~digitSequence", "#digitSequence"],
+                testNames: GenerateTestNames("digitSequence"),
                 validSamples: ["1", "0123", "9876543210"],
                 invalidSamples: ["", "a123", "$123", " 123"]
             );
@@ -23,7 +29,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.Boolean(name),
-                testNames: [null, "bool", "~bool", "#bool"],
+                testNames: GenerateTestNames("bool"),
                 validSamples: ["true", "false"],
                 invalidSamples: ["", " T", "True", " false"]
             );
@@ -34,7 +40,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory:    (tokenizer, name) => tokenizer.Identifier(name),
-                testNames:      [null, "identifier", "~identifier", "#identifier"],
+                testNames:      GenerateTestNames("identifier"),
                 validSamples:   ["foo", "_bar", "A123_abcd09"],
                 invalidSamples: ["", "123abc", "$abc", " foo"]
             );
@@ -45,7 +51,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.Integer(name),
-                testNames: [null, "int", "~int", "#int"],
+                testNames: GenerateTestNames("int"),
                 validSamples: ["123", "-123", "1", "-009", "+123456789"],
                 invalidSamples: ["", "*123", "a123", "_000", " 123"]
             );
@@ -56,7 +62,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.Float(name),
-                testNames: [null, "float", "~float", "#float"],
+                testNames: GenerateTestNames("float"),
                 validSamples: ["123.0", "-123.1", "1e3", "-2.0E-43", "+12345.6789", "123.3E+3"],
                 invalidSamples: ["", "*123.2", "a123.3", "_00.0", "123.", "123.3e", "123.3E+x"]
             );
@@ -67,7 +73,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.Literal(name, "foo"),
-                testNames: [null, "literal", "~literal", "#literal"],
+                testNames: GenerateTestNames("literal"),
                 validSamples: ["foo"],
                 invalidSamples: ["", "*foo", "Foo", "fo", "bar"]
             );
@@ -78,7 +84,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.Keyword(name, "keyword"),
-                testNames: [null, "keywordToken", "~keywordToken", "#keywordToken"],
+                testNames: GenerateTestNames("keywordToken"),
                 validSamples: ["keyword", "keyword ", "keyword!", "keyword("],
                 invalidSamples: ["", "kyword", "keywords", " keyword"]
             );
@@ -89,7 +95,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.MatchString(name, '\''),
-                testNames: [null, "string", "#string", "~string" ],
+                testNames: GenerateTestNames("string"),
                 validSamples: ["''", "'str''", "'str'", "'\\'str\\''", "'\\\\'", "'\\abc'" ],
                 invalidSamples: ["", "'str", "'\\'", " 'str''"]
             );
@@ -101,7 +107,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.MultiLineComment(name),
-                testNames: [null, "comment", "#comment", "~comment"],
+                testNames: GenerateTestNames("comment"),
                 validSamples: ["/* foo */", "/**/", "/** // */", "/** */"],
                 invalidSamples: ["", "/*", "/*/"]
             );
@@ -112,7 +118,7 @@ namespace gg.parse.script.tests.common
         {
             RunTokenizerTest(
                 ruleFactory: (tokenizer, name) => tokenizer.SingleLineComment(name),
-                testNames: [null, "comment", "#comment", "~comment"],
+                testNames: GenerateTestNames("comment"),
                 validSamples: ["// foo", "//bar\n", "//"],
                 invalidSamples: ["", "/foo", "/"]
             );
@@ -120,7 +126,50 @@ namespace gg.parse.script.tests.common
 
         // -- private / utility functions -----------------------------------------------------------------------------
 
-        private void RunTokenizerTest(
+        private static string[] GenerateTestNames(string baseName) =>
+            [
+                null,
+                baseName,
+                AnnotationPruningToken.None + baseName,
+                AnnotationPruningToken.All + baseName,
+                AnnotationPruningToken.Children + baseName,
+                AnnotationPruningToken.Root + baseName
+            ];
+
+        private static void ValidatePruning(RuleBase<char> rule, string name)
+        {
+            // validate the implicit pruning is correct
+            if (name != null)
+            {
+                if (name.StartsWith(AnnotationPruningToken.All))
+                {
+                    IsTrue(rule.Prune == AnnotationPruning.All);
+                }
+                else if (name.StartsWith(AnnotationPruningToken.Children))
+                {
+                    IsTrue(rule.Prune == AnnotationPruning.Children);
+                }
+                else if (name.StartsWith(AnnotationPruningToken.Root))
+                {
+                    IsTrue(rule.Prune == AnnotationPruning.Root);
+                }
+                else if ((name[0] >= 'a' && name[0] <= 'z') || (name[0] >= 'A' && name[0] <= 'Z'))
+                {
+                    IsTrue(rule.Prune == AnnotationPruning.None);
+                }
+                else
+                {
+                    Fail();
+                }
+            }
+            else
+            {
+                // no name is provided, it's therefore considered unnamed / anonymous so pruning should default to All
+                IsTrue(rule.Prune == AnnotationPruning.All);
+            }
+        }
+
+        private static void RunTokenizerTest(
             Func<CommonTokenizer, string, RuleBase<char>> ruleFactory, 
             string[] testNames,
             string[] validSamples, 
@@ -135,21 +184,23 @@ namespace gg.parse.script.tests.common
 
                 if (name != null)
                 {
-                    var (expectedName, output) = name.SplitNameAndOutput();
+                    var (expectedName, output) = name.SplitNameAndPruning();
                     
                     IsTrue(rule.Name == expectedName);
-                    IsTrue(rule.Output == output);
+                    IsTrue(rule.Prune == output);
                 }
                 else
                 {
                     // no name provided, there should be a non null default name
-                    IsNotNull(rule.Name);
-                    IsTrue(rule.Output == RuleOutput.Void);
+                    IsTrue(rule.Prune == AnnotationPruning.All);
                 }
 
                 IsTrue(tokenizer.FindRule(rule.Name) == rule);
 
-                // invoke the rule again - make sure the rule is not added again
+                ValidatePruning(rule, name);
+
+                // invoke the rule again - make sure the rule is not added to the rulegraph again
+                // as it uses the same name
                 ruleFactory(tokenizer, name);
 
                 IsTrue(ruleCount == tokenizer.Count);
@@ -167,7 +218,7 @@ namespace gg.parse.script.tests.common
                     IsTrue(result.FoundMatch);
                     IsTrue(result.MatchLength > 0);
 
-                    if (rule.Output == RuleOutput.Void)
+                    if (rule.Prune == AnnotationPruning.All)
                     {
                         IsTrue(result.Annotations == null);
                     }
@@ -178,7 +229,7 @@ namespace gg.parse.script.tests.common
                 {
                     var result = rule.Parse(sample);
 
-                    IsTrue(!result.FoundMatch);
+                    IsFalse(result.FoundMatch);
                 }
             }
         }

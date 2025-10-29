@@ -9,6 +9,10 @@ namespace gg.parse.script.parser
 {
     public class ScriptParser : CommonParser
     {
+        // short hands for annotation pruning tokens
+        private const string pa = AnnotationPruningToken.All;
+        private const string pr = AnnotationPruningToken.Root;
+
         public static class Names
         {
             public const string Any = "any";
@@ -51,9 +55,11 @@ namespace gg.parse.script.parser
 
         public MatchSingleData<int> MatchAnyToken { get; private set; }
 
-        public MatchSingleData<int> MatchTransitiveSelector { get; private set; }
+        public MatchSingleData<int> MatchPruneRootToken { get; private set; }
 
-        public MatchSingleData<int> MatchNoProductSelector { get; private set; }
+        public MatchSingleData<int> MatchPruneChildrenToken { get; private set; }
+
+        public MatchSingleData<int> MatchPruneAllToken { get; private set; }
 
         public MatchRuleSequence<int> MatchRule { get; private set; }
 
@@ -65,7 +71,7 @@ namespace gg.parse.script.parser
 
         public MatchRuleSequence<int> MatchSequence { get; private set; }
 
-        public MatchRuleSequence<int> MatchOption { get; private set; }
+        public MatchRuleSequence<int> MatchOneOf { get; private set; }
 
         public MatchRuleSequence<int> MatchEval { get; private set; }
 
@@ -97,9 +103,9 @@ namespace gg.parse.script.parser
 
         public MatchRuleSequence<int> Include { get; private set; }
 
-        public MatchRuleSequence<int> MatchUnexpectedProductInBodyError { get; private set; }
+        public MatchRuleSequence<int> MatchUnexpectedPruneTokenInBodyError { get; private set; }
 
-        public LogRule<int> UnexpectedProductInBodyError { get; private set; }
+        public LogRule<int> UnexpectedPrunetokenInBodyError { get; private set; }
 
         public LogRule<int> RuleBodyError { get; private set; }
 
@@ -109,7 +115,7 @@ namespace gg.parse.script.parser
 
         public LogRule<int> MissingRuleEndError { get; private set; }
 
-        public LogRule<int> InvalidProductInHeaderError { get; private set; }
+        public LogRule<int> InvalidPruneTokenInHeaderError { get; private set; }
 
         public LogRule<int> MissingAssignmentError { get; private set; }
 
@@ -154,22 +160,22 @@ namespace gg.parse.script.parser
 
             Include = Sequence("include", IncludeToken!, MatchLiteral!, RuleEndToken!);
 
-            var validStatement = OneOf("#validStatement", Include, MatchRule);
+            var validStatement = OneOf($"{pr}validStatement", Include, MatchRule);
 
             // fallback in case nothing matches
             UnknownInputError = Error(
-                "UnknownInput",
+                "unknown_input",
                 "Can't match token(s) to a grammar expression.",
-                Skip("~skipUntilNextValidStatement", stopCondition: validStatement, failOnEoF: false)
+                Skip($"{pa}skip_until_next_valid_statement", stopCondition: validStatement, failOnEoF: false)
             );            
 
-            Root = ZeroOrMore("#root", OneOf("#statement", validStatement, UnknownInputError));
+            Root = ZeroOrMore($"{pr}root", OneOf($"{pr}statement", validStatement, UnknownInputError));
         }
 
         private MatchRuleSequence<int> RegisterRuleHeaderMatchers()
         {
-            MatchRuleName = MatchSingle("ruleName", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
-            MatchPrecedence = MatchSingle("rulePrecedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
+            MatchRuleName = MatchSingle("rule_name", Tokenizer.FindRule(CommonTokenNames.Identifier)!.Id);
+            MatchPrecedence = MatchSingle("rule_precedence", Tokenizer.FindRule(CommonTokenNames.Integer)!.Id);
 
             InvalidPrecedenceError = Error(
                 "precedenceNotFoundError",
@@ -179,12 +185,12 @@ namespace gg.parse.script.parser
             );
 
             return Sequence(
-                "#ruleHeader",
+                $"{pr}rule_header",
                 CreateMatchHeaderAnnotationProduction(),
                 // xxx should handle incorrect rulename / error
                 MatchRuleName,
-                ZeroOrOne("#precedence",
-                    OneOf("#rulePrecedenceOptions",
+                ZeroOrOne($"{pr}precedence",
+                    OneOf($"{pr}rule_precedence_options",
                         // if we match an assingment there's no a precedence value
                         IfMatch(AssignmentToken),
                         // handle the precedence value
@@ -208,18 +214,18 @@ namespace gg.parse.script.parser
             var dataMatchersArray = RegisterDataMatchers();
 
             // unary terms are single terms, ie everything but binary operators
-            var unaryTerms = OneOf("#unaryTerms", dataMatchersArray);
+            var unaryTerms = OneOf($"{pr}unaryTerms", dataMatchersArray);
 
             // operators like not(x), if(x), *(x), +(x), ?(x)
             var unaryOperators = RegisterUnaryOperatorMatchers(unaryTerms);
 
             // operators like a | b | c , a , b , c , a / b / c
-            var binaryOperators = OneOf("#binaryRuleTerms", RegisterBinaryOperatorMatchers(unaryTerms));
+            var binaryOperators = OneOf($"{pr}binaryRuleTerms", RegisterBinaryOperatorMatchers(unaryTerms));
             
-            var ruleBody = OneOf("#ruleBody", binaryOperators, unaryTerms);
+            var ruleBody = OneOf($"{pr}ruleBody", binaryOperators, unaryTerms);
 
             // ( a, b, c )
-            MatchGroup = Sequence("#group", GroupStartToken!, ruleBody, GroupEndToken!);
+            MatchGroup = Sequence($"{pr}group", GroupStartToken!, ruleBody, GroupEndToken!);
 
             // create all various instances of logs (errors,warnings,infos...)
             MatchLog = CreateMatchLog(ruleBody);
@@ -241,37 +247,37 @@ namespace gg.parse.script.parser
         private MatchRuleSequence<int> RegisterRule(RuleBase<int> ruleHeader, RuleBase<int> ruleBody)
         {
             RuleBodyError = Error(
-                "RuleBodyError",
+                "rule_body_error",
                 "Unexpected token(s) in the rule's body.",
                 Skip(stopCondition: RuleEndToken, failOnEoF: false)
             );
 
-            var emptyBodyWarning = Warning("NoRuleBodyWarning", "Rule has no body.", IfMatch(RuleEndToken));
+            var emptyBodyWarning = Warning("no_rule_body_warning", "Rule has no body.", IfMatch(RuleEndToken));
 
-            var ruleBodyOptions = OneOf("#RuleBodyOptions", ruleBody, emptyBodyWarning, RuleBodyError);
+            var ruleBodyOptions = OneOf($"{pr}rule_body_options", ruleBody, emptyBodyWarning, RuleBodyError);
 
             MissingRuleEndError = Error(
-                "MissingEndRule",
+                "missing_end_rule",
                 "Missing end of rule (;) at the given position.",
                 // skip until the start of the next rule, if any
-                Skip("~skipUntilNextHeaderOrEof", ruleHeader, failOnEoF: false)
+                Skip($"{pa}skip_until_next_header_or_eof", ruleHeader, failOnEoF: false)
             );
 
             var endStatementOptions = OneOf(
-                "#EndStatementOptions",
+                $"{pr}end_statement_options",
                 RuleEndToken,
                 MissingRuleEndError
             );
 
             MissingAssignmentError = Error(
-                "MissingAssignmentError",
+                "missing_assignment_Error",
                 "Assignment token '=', expected but encountered something different."
             );
 
             MatchRule = Sequence(
-                "Rule",
+                "rule",
                 ruleHeader,
-                OneOf("#RuleAssignmentToken", AssignmentToken, MissingAssignmentError),
+                OneOf($"{pr}rule_assignment_token", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,
                 endStatementOptions
             );
@@ -283,24 +289,24 @@ namespace gg.parse.script.parser
         {
             // A stray output modifier found, output modifier can only appear in front of references
             // because they don't make any sense elsewhere (or at least I'm not aware of a valid use case).
-            // Match ~ or # inside the rule, if found, raise an error and skip until the next token,
-            // in script: (~|#), error "unexpected product modifier" .
-            UnexpectedProductInBodyError = Error(
-                    "UnexpectedProductionModifier",
+            // Match -r, -c or -a inside the rule, if found, raise an error and skip until the next token,
+            // in script: (-a|-r|-c), error "unexpected product modifier" .
+            UnexpectedPrunetokenInBodyError = Error(
+                    "unexpected_pruning_token",
                     "Found an unexpected annotation output modifier. These can only appear in front of references to other rules or rule declarations."
             );
 
-            // error for cases where a product is not followed by a valid term, eg #&, ~; or # followed by EOF
-            MatchUnexpectedProductInBodyError = Sequence(
-                "UnexpectedProductErrorMatch",
+            // error for cases where a product is not followed by a valid term, eg #&, -r; or -a followed by EOF
+            MatchUnexpectedPruneTokenInBodyError = Sequence(
+                "unexpected_prune_token_error_match",
                 CreateMatchBodyAnnotationProduction(),
-                OneOf("#UnexpectedProductErrorMatchTerm", recoveryRules),
-                UnexpectedProductInBodyError
+                OneOf($"{pr}UnexpectedProductErrorMatchTerm", recoveryRules),
+                UnexpectedPrunetokenInBodyError
             );
 
             // xxx add more error conditions here
 
-            return OneOf("#ruleBodyErrorHandler", MatchUnexpectedProductInBodyError);
+            return OneOf($"{pr}rulebody_error_handler", MatchUnexpectedPruneTokenInBodyError);
         }
 
         private RuleBase<int>[] RegisterDataMatchers()
@@ -352,11 +358,11 @@ namespace gg.parse.script.parser
 
         private RuleBase<int>[] RegisterUnaryOperatorMatchers(MatchOneOf<int> unaryTerms)
         {
-            MissingUnaryOperatorTerm = Error("MissingUnaryOperatorTerm", "Expecting term after an unary operator (try, !,?,+, or *).");
+            MissingUnaryOperatorTerm = Error("missing_unary_operator_term", "Expecting term after an unary operator (try, !,?,+, or *).");
 
             var unaryDataTermsOptions =
                 OneOf(
-                    "#UnaryDataTermsOptions",
+                    $"{pr}unary_data_terms_options",
                     unaryTerms,
                     MissingUnaryOperatorTerm
                 );
@@ -399,14 +405,14 @@ namespace gg.parse.script.parser
             // >> a
             MatchFindOperator = Sequence(
                 Names.Find,
-                Token(CommonTokenNames.Find),
+                Token(CommonTokenNames.FindOperator),
                 unaryDataTermsOptions
             );
 
             // >>> a
             MatchSkipOperator = Sequence(
                 Names.Skip,
-                Token(CommonTokenNames.Skip),
+                Token(CommonTokenNames.SkipOperator),
                 unaryDataTermsOptions
             );
 
@@ -431,8 +437,10 @@ namespace gg.parse.script.parser
             IncludeToken = Token(CommonTokenNames.Include);
 
             IdentifierToken = Token(CommonTokenNames.Identifier, CommonTokenNames.Identifier);
-            MatchTransitiveSelector = Token(CommonTokenNames.TransitiveSelector, CommonTokenNames.TransitiveSelector);
-            MatchNoProductSelector = Token(CommonTokenNames.NoProductSelector, CommonTokenNames.NoProductSelector);
+            
+            MatchPruneAllToken = Token(CommonTokenNames.PruneAll, CommonTokenNames.PruneAll);
+            MatchPruneChildrenToken = Token(CommonTokenNames.PruneChildren, CommonTokenNames.PruneChildren);
+            MatchPruneRootToken = Token(CommonTokenNames.PruneRoot, CommonTokenNames.PruneRoot);
         }
 
         private RuleBase<int>[] RegisterBinaryOperatorMatchers(MatchOneOf<int> unaryTerms)
@@ -442,7 +450,7 @@ namespace gg.parse.script.parser
 
             // a | b | c
             // mainOption contains both the match and error handling
-            (var mainOption, MatchOption) = CreateBinaryOperator(Names.Option, CommonTokenNames.Option, unaryTerms);
+            (var mainOption, MatchOneOf) = CreateBinaryOperator(Names.Option, CommonTokenNames.OneOf, unaryTerms);
 
             // a / b / c
             // mainEval contains both the match and error handling
@@ -479,7 +487,7 @@ namespace gg.parse.script.parser
             var operatorToken = Token(operatorTokenName);
 
             var nextElement = Sequence(
-                    $"#Next{name}Element",
+                    $"{pr}next_{name}_element",
                     Token(operatorTokenName),
                     ruleTerms);
 
@@ -488,7 +496,7 @@ namespace gg.parse.script.parser
 
             // user forgot an operator eg: a, b  c;
             var matchMissingOperatorError = Error(
-                $"MissingOperatorError({operatorTokenName})",
+                $"missing_operator_error({operatorTokenName})",
                 $"Expected an operator ({operatorTokenName}) but did not find any.",
                 ruleTerms
             );
@@ -497,7 +505,7 @@ namespace gg.parse.script.parser
 
             // user forgot an term after the operator eg: a, b, ;
             var matchMissingTermError = Error(
-                $"MissingTermError({operatorTokenName})",
+                $"missing_term_error({operatorTokenName})",
                 $"Expected an rule term after operator ({operatorTokenName}) but did not find any.",
                 Sequence(Token(operatorTokenName), Not(ruleTerms))
             );
@@ -507,7 +515,7 @@ namespace gg.parse.script.parser
             // user used a different operator by mistake (?) eg: a, b | c, d or a wrong token altogether
             // eg a, b, . c
             var matchWrongOperatorError = Error(
-                $"WrongOperatorError({operatorTokenName})",
+                $"wrong_operator_error({operatorTokenName})",
                 $"Expected an operator ({operatorTokenName}) but found something else.",
                 Sequence(Not(operatorToken), Any(), ruleTerms)
             );
@@ -515,10 +523,10 @@ namespace gg.parse.script.parser
             WrongOperatorTokenError[operatorTokenName] = matchWrongOperatorError;
 
             var matchOperatorError = Sequence(
-                $"#MatchOperatorErrors({operatorTokenName})",
+                $"{pr}match_operator_errors({operatorTokenName})",
                 notEndOfOperator,
                 OneOf(
-                    $"#OneOfOperatorError({operatorTokenName})",
+                    $"{pr}one_of_operator_error({operatorTokenName})",
                     matchMissingTermError,
                     matchMissingOperatorError,
                     matchWrongOperatorError
@@ -526,7 +534,7 @@ namespace gg.parse.script.parser
             );
 
             var remainder = OneOf(
-                $"#OperatorRemainder({operatorTokenName})",
+                $"{pr}operator_remainder({operatorTokenName})",
                 nextElement,
                 matchOperatorError
             );
@@ -536,11 +544,11 @@ namespace gg.parse.script.parser
                 ruleTerms,
                 operatorToken,
                 ruleTerms,
-                ZeroOrMore($"#{name}Remainder", remainder)
+                ZeroOrMore($"{pr}{name}_remainder", remainder)
             );
 
             var matchOperatorSequenceError = Error(
-                $"MatchOperatorSequenceError({operatorTokenName})",
+                $"match_operator_sequence_error({operatorTokenName})",
                 $"Expected a rule term after operator ({operatorTokenName}) but found something else.",
                 Sequence(ruleTerms, operatorToken, Not(ruleTerms))
             );
@@ -549,7 +557,7 @@ namespace gg.parse.script.parser
 
             return (
                 OneOf(
-                    $"#OneOfBinaryOperator(({operatorTokenName})",
+                    $"{pr}one_of_binary_operator(({operatorTokenName})",
                     matchOperatorSequence,
                     matchOperatorSequenceError
                 ),
@@ -571,9 +579,9 @@ namespace gg.parse.script.parser
             var matchText = MatchLiteral;
 
             var matchOptionalCondition = ZeroOrOne(
-                "#OptionalLogCondition", 
+                $"{pr}optional_log_vondition", 
                 Sequence(
-                    "#LogCondition",
+                    $"{pr}log_condition",
                     Token(CommonTokenNames.If),
                     condition
                 )
@@ -589,19 +597,20 @@ namespace gg.parse.script.parser
 
         private MatchOneOf<int> CreateMatchHeaderAnnotationProduction()
         {
-            InvalidProductInHeaderError = Error(
-                "InvalidProductInHeaderError",
-                $"Expected either '{RuleOutput.Void.GetToken()}' or '{RuleOutput.Children.GetToken()}' but found something else entirely.",
+            InvalidPruneTokenInHeaderError = Error(
+                "invalid_prune_token_in_rule_header_error",
+                $"Expected either '{AnnotationPruning.All.GetTokenString()}' or '{AnnotationPruning.Root.GetTokenString()}' but found something else entirely.",
                 Any()
             );
 
             return OneOf(
-                "#HeaderRuleProduction",
+                $"{pr}header_rule_pruning",
                 // if an indentifier token is found, it means there is no output
                 IfMatch(IdentifierToken),
-                MatchTransitiveSelector,
-                MatchNoProductSelector,
-                InvalidProductInHeaderError
+                MatchPruneAllToken,
+                MatchPruneChildrenToken,
+                MatchPruneRootToken,
+                InvalidPruneTokenInHeaderError
             );
         }
 
@@ -612,11 +621,12 @@ namespace gg.parse.script.parser
         private MatchCount<int> CreateMatchBodyAnnotationProduction()
         {
             return ZeroOrOne(
-                "#ruleBodyProduction", 
+                $"{pr}ruleBodyProduction", 
                 OneOf(
-                    "#productionSelection", 
-                    MatchTransitiveSelector,
-                    MatchNoProductSelector
+                    $"{pr}productionSelection",
+                    MatchPruneAllToken,
+                    MatchPruneChildrenToken,
+                    MatchPruneRootToken
                 )
             );
         }

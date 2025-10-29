@@ -39,7 +39,7 @@ namespace gg.parse.rules
 
         public MatchRuleSequence(
             string name, 
-            RuleOutput output, 
+            AnnotationPruning output, 
             int precedence = 0,
             params RuleBase<T>[] rules
         ) : base(name, output, precedence) 
@@ -62,7 +62,7 @@ namespace gg.parse.rules
                 }
 
                 if (result.Annotations != null && result.Annotations.Count > 0 &&
-                   (Output == RuleOutput.Self || Output == RuleOutput.Children))
+                   (Prune == AnnotationPruning.None || Prune == AnnotationPruning.Root))
                 {
                     children ??= [];
                     children.AddRange(result.Annotations);

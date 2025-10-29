@@ -5,7 +5,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchSingleData<T>(string name, T data, RuleOutput output = RuleOutput.Self)
+    public class MatchSingleData<T>(string name, T data, AnnotationPruning output = AnnotationPruning.None)
         : RuleBase<T>(name, output)
         where T : IComparable<T>
     {

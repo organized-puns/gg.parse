@@ -62,6 +62,34 @@ namespace gg.parse.argparser.tests
             public float[][] FloatArrays { get; set; }
         }
 
+        /// <summary>
+        /// Simplified test with only one array type to verify float array parsing works
+        /// as intended
+        /// </summary>
+        [TestMethod]
+        public void CreateReaderWithAttrClassWithFloatArrayTypes_Parse_ExpectValuesSet()
+        {
+            var arrayTypes = new ArgsReader<AttrClassWithArrayTypes>().Parse("--FloatArrays:[[1, 2.0, 3.5], [4, -5.5, 6]]");
+
+            IsTrue(arrayTypes.FloatArrays[0].SequenceEqual([1f, 2f, 3.5f]));
+            IsTrue(arrayTypes.FloatArrays[1].SequenceEqual([4f, -5.5f, 6f]));
+        }
+
+        /// <summary>
+        /// Simplified test with only one array type to verify bool array parsing works
+        /// as intended
+        /// </summary>
+        [TestMethod]
+        public void CreateReaderWithAttrClassWithBoolArrayTypes_Parse_ExpectValuesSet()
+        {
+            var arrayTypes = new ArgsReader<AttrClassWithArrayTypes>().Parse("-b:[true, true, false]");
+
+            IsTrue(arrayTypes.Booleans.SequenceEqual([true, true, false]));
+        }
+
+        /// <summary>
+        /// Full test with multiple array types to verify array parsing works as intended
+        /// </summary>
 
         [TestMethod]
         public void CreateReaderWithAttrClassWithArrayTypes_Parse_ExpectValuesSet()

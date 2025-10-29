@@ -23,14 +23,14 @@ namespace gg.parse.rules
                 Rule = value;
             }
         }
-        public MatchNot(string name, RuleOutput output, int precedence, RuleBase<T> rule)
+        public MatchNot(string name, AnnotationPruning output, int precedence, RuleBase<T> rule)
             : base(name, output, precedence)
         {
             Rule = rule;
         }
 
         public MatchNot(string name, RuleBase<T> rule)
-            : base(name, RuleOutput.Self)
+            : base(name, AnnotationPruning.None)
         {
             Rule = rule;
         }

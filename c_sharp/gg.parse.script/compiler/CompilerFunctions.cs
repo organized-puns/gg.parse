@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 using gg.parse.rules;
 using gg.parse.util;
 
-using static gg.parse.script.compiler.CompilerFunctionNameGenerator;
-
 namespace gg.parse.script.compiler
 {
     /// <summary>
@@ -30,7 +28,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("Literal text is empty (somehow...).", annotation: bodyNode);
             }
 
-            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Output, header.Precedence);
+            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Prune, header.Precedence);
         }        
 
         public static RuleBase<char> CompileCharacterSet( RuleHeader header, Annotation bodyNode, CompileSession session)
@@ -50,7 +48,7 @@ namespace gg.parse.script.compiler
             setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
 #pragma warning restore IDE0057 // Use range operator
 
-            return new MatchDataSet<char>(header.Name, header.Output, [.. setText], header.Precedence);
+            return new MatchDataSet<char>(header.Name, header.Prune, [.. setText], header.Precedence);
         }
 
         public static RuleBase<char> CompileCharacterRange(RuleHeader declaration, Annotation bodyNode, CompileSession context)
@@ -80,7 +78,7 @@ namespace gg.parse.script.compiler
                 declaration.Name, 
                 minText[1], 
                 maxText[1], 
-                declaration.Output, 
+                declaration.Prune, 
                 declaration.Precedence
             );
         }
@@ -102,17 +100,17 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("ReferenceName text is empty (somehow...).", annotation: bodyNode);
             }
 
-            var modifier = declaration.Output;
+            var referencePruning = AnnotationPruning.None;
 
             // xxx should raise a warning if product is anything else than annotation eg
             // the user specifies #rule = ~ref; the outcome for the product is ~ but that's
             // arbitrary. The user should either go #rule = ref or rule = ~ref...
             if (hasOutputModifier)
             {
-                session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out modifier);
+                session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out referencePruning);
             }
 
-            return new RuleReference<T>(declaration.Name, referenceName, modifier, declaration.Precedence);
+            return new RuleReference<T>(declaration.Name, referenceName, declaration.Prune, declaration.Precedence, referencePruning);
         }
 
         public static TRule CompileBinaryOperator<T, TRule>(RuleHeader header, Annotation body, CompileSession session) 
@@ -130,7 +128,7 @@ namespace gg.parse.script.compiler
                     var (compilationFunction, functionName) = session.Compiler.Functions[elementBody.Rule];
 
                     var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, i); 
-                    var elementHeader = new RuleHeader(RuleOutput.Self, elementName, 0, 0, false);
+                    var elementHeader = new RuleHeader(AnnotationPruning.None, elementName, 0, 0, false);
 
                     elementArray[i] = compilationFunction(elementHeader, elementBody, session) as RuleBase<T> 
                             ?? throw new CompilationException("Cannot compile rule definition for sequence.", annotation: elementBody);
@@ -142,8 +140,8 @@ namespace gg.parse.script.compiler
             // The latter would result in much more overhead in specifying the parsers.
             var output =
                 header.IsTopLevel
-                    ? header.Output
-                    : RuleOutput.Children;
+                    ? header.Prune
+                    : AnnotationPruning.Root;
 
             return (TRule) Activator.CreateInstance(
                 typeof(TRule), 
@@ -185,7 +183,7 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
             var (compilationFunction,_) = session.Compiler.Functions[bodyNode.Children[0].Rule];
-            var groupDeclaration = new RuleHeader(header.Output, header.Name, 0, 0);
+            var groupDeclaration = new RuleHeader(header.Prune, header.Name, 0, 0);
             var result = compilationFunction(groupDeclaration, bodyNode.Children[0], session) as RuleBase<T>;
 
             // xxx needs more info
@@ -208,7 +206,7 @@ namespace gg.parse.script.compiler
 
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
 
-            var elementHeader = new RuleHeader(RuleOutput.Children, elementName, 0, 0, false);
+            var elementHeader = new RuleHeader(AnnotationPruning.None, elementName, 0, 0, false);
 
             if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
             {
@@ -221,8 +219,8 @@ namespace gg.parse.script.compiler
             // toplevel rule (ie rule = a, b, c) we use the user specified output.
             var output =
                 header.IsTopLevel
-                    ? header.Output
-                    : RuleOutput.Children;
+                    ? header.Prune
+                    : AnnotationPruning.Root;
 
             return new MatchCount<T>(header.Name, countRule, output, min, max, header.Precedence);
         }
@@ -263,23 +261,27 @@ namespace gg.parse.script.compiler
             Assertions.Requires(bodyNode!.Children != null);
             Assertions.Requires(bodyNode.Children!.Count > 0);
 
+            // prune all if this is an inline rule as lookaheads never have a size
+            // if it's a toplevel, it is up to the user 
+            var pruning = header.IsTopLevel ? header.Prune : AnnotationPruning.All;
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
             var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
-            var elementHeader = new RuleHeader(RuleOutput.Self, elementName);
+            var elementHeader = new RuleHeader(pruning, elementName);
 
             var unaryRule = compilationFunction(elementHeader, elementBody, session) as RuleBase<T>
-                ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);
+                ?? throw new CompilationException($"Cannot compile unary rule definition for {typeof(TRule)}.", annotation: elementBody);           
 
             TRule? result; 
             if (creationParams == null || creationParams.Length == 0)
             {
-                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, header.Output, header.Precedence, unaryRule);
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), header.Name, pruning, header.Precedence, unaryRule);
             }
             else
             {
-                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, header.Output, header.Precedence, unaryRule, .. creationParams]);
+                result = (TRule?) Activator.CreateInstance(typeof(TRule), [header.Name, pruning, header.Precedence, unaryRule, .. creationParams]);
             }
+
 
             if (result == null)
             {
@@ -328,7 +330,7 @@ namespace gg.parse.script.compiler
         {
             Assertions.RequiresNotNull(header);
 
-            return new MatchAnyData<T>(header.Name, header.Output, precedence: header.Precedence);
+            return new MatchAnyData<T>(header.Name, header.Prune, precedence: header.Precedence);
         }
 
         public static RuleBase<T> CompileLog<T>(
@@ -366,7 +368,7 @@ namespace gg.parse.script.compiler
                 if (compilationFunction != null)
                 {
                     var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
-                    var conditionHeader = new RuleHeader(RuleOutput.Self, elementName);
+                    var conditionHeader = new RuleHeader(AnnotationPruning.None, elementName);
 
                     condition = compilationFunction(conditionHeader, elementBody, session) as RuleBase<T>
                         ?? throw new CompilationException("Cannot compile condition for Log.", annotation: elementBody);
@@ -377,7 +379,7 @@ namespace gg.parse.script.compiler
                 }
             }
 
-            return new LogRule<T>(header.Name, header.Output, message, condition, logLevel);
+            return new LogRule<T>(header.Name, header.Prune, message, condition, logLevel);
         }
     }
 }

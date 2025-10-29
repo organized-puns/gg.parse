@@ -17,15 +17,15 @@ namespace gg.parse.doc.examples.test
                 var letter = OneOf(UpperCaseLetter(), LowerCaseLetter());
                 var number = InRange('0', '9');
                 var specialCharacters = InSet("_-~()[]{}+=@!#$%&'`.".ToArray());
-                var separator = InSet("\\/".ToArray());
+                var separator = InSet([.. "\\/"]);
                 var drive = Sequence("drive", letter, Literal(":"), separator);
                 var pathPart = OneOrMore("path_part", OneOf(letter, number, specialCharacters));
-                var pathChain = ZeroOrMore("#path_chain", Sequence("#path_chain_part", separator, pathPart));
+                var pathChain = ZeroOrMore("-r path_chain", Sequence("-r path_chain_part", separator, pathPart));
                 var path = Sequence("path", pathPart, pathChain);
                 var filename = Sequence("filename", drive, path);
                 var findFilename = Skip(filename, failOnEoF: false);
 
-                Root = OneOrMore("#filenames", Sequence("#find_filename", findFilename, filename));
+                Root = OneOrMore("-r filenames", Sequence("-r find_filename", findFilename, filename));
             }
         }
 
@@ -50,11 +50,11 @@ namespace gg.parse.doc.examples.test
         }
 
         public static readonly string _filenameScript =
-            "#filenames         = +(find_filename, filename);\n" +
-            "~find_filename     = >>> filename;\n" +
+            "-r filenames       = +(find_filename, filename);\n" +
+            "-a find_filename   = >>> filename;\n" +
             "filename           = drive, path;\n" +
             "drive              = letter, ':', separator;\n" +
-            "path               = path_part, *(~separator, path_part);\n" +
+            "path               = path_part, *(-a separator, path_part);\n" +
             "path_part          = +(letter | number | special_character);\n" +
             "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
             "number             = {'0'..'9'};\n" +

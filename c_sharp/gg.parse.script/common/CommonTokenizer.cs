@@ -51,7 +51,7 @@ namespace gg.parse.script.common
                         ruleName,
                         product,
                         precedence: 0,
-                        Sequence("#float_sequence",
+                        Sequence(
                             optionalSign,
                             digits,
                             OneOf(

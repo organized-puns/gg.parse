@@ -11,6 +11,6 @@ namespace gg.parse
         
         int Precedence { get; init; }
 
-        RuleOutput Output { get; init; }
+        AnnotationPruning Prune { get; init; }
     }
 }

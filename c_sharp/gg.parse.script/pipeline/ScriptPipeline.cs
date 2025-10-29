@@ -153,10 +153,12 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public static (int functionId, RuleOutput product)[] CreateRuleOutputMapping(ScriptParser parser) =>
+        public static (int functionId, AnnotationPruning product)[] CreateRuleOutputMapping(ScriptParser parser) =>
         [
-            (parser.MatchTransitiveSelector.Id, RuleOutput.Children),
-            (parser.MatchNoProductSelector.Id, RuleOutput.Void),
+            // xxx Ids can be replaced with names
+            (parser.MatchPruneAllToken.Id, AnnotationPruning.All),
+            (parser.MatchPruneChildrenToken.Id, AnnotationPruning.Children),
+            (parser.MatchPruneRootToken.Id, AnnotationPruning.Root)
         ];
 
         public static RuleCompiler CreateParserCompiler(ScriptParser parser)
@@ -199,7 +201,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<char>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<char>)
                     .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
-                    .RegisterFunction(parser.MatchOption, CompileOption<char>)
+                    .RegisterFunction(parser.MatchOneOf, CompileOption<char>)
                     .RegisterFunction(parser.MatchSequence, CompileSequence<char>)
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
@@ -222,7 +224,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchNotOperator, CompileNot<int>)
                     .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<int>)
                     .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
-                    .RegisterFunction(parser.MatchOption, CompileOption<int>)
+                    .RegisterFunction(parser.MatchOneOf, CompileOption<int>)
                     .RegisterFunction(parser.MatchSequence, CompileSequence<int>)
                     .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<int>)
                     .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<int>)
@@ -322,10 +324,10 @@ namespace gg.parse.script.pipeline
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             tokenSource
-                .Where( f => f.Output == RuleOutput.Self
+                .Where( f => f.Prune == AnnotationPruning.None
                     && !f.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 .ForEach( f =>
-                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, RuleOutput.Self)));
+                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using gg.parse.script.common;
 using gg.parse.script.parser;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parser
@@ -91,8 +92,8 @@ namespace gg.parse.script.tests.parser
 
             var expectedNames = new string[]
             {
-                CommonTokenNames.Find,
-                CommonTokenNames.Skip
+                CommonTokenNames.FindOperator,
+                CommonTokenNames.SkipOperator
             };
 
             for (var i = 0; i < expectedNames.Length; i++)

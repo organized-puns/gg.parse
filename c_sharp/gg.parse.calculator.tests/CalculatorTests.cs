@@ -23,26 +23,26 @@ namespace gg.parse.calculator.tests
             var expressionRule = parser.FindRule("expression") as MatchOneOf<int>;
 
             IsNotNull(expressionRule);
-            IsTrue(expressionRule.Output == RuleOutput.Children);
+            IsTrue(expressionRule.Prune == AnnotationPruning.Root);
             IsTrue(expressionRule.RuleOptions.Length == 3);
 
             var operationRef = expressionRule.RuleOptions[0] as RuleReference<int>;
 
             IsNotNull(operationRef);
-            IsTrue(operationRef.Output == RuleOutput.Self);            
-            IsTrue(operationRef.Reference == "operation");
+            IsTrue(operationRef.Prune == AnnotationPruning.None);            
+            IsTrue(operationRef.ReferenceName == "operation");
 
             var termRef = expressionRule.RuleOptions[1] as RuleReference<int>;
 
             IsNotNull(termRef);
-            IsTrue(termRef.Output == RuleOutput.Self);            
-            IsTrue(termRef.Reference == "term");
+            IsTrue(termRef.Prune == AnnotationPruning.None);            
+            IsTrue(termRef.ReferenceName == "term");
 
             var unknown = expressionRule.RuleOptions[2] as RuleReference<int>;
 
             IsNotNull(unknown);
-            IsTrue(unknown.Output == RuleOutput.Self);
-            IsTrue(unknown.Reference == "unknown_expression");
+            IsTrue(unknown.Prune == AnnotationPruning.None);
+            IsTrue(unknown.ReferenceName == "unknown_expression");
         }      
 
         [TestMethod]

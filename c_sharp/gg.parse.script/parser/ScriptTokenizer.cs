@@ -12,7 +12,7 @@ namespace gg.parse.script.parser
         {
             var scriptTokens =
                 OneOf(
-                    "#scriptTokens",
+                    "-r scriptTokens",
 
                     // make sure keywords are matched before the Identifier
                     // otherwise no keywords will be found as Identifier will also match them
@@ -31,10 +31,10 @@ namespace gg.parse.script.parser
                 );
 
             Root = ZeroOrMore(
-                    "#root",
+                    "-r root",
 
                     OneOf(
-                        "#rootOptions", 
+                        "-r rootOptions", 
 
                         scriptTokens,
 
@@ -59,10 +59,10 @@ namespace gg.parse.script.parser
 
         private MatchRuleSequence<char> MatchScriptKeyword() =>
             Sequence(
-                    "#matchKeyword",
+                    "-r matchKeyword",
                     IfMatch(LowerCaseLetter()),
                     OneOf(
-                        "#keywordList",
+                        "-r keywordList",
 
                         Keyword(CommonTokenNames.LogFatal, "fatal"),
                         Keyword(CommonTokenNames.LogError, "error"),
@@ -76,7 +76,7 @@ namespace gg.parse.script.parser
 
         private MatchOneOf<char> MatchScriptLiteral() =>
             OneOf(
-                "#matchToken",
+                "-r matchToken",
 
                 Literal(CommonTokenNames.Assignment, "="),
                 Literal(CommonTokenNames.ScopeStart, "{"),
@@ -85,7 +85,7 @@ namespace gg.parse.script.parser
                 Literal(CommonTokenNames.Elipsis, ".."),
                 // needs to be behind elipsis, elipsis being the more specific one
                 Literal(CommonTokenNames.AnyCharacter, "."),
-                Literal(CommonTokenNames.Option, "|"),
+                Literal(CommonTokenNames.OneOf, "|"),
                 Literal(CommonTokenNames.GroupStart, "("),
                 Literal(CommonTokenNames.GroupEnd, ")"),
                 Literal(CommonTokenNames.CollectionSeparator, ","),
@@ -95,11 +95,12 @@ namespace gg.parse.script.parser
                 Literal(CommonTokenNames.ArrayStart, "["),
                 Literal(CommonTokenNames.ArrayEnd, "]"),
                 Literal(CommonTokenNames.NotOperator, "!"),
-                Literal(CommonTokenNames.TransitiveSelector, "#"),
-                Literal(CommonTokenNames.NoProductSelector, "~"),
+                Literal(CommonTokenNames.PruneRoot, AnnotationPruningToken.Root),
+                Literal(CommonTokenNames.PruneAll, AnnotationPruningToken.All),
+                Literal(CommonTokenNames.PruneChildren, AnnotationPruningToken.Children),
                 Literal(CommonTokenNames.OptionWithPrecedence, "/"),
-                Literal(CommonTokenNames.Skip, ">>>"),
-                Literal(CommonTokenNames.Find, ">>")
+                Literal(CommonTokenNames.SkipOperator, ">>>"),
+                Literal(CommonTokenNames.FindOperator, ">>")
             );
      }
 }

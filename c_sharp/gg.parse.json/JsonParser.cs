@@ -1,7 +1,8 @@
 ﻿using System.Text;
 
-using gg.parse.script.common;
 using gg.parse.util;
+using gg.parse.script.common;
+using gg.parse.script.parser;
 
 namespace gg.parse.json
 {
@@ -26,7 +27,7 @@ namespace gg.parse.json
         // xxx replace using this "global"
 
 #pragma warning disable IDE0044 // Add readonly modifier
-        private RuleOutput _defaultProduct = RuleOutput.Self;
+        private AnnotationPruning _defaultProduct = AnnotationPruning.None;
 #pragma warning restore IDE0044 // Add readonly modifier
 
         public JsonParser() 
@@ -40,7 +41,7 @@ namespace gg.parse.json
 
             Tokenizer = tokenizer;
 
-            _defaultProduct = RuleOutput.Self;
+            _defaultProduct = AnnotationPruning.None;
 
             var key = MatchSingle(JsonNodeNames.Key, TokenId(CommonTokenNames.String));
             var stringValue = MatchSingle(JsonNodeNames.String, TokenId(CommonTokenNames.String));
@@ -52,7 +53,7 @@ namespace gg.parse.json
             // value = string | int | float | bool | null
             var value = OneOf(JsonNodeNames.Value, stringValue, intValue, floatValue, boolValue, nullValue);
 
-            _defaultProduct = RuleOutput.Void;
+            _defaultProduct = AnnotationPruning.All;
             
             var keyValueSeparator = Token(CommonTokenNames.KeyValueSeparator);
             var objectStart = Token(CommonTokenNames.ScopeStart);
@@ -72,28 +73,28 @@ namespace gg.parse.json
                     "missing json value",
                     Skip(stopCondition: objRecovery, failOnEoF: false)
                 );
-            var valueMissingMatch = Sequence("#value_missing", key, keyValueSeparator, errorValueMissing);
-            var separatorMissingMatch = Sequence("#kv_sep_missing", key, errorValueMissing);
-            var keyValue = OneOf("#kvp_with_recovery", keyValueMatch, valueMissingMatch, separatorMissingMatch);
+            var valueMissingMatch = Sequence("-r value_missing", key, keyValueSeparator, errorValueMissing);
+            var separatorMissingMatch = Sequence("-r kv_sep_missing", key, errorValueMissing);
+            var keyValue = OneOf("-r kvp_with_recovery", keyValueMatch, valueMissingMatch, separatorMissingMatch);
 
-            var nextKeyValue = Sequence("#NextKeyValue", comma, keyValue);
-            var keyValueList = Sequence("#KeyValueList", keyValue, ZeroOrMore("#KeyValueListRest", nextKeyValue));
+            var nextKeyValue = Sequence("-r NextKeyValue", comma, keyValue);
+            var keyValueList = Sequence("-r KeyValueList", keyValue, ZeroOrMore("-r KeyValueListRest", nextKeyValue));
             
             // jsonObj = scope_start ?(kv_list) scope_end
             var jsonObject = Sequence(
                 JsonNodeNames.Object, 
                 objectStart, 
-                ZeroOrOne("#ObjectProperties", keyValueList), 
+                ZeroOrOne("-r ObjectProperties", keyValueList), 
                 objectEnd
             );
 
             // jsonArray = array_start ?(value *(collection_separator value)) array_end
-            var nextValue = Sequence("#NextValue", comma, value);
-            var valueList = Sequence("#ValueList", value, ZeroOrMore("#ValueListRest", nextValue));
+            var nextValue = Sequence("-r NextValue", comma, value);
+            var valueList = Sequence("-r ValueList", value, ZeroOrMore("-r ValueListRest", nextValue));
             var jsonArray = Sequence(
                 JsonNodeNames.Array,                 
                 arrayStart, 
-                ZeroOrOne("#ArrayValues", valueList), 
+                ZeroOrOne("-r ArrayValues", valueList), 
                 arrayEnd
             );
 
@@ -101,20 +102,20 @@ namespace gg.parse.json
 
             // todo error(s)
 
-            Root = OneOf("#JsonRoot", jsonObject, jsonArray);
+            Root = OneOf("-r JsonRoot", jsonObject, jsonArray);
         }
 
         public int TokenId(string name) => Tokenizer!.FindRule(name)!.Id;
 
         public RuleBase<int> Token(string tokenName) => Token(tokenName, _defaultProduct);
         
-        public RuleBase<int> Token(string tokenName, RuleOutput product)
+        public RuleBase<int> Token(string tokenName, AnnotationPruning product)
         {
             var rule = Tokenizer.FindRule(tokenName);
 
             Assertions.RequiresNotNull(rule);
 
-            return MatchSingle($"{product.GetToken()}Token({rule.Name})", rule.Id);
+            return MatchSingle($"{product.GetTokenString()}Token({rule.Name})", rule.Id);
         }
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);

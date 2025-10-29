@@ -54,19 +54,19 @@ namespace gg.parse.script.tests.compiler
             var litRule = table.FindRule("lit_rule") as MatchDataSequence<char>;
 
             IsNotNull(litRule);
-            IsTrue(litRule.Output == RuleOutput.Self);
+            IsTrue(litRule.Prune == AnnotationPruning.None);
             IsTrue(litRule.DataArray.SequenceEqual([.. "foo"]));
         }
 
         [TestMethod]
         public void TokenizeParseCompileSetRule_ExpectSuccess()
         {
-            var table = Compile("~set_rule = {'abc'};");
+            var table = Compile("-a set_rule = {'abc'};");
 
             var setRule = table.FindRule("set_rule") as MatchDataSet<char>;
 
             IsNotNull(setRule);
-            IsTrue(setRule.Output == RuleOutput.Void);
+            IsTrue(setRule.Prune == AnnotationPruning.All);
             IsTrue(setRule.MatchingValues.SequenceEqual("abc".ToArray()));
         }
 
@@ -85,12 +85,12 @@ namespace gg.parse.script.tests.compiler
         [TestMethod]
         public void TokenizeParseCompileSequenceRule_ExpectSuccess()
         {
-            var table = Compile("#sequence_rule = 'foo', 'bar';");
+            var table = Compile("-r sequence_rule = 'foo', 'bar';");
 
             var sequenceRule = table.FindRule("sequence_rule") as MatchRuleSequence<char>;
 
             IsNotNull(sequenceRule);
-            IsTrue(sequenceRule.Output == RuleOutput.Children);
+            IsTrue(sequenceRule.Prune == AnnotationPruning.Root);
 
             var fooLit = sequenceRule.SequenceRules[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
@@ -109,7 +109,7 @@ namespace gg.parse.script.tests.compiler
             var optionRule = table.FindRule("option_rule") as MatchOneOf<char>;
 
             IsNotNull(optionRule);
-            IsTrue(optionRule.Output == RuleOutput.Self);
+            IsTrue(optionRule.Prune == AnnotationPruning.None);
 
             var fooLit = optionRule.RuleOptions[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
@@ -234,22 +234,22 @@ namespace gg.parse.script.tests.compiler
         [TestMethod]
         public void SetupTokenizeParseCompileWithPrecedence_TestPrecedence_ExpectPredenceToMatchInput()
         {
-            var table = Compile("rule1 100= .;#rule2 200 = .; ~ rule_three -1 = .;");
+            var table = Compile("rule1 100= .;-r rule2 200 = .; -a rule_three -1 = .;");
 
             var rule1 = table.FindRule("rule1") as MatchAnyData<char>;
             IsNotNull(rule1);
             IsTrue(rule1.Precedence == 100);
-            IsTrue(rule1.Output == RuleOutput.Self);
+            IsTrue(rule1.Prune == AnnotationPruning.None);
 
             var rule2 = table.FindRule("rule2") as MatchAnyData<char>;
             IsNotNull(rule2);
             IsTrue(rule2.Precedence == 200);
-            IsTrue(rule2.Output == RuleOutput.Children);
+            IsTrue(rule2.Prune == AnnotationPruning.Root);
 
             var ruleThree = table.FindRule("rule_three") as MatchAnyData<char>;
             IsNotNull(ruleThree);
             IsTrue(ruleThree.Precedence == -1);
-            IsTrue(ruleThree.Output == RuleOutput.Void);
+            IsTrue(ruleThree.Prune == AnnotationPruning.All);
         }
 
     }

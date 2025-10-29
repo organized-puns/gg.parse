@@ -34,11 +34,11 @@ namespace gg.parse.json
                 { CommonTokenNames.ZeroOrMoreOperator, "color: #c79FFe;" },
                 { CommonTokenNames.ZeroOrOneOperator, "color: #c79FFe;" },
                 { CommonTokenNames.OneOrMoreOperator, "color: #c79FFe;" },
-                { CommonTokenNames.Option, "color: #c79FFe;" },
+                { CommonTokenNames.OneOf, "color: #c79FFe;" },
                 { CommonTokenNames.NotOperator, "color: #c79FFe;" },
 
-                { CommonTokenNames.NoProductSelector, "color: #A0A3AA;" },
-                { CommonTokenNames.TransitiveSelector, "color: #B0B3BA;" },
+                { CommonTokenNames.PruneAll, "color: #A0A3AA;" },
+                { CommonTokenNames.PruneRoot, "color: #B0B3BA;" },
 
                 { CommonTokenNames.SingleLineComment, "color: #15AA20;" },
                 { CommonTokenNames.MultiLineComment, "color: #15AA20;" },

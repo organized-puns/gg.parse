@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.rules;
+using gg.parse.script.parser;
 
 namespace gg.parse.script.common
 {
@@ -13,10 +14,10 @@ namespace gg.parse.script.common
     {
         // -- Utility methods -----------------------------------------------------------------------------------------
 
-        public static (string name, RuleOutput output) CreateRuleNameAndOutput(string? name, string fallback) =>
+        public static (string name, AnnotationPruning output) CreateRuleNameAndOutput(string? name, string fallback) =>
             string.IsNullOrEmpty(name)
-                ? ($"{RuleOutput.Void.GetToken()}{fallback}", RuleOutput.Void)
-                : name.SplitNameAndOutput();
+                ? ($"{AnnotationPruning.All.GetTokenString()}{fallback}", AnnotationPruning.All)
+                : name.SplitNameAndPruning();
 
         private static string JoinDataArray(T[] array) =>
             array is char[] charArray
@@ -25,7 +26,7 @@ namespace gg.parse.script.common
 
         public TRule FindOrRegister<TRule>(
             string? name, string fallback,
-            Func<string, RuleOutput, TRule> factoryMethod)
+            Func<string, AnnotationPruning, TRule> factoryMethod)
             where TRule : RuleBase<T>
         {
             var (ruleName, product) = CreateRuleNameAndOutput(name, fallback);
@@ -136,12 +137,12 @@ namespace gg.parse.script.common
             MatchSingle(null, data);
 
         public MatchSingleData<T> MatchSingle(string? name, T data) =>
-            FindOrRegister(name, $"{CommonTokenNames.SingleData}({data.ToString()})",
+            FindOrRegister(name, $"{CommonTokenNames.SingleData}({data})",
                         (ruleName, output) => RegisterRule(
                             new MatchSingleData<T>(ruleName, data, output)));
 
         public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
-            FindOrRegister(name, $"{CommonTokenNames.Skip}({stopCondition.ToString()}, {failOnEoF})",
+            FindOrRegister(name, $"{CommonTokenNames.SkipOperator}({stopCondition}, {failOnEoF})",
                         (ruleName, output) => RegisterRule(
                             new SkipRule<T>(ruleName, output, 0, stopCondition, failOnEoF)));
 

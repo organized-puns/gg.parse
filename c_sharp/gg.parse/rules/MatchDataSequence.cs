@@ -6,7 +6,7 @@ namespace gg.parse.rules
     public class MatchDataSequence<T>(
         string name, 
         T[] dataArray, 
-        RuleOutput output = RuleOutput.Self,
+        AnnotationPruning output = AnnotationPruning.None,
         int precedence = 0
     )
         : RuleBase<T>(name, output, precedence)

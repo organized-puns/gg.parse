@@ -1,7 +1,10 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.common;
 using gg.parse.script.parser;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
+using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.tests.parser
 {
@@ -62,7 +65,7 @@ namespace gg.parse.script.tests.parser
             IsTrue(ruleNameRule == parser.MatchRuleName);
 
             var optionRule = nodes[0][1].Rule;
-            IsTrue(optionRule.Name == parser.MatchOption.Name);
+            IsTrue(optionRule.Name == parser.MatchOneOf.Name);
             IsTrue(optionRule.GetType() == typeof(MatchRuleSequence<int>));
             
             var option1 = nodes[0][1][0].Rule;
@@ -119,7 +122,7 @@ namespace gg.parse.script.tests.parser
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
 
             var name = nodes[0].Children![0].Rule!.Name;
-            IsTrue(name == "ruleName");
+            IsTrue(name == "rule_name");
             name = nodes[0].Children[1].Rule!.Name;
             IsTrue(name == ScriptParser.Names.Literal);
 
@@ -171,7 +174,7 @@ namespace gg.parse.script.tests.parser
             IsTrue(name == ScriptParser.Names.CharacterSet);
 
             // try parsing zero or more
-            (tokens, nodes) = parser.Parse("rule = *('123'|{'foo'});");
+            (_, nodes) = parser.Parse("rule = *('123'|{'foo'});");
 
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == ScriptParser.Names.ZeroOrMore);
@@ -180,31 +183,31 @@ namespace gg.parse.script.tests.parser
             IsTrue(name == ScriptParser.Names.Option);
 
             // try parsing a transitive rule
-            (_, nodes) = parser.Parse("#rule = !('123',{'foo'});");
+            (_, nodes) = parser.Parse("-r rule = !('123',{'foo'});");
            
             name = nodes[0].Children[0].Rule.Name;
-            IsTrue(name == "TransitiveSelector");
+            IsTrue(name == CommonTokenNames.PruneRoot);
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "ruleName");
+            IsTrue(name == "rule_name");
 
             name = nodes[0].Children[2].Rule.Name;
             IsTrue(name == ScriptParser.Names.Not);
 
             // try parsing a no output rule
-            (_, nodes) = parser.Parse("~rule = ?('123',{'foo'});");
+            (_, nodes) = parser.Parse("-a rule = ?('123',{'foo'});");
 
             name = nodes[0].Children[0].Rule.Name;
-            IsTrue(name == "NoProductSelector");
+            IsTrue(name == CommonTokenNames.PruneAll);
 
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == "ruleName");
+            IsTrue(name == "rule_name");
 
             name = nodes[0].Children[2].Rule.Name;
             IsTrue(name == ScriptParser.Names.ZeroOrOne);
 
             // try parsing an identifier
-            (tokens, nodes) = parser.Parse("rule = +(one, two, three);");
+            (_, nodes) = parser.Parse("rule = +(one, two, three);");
 
             var node = nodes[0].Children[1];
             name = node.Rule.Name;
@@ -220,14 +223,14 @@ namespace gg.parse.script.tests.parser
 
             
             // try parsing a try match 
-            (tokens, nodes) = parser.Parse("rule = if \"lit\";");
+            (_, nodes) = parser.Parse("rule = if \"lit\";");
 
             IsTrue(nodes != null);
             name = nodes[0].Children[1].Rule.Name;
             IsTrue(name == ScriptParser.Names.If);
 
             // try parsing a try match with eoln
-            (tokens, nodes) = parser.Parse("rule = if\n\"lit\";");
+            (_, nodes) = parser.Parse("rule = if\n\"lit\";");
 
             IsTrue(nodes != null);
             name = nodes[0].Children[1].Rule.Name;
@@ -244,77 +247,508 @@ namespace gg.parse.script.tests.parser
             }
         }
 
-        /*
-            xxx move to json example
+        /// <summary>
+        /// Validate precedence parsing
+        /// </summary>
+        [TestMethod]
+        public void CreateRuleWithPrecedence_ParseRule_ExpectRuleToHaveCorrectPrecedence()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var parser = new ScriptParser(tokenizer);
+            var expectedPrecedence = 100;
+            var tokenizeResult = tokenizer.Tokenize($"rule {expectedPrecedence} = .;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+            IsTrue(tokenizeResult.Annotations.Count == 5);
+
+            var parseResult = parser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsNotNull(parseResult.Annotations);
+            IsTrue(parseResult.Annotations.Count == 1);
+
+            // rule should have precedence set
+            var root = parseResult.Annotations[0];
+
+            IsTrue(root.Children != null && root.Children.Count == 3);
+
+            // header should have name and precedence 
+            IsTrue(root.Children[0].Rule == parser.MatchRuleName);
+            IsTrue(root.Children[1].Rule == parser.MatchPrecedence);
+        }
 
         [TestMethod]
-        public void TokenizeParseCompileFile_ExpectSuccess()
+        public void CreateEvalRule_ParseRule_ExpectEvalRuleAnnotations()
         {
-            var (text,tokens,astNodes,table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = 'foo' / 'bar' / 'baz';");
 
-            // write the tokens to insepct (debug)
-            Directory.CreateDirectory("output");
-            File.WriteAllText("output/tpc_json_tokenizer_tokens.html",
-                new EbnfTokenizer().AnnotateTextUsingHtml(text, tokens, AnnotationMarkup.CreateTokenStyleLookup()));
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+            IsTrue(tokenizeResult.Annotations.Count == 8);
 
-            IsTrue(table.Root != null);
-            IsTrue(table.Root.Name == "json_tokens");
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
 
-            var stringRule = table.FindRule("string");
+            IsTrue(parseResult.FoundMatch);
+            IsNotNull(parseResult.Annotations);
+            IsTrue(parseResult.Annotations.Count == 1);
 
-            IsNotNull(stringRule);
+            var root = parseResult.Annotations[0];
 
-            // test single quote
-            var result = stringRule.Parse("'foo'".ToArray(), 0);
+            IsTrue(root.Rule == tokenizerParser.MatchRule);
+            IsTrue(root.Children != null && root.Children.Count == 2);
 
-            IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations[0].Range.Start == 0);
-            IsTrue(result.Annotations[0].Range.Length == "'foo'".Length);
+            // declaration should have name and an eval
+            IsTrue(root.Children[0].Rule == tokenizerParser.MatchRuleName);
+            IsTrue(root.Children[1].Rule == tokenizerParser.MatchEval);
 
-            // test double quote
-            result = stringRule.Parse("\"foo\"".ToArray(), 0);
+            var eval = root.Children[1];
 
-            IsTrue(result.FoundMatch);
-            IsTrue(result.Annotations[0].Range.Start == 0);
-            IsTrue(result.Annotations[0].Range.Length == "\"foo\"".Length);
+            IsTrue(eval.Children != null && eval.Children.Count == 3);
 
-            // test if whitespace is there
-            var whiteSpace = table.FindRule("white_space");
-            IsNotNull(whiteSpace);
-            IsTrue(whiteSpace.Production == AnnotationProduct.None);
-
-            // test parsing
-            result = table.Root.Parse("{\"key\": 123, \"key\": null }".ToArray(), 0);
-            IsTrue(result.FoundMatch);
-            var expectedTokens = new[] {
-                "scope_start", "string", "kv_separator", "int", "item_separator",
-                "string", "kv_separator", "null", "scope_end" };
-
-            IsTrue(result.Annotations.Count == expectedTokens.Length);
-
-            for (var i = 0; i < expectedTokens.Length; i++)
-            {
-                IsTrue(result.Annotations[i].Rule == table.FindRule(expectedTokens[i]));
-            }
+            IsTrue(eval.Children.All(child => child.Rule == tokenizerParser.MatchLiteral));
         }
 
 
+        /// <summary>
+        /// Try parse a literal with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
         [TestMethod]
-        public void TestEbnfSpecificationError_Handling()
+        public void CreateTokensForLiteralWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
         {
-            var (text, tokens, astNodes, table) = SetupTokenizeParseCompile(File.ReadAllText("assets/json_tokens.ebnf"));
+            TestParseUnexpectedProductError(
+                "-a 'foo'",
+                2,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneAllToken.Id,
+                    tokenizerParser => tokenizerParser.MatchLiteral.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
 
-            var result = table.Root.Parse("{\"key\": <bunch of errors> 123 }".ToArray(), 0);
-            IsTrue(result.FoundMatch);
-            var expectedTokens = new[] {
-                "scope_start", "string", "kv_separator", "unknown_token", "int", "scope_end" };
-            IsTrue(result.Annotations.Count == expectedTokens.Length);
+        /// <summary>
+        /// Try parse a range with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForRangeWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "-a {'0'..'9'}",
+                6,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneAllToken.Id,
+                    tokenizerParser => tokenizerParser.MatchCharacterRange.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
 
-            for (var i = 0; i < expectedTokens.Length; i++)
+        /// <summary>
+        /// Try parse a set with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForSetWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "-r {'abc'}",
+                4,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneRootToken.Id,
+                    tokenizerParser => tokenizerParser.MatchCharacterSet.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
+
+        /// <summary>
+        /// Try parse a set with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForAnyWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "-r .",
+                2,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneRootToken.Id,
+                    tokenizerParser => tokenizerParser.MatchAnyToken.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
+
+        /// <summary>
+        /// Try parse a group with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForGroupWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "-r ('foo')",
+                4,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneRootToken.Id,
+                    // group is transitive
+                    tokenizerParser => tokenizerParser.MatchLiteral.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
+
+        /// <summary>
+        /// Try parse a not with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForNotWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "-a !'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneAllToken.Id,
+                    tokenizerParser => tokenizerParser.MatchNotOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
+
+        /// <summary>
+        /// Try parse a count with a output qualifier. This should yield an unexpected product error. 
+        /// </summary>
+        [TestMethod]
+        public void CreateTokensForCountWithProductModifier_ParseUnexpectedProductError_ExpectMatchFound()
+        {
+            TestParseUnexpectedProductError(
+                "-r *'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneRootToken.Id,
+                    tokenizerParser => tokenizerParser.MatchZeroOrMoreOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+
+            TestParseUnexpectedProductError(
+                "-a ?'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneAllToken.Id,
+                    tokenizerParser => tokenizerParser.MatchZeroOrOneOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+
+            TestParseUnexpectedProductError(
+                "-a +'foo'",
+                3,
+                [
+                    tokenizerParser => tokenizerParser.MatchPruneAllToken.Id,
+                    tokenizerParser => tokenizerParser.MatchOneOrMoreOperator.Id,
+                    tokenizerParser => tokenizerParser.UnexpectedPrunetokenInBodyError.Id
+                ]
+            );
+        }
+
+        private static void TestParseUnexpectedProductError(
+            string testData,
+            int expectedTokenCount,
+            Func<ScriptParser, int>[] expectedFunctionIds
+        )
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizeResult = tokenizer.Tokenize(testData);
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsTrue(tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count == expectedTokenCount);
+
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var errorParseResult = tokenizerParser
+                .MatchUnexpectedPruneTokenInBodyError
+                .Parse([.. tokenizeResult.Annotations.Select(a => a.Rule.Id)], 0);
+
+            IsTrue(errorParseResult.FoundMatch);
+            IsTrue(errorParseResult.MatchLength == expectedTokenCount);
+            IsTrue(errorParseResult.Annotations != null
+                    && errorParseResult.Annotations.Count == 1
+                    && errorParseResult.Annotations[0].Children != null
+                    && errorParseResult.Annotations[0].Children!.Count == 3
+                    && errorParseResult.Annotations[0].Rule == tokenizerParser.MatchUnexpectedPruneTokenInBodyError);
+
+            for (var i = 0; i < expectedFunctionIds.Length; i++)
             {
-                IsTrue(result.Annotations[i].Rule == table.FindRule(expectedTokens[i]));
+                IsTrue(errorParseResult.Annotations[0][i]!.Rule.Id == expectedFunctionIds[i](tokenizerParser));
             }
-        }*/
+        }
+
+        /// <summary>
+        /// Random # or ~ without following keyword should lead to an error in a rule.
+        /// </summary>
+        [TestMethod]
+        public void CreateRuleWithProductionModifiersInElements_ParseRule_ExpectErrorsInAnnotations()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = -a foo, -r 'bar', -a {{'a'..'z'}};");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 1);
+
+            // rulename & sequence
+            IsTrue(parseResult.Annotations[0].Children != null && parseResult.Annotations[0].Children!.Count == 2);
+
+            var sequence = parseResult[0]![1];
+            IsTrue(sequence!.Children != null && sequence!.Children!.Count == 3);
+            IsTrue(sequence[0]!.Rule == tokenizerParser.MatchReference);
+            IsTrue(sequence[1]!.Rule == tokenizerParser.MatchUnexpectedPruneTokenInBodyError);
+            IsTrue(sequence[2]!.Rule == tokenizerParser.MatchUnexpectedPruneTokenInBodyError);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithInvalidRuleDefinition_Parse_ExpectDefintionMarkedWithError()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize("rule = *; rule2 = 'foo';");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 2);
+            IsTrue(parseResult.Annotations[0] != null
+                    && parseResult[0].Children != null
+                    && parseResult[0].Children!.Count == 2);
+            
+            IsTrue(parseResult[0][1].Rule == tokenizerParser.MatchZeroOrMoreOperator);
+            IsTrue(parseResult[0][1].Range.Equals(new Range(2, 1)));
+
+            IsTrue(parseResult[0][1][0].Rule == tokenizerParser.MissingUnaryOperatorTerm);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingEndRule_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = 'bar' rule2 = 'foo'");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult.Annotations != null && parseResult.Annotations.Count == 2);
+            IsTrue(parseResult.Annotations[0] != null
+                    && parseResult.Annotations[0]!.Children != null
+                    && parseResult.Annotations[0]!.Children!.Count == 3);
+            IsTrue(parseResult.Annotations[0]!.Children![2].Rule == tokenizerParser.MissingRuleEndError);
+
+            IsTrue(parseResult.Annotations[1] != null
+                    && parseResult.Annotations[1]!.Children != null
+                    && parseResult.Annotations[1]!.Children!.Count == 3);
+            IsTrue(parseResult.Annotations[1]!.Children![2].Rule == tokenizerParser.MissingRuleEndError);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingRemainderOperator_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"rule = a, b c;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // expecting: rule[0] / sequence[1] / error[2]
+            var errorRule = parseResult[0]![1]![2]!.Rule;
+            var expectedRule = tokenizerParser.MissingOperatorError[CommonTokenNames.CollectionSeparator];
+
+            IsTrue(errorRule == expectedRule);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithDifferentRemainderOperator_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"r1 = a, b |c; r2 = d;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // should find two rules
+            IsTrue(parseResult.Annotations!.Count == 2);
+
+            // expecting: rule[0] / sequence[1] / error[2]
+
+            var errorRule = parseResult[0]![1]![2]!.Rule;
+
+            // name should be error containing an indication what operator we're missing
+            var expectedRule = tokenizerParser.WrongOperatorTokenError[CommonTokenNames.CollectionSeparator];
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule == expectedRule);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingTermsAfterOperatorInRemainder_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"r1 = a, b,; r2 = d;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // should find two rules
+            IsTrue(parseResult.Annotations!.Count == 2);
+
+            // expecting: rule[0] / sequence[1] / error[2]
+
+            var errorRule = parseResult[0]![1]![2]!.Rule;
+            var expectedRule = tokenizerParser.MissingTermAfterOperatorInRemainderError[CommonTokenNames.CollectionSeparator];
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule == expectedRule);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithMissingTermsAfterOperator_Parse_ExpectErrorRaised()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var tokenizeResult = tokenizer.Tokenize($"r1 = a,; r2 = d;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var parseResult = tokenizerParser.Root!.Parse(tokenizeResult.Annotations);
+
+            IsTrue(parseResult.FoundMatch);
+
+            // should find two rules
+            IsTrue(parseResult.Annotations!.Count == 2);
+
+            // expecting: rule[0] / sequence[1] / error[2]
+
+            var errorRule = parseResult[0]![1]!.Rule;
+            var expectedRule = tokenizerParser.MissingTermAfterOperatorError[CommonTokenNames.CollectionSeparator];
+
+            // name should be error containing an indication what operator we're missing
+            IsTrue(errorRule == expectedRule);
+        }
+
+        [TestMethod]
+        public void CreateLogErrorRuleWithText_ParseWithMatchLog_ExpectMatchFound()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizeResult = tokenizer.Tokenize($"error 'text'");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var tokens = tokenizeResult.CollectRuleIds();
+
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var parseResult = tokenizerParser.MatchLog.Parse(tokens, 0);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult[0]!.Children != null && parseResult[0]!.Children!.Count == 2);
+        }
+
+        [TestMethod]
+        public void CreateLogErrorRuleWithTextAndCondition_ParseWithMatchLog_ExpectMatchFound()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizeResult = tokenizer.Tokenize($"warning 'text' if !'foo'");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var tokens = tokenizeResult.CollectRuleIds();
+
+            var tokenizerParser = new ScriptParser(tokenizer);
+            var parseResult = tokenizerParser.MatchLog.Parse(tokens, 0);
+
+            IsTrue(parseResult.FoundMatch);
+            IsTrue(parseResult[0]!.Children != null && parseResult[0]!.Children!.Count == 3);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithNoBody_ParseWithMatchRule_ExpectWarning()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var tokenizeResult = tokenizer.Tokenize($"rule = ;");
+
+            IsTrue(tokenizeResult.FoundMatch);
+            IsNotNull(tokenizeResult.Annotations);
+
+            var tokens = tokenizeResult.CollectRuleIds();
+
+            var parser = new ScriptParser(tokenizer);
+            var ruleMatcher = parser.MatchRule;
+            var parseResult = ruleMatcher.Parse(tokens, 0);
+
+            IsTrue(parseResult.FoundMatch);
+            var warning = parseResult[0]![1]!.Rule as LogRule<int>;
+
+            IsNotNull(warning);
+            IsNotNull(warning.Level == LogLevel.Warning);
+        }
+
+        [TestMethod]
+        public void CreateRuleWithReferenceAndProduction_ParseWithMatchRule_ExpectCorrectProductionModifiers()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var parser = new ScriptParser(tokenizer);
+            var (_, astNodes) = parser.Parse("foo='foo';sequence = -a foo, -r foo, -c foo, foo;");
+
+            // expect two rules
+            IsTrue(astNodes.Count == 2);
+
+            // expect output modifiers for each of the sequence's terms
+            var sequenceNode = astNodes[1][1];
+
+            var modifierNode = sequenceNode[0][0];
+
+            IsTrue(modifierNode.Rule == parser.MatchPruneAllToken);
+
+            modifierNode = sequenceNode[1][0];
+
+            IsTrue(modifierNode.Rule == parser.MatchPruneRootToken);
+
+            modifierNode = sequenceNode[2][0];
+
+            IsTrue(modifierNode.Rule == parser.MatchPruneChildrenToken);
+
+            // no modifier selector
+            IsTrue(sequenceNode[3][0].Rule == parser.IdentifierToken);
+        }
+
+        
     }
 }
 

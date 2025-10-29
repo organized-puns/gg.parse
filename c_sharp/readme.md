@@ -59,6 +59,7 @@ Quickstart
 - A set of common rules (literal, sequence, not...) to quickly build tokenizers and parsers. 
 - A tokenizer/parser/compiler which can build a tokenizer and or parser based on a high-level ebnf-like script.
 - A facade-like class, `gg.parse.script.ParserBuilder`, which combines all of the above in a single convenient class.
+- [Pruning](./doc/pruning.md) as first class citizen to generate lean syntax tree.
 
 ### Example
 
@@ -106,16 +107,16 @@ Doing the same using a script (see `gg.parse.doc.examples.test\CreateFilenameTok
 
     // note this can also be read from a separate file
     public static readonly string _filenameScript =
-        "#filenames         = +(find_filename, filename);\n" +
-        "~find_filename     = >>> filename;\n" +
-        "filename           = drive, path;\n" +
-        "drive              = letter, ':', separator;\n" +
-        "path               = path_part, *(~separator, path_part);\n" +
-        "path_part          = +(letter | number | special_character);\n" +
-        "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
-        "number             = {'0'..'9'};\n" +
-        "separator          = {'\\\\/'};\n" +
-        "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
+      "-r filenames       = +(find_filename, filename);\n" +
+      "-a find_filename   = >>> filename;\n" +
+      "filename           = drive, path;\n" +
+      "drive              = letter, ':', separator;\n" +
+      "path               = path_part, *(-a separator, path_part);\n" +
+      "path_part          = +(letter | number | special_character);\n" +
+      "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
+      "number             = {'0'..'9'};\n" +
+      "separator          = {'\\\\/'};\n" +
+      "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
 
     ...
 
@@ -165,4 +166,7 @@ More information
 
 [Extending parse script](./doc/extending_parse_script.md) steps required to add a new rule to the script.
 
+[Pruning](./doc/pruning.md) details on how to keep your syntax tree lean.
+
 [To do list](./doc/todo.md) a list of all planned or unplanned tasks.
+

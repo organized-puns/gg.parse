@@ -1,4 +1,5 @@
 ﻿using gg.parse.script.pipeline;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parser

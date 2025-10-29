@@ -113,7 +113,7 @@ namespace gg.parse.script.tests.parserbuilder
             var jsonParser = new ParserBuilder()
                                 .From(
                                     File.ReadAllText("assets/json.tokens"), 
-                                    "include 'assets/json.grammar';__main__=#json;"
+                                    "include 'assets/json.grammar';root =-r json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);
@@ -148,8 +148,8 @@ namespace gg.parse.script.tests.parserbuilder
         {
             var jsonParser = new ParserBuilder()
                                 .From(
-                                    "include 'assets/json.tokens';#token_main = json_tokens;",
-                                    "include 'assets/json.grammar'; # main = json;"
+                                    "include 'assets/json.tokens';-r token_main = json_tokens;",
+                                    "include 'assets/json.grammar'; -r main = json;"
                                 );
 
             IsTrue(jsonParser.TokenGraph != null);
@@ -166,7 +166,7 @@ namespace gg.parse.script.tests.parserbuilder
             var scopeStart = objectRule.Rules.ElementAt(0) as RuleReference<int>;
 
             IsNotNull(scopeStart);
-            IsTrue(scopeStart.Output == RuleOutput.Void);
+            IsTrue(scopeStart.ReferencePrune == AnnotationPruning.All);
 
             // check if it compiles json
             var text = "{ \"key\": 123 }";
@@ -174,7 +174,7 @@ namespace gg.parse.script.tests.parserbuilder
 
             IsTrue(result.syntaxTree.FoundMatch);
 
-            Debug.WriteLine(ScriptUtils.AstToString(text, result.tokens.Annotations, result.syntaxTree.Annotations));
+            Debug.WriteLine(ScriptUtils.PrettyPrintSyntaxTree(text, result.tokens.Annotations, result.syntaxTree.Annotations));
 
             var objectAnnotation = result.syntaxTree[0][0];
 

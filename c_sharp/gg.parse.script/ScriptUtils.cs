@@ -10,7 +10,54 @@ namespace gg.parse.script
 {
     public static class ScriptUtils
     {
-        public static string AstToString(string text, List<Annotation> tokens, List<Annotation> astNodes, string indentStr = "   ")
+        public static string PrettyPrintTokens(string text, List<Annotation> tokens, string indentStr = "   ")
+        {
+            var builder = new StringBuilder();
+            var indent = 0;
+
+            if (tokens != null && tokens.Count > 0)
+            {
+                foreach (var tokenNode in tokens)
+                {
+                    builder.Append(PrettyPrintToken(indent, indentStr, tokenNode, text));
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private static string PrettyPrintToken(int indentCount, string indentStr, Annotation token, string text)
+        {
+            var builder = new StringBuilder();
+
+            var rule = token.Rule;
+
+            for (var i = 0; i < indentCount; i++)
+            {
+                builder.Append(indentStr);
+            }
+
+            var nodeText = Regex.Escape(token.GetText(text));
+
+            if (nodeText.Length > 20)
+            {
+                nodeText = $"{nodeText.Substring(0, 17)}...";
+            }
+
+            builder.AppendLine($"[{token.Range.Start},{token.Range.End}]{rule.Name}({rule.Id}): {nodeText}");
+
+            if (token.Children != null && token.Children.Count > 0)
+            {
+                foreach (var child in token.Children)
+                {
+                    builder.Append(PrettyPrintToken(indentCount + 1, indentStr, child, text));
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        public static string PrettyPrintSyntaxTree(string text, List<Annotation> tokens, List<Annotation> astNodes, string indentStr = "   ")
         {
             var builder = new StringBuilder();
             var indent = 0;
@@ -19,14 +66,14 @@ namespace gg.parse.script
             {
                 foreach (var astNode in astNodes)
                 {
-                    builder.Append(AstToString(indent, indentStr, astNode, text, tokens));
+                    builder.Append(PrettyPrintSyntaxTree(indent, indentStr, astNode, text, tokens));
                 }
             }
 
             return builder.ToString();
         }
 
-        private static string AstToString(int indentCount, string indentStr, Annotation node, string text, List<Annotation> tokens)
+        private static string PrettyPrintSyntaxTree(int indentCount, string indentStr, Annotation node, string text, List<Annotation> tokens)
         {
             var builder = new StringBuilder();
 
@@ -50,7 +97,7 @@ namespace gg.parse.script
             {
                 foreach (var child in node.Children)
                 {
-                    builder.Append(AstToString(indentCount + 1, indentStr, child, text, tokens));
+                    builder.Append(PrettyPrintSyntaxTree(indentCount + 1, indentStr, child, text, tokens));
                 }
             }
 

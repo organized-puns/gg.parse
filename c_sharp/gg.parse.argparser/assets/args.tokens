@@ -5,9 +5,9 @@
 include "properties.tokens";
 include "filename.tokens";
 
-#arg_tokens			= *(arg_token | ~white_space | unknown_arg_token);
+-r arg_tokens			= *(-r arg_token | -a white_space | unknown_arg_token);
 
-#arg_token			= float | int 
+arg_token				= float | int 
 						| arg_key_switch
 						| boolean 
 						| null 
@@ -19,7 +19,7 @@ include "filename.tokens";
 
 arg_key_switch		= ("--" | "-");	
 
-#identifier_or_file = (~starts_with_filename_token,	+(#file_name_token)) | identifier;
+-r identifier_or_file = (-a starts_with_filename_token,	+(-r file_name_token)) | identifier;
 
 starts_with_filename_token  = starts_with_relative_dir | starts_with_dir_separator | starts_with_filename_symbol | starts_with_drive;
 

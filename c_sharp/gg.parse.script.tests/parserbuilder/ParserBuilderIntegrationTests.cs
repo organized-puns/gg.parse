@@ -4,6 +4,7 @@ using gg.parse.util;
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.pipeline;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -12,6 +13,10 @@ namespace gg.parse.script.tests.parserbuilder
     [TestClass]
     public sealed class ParserBuilderIntegrationTests
     {
+        // short hands for annotation pruning tokens
+        private const string pa = AnnotationPruningToken.All;
+        private const string pc = AnnotationPruningToken.Children;
+        private const string pr = AnnotationPruningToken.Root;
 
         [TestMethod]
         public void CreateEmptyRule_Compile_ExpectNopToShowUp()
@@ -85,8 +90,8 @@ namespace gg.parse.script.tests.parserbuilder
         {
             var searchTerm = "bar";
             var tokenizer = new ParserBuilder().From(
-                $"#find_all_bars = +( find_bar, '{searchTerm}' );" +
-                $"~find_bar      = >> '{searchTerm}';"
+                $"{pr}find_all_bars = +( find_bar, '{searchTerm}' );" +
+                $"{pa}find_bar      = >> '{searchTerm}';"
             );
 
             var testStringWithBar = "123ba345bar567 bar ";
@@ -151,20 +156,20 @@ namespace gg.parse.script.tests.parserbuilder
 
             IsNotNull(topLevelRule);
             IsTrue(topLevelRule.SequenceRules.Length == 3);
-            IsTrue(topLevelRule.Output == RuleOutput.Self);
+            IsTrue(topLevelRule.Prune == AnnotationPruning.None);
 
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
 
             IsNotNull(anonymousRule);
             IsTrue(anonymousRule.RuleOptions.Length == 2);
-            IsTrue(anonymousRule.Output == RuleOutput.Self);
+            IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
             // the anonymous parts of the rule should by default return the children
             IsTrue(anonymousRule[0] is MatchRuleSequence<char>);
-            IsTrue(anonymousRule[0].Output == RuleOutput.Children);
+            IsTrue(anonymousRule[0].Prune == AnnotationPruning.Root);
 
             IsTrue(anonymousRule[1] is MatchRuleSequence<char>);
-            IsTrue(anonymousRule[1].Output == RuleOutput.Children);
+            IsTrue(anonymousRule[1].Prune == AnnotationPruning.Root);
         }
 
         [TestMethod]
@@ -186,20 +191,20 @@ namespace gg.parse.script.tests.parserbuilder
 
             IsNotNull(topLevelRule);
             IsTrue(topLevelRule.Rule is MatchDataSequence<char>);
-            IsTrue(topLevelRule.Output == RuleOutput.Self);
+            IsTrue(topLevelRule.Prune == AnnotationPruning.None);
 
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
 
             IsNotNull(anonymousRule);
             IsTrue(anonymousRule.RuleOptions.Length == 2);
-            IsTrue(anonymousRule.Output == RuleOutput.Self);
+            IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
             // the anonymous parts of the rule should by default return the children
             IsTrue(anonymousRule[0] is MatchCount<char>);
-            IsTrue(anonymousRule[0].Output == RuleOutput.Children);
+            IsTrue(anonymousRule[0].Prune == AnnotationPruning.Root);
 
             IsTrue(anonymousRule[1] is MatchCount<char>);
-            IsTrue(anonymousRule[1].Output == RuleOutput.Children);
+            IsTrue(anonymousRule[1].Prune == AnnotationPruning.Root);
         }
 
         [TestMethod]
@@ -221,20 +226,21 @@ namespace gg.parse.script.tests.parserbuilder
 
             IsNotNull(topLevelRule);
             IsTrue(topLevelRule.Rule is MatchDataSequence<char>);
-            IsTrue(topLevelRule.Output == RuleOutput.Self);
+            IsTrue(topLevelRule.Prune == AnnotationPruning.None);
 
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
 
             IsNotNull(anonymousRule);
             IsTrue(anonymousRule.RuleOptions.Length == 2);
-            IsTrue(anonymousRule.Output == RuleOutput.Self);
+            IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
-            // the anonymous parts (lookahead functions) of the rule should by default return self 
+            // the anonymous parts (lookahead functions) of the rule should by default prune everything
             IsTrue(anonymousRule[0] is MatchCondition<char>);
-            IsTrue(anonymousRule[0].Output == RuleOutput.Self);
+            IsTrue(anonymousRule[0].Prune == AnnotationPruning.All);
 
+            // !bar is a lookahead so it should prune all as well
             IsTrue(anonymousRule[1] is MatchNot<char>);
-            IsTrue(anonymousRule[1].Output == RuleOutput.Self);
+            IsTrue(anonymousRule[1].Prune == AnnotationPruning.All);
         }
     }
 }

@@ -37,14 +37,14 @@ namespace gg.parse.rules
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
         public MatchOneOf(string name, params RuleBase<T>[] options)
-            : base(name, RuleOutput.Self)
+            : base(name, AnnotationPruning.None)
         {
             _options = options;
         }
 
         public MatchOneOf(
             string name, 
-            RuleOutput output, 
+            AnnotationPruning output, 
             int precedence = 0, 
             params RuleBase<T>[] rules
         ) : base(name, output, precedence)

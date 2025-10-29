@@ -8,7 +8,7 @@ namespace gg.parse
 
     public abstract class RuleBase<T>(
         string name, 
-        RuleOutput output = RuleOutput.Self, 
+        AnnotationPruning output = AnnotationPruning.None, 
         int precedence = 0) 
         : IRule
     {
@@ -18,41 +18,57 @@ namespace gg.parse
 
         public int Precedence { get; init; } = precedence;
 
-        public RuleOutput Output { get; init; } = output;
+        public AnnotationPruning Prune { get; init; } = output;
 
         
         public abstract ParseResult Parse(T[] input, int start);
 
         public override string ToString() => Name;
 
-        public ParseResult BuildDataRuleResult(Range dataRange) 
-        {
-            return Output switch
+
+        public ParseResult BuildDataRuleResult(Range dataRange) =>
+        
+            Prune switch
             {
-                RuleOutput.Self => 
-                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
-
-                RuleOutput.Children => 
-                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
-
-                RuleOutput.Void => 
+                AnnotationPruning.All =>
                     new ParseResult(true, dataRange.Length),
-  
-                _ => throw new NotImplementedException($"No implementation to build a data rule result for enum value {Output}."),
+
+                // in case of a data rule, all remaining cases produce the root as data rules should not have
+                // children.
+                AnnotationPruning.Children =>                
+                    new ParseResult(true, dataRange.Length),
+                //new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
+
+                AnnotationPruning.None => 
+                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
+
+                // data rules do not have children as they are not composed of other rules
+                // so when their children being asked, nothing is left
+                AnnotationPruning.Root =>
+                    new ParseResult(true, dataRange.Length),
+                //new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),               
+
+                _ => throw new NotImplementedException($"No implementation to build a data rule result for enum value {Prune}."),
             };
-        }
+        
 
         public ParseResult BuildResult(Range dataRange, List<Annotation>? children = null)
         {
-            return Output switch
+            return Prune switch
             {
-                RuleOutput.Self => new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange, children) ]),
+                AnnotationPruning.All => 
+                    new ParseResult(true, dataRange.Length),
 
-                RuleOutput.Children => new ParseResult(true, dataRange.Length, children),
+                AnnotationPruning.Children => 
+                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
-                RuleOutput.Void => new ParseResult(true, dataRange.Length),
+                AnnotationPruning.None => 
+                    new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange, children) ]),
 
-                _ => throw new NotImplementedException($"No implementation to build a rule result for enum value {Output}."),
+                AnnotationPruning.Root => 
+                    new ParseResult(true, dataRange.Length, children),
+                                
+                _ => throw new NotImplementedException($"No implementation to build a rule result for enum value {Prune}."),
             };
         }
     }

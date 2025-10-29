@@ -11,7 +11,9 @@ namespace gg.parse.rules
     {
         private RuleBase<T>? _rule;
 
-        public string Reference { get; init; }
+        public string ReferenceName { get; init; }
+
+        public AnnotationPruning ReferencePrune { get; init; }
 
         public RuleBase<T>? Rule 
         {
@@ -31,12 +33,19 @@ namespace gg.parse.rules
         /// If false (this is the default) this rule will show up in the ast tree if its annotation output
         /// is set to 'Annotation'.
         /// </summary>
-        public bool DeferResultToReference { get; set; } = false;
+        public bool IsTopLevel { get; set; } = true;
 
-        public RuleReference(string name, string reference, RuleOutput product = RuleOutput.Self, int precedence = 0)
-            : base(name, product, precedence) 
+        public RuleReference(
+            string name, 
+            string reference, 
+            AnnotationPruning prune = AnnotationPruning.None,
+            int precedence = 0,
+            AnnotationPruning referencePruning = AnnotationPruning.None
+        )
+        : base(name, prune, precedence) 
         {
-            Reference = reference;
+            ReferenceName = reference;
+            ReferencePrune = referencePruning;
         }
 
         public override ParseResult Parse(T[] input, int start)
@@ -48,41 +57,135 @@ namespace gg.parse.rules
             if (result.FoundMatch)
             {
                 // parse behaviour depends on whether this reference is part of a composition (eg sequence)
-                // in which case we take in account any  output modifiers applied to this rule, but
+                // in which case we take in account any prune modifiers applied to this rule, but
                 // otherwise pass the results of the referced rule
-                if (DeferResultToReference)
+                if (IsTopLevel)
                 {
-                    // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 
-                    // the rule output so pass back the result based on this' product
-                    return Output switch
-                    {
-                        RuleOutput.Self => result,
-                        RuleOutput.Children => new ParseResult(
-                            true, 
-                            result.MatchLength, 
-                            CollectChildAnnotations(result.Annotations)
-                        ),
-                        _ => new ParseResult(true, result.MatchLength),
-                    };
+                    return GetTopLevelResult(result, start);
                 }
                 else
                 {
-                    // this rule is a named rule we _assume+ the user wants this rule to show up in the result/asttree
-                    // rather than the referred rule (for whatever the motivations are of the user).
-                    // eg let's say the user states foo = 'bar'; bar = foo; in this case the rule 'bar' has its own name
-                    // so the results should include 'bar' as the rule name, not 'foo'. Bar may still have any output
-                    // modifiers eg "#bar = foo;" in which case foo will show up.
-                    return Output switch
+                    // this rule is part of a sequence/option/oneormore/..., it's assumed this is only to change 
+                    // the rule output so pass back the result based on the reference pruning
+                    return ReferencePrune switch
                     {
-                        RuleOutput.Self => new ParseResult(true, result.MatchLength,
-                                                                       [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]),
-                        RuleOutput.Children => result,
+                        AnnotationPruning.None => result,
+                        AnnotationPruning.Children => new ParseResult(
+                            true,
+                            result.MatchLength,
+                            CollectRootAnnotations(result.Annotations)
+                        ),
+                        AnnotationPruning.Root => new ParseResult(
+                            true,
+                            result.MatchLength,
+                            CollectChildAnnotations(result.Annotations)
+                        ),
                         _ => new ParseResult(true, result.MatchLength),
                     };
                 }
             }
 
             return result;
+        }
+
+
+        /// <summary>
+        /// Deal with the complications of this rule's pruning and the reference rule's pruning.
+        /// Cases:
+        ///     Prune               | ReferencePrune        | Result
+        ///     --------------------|-----------------------|-----------------------
+        ///     All                 | Ignored               | Prune all
+        ///     Children            | Ignored               | This
+        ///     Root                | All                   | Prune all
+        ///     Root                | Children              | Ref Result Root
+        ///     Root                | Root                  | Ref Result's children
+        ///     Root                | None                  | Ref Result Root + Ref Result children 
+        ///     None                | All                   | This
+        ///     None                | Children              | This with Ref result
+        ///     None                | Root                  | This with Ref result children     
+        ///     None                | None                  | This with Ref result + Ref result children    
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="start"></param>
+        /// <returns></returns>
+        private ParseResult GetTopLevelResult(ParseResult result, int start)
+        {
+            switch (Prune)
+            {
+                case AnnotationPruning.All:
+                    return new ParseResult(true, result.MatchLength);
+
+                case AnnotationPruning.Children:
+                    return new ParseResult(
+                       true,
+                       result.MatchLength,
+                       [new Annotation(this, new Range(start, result.MatchLength))]
+                    );
+                case AnnotationPruning.Root:
+                    return GetTopLevelResultWithoutRoot(result, start);
+                case AnnotationPruning.None:
+                    return GetTopLevelResultWithRoot(result, start);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private ParseResult GetTopLevelResultWithoutRoot(ParseResult result, int start)
+        {
+            switch (ReferencePrune)
+            {
+                case AnnotationPruning.All:
+                    return new ParseResult(true, result.MatchLength);
+                case AnnotationPruning.Children:
+                    return new ParseResult(
+                        true,
+                        result.MatchLength,
+                        CollectRootAnnotations(result.Annotations)
+                    );
+                case AnnotationPruning.Root:
+                    return new ParseResult(
+                        true,
+                        result.MatchLength,
+                        CollectChildAnnotations(result.Annotations)
+                    );
+                case AnnotationPruning.None:
+                    return result;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private ParseResult GetTopLevelResultWithRoot(ParseResult result, int start)
+        {
+            switch (ReferencePrune)
+            {
+                case AnnotationPruning.All:
+                    return new ParseResult(
+                       true,
+                       result.MatchLength,
+                       [new Annotation(this, new Range(start, result.MatchLength))]
+                    );
+                case AnnotationPruning.Children:
+                    return new ParseResult(
+                        true,
+                        result.MatchLength,
+                        [new Annotation(this, new Range(start, result.MatchLength), CollectRootAnnotations(result.Annotations))]
+                    );
+                case AnnotationPruning.Root:
+                    return new ParseResult(
+                        true,
+                        result.MatchLength,
+                        [new Annotation(this, new Range(start, result.MatchLength), CollectChildAnnotations(result.Annotations))]
+                    );
+                case AnnotationPruning.None:
+                    return new ParseResult(
+                        true,
+                        result.MatchLength,
+                        [new Annotation(this, new Range(start, result.MatchLength), result.Annotations)]
+                    );
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private static List<Annotation>? CollectChildAnnotations(List<Annotation>? annotations)
@@ -96,6 +199,33 @@ namespace gg.parse.rules
                     if (a != null && a.Children != null && a.Children.Count > 0)
                     {
                         result.AddRange(a.Children);
+                    }
+                });
+
+                return result.Count > 0 ? result : null;
+            }
+
+            return null;
+        }
+
+        private static List<Annotation>? CollectRootAnnotations(List<Annotation>? annotations)
+        {
+            if (annotations != null)
+            {
+                var result = new List<Annotation>();
+
+                annotations.ForEach(a =>
+                {
+                    if (a != null)
+                    {
+                        if (a.Children == null || a.Children.Count == 0)
+                        {
+                            result.Add(a);
+                        }
+                        else
+                        {
+                            result.Add(new Annotation(a.Rule, a.Range));
+                        }
                     }
                 });
 
