@@ -1,12 +1,9 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
-#pragma warning disable IDE0290 // Use primary constructor
-
-using gg.parse.util;
 
 namespace gg.parse.rules
 {
-    public  delegate void RuleCallbackAction<T>(IRule rule, T[] data, ParseResult? result = null) where T : IComparable<T>;
+    public delegate void RuleCallbackAction<T>(IRule rule, T[] data, ParseResult? result = null) where T : IComparable<T>;
 
     /// <summary>
     /// Will give a callback to the client code when its associated rule meets a certain 
@@ -28,22 +25,13 @@ namespace gg.parse.rules
         
         public int Count => 1;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => Rule;
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                Rule = value;
-            }
-        }
+        public RuleBase<T>? this[int index] => Rule;
 
         public CallbackCondition Condition { get; init; }
 
         public RuleCallbackAction<T>? ParseStartCallback { get; init; }
 
         public RuleCallbackAction<T>? ResultCallback { get; init; }
-
 
         public CallbackRule(
 
@@ -89,6 +77,14 @@ namespace gg.parse.rules
 
             return result;
         }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new CallbackRule<T>(
+                Name, 
+                composition.First(), 
+                ResultCallback!, 
+                Condition
+            );
+        
     }
 }
-#pragma warning restore IDE0290 // Use primary constructor

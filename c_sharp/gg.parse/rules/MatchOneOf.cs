@@ -9,18 +9,9 @@ namespace gg.parse.rules
     {
         private RuleBase<T>[] _options;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => _options[index];
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                _options[index] = value;
-            }
-        }
-
+        public RuleBase<T>? this[int index] => _options[index];
+        
         public int Count => _options.Length;
-
 
         public RuleBase<T>[] RuleOptions 
         {
@@ -68,5 +59,8 @@ namespace gg.parse.rules
             }
             return ParseResult.Failure;
         }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new MatchOneOf<T>(Name, Prune, Precedence, [..composition]);
     }
 }

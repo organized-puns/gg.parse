@@ -138,7 +138,6 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(objectNode.Rule == jsonParser.GrammarGraph!.FindRule("object"));
             IsTrue(objectNode[0].Rule == jsonParser.GrammarGraph!.FindRule("key_value_pair"));
         }
-
         
         /// <summary>
         /// Test if include files also work with tokens AND parsers 

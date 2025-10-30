@@ -27,7 +27,6 @@ namespace gg.parse.rules
 
     public class LogRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-
         public LogLevel Level { get; init; }
 
         /// <summary>
@@ -59,11 +58,11 @@ namespace gg.parse.rules
 
         public LogRule(
             string name, 
-            AnnotationPruning product, 
+            AnnotationPruning pruning, 
             string? text, 
             RuleBase<T>? condition = null, 
             LogLevel level = LogLevel.Info
-        ) : base(name, product)
+        ) : base(name, pruning)
         {
             Text = text;
             Condition = condition;
@@ -95,6 +94,17 @@ namespace gg.parse.rules
             }
 
             return BuildDataRuleResult(new(start, 0));
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            return new LogRule<T>(
+                Name, 
+                Prune, 
+                Text, 
+                composition.FirstOrDefault(), 
+                Level
+            );
         }
     }
 }

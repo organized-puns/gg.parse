@@ -30,16 +30,7 @@ namespace gg.parse.rules
 
         public IEnumerable<RuleBase<T>> Rules => [StopCondition];
 
-        public RuleBase<T>? this[int index]
-        {
-            get => StopCondition;
-            
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                StopCondition = value;
-            }
-        }
+        public RuleBase<T>? this[int index] => StopCondition;
 
         public int Count => 1;
 
@@ -73,5 +64,8 @@ namespace gg.parse.rules
 
             return FailOnEoF ? ParseResult.Failure : BuildDataRuleResult(new(start, idx - start));
         }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new SkipRule<T>(Name, Prune, Precedence, composition.First(), FailOnEoF);
     }
 }

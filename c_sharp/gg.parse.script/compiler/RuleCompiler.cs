@@ -129,12 +129,11 @@ namespace gg.parse.script.compiler
                 if (resultGraph.FindRule(ruleHeader.Name) == null)
                 {
                     var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
-
-                    resultGraph.RegisterRuleAndSubRules(compiledRule);
+                    var registeredRule = resultGraph.RegisterRuleAndSubRules(compiledRule);
 
                     // First compiled rule will be assigned to the root. Seems the most intuitive
                     // xxx replace with name root or smth
-                    resultGraph.Root ??= compiledRule;
+                    resultGraph.Root ??= registeredRule;
                 }
                 else
                 {

@@ -28,11 +28,11 @@ namespace gg.parse.rules
         public RuleBase<T>? this[int index]
         {
             get => Rule;
-            set
+            /*set
             {
                 Assertions.RequiresNotNull(value);
                 Rule = value;
-            }
+            }*/
         }
 
         public override ParseResult Parse(T[] input, int start)
@@ -69,6 +69,18 @@ namespace gg.parse.rules
             return Min <= 0 || count >= Min
                 ? BuildResult(new Range(start, index - start), children)
                 : ParseResult.Failure;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            return new MatchCount<T>(
+                Name, 
+                composition.First(), 
+                Prune, 
+                Min, 
+                Max, 
+                Precedence
+            );
         }
     }
 }

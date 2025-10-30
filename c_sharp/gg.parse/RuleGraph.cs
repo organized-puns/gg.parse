@@ -30,7 +30,6 @@ namespace gg.parse
         /// </summary>
         public int Count => _nameRuleLookup.Count;
 
-
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
             Assertions.RequiresNotNull(rule);
@@ -66,17 +65,23 @@ namespace gg.parse
 
             if (existingRule == null)
             {
-                RegisterRule(rule);
-
                 if (rule is IRuleComposition<T> ruleComposition)
                 {
+                    var composition = new RuleBase<T>[ruleComposition.Count];
+
+                    // potentially replace the rules making up the composition with registered versions
                     for (var i = 0; i < ruleComposition.Count; i++)
                     {
-                        ruleComposition[i] = RegisterRuleAndSubRules(ruleComposition[i]!);
+                        /*ruleComposition[i] =*/
+                        composition[i] = RegisterRuleAndSubRules(ruleComposition[i]!);
                     }
-                }
 
-                return rule;
+                    return RegisterRule((TRule) ruleComposition.CloneWithComposition(composition));
+                }
+                else
+                {
+                    return RegisterRule(rule);
+                }
             }
 
             return (TRule) existingRule;

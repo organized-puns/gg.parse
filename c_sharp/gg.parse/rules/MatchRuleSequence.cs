@@ -9,31 +9,13 @@ namespace gg.parse.rules
 {
     public class MatchRuleSequence<T> : RuleBase<T>, IRuleComposition<T>  where T : IComparable<T>
     {
-        private RuleBase<T>[] _rules;
+        private readonly RuleBase<T>[] _rules;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => _rules[index];
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                _rules[index] = value;
-            }
-        }
-
+        public RuleBase<T>? this[int index] => _rules[index];
+        
         public int Count => _rules.Length;
 
-        public RuleBase<T>[] SequenceRules
-        {
-            get => _rules;
-            set
-            {
-                Assertions.Requires(value != null);
-                Assertions.Requires(value!.Any( v => v != null));
-
-                _rules = value!;
-            }
-        }
+        public RuleBase<T>[] SequenceRules => _rules;
 
         public IEnumerable<RuleBase<T>> Rules => SequenceRules;
 
@@ -73,5 +55,8 @@ namespace gg.parse.rules
 
             return BuildResult(new Range(start, index - start), children);
         }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new MatchRuleSequence<T>(Name, Prune, Precedence, [..composition]);
     }
 }

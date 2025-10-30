@@ -10,35 +10,15 @@ namespace gg.parse.rules
 {
     public class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-        private RuleBase<T>[] _options;
+        private readonly RuleBase<T>[] _options;
 
         [DisallowNull]
-        public RuleBase<T>[] RuleOptions 
-        {
-            get => _options;
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                Assertions.Requires(value!.Any(v => v != null));
-
-                _options = value;
-            }
-        }
+        public RuleBase<T>[] RuleOptions => _options;
 
         public int Count => _options == null ? 0 : _options.Length;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => _options[index];
-            set
-            {
-                Assertions.RequiresNotNull(value!);
-                Assertions.RequiresNotNull(_options!);
-                
-                _options[index] = value!;
-            }
-        }
-
+        public RuleBase<T>? this[int index] => _options[index];
+        
         public IEnumerable<RuleBase<T>> Rules => RuleOptions;
 
         public MatchEvaluation(string name, params RuleBase<T>[] options)
@@ -197,6 +177,9 @@ namespace gg.parse.rules
                 }
             }
             return ParseResult.Failure;
-        }       
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new MatchEvaluation<T>(Name, Prune, Precedence, [.. composition]);
     }
 }

@@ -18,11 +18,11 @@ namespace gg.parse.rules
         public RuleBase<T>? this[int index]
         {
             get => Rule;
-            set
+            /*set
             {
                 Assertions.RequiresNotNull(value);
                 Rule = value;
-            }
+            }*/
         }
 
         public MatchCondition(
@@ -55,6 +55,16 @@ namespace gg.parse.rules
             }
 
             return ParseResult.Failure;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            return new MatchCondition<T>(
+                Name,
+                Prune,
+                Precedence,
+                composition.First()
+            );
         }
     }
 }
