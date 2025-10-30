@@ -1,4 +1,7 @@
-﻿using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.core
 {

@@ -1,10 +1,11 @@
-﻿#nullable disable
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
 
 using gg.parse.rules;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace gg.parse.tests.rulefunctions
+namespace gg.parse.tests.rules
 {
     [TestClass]
     public class MatchFunctionCountTests
@@ -14,10 +15,6 @@ namespace gg.parse.tests.rulefunctions
         {
             var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
             var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.None, 1, 3);
-
-            function.Id = 1;
-            rule.Id = 2;
-
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             
@@ -32,14 +29,11 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void MatchFunctionCount_ValidMultipleInput_ReturnsSuccess()
         {
-            var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
+            var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
             var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.None, 1, 2);
-
-            function.Id = 1;
-            rule.Id = 2;
-
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
+
             IsTrue(result.FoundMatch);
             AreEqual(6, result.MatchLength);
             IsTrue(result.Annotations!.Count == 1);
@@ -58,14 +52,11 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void MatchFunctionCount_ValidMultipleTransitiveInput_ReturnsSuccess()
         {
-            var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
+            var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
             var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.Root, 1, 2);
-
-            function.Id = 1;
-            rule.Id = 2;
-
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
+
             IsTrue(result.FoundMatch);
             AreEqual(6, result.MatchLength);
             IsTrue(result.Annotations.Count == 2);
@@ -82,11 +73,8 @@ namespace gg.parse.tests.rulefunctions
         [TestMethod]
         public void MatchFunctionCount_ValidMultipleNoneInput_ReturnsSuccess()
         {
-            var function = new MatchDataSequence<int>("TestFunction", new[] { 1, 2, 3 });
+            var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
             var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.All, 1, 2);
-
-            function.Id = 1;
-            rule.Id = 2;
 
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
@@ -135,7 +123,7 @@ namespace gg.parse.tests.rulefunctions
             IsTrue(result.FoundMatch);
             IsTrue(result.MatchLength == 3);
 
-            result = function2.Parse("bar".ToCharArray(), 0);
+            function2.Parse("bar".ToCharArray(), 0);
         }
     }
 }

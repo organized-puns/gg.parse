@@ -13,8 +13,6 @@ namespace gg.parse
     /// <typeparam name="T"></typeparam>
     public class RuleGraph<T> : IEnumerable<RuleBase<T>> where T : IComparable<T>
     {
-        private int _nextRuleId = 0;
-
         private readonly Dictionary<string, RuleBase<T>> _nameRuleLookup = [];
         
         /// <summary>
@@ -41,7 +39,6 @@ namespace gg.parse
                 $"Rule with name '{rule.Name}' already exists in the rule table.");
 
             _nameRuleLookup[rule.Name] = rule;
-            rule.Id = _nextRuleId++;
 
             return rule;
         }
@@ -62,7 +59,6 @@ namespace gg.parse
         {
             return _nameRuleLookup.TryGetValue(name, out var rule) ? rule : null;
         }
-
 
         public TRule RegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
         {
