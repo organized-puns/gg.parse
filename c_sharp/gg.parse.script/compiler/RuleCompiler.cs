@@ -223,19 +223,22 @@ namespace gg.parse.script.compiler
             {
                 try
                 {
-                    if (rule is IRuleComposition<T> composition && composition.Rules != null)
-                    {
-                        foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
-                        {
-                            referenceRule.Rule = FindRule(graph, referenceRule.ReferenceName);
-                            referenceRule.IsTopLevel = false;
-                        }
-                    }
-                    else if (rule is RuleReference<T> referenceRule)
+                    // make sure to put this before the next if as a RuleReference is also an IRuleComposition
+                    if (rule is RuleReference<T> referenceRule)
                     {
                         referenceRule.Rule = FindRule(graph, referenceRule.ReferenceName);
                         referenceRule.IsTopLevel = true;
                     }
+                    else if (rule is IRuleComposition<T> composition && composition.Rules != null)
+                    {
+                        foreach (var compositionReference in 
+                            composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                        {
+                            compositionReference.Rule = FindRule(graph, compositionReference.ReferenceName);
+                            compositionReference.IsTopLevel = false;
+                        }
+                    }
+                    
                 }
                 catch (Exception ex)
                 {

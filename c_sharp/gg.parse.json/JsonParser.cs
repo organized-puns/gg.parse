@@ -80,7 +80,6 @@ namespace gg.parse.json
             var nextKeyValue = Sequence("-r NextKeyValue", comma, keyValue);
             var keyValueList = Sequence("-r KeyValueList", keyValue, ZeroOrMore("-r KeyValueListRest", nextKeyValue));
             
-            // jsonObj = scope_start ?(kv_list) scope_end
             var jsonObject = Sequence(
                 JsonNodeNames.Object, 
                 objectStart, 
@@ -88,7 +87,6 @@ namespace gg.parse.json
                 objectEnd
             );
 
-            // jsonArray = array_start ?(value *(collection_separator value)) array_end
             var nextValue = Sequence("-r NextValue", comma, value);
             var valueList = Sequence("-r ValueList", value, ZeroOrMore("-r ValueListRest", nextValue));
             var jsonArray = Sequence(
@@ -98,7 +96,7 @@ namespace gg.parse.json
                 arrayEnd
             );
 
-            value.RuleOptions = [.. value.RuleOptions, jsonObject, jsonArray];
+            ReplaceRule(value, (RuleBase<int>) value.CloneWithComposition([.. value.Rules, jsonObject, jsonArray]));
 
             // todo error(s)
 

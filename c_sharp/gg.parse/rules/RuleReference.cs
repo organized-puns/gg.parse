@@ -3,11 +3,12 @@
 
 using gg.parse.util;
 using System.Diagnostics.CodeAnalysis;
+
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class RuleReference<T> : RuleBase<T> where T : IComparable<T>
+    public class RuleReference<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>? _rule;
 
@@ -41,6 +42,19 @@ namespace gg.parse.rules
         /// is set to 'Annotation'.
         /// </summary>
         public bool IsTopLevel { get; set; } = true;
+
+        public IEnumerable<RuleBase<T>>? Rules
+        {
+            get
+            {
+                Assertions.RequiresNotNull(Rule);
+                return [Rule!];
+            }
+        }
+
+        public int Count => 1;
+
+        public RuleBase<T>? this[int index] => Rule;
 
         public RuleReference(
             string name, 
@@ -231,6 +245,27 @@ namespace gg.parse.rules
             }
 
             return null;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new RuleReference<T>(
+                Name, 
+                ReferenceName, 
+                Prune, 
+                Precedence, 
+                ReferencePrune
+            )
+            {
+                // rule may be null in this case when the rule hasn't been resolved yet
+                _rule = composition.First()
+            };
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
         }
     }
 }

@@ -13,19 +13,7 @@ namespace gg.parse.rules
         
         public int Count => _options.Length;
 
-        public RuleBase<T>[] RuleOptions 
-        {
-            get => _options;
-            set
-            {
-                Assertions.Requires(value != null);
-                Assertions.Requires(value!.Any(v => v != null));
-
-                _options = value!;
-            }
-        }
-
-        public IEnumerable<RuleBase<T>> Rules => RuleOptions;
+        public IEnumerable<RuleBase<T>> Rules => _options;
 
         public MatchOneOf(string name, params RuleBase<T>[] options)
             : base(name, AnnotationPruning.None)
@@ -45,7 +33,7 @@ namespace gg.parse.rules
 
         public override ParseResult Parse(T[] input, int start)
         {
-            foreach (var option in RuleOptions)
+            foreach (var option in _options)
             {   
                 var result = option.Parse(input, start);
                 if (result.FoundMatch)
@@ -62,5 +50,13 @@ namespace gg.parse.rules
 
         public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
             new MatchOneOf<T>(Name, Prune, Precedence, [..composition]);
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.Requires(!composition.Any( r => r == null));
+
+            _options = [.. composition];
+        }
     }
 }

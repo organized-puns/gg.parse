@@ -25,16 +25,8 @@ namespace gg.parse.rules
 
         public int Count => 1;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => Rule;
-            /*set
-            {
-                Assertions.RequiresNotNull(value);
-                Rule = value;
-            }*/
-        }
-
+        public RuleBase<T>? this[int index] => Rule;
+        
         public override ParseResult Parse(T[] input, int start)
         {
             int count = 0;
@@ -71,9 +63,9 @@ namespace gg.parse.rules
                 : ParseResult.Failure;
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            return new MatchCount<T>(
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+        
+            new MatchCount<T>(
                 Name, 
                 composition.First(), 
                 Prune, 
@@ -81,6 +73,14 @@ namespace gg.parse.rules
                 Max, 
                 Precedence
             );
+        
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
         }
     }
 }

@@ -67,7 +67,7 @@ namespace gg.parse.script.tests.compiler
 
             IsNotNull(setRule);
             IsTrue(setRule.Prune == AnnotationPruning.All);
-            IsTrue(setRule.MatchingValues.SequenceEqual("abc".ToArray()));
+            IsTrue(setRule.MatchingValues.SequenceEqual([.. "abc"]));
         }
 
         [TestMethod]
@@ -92,13 +92,13 @@ namespace gg.parse.script.tests.compiler
             IsNotNull(sequenceRule);
             IsTrue(sequenceRule.Prune == AnnotationPruning.Root);
 
-            var fooLit = sequenceRule.SequenceRules[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.Rules.ElementAt(0) as MatchDataSequence<char>;
             IsNotNull(fooLit);
-            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsTrue(fooLit.DataArray.SequenceEqual([.. "foo"]));
 
-            var barLit = sequenceRule.SequenceRules[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.Rules.ElementAt(1) as MatchDataSequence<char>;
             IsNotNull(barLit);
-            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsTrue(barLit.DataArray.SequenceEqual([.. "bar"]));
         }
 
         [TestMethod]
@@ -111,13 +111,13 @@ namespace gg.parse.script.tests.compiler
             IsNotNull(optionRule);
             IsTrue(optionRule.Prune == AnnotationPruning.None);
 
-            var fooLit = optionRule.RuleOptions[0] as MatchDataSequence<char>;
+            var fooLit = optionRule[0] as MatchDataSequence<char>;
             IsNotNull(fooLit);
-            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsTrue(fooLit.DataArray.SequenceEqual([.. "foo"]));
 
-            var barLit = optionRule.RuleOptions[1] as MatchDataSequence<char>;
+            var barLit = optionRule[1] as MatchDataSequence<char>;
             IsNotNull(barLit);
-            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsTrue(barLit.DataArray.SequenceEqual([.. "bar"]));
         }
 
         [TestMethod]
@@ -128,20 +128,20 @@ namespace gg.parse.script.tests.compiler
             var groupRule = table.FindRule("group_rule") as MatchOneOf<char>;
 
             IsNotNull(groupRule);
-            var sequenceRule = groupRule.RuleOptions[0] as MatchRuleSequence<char>;
-            var litRule = groupRule.RuleOptions[1] as MatchDataSequence<char>;
+            var sequenceRule = groupRule[0] as MatchRuleSequence<char>;
+            var litRule = groupRule[1] as MatchDataSequence<char>;
 
             IsNotNull(sequenceRule);
             IsNotNull(litRule);
-            IsTrue(litRule.DataArray.SequenceEqual("baz".ToArray()));
+            IsTrue(litRule.DataArray.SequenceEqual([.. "baz"]));
 
-            var fooLit = sequenceRule.SequenceRules[0] as MatchDataSequence<char>;
+            var fooLit = sequenceRule.Rules.ElementAt(0) as MatchDataSequence<char>;
             IsNotNull(fooLit);
-            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsTrue(fooLit.DataArray.SequenceEqual([.. "foo"]));
 
-            var barLit = sequenceRule.SequenceRules[1] as MatchDataSequence<char>;
+            var barLit = sequenceRule.Rules.ElementAt(1) as MatchDataSequence<char>;
             IsNotNull(barLit);
-            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsTrue(barLit.DataArray.SequenceEqual([.. "bar"]));
         }
 
         [TestMethod]
@@ -152,22 +152,22 @@ namespace gg.parse.script.tests.compiler
             var sequenceRule = table.FindRule("sequence_rule") as MatchRuleSequence<char>;
             IsNotNull(sequenceRule);
 
-            var fooLitRef = sequenceRule.SequenceRules[0] as RuleReference<char>;
+            var fooLitRef = sequenceRule.Rules.ElementAt(0) as RuleReference<char>;
             IsNotNull(fooLitRef);
 
             var fooLit = fooLitRef.Rule as MatchDataSequence<char>;
             IsNotNull(fooLit);
 
-            IsTrue(fooLit.DataArray.SequenceEqual("foo".ToArray()));
+            IsTrue(fooLit.DataArray.SequenceEqual([.. "foo"]));
             IsTrue(table.FindRule("foo") == fooLit);
 
-            var barLitRef = sequenceRule.SequenceRules[1] as RuleReference<char>;
+            var barLitRef = sequenceRule.Rules.ElementAt(1) as RuleReference<char>;
             IsNotNull(barLitRef);
 
             var barLit = barLitRef.Rule as MatchDataSequence<char>;
             IsNotNull(barLit);
 
-            IsTrue(barLit.DataArray.SequenceEqual("bar".ToArray()));
+            IsTrue(barLit.DataArray.SequenceEqual([.. "bar"]));
             IsTrue(table.FindRule("bar") == barLit);
         }
 

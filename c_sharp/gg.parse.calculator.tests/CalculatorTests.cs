@@ -24,21 +24,21 @@ namespace gg.parse.calculator.tests
 
             IsNotNull(expressionRule);
             IsTrue(expressionRule.Prune == AnnotationPruning.Root);
-            IsTrue(expressionRule.RuleOptions.Length == 3);
+            IsTrue(expressionRule.Count == 3);
 
-            var operationRef = expressionRule.RuleOptions[0] as RuleReference<int>;
+            var operationRef = expressionRule[0] as RuleReference<int>;
 
             IsNotNull(operationRef);
             IsTrue(operationRef.Prune == AnnotationPruning.None);            
             IsTrue(operationRef.ReferenceName == "operation");
 
-            var termRef = expressionRule.RuleOptions[1] as RuleReference<int>;
+            var termRef = expressionRule[1] as RuleReference<int>;
 
             IsNotNull(termRef);
             IsTrue(termRef.Prune == AnnotationPruning.None);            
             IsTrue(termRef.ReferenceName == "term");
 
-            var unknown = expressionRule.RuleOptions[2] as RuleReference<int>;
+            var unknown = expressionRule[2] as RuleReference<int>;
 
             IsNotNull(unknown);
             IsTrue(unknown.Prune == AnnotationPruning.None);

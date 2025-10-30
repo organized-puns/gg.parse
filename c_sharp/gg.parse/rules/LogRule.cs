@@ -1,6 +1,9 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.util;
+using System.Data;
+
 namespace gg.parse.rules
 {
     [Flags]
@@ -96,15 +99,24 @@ namespace gg.parse.rules
             return BuildDataRuleResult(new(start, 0));
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            return new LogRule<T>(
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+        
+            new LogRule<T>(
                 Name, 
                 Prune, 
                 Text, 
+                // log rule may not have a condition
                 composition.FirstOrDefault(), 
                 Level
             );
+        
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            _condition = composition.First();
         }
     }
 }

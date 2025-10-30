@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
+using System.Data;
 
 namespace gg.parse.rules
 {
@@ -25,7 +26,7 @@ namespace gg.parse.rules
         public RuleBase<T> StopCondition
         {
             get;
-            set;
+            private set;
         }
 
         public IEnumerable<RuleBase<T>> Rules => [StopCondition];
@@ -67,5 +68,14 @@ namespace gg.parse.rules
 
         public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
             new SkipRule<T>(Name, Prune, Precedence, composition.First(), FailOnEoF);
+
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            StopCondition = composition.First();
+        }
     }
 }

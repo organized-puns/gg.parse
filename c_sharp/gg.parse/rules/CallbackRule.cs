@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.util;
+
 namespace gg.parse.rules
 {
     public delegate void RuleCallbackAction<T>(IRule rule, T[] data, ParseResult? result = null) where T : IComparable<T>;
@@ -85,6 +87,13 @@ namespace gg.parse.rules
                 ResultCallback!, 
                 Condition
             );
-        
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
+        }
     }
 }

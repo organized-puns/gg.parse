@@ -1,13 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.util;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
     public class MatchNot<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
-        public RuleBase<T> Rule { get; init; }
+        public RuleBase<T> Rule { get; private set; }
 
         public IEnumerable<RuleBase<T>> Rules => [Rule];
 
@@ -42,5 +43,13 @@ namespace gg.parse.rules
 
         public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
             new MatchNot<T>(Name, Prune, Precedence, composition.First());
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
+        }
     }
 }

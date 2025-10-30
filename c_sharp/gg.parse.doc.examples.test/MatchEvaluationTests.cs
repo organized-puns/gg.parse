@@ -119,8 +119,8 @@ namespace gg.parse.doc.examples.test
             var plusToken = new MatchSingleData<int>(PlusTokenName, plus.Id);
             var multToken = new MatchSingleData<int>(MultTokenName, mult.Id);
 
-            var addOperation = new MatchRuleSequence<int>(AddOpName, output: AnnotationPruning.None, precedence: addPrecedence, numberToken, plusToken, numberToken);
-            var multOperation = new MatchRuleSequence<int>(MultOpName, output: AnnotationPruning.None, precedence: multPrecedence, numberToken, multToken, numberToken);
+            var addOperation = new MatchRuleSequence<int>(AddOpName, pruning: AnnotationPruning.None, precedence: addPrecedence, numberToken, plusToken, numberToken);
+            var multOperation = new MatchRuleSequence<int>(MultOpName, pruning: AnnotationPruning.None, precedence: multPrecedence, numberToken, multToken, numberToken);
 
             var evaluation = new MatchEvaluation<int>(EvaluationName, output: AnnotationPruning.None, precedence: 0, addOperation, multOperation);
 
