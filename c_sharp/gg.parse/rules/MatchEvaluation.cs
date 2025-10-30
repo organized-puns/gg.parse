@@ -7,7 +7,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         // we need to wrangle the resulting annotations so wrap the annotation we get from
         // parsing into a mutable structure we can manipulate

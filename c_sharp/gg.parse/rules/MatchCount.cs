@@ -6,7 +6,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchCount<T>(
+    public sealed class MatchCount<T>(
         string name, 
         RuleBase<T> rule, 
         AnnotationPruning output = AnnotationPruning.None, 

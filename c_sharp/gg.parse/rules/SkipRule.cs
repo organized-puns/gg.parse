@@ -13,7 +13,7 @@ namespace gg.parse.rules
     /// skip_until_eof_or {condition} (implicit failOnEoF = false) 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SkipRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class SkipRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         /// <summary>
         /// If initialized to true, this rule will fail when encountering eof (succeed otherwise)

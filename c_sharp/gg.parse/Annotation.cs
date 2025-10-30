@@ -8,7 +8,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse
 {
-    public class Annotation : IEnumerable<Annotation>
+    public sealed class Annotation : IEnumerable<Annotation>
     {
         /// <summary>
         /// Allows matching the annotation against a string based on the set rule. Applicable in a lot of cases where

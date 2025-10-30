@@ -2,11 +2,10 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
-using System.Collections.Immutable;
 
 namespace gg.parse.rules
 {
-    public class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>[] _options;
 

@@ -9,7 +9,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class RuleReference<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class RuleReference<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>? _rule;
 

@@ -3,7 +3,7 @@
 
 namespace gg.parse.rules
 {
-    public class MatchDataSequence<T>(
+    public sealed class MatchDataSequence<T>(
         string name, 
         T[] dataArray, 
         AnnotationPruning output = AnnotationPruning.None,

@@ -3,7 +3,7 @@
 
 namespace gg.parse.rules
 {
-    public class MatchDataRange<T>(
+    public sealed class MatchDataRange<T>(
         string name, 
         T minDataValue, 
         T maxDataValue, 

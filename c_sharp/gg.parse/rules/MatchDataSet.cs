@@ -5,7 +5,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchDataSet<T> : RuleBase<T> where T : IComparable<T>
+    public sealed class MatchDataSet<T> : RuleBase<T> where T : IComparable<T>
     {
         public T[] MatchingValues { get; init; }
 

@@ -28,7 +28,7 @@ namespace gg.parse.rules
         }
     }
 
-    public class LogRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class LogRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         public LogLevel Level { get; init; }
 

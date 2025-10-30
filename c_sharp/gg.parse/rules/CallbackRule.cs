@@ -12,7 +12,7 @@ namespace gg.parse.rules
     /// result. Convenient when debugging large rule graphs.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CallbackRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class CallbackRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         public enum CallbackCondition
         {

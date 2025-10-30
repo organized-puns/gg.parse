@@ -6,7 +6,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchNot<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchNot<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         public RuleBase<T> Rule { get; private set; }
 
