@@ -1,11 +1,11 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
 {
-
     public abstract class RuleBase<T>(
         string name, 
         AnnotationPruning output = AnnotationPruning.None, 
@@ -14,7 +14,7 @@ namespace gg.parse
     {
         public string Name { get; init; } = name;
 
-        public int Id { get; set; } = -1;
+        public int Id { get; init; } = name.GetHashCode();
 
         public int Precedence { get; init; } = precedence;
 
@@ -52,7 +52,7 @@ namespace gg.parse
             };
         
 
-        public ParseResult BuildResult(Range dataRange, List<Annotation>? children = null)
+        public ParseResult BuildResult(Range dataRange, ImmutableList<Annotation>? children = null)
         {
             return Prune switch
             {

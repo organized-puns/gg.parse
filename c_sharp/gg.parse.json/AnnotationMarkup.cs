@@ -1,6 +1,6 @@
-﻿using System.Text;
-
-using gg.parse.script.common;
+﻿using gg.parse.script.common;
+using System.Collections.Immutable;
+using System.Text;
 
 namespace gg.parse.json
 {
@@ -50,7 +50,7 @@ namespace gg.parse.json
 
         public static string AnnotateTextUsingHtml(
             string sourceText,
-            List<Annotation> tokens,
+            ImmutableList<Annotation> tokens,
             Dictionary<string, string> styleLookup) 
         {
             var builder = new StringBuilder();

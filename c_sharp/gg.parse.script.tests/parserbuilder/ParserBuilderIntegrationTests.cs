@@ -155,13 +155,13 @@ namespace gg.parse.script.tests.parserbuilder
             var topLevelRule = builder.TokenGraph.FindRule(topLevelRuleName) as MatchRuleSequence<char>;
 
             IsNotNull(topLevelRule);
-            IsTrue(topLevelRule.SequenceRules.Length == 3);
+            IsTrue(topLevelRule.Rules.Count() == 3);
             IsTrue(topLevelRule.Prune == AnnotationPruning.None);
 
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
 
             IsNotNull(anonymousRule);
-            IsTrue(anonymousRule.RuleOptions.Length == 2);
+            IsTrue(anonymousRule.Count == 2);
             IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
             // the anonymous parts of the rule should by default return the children
@@ -196,7 +196,7 @@ namespace gg.parse.script.tests.parserbuilder
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
 
             IsNotNull(anonymousRule);
-            IsTrue(anonymousRule.RuleOptions.Length == 2);
+            IsTrue(anonymousRule.Count == 2);
             IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
             // the anonymous parts of the rule should by default return the children
@@ -231,7 +231,7 @@ namespace gg.parse.script.tests.parserbuilder
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
 
             IsNotNull(anonymousRule);
-            IsTrue(anonymousRule.RuleOptions.Length == 2);
+            IsTrue(anonymousRule.Count == 2);
             IsTrue(anonymousRule.Prune == AnnotationPruning.None);
 
             // the anonymous parts (lookahead functions) of the rule should by default prune everything

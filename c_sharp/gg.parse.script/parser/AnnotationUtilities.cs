@@ -2,12 +2,13 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.rules;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.parser
 {
     public static class AnnotationUtilities
     {
-        public static bool ContainsErrors<T>(this List<Annotation> annotations, bool failOnWarning, out List<Annotation> errors)
+        public static bool ContainsErrors<T>(this ImmutableList<Annotation> annotations, bool failOnWarning, out ImmutableList<Annotation> errors)
             where T : IComparable<T>
         {
             var errorLevel = failOnWarning

@@ -4,6 +4,7 @@
 
 using gg.parse.rules;
 using gg.parse.script.common;
+using System.Text.Json.Nodes;
 
 namespace gg.parse.script.parser
 {
@@ -233,13 +234,15 @@ namespace gg.parse.script.parser
             RuleBase<int>[] recoveryRules = [.. dataMatchersArray, .. unaryOperators, MatchGroup];
             var ruleBodyErrorHandler = RegisterRuleBodyErrorHandlers(recoveryRules);
 
-            unaryTerms.RuleOptions = [
-                ..unaryTerms.RuleOptions,
-                ..unaryOperators,
-                MatchGroup,
-                MatchLog,
-                ruleBodyErrorHandler
-            ];
+            ReplaceRule(unaryTerms, 
+                (RuleBase<int>) unaryTerms.CloneWithComposition([
+                    ..unaryTerms.Rules,
+                    ..unaryOperators,
+                    MatchGroup,
+                    MatchLog,
+                    ruleBodyErrorHandler
+                ])
+            );
 
             return ruleBody;
         }

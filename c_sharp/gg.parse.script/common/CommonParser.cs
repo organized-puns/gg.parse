@@ -4,6 +4,7 @@
 using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.util;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.common
 {
@@ -24,7 +25,7 @@ namespace gg.parse.script.common
         /// <returns></returns>
         /// <exception cref="TokenizeException">Thrown when the tokenization step results in errors.</exception>
         /// <exception cref="ScriptException">Thrown when parsing reports error.</exception>
-        public (List<Annotation>? tokens, List<Annotation>? astNodes) Parse(
+        public (ImmutableList<Annotation>? tokens, ImmutableList<Annotation>? astNodes) Parse(
             string text, 
             string? usingRule = null,
             bool failOnWarning = false

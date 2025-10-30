@@ -2,19 +2,28 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class RuleReference<T> : RuleBase<T> where T : IComparable<T>
+    public sealed class RuleReference<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>? _rule;
 
         public string ReferenceName { get; init; }
 
+        /// <summary>
+        /// Pruning applied to the refereced rule.
+        /// </summary>
         public AnnotationPruning ReferencePrune { get; init; }
 
+        /// <summary>
+        /// Referenced rule, may be set at a later stage.
+        /// </summary>
+        [DisallowNull]
         public RuleBase<T>? Rule 
         {
             get => _rule;
@@ -34,6 +43,19 @@ namespace gg.parse.rules
         /// is set to 'Annotation'.
         /// </summary>
         public bool IsTopLevel { get; set; } = true;
+
+        public IEnumerable<RuleBase<T>>? Rules
+        {
+            get
+            {
+                Assertions.RequiresNotNull(Rule);
+                return [Rule!];
+            }
+        }
+
+        public int Count => 1;
+
+        public RuleBase<T>? this[int index] => Rule;
 
         public RuleReference(
             string name, 
@@ -179,7 +201,7 @@ namespace gg.parse.rules
             };
         }
 
-        private static List<Annotation>? CollectChildAnnotations(List<Annotation>? annotations)
+        private static ImmutableList<Annotation>? CollectChildAnnotations(ImmutableList<Annotation>? annotations)
         {
             if (annotations != null)
             {
@@ -193,13 +215,13 @@ namespace gg.parse.rules
                     }
                 });
 
-                return result.Count > 0 ? result : null;
+                return result.Count > 0 ? [.. result] : null;
             }
 
             return null;
         }
 
-        private static List<Annotation>? CollectRootAnnotations(List<Annotation>? annotations)
+        private static ImmutableList<Annotation>? CollectRootAnnotations(ImmutableList<Annotation>? annotations)
         {
             if (annotations != null)
             {
@@ -220,10 +242,31 @@ namespace gg.parse.rules
                     }
                 });
 
-                return result.Count > 0 ? result : null;
+                return result.Count > 0 ? [.. result ]: null;
             }
 
             return null;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new RuleReference<T>(
+                Name, 
+                ReferenceName, 
+                Prune, 
+                Precedence, 
+                ReferencePrune
+            )
+            {
+                // rule may be null in this case when the rule hasn't been resolved yet
+                _rule = composition.First()
+            };
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
         }
     }
 }

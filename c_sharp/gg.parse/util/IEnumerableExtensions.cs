@@ -14,5 +14,21 @@ namespace gg.parse.util
 
             return values;
         }
+
+        public static IEnumerable<T> Replace<T>(this IEnumerable<T> values, T original, T replacement)
+            where T : class
+        {
+            var array = values.ToArray();
+
+            for (var i = 0; i < array.Length; i++)
+            {
+                if (array[i] == original)
+                {
+                    array[i] = replacement;
+                }
+            }
+
+            return array;
+        }
     }
 }

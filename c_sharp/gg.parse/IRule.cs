@@ -8,7 +8,7 @@ namespace gg.parse
         /// <summary>
         /// Unique id, used to identify a rule in a rule graph. Also used as tokens in the grammar parsers.
         /// </summary>
-        int Id { get; set; }
+        int Id { get; init; }
 
         /// <summary>
         /// Unique, preferably somewhat human-readable, name of the rule. Used to identify a rule in a rule graph

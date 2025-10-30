@@ -6,7 +6,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchAnyData<T>(
+    public sealed class MatchAnyData<T>(
         string name, 
         AnnotationPruning output = AnnotationPruning.None, 
         int precedence = 0

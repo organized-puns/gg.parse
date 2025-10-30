@@ -6,7 +6,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchNot<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchNot<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         public RuleBase<T> Rule { get; private set; }
 
@@ -14,17 +14,11 @@ namespace gg.parse.rules
 
         public int Count => 1;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => Rule;
-            set 
-            {
-                Assertions.RequiresNotNull(value);
-                Rule = value;
-            }
-        }
-        public MatchNot(string name, AnnotationPruning output, int precedence, RuleBase<T> rule)
-            : base(name, output, precedence)
+        public RuleBase<T>? this[int index] => Rule;
+
+
+        public MatchNot(string name, AnnotationPruning prune, int precedence, RuleBase<T> rule)
+            : base(name, prune, precedence)
         {
             Rule = rule;
         }
@@ -45,6 +39,17 @@ namespace gg.parse.rules
             }
 
             return ParseResult.Failure;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new MatchNot<T>(Name, Prune, Precedence, composition.First());
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
         }
     }
 }

@@ -3,6 +3,7 @@
 
 using gg.parse.script.parser;
 using gg.parse.util;
+using System.Collections.Immutable;
 
 using ParseOutput = (gg.parse.ParseResult tokeninzeResult, gg.parse.ParseResult parseResult);
 
@@ -73,7 +74,7 @@ namespace gg.parse.script.common
         public static ParseResult ParseGrammar(
             this RuleGraph<int> parser, 
             string text, 
-            in List<Annotation> tokens,
+            ImmutableList<Annotation> tokens,
             string? usingRule = null,
             bool failOnWarning = false,
             bool throwExceptionOnErrors = true)

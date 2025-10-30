@@ -2,10 +2,11 @@
 // Copyright (c) Pointless pun
 
 using System.Collections;
+using System.Collections.Immutable;
 
 namespace gg.parse
 {
-    public readonly struct ParseResult(bool isSuccess, int dataRead, List<Annotation>? annotations = null) : IEnumerable<Annotation>
+    public readonly struct ParseResult(bool isSuccess, int dataRead, ImmutableList<Annotation>? annotations = null) : IEnumerable<Annotation>
     {
         public static implicit operator bool(ParseResult result) => result.FoundMatch;
 
@@ -17,7 +18,7 @@ namespace gg.parse
 
         public int MatchLength { get; init; } = dataRead;
 
-        public List<Annotation>? Annotations { get; init; } = annotations;
+        public ImmutableList<Annotation>? Annotations { get; init; } = annotations;
 
         public Annotation? this [int index] => Annotations?[index];
 
@@ -25,7 +26,7 @@ namespace gg.parse
 
         public int Count => Annotations?.Count ?? 0;
 
-        public void Deconstruct(out bool isSuccess, out int matchedLength, out List<Annotation>? annotations)
+        public void Deconstruct(out bool isSuccess, out int matchedLength, out ImmutableList<Annotation>? annotations)
         {
             isSuccess = FoundMatch;
             matchedLength = MatchLength;

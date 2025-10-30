@@ -1,9 +1,12 @@
-﻿namespace gg.parse.tests
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse.tests
 {
     public class EmptyRule : IRule
     {
         public string Name { get; init; }
-        public int Id { get; set; }
+        public int Id { get; init; }
         public int Precedence { get; init; }
         public AnnotationPruning Prune { get; init; }
 

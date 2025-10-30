@@ -1,10 +1,10 @@
-﻿using System.Globalization;
-
-using gg.parse.script;
+﻿using gg.parse.script;
+using System.Collections.Immutable;
+using System.Globalization;
 
 namespace gg.parse.calculator
 {
-    public delegate double CalculatorFunction(string text, Annotation node, List<Annotation> tokens);
+    public delegate double CalculatorFunction(string text, Annotation node, ImmutableList<Annotation> tokens);
 
     public class CalculatorInterpreter
     {
@@ -55,7 +55,7 @@ namespace gg.parse.calculator
             throw new ArgumentException("Failed to parse text.");
         }
 
-        public double Interpret(string text, in Annotation node, in List<Annotation> tokens) =>
+        public double Interpret(string text, in Annotation node, ImmutableList<Annotation> tokens) =>
             _functionLookup.TryGetValue(node.Rule, out var function) 
                 ? function(text, node, tokens)
                 : throw new NotImplementedException();

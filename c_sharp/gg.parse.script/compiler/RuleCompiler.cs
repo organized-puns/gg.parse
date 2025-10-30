@@ -3,6 +3,7 @@
 
 using gg.parse.rules;
 using gg.parse.util;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.compiler
 {
@@ -45,9 +46,9 @@ namespace gg.parse.script.compiler
         }
 
         public RuleGraph<T> Compile<T>(
-            string text, 
-            List<Annotation> tokens, 
-            List<Annotation> syntaxTree,
+            string text,
+            ImmutableList<Annotation> tokens,
+            ImmutableList<Annotation> syntaxTree,
             RuleGraph<T>? resultGraph = null) where T : IComparable<T>
         {
             Assertions.RequiresNotNull(tokens);
@@ -129,12 +130,11 @@ namespace gg.parse.script.compiler
                 if (resultGraph.FindRule(ruleHeader.Name) == null)
                 {
                     var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
-
-                    resultGraph.RegisterRuleAndSubRules(compiledRule);
+                    var registeredRule = resultGraph.FindOrRegisterRuleAndSubRules(compiledRule);
 
                     // First compiled rule will be assigned to the root. Seems the most intuitive
                     // xxx replace with name root or smth
-                    resultGraph.Root ??= compiledRule;
+                    resultGraph.Root ??= registeredRule;
                 }
                 else
                 {
@@ -172,7 +172,7 @@ namespace gg.parse.script.compiler
         /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private RuleHeader ReadRuleHeader(CompileSession context, List<Annotation> ruleNodes, int index)
+        private RuleHeader ReadRuleHeader(CompileSession context, ImmutableList<Annotation> ruleNodes, int index)
         {
             var idx = index;
 
@@ -224,27 +224,22 @@ namespace gg.parse.script.compiler
             {
                 try
                 {
-                    if (rule is IRuleComposition<T> composition && composition.Rules != null)
+                    // make sure to put this before the next if as a RuleReference is also an IRuleComposition
+                    if (rule is RuleReference<T> referenceRule)
                     {
-                        foreach (var referenceRule in composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
+                        referenceRule.Rule = FindRule(graph, referenceRule.ReferenceName);
+                        referenceRule.IsTopLevel = true;
+                    }
+                    else if (rule is IRuleComposition<T> composition && composition.Rules != null)
+                    {
+                        foreach (var compositionReference in 
+                            composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
                         {
-                            var referredRule = FindRule(graph, referenceRule.ReferenceName);
-
-                            // note: we don't replace the rule we just set the reference. This allows
-                            // these subrules to have their own annotation output. If we replace these 
-                            // any output modifiers will affect the original rule
-                            referenceRule.Rule = referredRule!;
-
-                            // if the reference rule is part of a composition (sequence/option/oneormore/...)
-                            // then use the referred rule's name / output to show up in the result/ast tree
-                            // rather than this reference rule's name/output
-                            referenceRule.IsTopLevel = false;
+                            compositionReference.Rule = FindRule(graph, compositionReference.ReferenceName);
+                            compositionReference.IsTopLevel = false;
                         }
                     }
-                    else if (rule is RuleReference<T> reference)
-                    {
-                        reference.Rule = FindRule(graph, reference.ReferenceName);
-                    }
+                    
                 }
                 catch (Exception ex)
                 {

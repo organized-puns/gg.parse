@@ -11,7 +11,6 @@ config:
 ---
 kanban
   Backlog
-    [Add rule reference documentation]
     [fix ambiguous root]
     [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
   
@@ -20,6 +19,8 @@ kanban
     [Add rule examples]
 	
   Done
+	[Add rule reference documentation]
+	[Made rule, annotation slightly more immutable]
 	[Document Pruning]
 	[output passthrough unintuitive, possibly wrong]
 	[Add to nuget]	

@@ -2,7 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
-
+using System.Collections.Immutable;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.compiler
@@ -13,17 +13,17 @@ namespace gg.parse.script.compiler
 
         public string? Text { get; init; }
 
-        public List<Annotation>? Tokens { get; init; } 
+        public ImmutableList<Annotation>? Tokens { get; init; } 
 
-        public List<Annotation>? SyntaxTree { get; init; }      
+        public ImmutableList<Annotation>? SyntaxTree { get; init; }      
        
         public List<Exception> Exceptions { get; init; } = [];
 
         public CompileSession(
             RuleCompiler compiler,
-            string text, 
-            List<Annotation> tokens, 
-            List<Annotation>? syntaxTree = null
+            string text,
+            ImmutableList<Annotation> tokens,
+            ImmutableList<Annotation>? syntaxTree = null
         )
         {
             Compiler = compiler;

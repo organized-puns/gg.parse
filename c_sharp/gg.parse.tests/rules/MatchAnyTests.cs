@@ -1,4 +1,5 @@
-﻿#nullable disable
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
 
 using gg.parse.rules;
 

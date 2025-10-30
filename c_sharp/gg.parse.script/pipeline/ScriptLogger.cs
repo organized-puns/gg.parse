@@ -4,7 +4,7 @@
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-
+using System.Collections.Immutable;
 using static gg.parse.util.Assertions;
 
 using Range = gg.parse.util.Range;
@@ -56,7 +56,7 @@ namespace gg.parse.script.pipeline
             Out?.Invoke(level, message);
         }
 
-        public void ProcessTokens(string text, List<Annotation> tokens)
+        public void ProcessTokens(string text, IEnumerable<Annotation> tokens)
         {
             var logs = tokens
                 .WhereDfs(node => node.Rule is LogRule<char> rule)
@@ -73,7 +73,7 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public void ProcessSyntaxTree(string text, List<Annotation> tokens, List<Annotation> syntaxTree) 
+        public void ProcessSyntaxTree(string text, ImmutableList<Annotation> tokens, ImmutableList<Annotation> syntaxTree) 
         {
             var logs = syntaxTree
                         .WhereDfs(node => node.Rule is LogRule<int> rule)
@@ -140,7 +140,7 @@ namespace gg.parse.script.pipeline
         public void ProcessExceptions(
             IEnumerable<Exception> exceptions, 
             string text,
-            List<Annotation> tokens)
+            ImmutableList<Annotation> tokens)
         {
             var lineRanges = CollectLineRanges(text);
 
@@ -161,7 +161,7 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        public void ProcessException(CompilationException exception, List<Annotation> tokens, List<Range> lineRanges)
+        public void ProcessException(CompilationException exception, ImmutableList<Annotation> tokens, List<Range> lineRanges)
         {
             if (exception.Annotation != null)
             {
@@ -176,8 +176,8 @@ namespace gg.parse.script.pipeline
 
         private static string GetAnnotationText(
             Annotation annotation, 
-            string text, 
-            List<Annotation> tokens, 
+            string text,
+            ImmutableList<Annotation> tokens, 
             int minStringLength = 8, 
             int maxStringLength = 60
         )
@@ -276,8 +276,8 @@ namespace gg.parse.script.pipeline
         }
 
         private static (int line, int column) MapAnnotationRangeToLineColumn(
-            Annotation annotation, 
-            List<Annotation> tokens, 
+            Annotation annotation,
+            ImmutableList<Annotation> tokens, 
             List<Range> lineRanges) =>
 
            MapRangeToLineColumn(tokens.CombinedRange(annotation.Range), lineRanges);         

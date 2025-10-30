@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
+using System.Data;
 
 namespace gg.parse.rules
 {
@@ -12,7 +13,7 @@ namespace gg.parse.rules
     /// skip_until_eof_or {condition} (implicit failOnEoF = false) 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SkipRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class SkipRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         /// <summary>
         /// If initialized to true, this rule will fail when encountering eof (succeed otherwise)
@@ -25,21 +26,12 @@ namespace gg.parse.rules
         public RuleBase<T> StopCondition
         {
             get;
-            set;
+            private set;
         }
 
         public IEnumerable<RuleBase<T>> Rules => [StopCondition];
 
-        public RuleBase<T>? this[int index]
-        {
-            get => StopCondition;
-            
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                StopCondition = value;
-            }
-        }
+        public RuleBase<T>? this[int index] => StopCondition;
 
         public int Count => 1;
 
@@ -72,6 +64,18 @@ namespace gg.parse.rules
             }
 
             return FailOnEoF ? ParseResult.Failure : BuildDataRuleResult(new(start, idx - start));
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new SkipRule<T>(Name, Prune, Precedence, composition.First(), FailOnEoF);
+
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            StopCondition = composition.First();
         }
     }
 }

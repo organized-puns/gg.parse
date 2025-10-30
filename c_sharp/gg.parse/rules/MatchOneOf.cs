@@ -5,36 +5,15 @@ using gg.parse.util;
 
 namespace gg.parse.rules
 {
-    public class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchOneOf<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
     {
         private RuleBase<T>[] _options;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => _options[index];
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                _options[index] = value;
-            }
-        }
-
+        public RuleBase<T>? this[int index] => _options[index];
+        
         public int Count => _options.Length;
 
-
-        public RuleBase<T>[] RuleOptions 
-        {
-            get => _options;
-            set
-            {
-                Assertions.Requires(value != null);
-                Assertions.Requires(value!.Any(v => v != null));
-
-                _options = value!;
-            }
-        }
-
-        public IEnumerable<RuleBase<T>> Rules => RuleOptions;
+        public IEnumerable<RuleBase<T>> Rules => _options;
 
         public MatchOneOf(string name, params RuleBase<T>[] options)
             : base(name, AnnotationPruning.None)
@@ -54,19 +33,30 @@ namespace gg.parse.rules
 
         public override ParseResult Parse(T[] input, int start)
         {
-            foreach (var option in RuleOptions)
+            foreach (var option in _options)
             {   
                 var result = option.Parse(input, start);
                 if (result.FoundMatch)
                 {
-                    List<Annotation>? children = result.Annotations == null || result.Annotations.Count == 0
-                            ? null 
-                            : [..result.Annotations!];
+                    //ImmutableList<Annotation>? children = result.Annotations == null || result.Annotations.Count == 0
+                      //      ? null 
+                            //: [..result.Annotations!];
 
-                    return BuildResult(new(start, result.MatchLength), children);
+                    return BuildResult(new(start, result.MatchLength), result.Annotations);
                 }
             }
             return ParseResult.Failure;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+            new MatchOneOf<T>(Name, Prune, Precedence, [..composition]);
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.Requires(!composition.Any( r => r == null));
+
+            _options = [.. composition];
         }
     }
 }

@@ -6,7 +6,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public class MatchCount<T>(
+    public sealed class MatchCount<T>(
         string name, 
         RuleBase<T> rule, 
         AnnotationPruning output = AnnotationPruning.None, 
@@ -25,16 +25,8 @@ namespace gg.parse.rules
 
         public int Count => 1;
 
-        public RuleBase<T>? this[int index]
-        {
-            get => Rule;
-            set
-            {
-                Assertions.RequiresNotNull(value);
-                Rule = value;
-            }
-        }
-
+        public RuleBase<T>? this[int index] => Rule;
+        
         public override ParseResult Parse(T[] input, int start)
         {
             int count = 0;
@@ -67,8 +59,28 @@ namespace gg.parse.rules
             }
 
             return Min <= 0 || count >= Min
-                ? BuildResult(new Range(start, index - start), children)
+                ? BuildResult(new Range(start, index - start), children == null ? null : [..children])
                 : ParseResult.Failure;
+        }
+
+        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+        
+            new MatchCount<T>(
+                Name, 
+                composition.First(), 
+                Prune, 
+                Min, 
+                Max, 
+                Precedence
+            );
+        
+
+        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
+        {
+            Assertions.RequiresNotNull(composition);
+            Assertions.RequiresNotNull(composition.Count() == 1);
+
+            Rule = composition.First();
         }
     }
 }

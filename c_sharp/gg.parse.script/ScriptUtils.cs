@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
-
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,7 +10,7 @@ namespace gg.parse.script
 {
     public static class ScriptUtils
     {
-        public static string PrettyPrintTokens(string text, List<Annotation> tokens, string indentStr = "   ")
+        public static string PrettyPrintTokens(string text, ImmutableList<Annotation> tokens, string indentStr = "   ")
         {
             var builder = new StringBuilder();
             var indent = 0;
@@ -41,7 +41,7 @@ namespace gg.parse.script
 
             if (nodeText.Length > 20)
             {
-                nodeText = $"{nodeText.Substring(0, 17)}...";
+                nodeText = $"{nodeText[..17]}...";
             }
 
             builder.AppendLine($"[{token.Range.Start},{token.Range.End}]{rule.Name}({rule.Id}): {nodeText}");
@@ -57,7 +57,7 @@ namespace gg.parse.script
             return builder.ToString();
         }
 
-        public static string PrettyPrintSyntaxTree(string text, List<Annotation> tokens, List<Annotation> astNodes, string indentStr = "   ")
+        public static string PrettyPrintSyntaxTree(string text, ImmutableList<Annotation> tokens, ImmutableList<Annotation> astNodes, string indentStr = "   ")
         {
             var builder = new StringBuilder();
             var indent = 0;
@@ -73,7 +73,7 @@ namespace gg.parse.script
             return builder.ToString();
         }
 
-        private static string PrettyPrintSyntaxTree(int indentCount, string indentStr, Annotation node, string text, List<Annotation> tokens)
+        private static string PrettyPrintSyntaxTree(int indentCount, string indentStr, Annotation node, string text, ImmutableList<Annotation> tokens)
         {
             var builder = new StringBuilder();
 
@@ -88,7 +88,7 @@ namespace gg.parse.script
 
             if (nodeText.Length > 20)
             {
-                nodeText = $"{nodeText.Substring(0, 17)}...";
+                nodeText = $"{nodeText[..17]}...";
             }
 
             builder.AppendLine($"[{node.Range.Start},{node.Range.End}]{rule.Name}({rule.Id}): {nodeText}");
