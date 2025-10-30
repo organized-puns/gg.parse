@@ -58,7 +58,7 @@ namespace gg.parse
             return _registeredRules.TryGetValue(name, out var rule) ? rule : null;
         }
 
-        public TRule RegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
+        public TRule FindOrRegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
         {
             var existingRule = FindRule(rule.Name);
 
@@ -73,13 +73,13 @@ namespace gg.parse
                     {
                         if (ruleComposition[i] != null)
                         {
-                            composition[i] = RegisterRuleAndSubRules(ruleComposition[i]!);
+                            composition[i] = FindOrRegisterRuleAndSubRules(ruleComposition[i]!);
                         }
                         else
                         {
                             // this can only be the case when the rule is a rule reference
                             // we don't want an explicit dependency on RuleReference here so
-                            // check the type name
+                            // check by type name
                             var typeName = ruleComposition.GetType().Name;
                             Assertions.Requires(typeName == "RuleReference`1",
                                 "Null rule in composition can only be a RuleReference."

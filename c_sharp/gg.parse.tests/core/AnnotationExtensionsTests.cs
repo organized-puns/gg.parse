@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.core
@@ -38,7 +39,7 @@ namespace gg.parse.tests.core
         [TestMethod]
         public void CreateAnnotationCollectionWithChildren_PruneByRuleId_ExpectResultToMatchRuleId()
         {
-            var annotations = new List<Annotation>() {
+            var annotations = ImmutableList.Create<Annotation>(
                 new(new EmptyRule(1), new(0, 1)),
                 new(new EmptyRule(2), new(0, 1), [
                     new Annotation(new EmptyRule(2), new(0,0), [
@@ -52,7 +53,7 @@ namespace gg.parse.tests.core
                 new(new EmptyRule(8), new(0, 1), [
                     new Annotation(new EmptyRule(10), new(0,0), [])
                 ])
-            };
+            );
 
             // prune annotations where the rule's id is odd
             var filteredChildren = annotations.Prune(a => a.Rule.Id % 2 == 1);

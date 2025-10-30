@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
@@ -51,7 +52,7 @@ namespace gg.parse
             };
         
 
-        public ParseResult BuildResult(Range dataRange, List<Annotation>? children = null)
+        public ParseResult BuildResult(Range dataRange, ImmutableList<Annotation>? children = null)
         {
             return Prune switch
             {

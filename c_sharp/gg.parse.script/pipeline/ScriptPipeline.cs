@@ -2,13 +2,13 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.rules;
-using gg.parse.util;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-
-using static gg.parse.util.Assertions;
-using static gg.parse.script.compiler.CompilerFunctions;
+using gg.parse.util;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using static gg.parse.script.compiler.CompilerFunctions;
+using static gg.parse.util.Assertions;
 
 namespace gg.parse.script.pipeline
 {
@@ -234,7 +234,7 @@ namespace gg.parse.script.pipeline
                     .RegisterFunction(parser.MatchSkipOperator, CompileSkip<int>);
         }
 
-        private static (List<Annotation>? tokens, List<Annotation>? astNodes) ParseSessionText<T>(PipelineSession<T> session)
+        private static (ImmutableList<Annotation>? tokens, ImmutableList<Annotation>? syntaxTree) ParseSessionText<T>(PipelineSession<T> session)
             where T : IComparable<T>
         {
             RequiresNotNull(session);
@@ -311,7 +311,7 @@ namespace gg.parse.script.pipeline
                     }
 
                     // remove the include from the syntax tree
-                    session.SyntaxTree.RemoveAt(i);
+                    session.SyntaxTree = session.SyntaxTree.RemoveAt(i);
                 }
                 else
                 {

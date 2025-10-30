@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
+using System.Collections.Immutable;
 
 namespace gg.parse.rules
 {
@@ -38,11 +39,11 @@ namespace gg.parse.rules
                 var result = option.Parse(input, start);
                 if (result.FoundMatch)
                 {
-                    List<Annotation>? children = result.Annotations == null || result.Annotations.Count == 0
-                            ? null 
-                            : [..result.Annotations!];
+                    //ImmutableList<Annotation>? children = result.Annotations == null || result.Annotations.Count == 0
+                      //      ? null 
+                            //: [..result.Annotations!];
 
-                    return BuildResult(new(start, result.MatchLength), children);
+                    return BuildResult(new(start, result.MatchLength), result.Annotations);
                 }
             }
             return ParseResult.Failure;

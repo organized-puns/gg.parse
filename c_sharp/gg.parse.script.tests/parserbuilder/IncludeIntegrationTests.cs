@@ -129,7 +129,7 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(jsonParser.GrammarGraph.FindRule("object") != null);
 
             // check if it compiles json
-            var (tokens, syntaxTree) = jsonParser.Parse("{ \"key\": 123 }");
+            var (_, syntaxTree) = jsonParser.Parse("{ \"key\": 123 }");
 
             IsTrue(syntaxTree.FoundMatch);
 
@@ -169,13 +169,13 @@ namespace gg.parse.script.tests.parserbuilder
 
             // check if it compiles json
             var text = "{ \"key\": 123 }";
-            var result = jsonParser.Parse(text);
+            var (tokens, syntaxTree) = jsonParser.Parse(text);
 
-            IsTrue(result.syntaxTree.FoundMatch);
+            IsTrue(syntaxTree.FoundMatch);
 
-            Debug.WriteLine(ScriptUtils.PrettyPrintSyntaxTree(text, result.tokens.Annotations, result.syntaxTree.Annotations));
+            Debug.WriteLine(ScriptUtils.PrettyPrintSyntaxTree(text, tokens.Annotations, syntaxTree.Annotations));
 
-            var objectAnnotation = result.syntaxTree[0][0];
+            var objectAnnotation = syntaxTree[0][0];
 
             IsTrue(objectAnnotation.Rule == jsonParser.GrammarGraph.FindRule("object"));
 

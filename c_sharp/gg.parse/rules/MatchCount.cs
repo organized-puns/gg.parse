@@ -59,7 +59,7 @@ namespace gg.parse.rules
             }
 
             return Min <= 0 || count >= Min
-                ? BuildResult(new Range(start, index - start), children)
+                ? BuildResult(new Range(start, index - start), children == null ? null : [..children])
                 : ParseResult.Failure;
         }
 

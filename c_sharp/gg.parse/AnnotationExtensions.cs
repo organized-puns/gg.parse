@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+
 using gg.parse.util;
 
 using Range = gg.parse.util.Range;
@@ -20,7 +22,7 @@ namespace gg.parse
         public static string GetText(this Annotation annotation, string text) =>
             text.Substring(annotation.Start, annotation.Length);
        
-        public static string GetText(this Annotation grammarAnnotation, string text, List<Annotation> tokens)
+        public static string GetText(this Annotation grammarAnnotation, string text, ImmutableList<Annotation> tokens)
         {
             var range = CombinedRange(tokens, grammarAnnotation.Range);
             return text.Substring(range.Start, range.Length);
@@ -40,7 +42,7 @@ namespace gg.parse
         /// <param name="tokens"></param>
         /// <param name="tokensRange"></param>
         /// <returns></returns>
-        public static Range CombinedRange(this List<Annotation> tokens, Range tokensRange)
+        public static Range CombinedRange(this ImmutableList<Annotation> tokens, Range tokensRange)
         {
             // tokenRange is allowed to start above the max count as it signals a token
             // at the eof.
@@ -71,7 +73,7 @@ namespace gg.parse
         /// <param name="result"></param>
         /// <returns></returns>
         //  note: can't name this "Where" because of name clashes with linq
-        public static List<Annotation> WhereDfs(this IEnumerable<Annotation> annotationList, Func<Annotation, bool> predicate, List<Annotation>? result = null)
+        public static ImmutableList<Annotation> WhereDfs(this IEnumerable<Annotation> annotationList, Func<Annotation, bool> predicate, List<Annotation>? result = null)
         {
             result ??= [];
 
@@ -80,7 +82,7 @@ namespace gg.parse
                 WhereDfs(annotation, predicate, result);
             }
 
-            return result;
+            return [.. result];
         }
 
         /// <summary>
@@ -91,7 +93,7 @@ namespace gg.parse
         /// <param name="result"></param>
         /// <returns></returns>
         // note: can't name this "Where" because of name clashes with Linq
-        public static List<Annotation> WhereDfs(this Annotation annotation, Func<Annotation, bool> predicate, List<Annotation>? result = null)
+        public static ImmutableList<Annotation> WhereDfs(this Annotation annotation, Func<Annotation, bool> predicate, List<Annotation>? result = null)
         {
             result ??= [];
 
@@ -102,7 +104,7 @@ namespace gg.parse
 
             return annotation.Children != null
                 ? annotation.Children.WhereDfs(predicate, result)
-                : result;
+                : [..result];
         }
 
         /// <summary>
@@ -112,7 +114,7 @@ namespace gg.parse
         /// <param name="annotations"></param>
         /// <param name="predicate">Remove an annotation if it matches the given predicate</param>
         /// <returns></returns>
-        public static List<Annotation> Prune(this List<Annotation> annotations, Func<Annotation, bool> predicate)
+        public static ImmutableList<Annotation> Prune(this ImmutableList<Annotation> annotations, Func<Annotation, bool> predicate)
         {
             List<Annotation> result = [];
 
@@ -126,7 +128,7 @@ namespace gg.parse
                 }
             });
 
-            return result;
+            return [..result];
         }
 
         /// <summary>
@@ -142,7 +144,7 @@ namespace gg.parse
                 : new Annotation(
                     annotation.Rule,
                     annotation.Range,
-                    annotation.Children.Prune(predicate),
+                    [.. annotation.Children.Prune(predicate)],
                     annotation.Parent
                 );
         

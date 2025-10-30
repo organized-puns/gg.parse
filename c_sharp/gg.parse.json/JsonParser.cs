@@ -1,8 +1,8 @@
-﻿using System.Text;
-
-using gg.parse.util;
-using gg.parse.script.common;
+﻿using gg.parse.script.common;
 using gg.parse.script.parser;
+using gg.parse.util;
+using System.Collections.Immutable;
+using System.Text;
 
 namespace gg.parse.json
 {
@@ -118,14 +118,14 @@ namespace gg.parse.json
 
         public ParseResult Tokenize(string text) => Tokenizer.Tokenize(text);
 
-        public (List<Annotation> tokens, List<Annotation> astNodes, string text) ParseFile(string path)
+        public (ImmutableList<Annotation> tokens, ImmutableList<Annotation> astNodes, string text) ParseFile(string path)
         {
             var text = File.ReadAllText(path);
             var (tokens, astNodes) = Parse(text);
             return (tokens, astNodes, text);
         }
 
-        public (List<Annotation> tokens, List<Annotation> astNodes) Parse(string text)
+        public (ImmutableList<Annotation> tokens, ImmutableList<Annotation> astNodes) Parse(string text)
         {
             if (!string.IsNullOrEmpty(text))
             {
@@ -174,7 +174,7 @@ namespace gg.parse.json
             };
         }
 
-        public ParseResult Parse(List<Annotation> tokens)
+        public ParseResult Parse(ImmutableList<Annotation> tokens)
         {
             return Root != null
                 ? Root.Parse([.. tokens.Select(t => t.Rule.Id)], 0)
@@ -183,8 +183,8 @@ namespace gg.parse.json
 
         public static string AnnotateTextUsingHtml(
             string text,
-            List<Annotation> tokens,
-            List<Annotation> astNodes,
+            ImmutableList<Annotation> tokens,
+            ImmutableList<Annotation> astNodes,
             Dictionary<string, string> styleLookup)
         {
             var builder = new StringBuilder();
@@ -216,7 +216,7 @@ namespace gg.parse.json
             return builder.ToString();
         }
 
-        private static int AppendAnnotation(string text, StringBuilder builder, Annotation annotation, int writePosition, List<Annotation> tokens)
+        private static int AppendAnnotation(string text, StringBuilder builder, Annotation annotation, int writePosition, ImmutableList<Annotation> tokens)
         {
             var textStart = tokens[annotation.Range.Start].Start;
 

@@ -50,7 +50,7 @@ namespace gg.parse.rules
                 index += result.MatchLength;
             }
 
-            return BuildResult(new Range(start, index - start), children);
+            return BuildResult(new Range(start, index - start), children == null ? null : [.. children]);
         }
 
         public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>

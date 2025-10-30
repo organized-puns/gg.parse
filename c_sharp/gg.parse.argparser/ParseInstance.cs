@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Reflection;
 
@@ -9,7 +10,7 @@ namespace gg.parse.argparser
 {
     public static class ParseInstance
     {
-        public static object OfValue<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        public static object OfValue<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             if (targetType.IsArray)
             {
@@ -49,7 +50,7 @@ namespace gg.parse.argparser
             }
         }
 
-        public static Array OfArray<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        public static Array OfArray<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             var arrayType = targetType.GetElementType();
 
@@ -72,7 +73,7 @@ namespace gg.parse.argparser
                 : new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
         }
 
-        public static IList OfList<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        public static IList OfList<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);           
@@ -97,7 +98,7 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Array<{listType}> but provided value is not a valid array.");
         }
 
-        public static object OfSet<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        public static object OfSet<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             var setType = targetType.GetGenericArguments()[0];
 
@@ -120,7 +121,7 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Set<{setType}> but provided value is not a valid set (must be defined as an array).");
         }
 
-        public static IDictionary OfDictionary<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        public static IDictionary OfDictionary<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);
@@ -149,7 +150,7 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
         }
 
-        public static object OfObject<T>(Type targetType, Annotation annotation, List<Annotation> tokenList, string text)
+        public static object OfObject<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             if (annotation == ArgParserNames.Dictionary)
             {

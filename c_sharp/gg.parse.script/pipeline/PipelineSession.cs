@@ -3,6 +3,7 @@
 
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.pipeline
 {
@@ -30,8 +31,8 @@ namespace gg.parse.script.pipeline
         
         public RuleGraph<T>? RuleGraph { get; set; }
 
-        public List<Annotation>? Tokens { get; set; }
+        public ImmutableList<Annotation>? Tokens { get; set; }
 
-        public List<Annotation>? SyntaxTree { get; set; }
+        public ImmutableList<Annotation>? SyntaxTree { get; set; }
     }
 }

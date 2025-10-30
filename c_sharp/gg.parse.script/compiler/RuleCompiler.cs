@@ -3,6 +3,7 @@
 
 using gg.parse.rules;
 using gg.parse.util;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.compiler
 {
@@ -45,9 +46,9 @@ namespace gg.parse.script.compiler
         }
 
         public RuleGraph<T> Compile<T>(
-            string text, 
-            List<Annotation> tokens, 
-            List<Annotation> syntaxTree,
+            string text,
+            ImmutableList<Annotation> tokens,
+            ImmutableList<Annotation> syntaxTree,
             RuleGraph<T>? resultGraph = null) where T : IComparable<T>
         {
             Assertions.RequiresNotNull(tokens);
@@ -129,7 +130,7 @@ namespace gg.parse.script.compiler
                 if (resultGraph.FindRule(ruleHeader.Name) == null)
                 {
                     var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
-                    var registeredRule = resultGraph.RegisterRuleAndSubRules(compiledRule);
+                    var registeredRule = resultGraph.FindOrRegisterRuleAndSubRules(compiledRule);
 
                     // First compiled rule will be assigned to the root. Seems the most intuitive
                     // xxx replace with name root or smth
@@ -171,7 +172,7 @@ namespace gg.parse.script.compiler
         /// <param name="ruleNodes">Nodes that make up the product, rulename, precendence and rulebody</param>
         /// <param name="index"></param>
         /// <returns></returns>
-        private RuleHeader ReadRuleHeader(CompileSession context, List<Annotation> ruleNodes, int index)
+        private RuleHeader ReadRuleHeader(CompileSession context, ImmutableList<Annotation> ruleNodes, int index)
         {
             var idx = index;
 

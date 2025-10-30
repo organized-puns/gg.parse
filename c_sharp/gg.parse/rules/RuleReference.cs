@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 using Range = gg.parse.util.Range;
@@ -200,7 +201,7 @@ namespace gg.parse.rules
             };
         }
 
-        private static List<Annotation>? CollectChildAnnotations(List<Annotation>? annotations)
+        private static ImmutableList<Annotation>? CollectChildAnnotations(ImmutableList<Annotation>? annotations)
         {
             if (annotations != null)
             {
@@ -214,13 +215,13 @@ namespace gg.parse.rules
                     }
                 });
 
-                return result.Count > 0 ? result : null;
+                return result.Count > 0 ? [.. result] : null;
             }
 
             return null;
         }
 
-        private static List<Annotation>? CollectRootAnnotations(List<Annotation>? annotations)
+        private static ImmutableList<Annotation>? CollectRootAnnotations(ImmutableList<Annotation>? annotations)
         {
             if (annotations != null)
             {
@@ -241,7 +242,7 @@ namespace gg.parse.rules
                     }
                 });
 
-                return result.Count > 0 ? result : null;
+                return result.Count > 0 ? [.. result ]: null;
             }
 
             return null;
