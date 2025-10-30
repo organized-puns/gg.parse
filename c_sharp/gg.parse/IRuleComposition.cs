@@ -24,7 +24,7 @@ namespace gg.parse
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        RuleBase<T>? this[int index] { get; /*set;*/ }
+        RuleBase<T>? this[int index] { get; }
 
         /// <summary>
         /// Clone this rule taking in account the provided rule composition.

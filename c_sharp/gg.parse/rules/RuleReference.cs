@@ -2,7 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.util;
-
+using System.Diagnostics.CodeAnalysis;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
@@ -13,8 +13,15 @@ namespace gg.parse.rules
 
         public string ReferenceName { get; init; }
 
+        /// <summary>
+        /// Pruning applied to the refereced rule.
+        /// </summary>
         public AnnotationPruning ReferencePrune { get; init; }
 
+        /// <summary>
+        /// Referenced rule, may be set at a later stage.
+        /// </summary>
+        [DisallowNull]
         public RuleBase<T>? Rule 
         {
             get => _rule;
