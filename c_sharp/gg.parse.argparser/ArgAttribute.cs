@@ -1,4 +1,7 @@
-﻿namespace gg.parse.argparser
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+namespace gg.parse.argparser
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class ArgAttribute : Attribute

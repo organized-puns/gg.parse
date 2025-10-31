@@ -191,22 +191,22 @@ namespace gg.parse.script.pipeline
         public static RuleCompiler RegisterTokenizerCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
         {
             return compiler
-                    .RegisterFunction(parser.MatchAnyToken, CompileAny<char>)
-                    .RegisterFunction(parser.MatchCharacterRange, CompileCharacterRange)
-                    .RegisterFunction(parser.MatchCharacterSet, CompileCharacterSet)
-                    .RegisterFunction(parser.MatchLog, CompileLog<char>)
-                    .RegisterFunction(parser.MatchGroup, CompileGroup<char>)
-                    .RegisterFunction(parser.MatchReference, CompileIdentifier<char>)
-                    .RegisterFunction(parser.MatchLiteral, CompileLiteral)
-                    .RegisterFunction(parser.MatchNotOperator, CompileNot<char>)
-                    .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<char>)
-                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
-                    .RegisterFunction(parser.MatchOneOf, CompileOption<char>)
-                    .RegisterFunction(parser.MatchSequence, CompileSequence<char>)
-                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
-                    .RegisterFunction(parser.MatchFindOperator, CompileFind<char>)
-                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip<char>);
+                    .MapRuleToCompilerFunction(parser.MatchAnyToken, CompileAny<char>)
+                    .MapRuleToCompilerFunction(parser.MatchCharacterRange, CompileCharacterRange)
+                    .MapRuleToCompilerFunction(parser.MatchCharacterSet, CompileCharacterSet)
+                    .MapRuleToCompilerFunction(parser.MatchLog, CompileLog<char>)
+                    .MapRuleToCompilerFunction(parser.MatchGroup, CompileGroup<char>)
+                    .MapRuleToCompilerFunction(parser.MatchReference, CompileIdentifier<char>)
+                    .MapRuleToCompilerFunction(parser.MatchLiteral, CompileLiteral)
+                    .MapRuleToCompilerFunction(parser.MatchNotOperator, CompileNot<char>)
+                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileTryMatch<char>)
+                    .MapRuleToCompilerFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
+                    .MapRuleToCompilerFunction(parser.MatchOneOf, CompileOption<char>)
+                    .MapRuleToCompilerFunction(parser.MatchSequence, CompileSequence<char>)
+                    .MapRuleToCompilerFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
+                    .MapRuleToCompilerFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
+                    .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<char>)
+                    .MapRuleToCompilerFunction(parser.MatchSkipOperator, CompileSkip<char>);
         }
 
         /// <summary>
@@ -218,20 +218,20 @@ namespace gg.parse.script.pipeline
         public static RuleCompiler RegisterGrammarCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
         {
             return compiler
-                    .RegisterFunction(parser.MatchAnyToken, CompileAny<int>)
-                    .RegisterFunction(parser.MatchGroup, CompileGroup<int>)
-                    .RegisterFunction(parser.MatchReference, CompileIdentifier<int>)
-                    .RegisterFunction(parser.MatchNotOperator, CompileNot<int>)
-                    .RegisterFunction(parser.IfMatchOperator, CompileTryMatch<int>)
-                    .RegisterFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
-                    .RegisterFunction(parser.MatchOneOf, CompileOption<int>)
-                    .RegisterFunction(parser.MatchSequence, CompileSequence<int>)
-                    .RegisterFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<int>)
-                    .RegisterFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<int>)
-                    .RegisterFunction(parser.MatchEval, CompileEvaluation<int>)
-                    .RegisterFunction(parser.MatchLog, CompileLog<int>)
-                    .RegisterFunction(parser.MatchFindOperator, CompileFind<int>)
-                    .RegisterFunction(parser.MatchSkipOperator, CompileSkip<int>);
+                    .MapRuleToCompilerFunction(parser.MatchAnyToken, CompileAny<int>)
+                    .MapRuleToCompilerFunction(parser.MatchGroup, CompileGroup<int>)
+                    .MapRuleToCompilerFunction(parser.MatchReference, CompileIdentifier<int>)
+                    .MapRuleToCompilerFunction(parser.MatchNotOperator, CompileNot<int>)
+                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileTryMatch<int>)
+                    .MapRuleToCompilerFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
+                    .MapRuleToCompilerFunction(parser.MatchOneOf, CompileOption<int>)
+                    .MapRuleToCompilerFunction(parser.MatchSequence, CompileSequence<int>)
+                    .MapRuleToCompilerFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<int>)
+                    .MapRuleToCompilerFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<int>)
+                    .MapRuleToCompilerFunction(parser.MatchEval, CompileEvaluation<int>)
+                    .MapRuleToCompilerFunction(parser.MatchLog, CompileLog<int>)
+                    .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<int>)
+                    .MapRuleToCompilerFunction(parser.MatchSkipOperator, CompileSkip<int>);
         }
 
         private static (ImmutableList<Annotation>? tokens, ImmutableList<Annotation>? syntaxTree) ParseSessionText<T>(PipelineSession<T> session)

@@ -1,8 +1,8 @@
-gg.parse 0.1
+gg.parse 0.2
 =======================================================================================================================
 
 ```bash
-dotnet add package gg.parse.script --version 0.1.0
+dotnet add package gg.parse.script --version 0.2.0
 ```
 
 !_Please Note_! the code base is under development and changes frequently. The documentation below may be out of date.
@@ -160,6 +160,7 @@ Rule References
 
 ### Look-ahead rules
 #### [Match Condition](./doc/match-condition.md)  (if ...)
+#### [Match Not](./doc/match-not.md)  (!foo ...)
 
 More information
 ----------------

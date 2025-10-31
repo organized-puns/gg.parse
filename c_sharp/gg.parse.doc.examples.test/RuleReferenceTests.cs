@@ -1,8 +1,7 @@
-﻿using System.Diagnostics;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
 
 using gg.parse.rules;
-using gg.parse.script;
-using gg.parse.script.pipeline;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 

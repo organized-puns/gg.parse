@@ -17,9 +17,10 @@ kanban
   In progress
     
     [Add rule examples]
-	[implement explicit root, add documentation]
+	
 	
   Done
+	[implement explicit root, add documentation]
 	[Create Graph Documentation]
 	[Add rule reference documentation]
 	[Made rule, annotation slightly more immutable]

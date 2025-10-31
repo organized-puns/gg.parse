@@ -1,6 +1,10 @@
-﻿using gg.parse.script;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
 using System.Collections.Immutable;
 using System.Globalization;
+
+using gg.parse.script;
 
 namespace gg.parse.calculator
 {

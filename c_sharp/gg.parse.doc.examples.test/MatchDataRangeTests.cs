@@ -1,5 +1,9 @@
-﻿using gg.parse.rules;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using gg.parse.rules;
 using gg.parse.script;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.doc.examples.test
