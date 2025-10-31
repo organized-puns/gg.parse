@@ -4,7 +4,6 @@
 
 using gg.parse.rules;
 using gg.parse.script.common;
-using System.Text.Json.Nodes;
 
 namespace gg.parse.script.parser
 {
@@ -37,11 +36,12 @@ namespace gg.parse.script.parser
             public const string LogLevelInfo = "log_lvl_info";
             public const string LogLevelWarning = "log_lvl_warning";
 
+            public const string MatchOneOf = "match_one_of";
+
             public const string Not = "not";
 
             public const string OneOrMore = "one_or_more";
-            public const string Option = "option";
-
+            
             public const string Reference = "ref";
 
             public const string Sequence = "sequence";
@@ -212,10 +212,10 @@ namespace gg.parse.script.parser
         private MatchOneOf<int> RegisterRuleBodyMatchers()
         {
             // register matching rules like literals, identifiers, character sets/ranges, any character
-            var dataMatchersArray = RegisterDataMatchers();
+            var dataRules = RegisterDataRules();
 
             // unary terms are single terms, ie everything but binary operators
-            var unaryTerms = OneOf($"{pr}unaryTerms", dataMatchersArray);
+            var unaryTerms = OneOf($"{pr}unaryTerms", dataRules);
 
             // operators like not(x), if(x), *(x), +(x), ?(x)
             var unaryOperators = RegisterUnaryOperatorMatchers(unaryTerms);
@@ -231,7 +231,7 @@ namespace gg.parse.script.parser
             // create all various instances of logs (errors,warnings,infos...)
             MatchLog = CreateMatchLog(ruleBody);
 
-            RuleBase<int>[] recoveryRules = [.. dataMatchersArray, .. unaryOperators, MatchGroup];
+            RuleBase<int>[] recoveryRules = [.. dataRules, .. unaryOperators, MatchGroup];
             var ruleBodyErrorHandler = RegisterRuleBodyErrorHandlers(recoveryRules);
 
             ReplaceRule(unaryTerms, 
@@ -303,7 +303,7 @@ namespace gg.parse.script.parser
             MatchUnexpectedPruneTokenInBodyError = Sequence(
                 "unexpected_prune_token_error_match",
                 CreateMatchBodyAnnotationProduction(),
-                OneOf($"{pr}UnexpectedProductErrorMatchTerm", recoveryRules),
+                OneOf($"{pr}unexpected_product_error_match_term", recoveryRules),
                 UnexpectedPrunetokenInBodyError
             );
 
@@ -312,7 +312,7 @@ namespace gg.parse.script.parser
             return OneOf($"{pr}rulebody_error_handler", MatchUnexpectedPruneTokenInBodyError);
         }
 
-        private RuleBase<int>[] RegisterDataMatchers()
+        private RuleBase<int>[] RegisterDataRules()
         {
             // .
             // MatchAnyToken = Token(CommonTokenNames.AnyCharacter, CommonTokenNames.AnyCharacter);
@@ -453,7 +453,7 @@ namespace gg.parse.script.parser
 
             // a | b | c
             // mainOption contains both the match and error handling
-            (var mainOption, MatchOneOf) = CreateBinaryOperator(Names.Option, CommonTokenNames.OneOf, unaryTerms);
+            (var mainOption, MatchOneOf) = CreateBinaryOperator(Names.MatchOneOf, CommonTokenNames.OneOf, unaryTerms);
 
             // a / b / c
             // mainEval contains both the match and error handling

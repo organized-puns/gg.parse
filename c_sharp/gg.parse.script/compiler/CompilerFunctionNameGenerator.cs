@@ -47,7 +47,7 @@ namespace gg.parse.script.compiler
                 case ScriptParser.Names.If:
                     return CreateUnaryName(annotation, session, annotation.Name);
 
-                case ScriptParser.Names.Option:
+                case ScriptParser.Names.MatchOneOf:
                 case ScriptParser.Names.Sequence:
                 case ScriptParser.Names.Evaluation:
                     return CreateBinaryName(annotation, session, annotation.Name);

@@ -25,7 +25,7 @@ namespace gg.parse.script.pipeline
 
         public Action<LogLevel, string>? Out { get; set; } = null;
 
-        public ScriptLogger(bool storeLogs = true, int maxStoredLogs = -1)
+        public ScriptLogger(bool storeLogs = true, int maxStoredLogs = -1, Action<LogLevel, string>? output = null)
         {
             if (storeLogs)
             {
@@ -33,6 +33,8 @@ namespace gg.parse.script.pipeline
             }
 
             MaxStoredLogs = maxStoredLogs;
+
+            Out = output;
         }
 
         public ScriptLogger(Action<LogLevel, string> outputAction, bool storeLogs = true, int maxStoredLogs = -1)

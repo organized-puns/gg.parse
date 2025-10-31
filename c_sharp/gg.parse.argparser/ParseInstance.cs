@@ -1,10 +1,11 @@
-﻿using gg.parse.util;
-using System;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Reflection;
+
+using gg.parse.util;
 
 namespace gg.parse.argparser
 {

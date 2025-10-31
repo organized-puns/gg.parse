@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using System.Reflection;
 
 namespace gg.parse.argparser
 {

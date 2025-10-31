@@ -24,7 +24,7 @@ namespace gg.parse.script.tests.compiler
         public void TestRegisterAndCompileLiteral()
         {
             var litRule = new EmptyRule(42);
-            var compiler = new RuleCompiler().RegisterFunction(litRule, CompileLiteral);
+            var compiler = new RuleCompiler().MapRuleToCompilerFunction(litRule, CompileLiteral);
 
             // compile a rule table which can tokenize 'foo'
             var table = compiler.Compile<char>(
@@ -89,7 +89,7 @@ namespace gg.parse.script.tests.compiler
         {
             var setId = new EmptyRule(42);
             var compiler = new RuleCompiler()
-                .RegisterFunction(setId, CompileCharacterSet);
+                .MapRuleToCompilerFunction(setId, CompileCharacterSet);
 
             var table = compiler.Compile<char>(
                 text: "rule={'abc'}",
@@ -160,7 +160,7 @@ namespace gg.parse.script.tests.compiler
         {
             var rangeId = new EmptyRule(42);
             var compiler = new RuleCompiler()
-                   .RegisterFunction(rangeId, CompileCharacterRange);
+                   .MapRuleToCompilerFunction(rangeId, CompileCharacterRange);
             
             // compile a rule table which can tokenize a character in the set of 'abc'
             var table = compiler.Compile<char>(
@@ -238,7 +238,7 @@ namespace gg.parse.script.tests.compiler
         {
             var indentifierId = new EmptyRule(42);
             var compiler = new RuleCompiler()
-                    .RegisterFunction(indentifierId, CompileIdentifier<char>);
+                    .MapRuleToCompilerFunction(indentifierId, CompileIdentifier<char>);
 
             var table = new RuleGraph<char>();
 
@@ -309,7 +309,7 @@ namespace gg.parse.script.tests.compiler
             var noneProductId = 62;
 
             var compiler = new RuleCompiler([(noneProductId, AnnotationPruning.All)])
-                .RegisterFunction(indentifierId, CompileIdentifier<char>);
+                .MapRuleToCompilerFunction(indentifierId, CompileIdentifier<char>);
 
             // compile a rule table which can tokenize foo
             var table = new RuleGraph<char>();
@@ -384,9 +384,9 @@ namespace gg.parse.script.tests.compiler
             var groupId = new EmptyRule(128);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(sequenceId, CompileSequence<char>)
-                .RegisterFunction(groupId, CompileGroup<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(sequenceId, CompileSequence<char>)
+                .MapRuleToCompilerFunction(groupId, CompileGroup<char>);
             
 
             var  table = compiler.Compile<char>(
@@ -447,8 +447,8 @@ namespace gg.parse.script.tests.compiler
             var sequenceId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(sequenceId, CompileSequence<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(sequenceId, CompileSequence<char>);
 
             var table = compiler.Compile<char>(
                 text: "rule='foo','bar'",
@@ -504,8 +504,8 @@ namespace gg.parse.script.tests.compiler
             var optionId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(optionId, CompileOption<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(optionId, CompileOption<char>);
 
             var table = compiler.Compile<char>(
                 text: "rule='foo'|'bar'",
@@ -572,8 +572,8 @@ namespace gg.parse.script.tests.compiler
             var evalId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(evalId, CompileEvaluation<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(evalId, CompileEvaluation<char>);
 
             var graph = compiler.Compile<char>(
                 text: "rule='add'/'mult';",
@@ -654,8 +654,8 @@ namespace gg.parse.script.tests.compiler
             var notId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(notId, CompileNot<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(notId, CompileNot<char>);
 
             var graph = compiler.Compile<char>(
                 text: "rule=!'foo'",
@@ -718,8 +718,8 @@ namespace gg.parse.script.tests.compiler
             var tryMatchId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(tryMatchId, CompileTryMatch<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(tryMatchId, CompileTryMatch<char>);
 
             var graph = compiler.Compile<char>(
                 text: "rule=try 'foo'",
@@ -773,7 +773,7 @@ namespace gg.parse.script.tests.compiler
         {
             var anyId = new EmptyRule(64);
             var compiler = new RuleCompiler()
-                .RegisterFunction(anyId, CompileAny<char>);
+                .MapRuleToCompilerFunction(anyId, CompileAny<char>);
 
             var graph = compiler.Compile<char>(
                 text: "rule=.",
@@ -831,8 +831,8 @@ namespace gg.parse.script.tests.compiler
             var logLevelId = new EmptyRule(256);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(logId, CompileLog<char>);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(logId, CompileLog<char>);
 
             var graph = compiler.Compile<char>(
                 text: "rule=debug 'message' if 'foo'",
@@ -878,7 +878,7 @@ namespace gg.parse.script.tests.compiler
         {
             var litId = new EmptyRule(42);
             var compiler = new RuleCompiler()
-                    .RegisterFunction(litId, CompileLiteral);
+                    .MapRuleToCompilerFunction(litId, CompileLiteral);
 
             try
             {
@@ -934,7 +934,7 @@ namespace gg.parse.script.tests.compiler
             var litId = new EmptyRule(42);
             var rulePrecedence = 142;
             var compiler = new RuleCompiler()
-                    .RegisterFunction(litId, CompileLiteral);
+                    .MapRuleToCompilerFunction(litId, CompileLiteral);
 
             var graph = compiler.Compile<char>(
                 text: $"rule {rulePrecedence} = 'foo';",
@@ -984,8 +984,8 @@ namespace gg.parse.script.tests.compiler
             var countId = new EmptyRule(64);
 
             var compiler = new RuleCompiler()
-                .RegisterFunction(literalId, CompileLiteral)
-                .RegisterFunction(countId, function);
+                .MapRuleToCompilerFunction(literalId, CompileLiteral)
+                .MapRuleToCompilerFunction(countId, function);
 
             var graph = compiler.Compile<char>(
                 text: $"rule={operatorChar}'foo'",

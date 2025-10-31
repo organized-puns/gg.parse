@@ -30,6 +30,13 @@ namespace gg.parse
         /// </summary>
         public int Count => _registeredRules.Count;
 
+        /// <summary>
+        /// Find a rule by name. Rule must exist in the graph.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public RuleBase<T> this[string name] => _registeredRules[name];
+
         public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
         {
             Assertions.RequiresNotNull(rule);

@@ -69,10 +69,10 @@ namespace gg.parse.script.tests.parser
             IsTrue(optionRule.GetType() == typeof(MatchRuleSequence<int>));
             
             var option1 = nodes[0][1][0].Rule;
-            IsTrue(option1.Name == parser.MatchLiteral.Name);
+            IsTrue(option1.Name == ScriptParser.Names.Literal);
 
             var option2 = nodes[0][1][1].Rule;
-            IsTrue(option2.Name == parser.MatchLiteral.Name);
+            IsTrue(option2.Name == ScriptParser.Names.Literal);
         }
 
         [TestMethod]
@@ -156,7 +156,7 @@ namespace gg.parse.script.tests.parser
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children.Count == 2);
             
             name = nodes[0].Children[1].Rule.Name;
-            IsTrue(name == ScriptParser.Names.Option);
+            IsTrue(name == ScriptParser.Names.MatchOneOf);
 
             // try parsing a group  
             (tokens, nodes) = parser.Parse("rule = ('123', {'foo'});");
@@ -180,7 +180,7 @@ namespace gg.parse.script.tests.parser
             IsTrue(name == ScriptParser.Names.ZeroOrMore);
 
             name = nodes[0].Children[1].Children[0].Rule.Name;
-            IsTrue(name == ScriptParser.Names.Option);
+            IsTrue(name == ScriptParser.Names.MatchOneOf);
 
             // try parsing a transitive rule
             (_, nodes) = parser.Parse("-r rule = !('123',{'foo'});");
@@ -308,7 +308,7 @@ namespace gg.parse.script.tests.parser
 
             IsTrue(eval.Children != null && eval.Children.Count == 3);
 
-            IsTrue(eval.Children.All(child => child.Rule == tokenizerParser.MatchLiteral));
+            IsTrue(eval.Children.All(child => child.Rule == tokenizerParser[ScriptParser.Names.Literal]));
         }
 
 

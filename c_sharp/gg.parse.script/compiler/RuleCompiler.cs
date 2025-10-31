@@ -26,7 +26,7 @@ namespace gg.parse.script.compiler
             RuleOutputLookup = outputLookup;
         }
 
-        public RuleCompiler RegisterFunction(IRule rule, CompileFunction function)
+        public RuleCompiler MapRuleToCompilerFunction(IRule rule, CompileFunction function)
         {
             Assertions.Requires(rule != null);
             Assertions.Requires(function != null);
