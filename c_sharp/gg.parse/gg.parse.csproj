@@ -10,9 +10,10 @@
 	<AssemblyVersion>0.2</AssemblyVersion>
 	<VersionPrefix>0.2</VersionPrefix>
 	<VersionSuffix Condition="'$(Configuration)' == 'Debug'">debug</VersionSuffix>
-    <Description>gg.parse is a c# project aiming to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
-tools to make parsing of simple and complex data easy to do.
-</Description>
+    <Description>
+		gg.parse is a c# project aiming to provide a library for a tokenization, parsing and offer an ebnf-like scripting 
+        tools to make parsing of simple and complex data easy to do.
+    </Description>
     <Copyright>(C) 2025 - Organized Puns</Copyright>
     <PackageProjectUrl>https://github.com/organized-puns/gg.parse</PackageProjectUrl>
     <RepositoryUrl>https://github.com/organized-puns/gg.parse</RepositoryUrl>
