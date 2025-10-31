@@ -11,14 +11,16 @@ config:
 ---
 kanban
   Backlog
-    [fix ambiguous root]
+    
     [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
   
   In progress
-    [Create Documentation]
+    
     [Add rule examples]
+	[implement explicit root, add documentation]
 	
   Done
+	[Create Graph Documentation]
 	[Add rule reference documentation]
 	[Made rule, annotation slightly more immutable]
 	[Document Pruning]
@@ -41,8 +43,11 @@ Should be able to set root based on name 'root', if there is no root specified t
 Future backlog
 --------------
 
+### Add meta rule vs data rule vs rule composition
+
 ### Add replace rule to parser
-Add ReplaceRule(oldRuleName, newRule) to parser
+Add ReplaceRule(oldRuleName, newRule) to parser, allowing for different type with same name, rename existing replace
+to update.
 
 ### Improve callback support
 
@@ -67,13 +72,17 @@ Implement properties file
 Having a literal in a grammar leads to very confusing errors. Should be handled better.
 Add literalRule which allows for case senstive matching or not
 
+### Namespaces
+Add optional namespaces to avoid grammar / token name clash 
+
+### Example, small function console
+Implement a function console
 
 ### Add transpiling
 Transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
 
 ### Add extend to parser
 Add Extend() to existing parser, similar to merge
-
 
 ### Matcher example
 add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer rule term and will match a string and has
@@ -82,12 +91,6 @@ add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer
 	   var ranges = ip4AddressMatcher.Find("#this are the ip addresses 127.9.21.12, 256.12.12.3:8080") => two ranges
 
 ### Compare performance against regex
-
-### Namespaces
-Add optional namespaces to avoid grammar / token name clash 
-
-### Example, small function console
-Implement a function console
 
 ### Recreate bootstrap in script
 - Do All of the following based on ebnf assets, not in the bootstrap

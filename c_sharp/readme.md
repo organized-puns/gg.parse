@@ -161,13 +161,15 @@ Rule References
 ### Look-ahead rules
 #### [Match Condition](./doc/match-condition.md)  (if ...)
 
-
 More information
 ----------------
 
-[Extending parse script](./doc/extending_parse_script.md) steps required to add a new rule to the script.
+[Rule graph](./doc/rulegraph.md) details on working with - and implementation details of rule graphs.
 
 [Pruning](./doc/pruning.md) details on how to keep your syntax tree lean.
+
+[Extending parse script](./doc/extending_parse_script.md) steps required to add a new rule to the script.
+
 
 [To do list](./doc/todo.md) a list of all planned or unplanned tasks.
 
