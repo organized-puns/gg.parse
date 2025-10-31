@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<AssemblyVersion>0.1</AssemblyVersion>
-	<VersionPrefix>0.1</VersionPrefix>
+	<AssemblyVersion>0.2</AssemblyVersion>
+	<VersionPrefix>0.2</VersionPrefix>
 	<VersionSuffix Condition="'$(Configuration)' == 'Debug'">debug</VersionSuffix>
 	<Authors>organized-puns</Authors>
     <Title>gg.parse.script scripting library</Title>
@@ -14,10 +14,10 @@
 		  gg.parse is a c# project aiming to provide a library for a tokenization, parsing and offer an ebnf-like scripting
 		  tools to make parsing of simple and complex data easy to do.
 	  </Description>
-	  <Copyright>(C) 2025 - O.P.</Copyright>
+	  <Copyright>(C) 2025 - Organized Puns</Copyright>
 	  <PackageProjectUrl>https://github.com/organized-puns/gg.parse</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/organized-puns/gg.parse</RepositoryUrl>
-	  <PackageTags>c#, parsing, syntaxtree,tokenizer</PackageTags>
+	  <PackageTags>c#, parsing, syntaxtree, tokenizer, parse script</PackageTags>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
