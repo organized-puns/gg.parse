@@ -11,6 +11,8 @@ namespace gg.parse.script.compiler
 
     public class RuleCompiler
     {
+        public const string DefaultRootRuleName = "root";
+
         public Dictionary<IRule, (CompileFunction function, string? name)> Functions { get; private set; } = [];
 
         public (int functionId, AnnotationPruning product)[]? RuleOutputLookup { get; set; }
@@ -63,7 +65,13 @@ namespace gg.parse.script.compiler
             {
                 try
                 {
-                    CompileRule(session, node, resultGraph);
+                    var compiledRule = CompileRule(session, node, resultGraph);
+                    var registeredRule = resultGraph.FindOrRegisterRuleAndSubRules(compiledRule);
+
+                    if (resultGraph.Root == null || registeredRule.Name == DefaultRootRuleName)
+                    {
+                        resultGraph.Root = registeredRule;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -104,7 +112,7 @@ namespace gg.parse.script.compiler
             return resultGraph;
         }
 
-        private void CompileRule<T>(
+        private RuleBase<T> CompileRule<T>(
             CompileSession session, 
             Annotation node, 
             RuleGraph<T> resultGraph)
@@ -115,11 +123,7 @@ namespace gg.parse.script.compiler
             // user provided an empty body - which is results in a warning but is allowed
             if (ruleHeader.Length >= node.Children!.Count)
             {
-                var compiledRule = resultGraph.RegisterRule(new NopRule<T>(ruleHeader.Name));
-
-                // First compiled rule will be assigned to the root. Seems the most intuitive
-                // xxx replace with name root or smth
-                resultGraph.Root ??= compiledRule;
+                return new NopRule<T>(ruleHeader.Name);
             }
             else
             {
@@ -129,12 +133,7 @@ namespace gg.parse.script.compiler
                 // validate a named rule doesn't get implemented twice
                 if (resultGraph.FindRule(ruleHeader.Name) == null)
                 {
-                    var compiledRule = (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
-                    var registeredRule = resultGraph.FindOrRegisterRuleAndSubRules(compiledRule);
-
-                    // First compiled rule will be assigned to the root. Seems the most intuitive
-                    // xxx replace with name root or smth
-                    resultGraph.Root ??= registeredRule;
+                    return (RuleBase<T>)compilationFunction(ruleHeader, ruleBodyNode, session);
                 }
                 else
                 {

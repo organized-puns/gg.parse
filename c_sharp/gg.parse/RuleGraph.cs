@@ -1,8 +1,9 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using gg.parse.util;
 using System.Collections;
+
+using gg.parse.util;
 
 namespace gg.parse
 {
@@ -51,6 +52,12 @@ namespace gg.parse
 
             result = default;
             return false;
+        }
+
+        public ParseResult Parse(T[] data, int start = 0)
+        {
+            Assertions.RequiresNotNull(Root, "Root rule must be set before parsing.");
+            return Root!.Parse(data, start);
         }
 
         public RuleBase<T>? FindRule(string name)

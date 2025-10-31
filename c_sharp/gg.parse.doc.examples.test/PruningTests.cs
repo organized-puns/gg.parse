@@ -1,6 +1,7 @@
 ﻿using gg.parse.rules;
 using gg.parse.script;
 using System.Diagnostics;
+
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.doc.examples.test
