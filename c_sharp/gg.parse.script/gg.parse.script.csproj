@@ -7,6 +7,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<AssemblyVersion>0.1</AssemblyVersion>
 	<VersionPrefix>0.1</VersionPrefix>
+	<VersionSuffix Condition="'$(Configuration)' == 'Debug'">debug</VersionSuffix>
 	<Authors>organized-puns</Authors>
     <Title>gg.parse.script scripting library</Title>
 	  <Description>
