@@ -13,16 +13,16 @@ kanban
   Backlog
     
     [ Add callback scripting ]
-	[ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	[ Add repeat count to script ]
 	[ Implement properties file ]
   
   In progress
     
     [ Add rule examples ]
-	[ Add meta rule vs data rule vs rule composition ]
+	[ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	
   Done
+	[ Add meta rule vs data rule vs rule composition ]
 
 ```
 
