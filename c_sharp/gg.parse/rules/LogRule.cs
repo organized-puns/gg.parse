@@ -1,8 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.util;
-using System.Data;
 
 namespace gg.parse.rules
 {
@@ -28,7 +28,7 @@ namespace gg.parse.rules
         }
     }
 
-    public sealed class LogRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class LogRule<T> : MetaRuleBase<T> where T : IComparable<T>
     {
         public LogLevel Level { get; init; }
 
@@ -37,46 +37,24 @@ namespace gg.parse.rules
         /// </summary>
         public string? Text { get; init; }
 
-        private RuleBase<T>? _condition;
-        
-        /// <summary>
-        /// Condition to capture this log. Tangentially also a way to correctly indicate
-        /// the range where an error/warning applies to.
-        /// </summary>
-        public RuleBase<T>? Condition
-        {
-            get => _condition;
-            init => _condition = value;
-        }
-
-        public IEnumerable<RuleBase<T>>? Rules => _condition == null ? null : [_condition];
-
-        public int Count => _condition == null ? 0 : 1;
-
-        public RuleBase<T>? this[int index]
-        {
-            get => _condition;
-            set => _condition = value;
-        }
-
         public LogRule(
             string name, 
-            AnnotationPruning pruning, 
+            AnnotationPruning pruning,
+            IRule? condition,
             string? text, 
-            RuleBase<T>? condition = null, 
             LogLevel level = LogLevel.Info
-        ) : base(name, pruning)
+        ) : base(name, pruning, 0, condition)
         {
             Text = text;
-            Condition = condition;
             Level = level;
         }
 
         public override ParseResult Parse(T[] input, int start)
         {
-            if (Condition != null)
+            // subject is the condition to log on
+            if (Subject != null)
             {
-                var conditionalResult = Condition.Parse(input, start);
+                var conditionalResult = Subject.Parse(input, start);
 
                 if (conditionalResult)
                 {
@@ -99,24 +77,8 @@ namespace gg.parse.rules
             return BuildDataRuleResult(new(start, 0));
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
+        public override LogRule<T> CloneWithSubject(IRule subject) =>
+            new (Name, Prune, subject, Text, Level);
         
-            new LogRule<T>(
-                Name, 
-                Prune, 
-                Text, 
-                // log rule may not have a condition
-                composition.FirstOrDefault(), 
-                Level
-            );
-        
-
-        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-            Assertions.RequiresNotNull(composition.Count() == 1);
-
-            _condition = composition.First();
-        }
     }
 }

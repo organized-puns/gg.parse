@@ -2,23 +2,22 @@
 // Copyright (c) Pointless pun
 
 using System.Collections;
-
 using gg.parse.util;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     /// <summary>
     /// Graph of Rules. Has one rule which is designated as a Root
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RuleGraph<T> : IEnumerable<RuleBase<T>> where T : IComparable<T>
+    public class RuleGraph<T> : IEnumerable<IRule> 
     {
-        private readonly Dictionary<string, RuleBase<T>> _registeredRules = [];
+        private readonly Dictionary<string, IRule> _registeredRules = [];
         
         /// <summary>
         /// When calling parsing data using the graph the root is used as a starting point.
         /// </summary>
-        public RuleBase<T>? Root { get; set; }
+        public IRule? Root { get; set; }
 
         /// <summary>
         /// Returns an enumerable of all registered rules' names.
@@ -35,9 +34,9 @@ namespace gg.parse
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public RuleBase<T> this[string name] => _registeredRules[name];
+        public IRule this[string name] => _registeredRules[name];
 
-        public TRule RegisterRule<TRule>(TRule rule) where TRule : RuleBase<T>
+        public TRule RegisterRule<TRule>(TRule rule) where TRule : IRule
         {
             Assertions.RequiresNotNull(rule);
             Assertions.RequiresNotNullOrEmpty(rule.Name);
@@ -67,41 +66,24 @@ namespace gg.parse
             return Root!.Parse(data, start);
         }
 
-        public RuleBase<T>? FindRule(string name)
+        public IRule? FindRule(string name)
         {
             return _registeredRules.TryGetValue(name, out var rule) ? rule : null;
         }
 
-        public TRule FindOrRegisterRuleAndSubRules<TRule>(TRule rule) where TRule : RuleBase<T>
+        public TRule FindOrRegisterRuleAndSubRules<TRule>(TRule rule) where TRule : IRule
         {
             var existingRule = FindRule(rule.Name);
 
             if (existingRule == null)
             {
-                if (rule is IRuleComposition<T> ruleComposition)
+                if (rule is IRuleComposition ruleComposition)
                 {
-                    var composition = new RuleBase<T>[ruleComposition.Count];
-
-                    // potentially replace the rules making up the composition with registered versions
-                    for (var i = 0; i < ruleComposition.Count; i++)
-                    {
-                        if (ruleComposition[i] != null)
-                        {
-                            composition[i] = FindOrRegisterRuleAndSubRules(ruleComposition[i]!);
-                        }
-                        else
-                        {
-                            // this can only be the case when the rule is a rule reference
-                            // we don't want an explicit dependency on RuleReference here so
-                            // check by type name
-                            var typeName = ruleComposition.GetType().Name;
-                            Assertions.Requires(typeName == "RuleReference`1",
-                                "Null rule in composition can only be a RuleReference."
-                            );
-                        }
-                    }
-
-                    return RegisterRule((TRule) ruleComposition.CloneWithComposition(composition));
+                    return (TRule) FindOrRegisterRuleCompositionAndSubRules(ruleComposition);
+                }
+                else if (rule is IMetaRule metaRule)
+                {
+                    return (TRule)FindOrRegisterMetaRuleAndSubject(metaRule);
                 }
                 else
                 {
@@ -112,7 +94,51 @@ namespace gg.parse
             return (TRule) existingRule;
         }
 
-        public IEnumerator<RuleBase<T>> GetEnumerator()
+        private IRuleComposition FindOrRegisterRuleCompositionAndSubRules(IRuleComposition ruleComposition) 
+        {
+            var composition = new IRule[ruleComposition.Count];
+            var isChanged = false;
+
+            // potentially replace the rules making up the composition with registered versions
+            for (var i = 0; i < ruleComposition.Count; i++)
+            {
+                if (ruleComposition[i] != null)
+                {
+                    var registeredSubrule = FindOrRegisterRuleAndSubRules(ruleComposition[i]!);
+
+                    if (registeredSubrule != ruleComposition[i])
+                    {
+                        isChanged = true;
+                    }   
+
+                    composition[i] = registeredSubrule;
+                }
+            }
+
+            return RegisterRule(isChanged ? ruleComposition.CloneWithComposition(composition) : ruleComposition);
+        }
+
+        private IMetaRule FindOrRegisterMetaRuleAndSubject(IMetaRule metaRule)
+        {
+            // make the assumptions explicit
+            Assertions.Requires(!_registeredRules.ContainsKey(metaRule.Name));
+
+            if (metaRule.Subject != null)
+            {
+                var registeredSubject = FindOrRegisterRuleAndSubRules(metaRule.Subject);
+
+                // if a different object comes back we need to register a new meta rule
+                // clone since this subject was already registered unlike this meta rule 
+                if (registeredSubject != metaRule.Subject)
+                {
+                    return RegisterRule(metaRule.CloneWithSubject(registeredSubject));
+                }
+            }
+
+            return RegisterRule(metaRule);
+        }
+
+        public IEnumerator<IRule> GetEnumerator()
         {
             return _registeredRules.Values.GetEnumerator();
         }
@@ -143,16 +169,25 @@ namespace gg.parse
             
             _registeredRules[original.Name] = replacement;
 
+            // replace all references to the original rule in compositions
             _registeredRules.Values
                 // find all compositions that reference the original rule
-                .Where(r => r is IRuleComposition<T> composition
+                .Where(r => r is IRuleComposition composition
                     && composition.Count > 0
                     && composition.Rules!.Any(r => r != null && r == original))
-                .Cast<IRuleComposition<T>>()
+                .Cast<IRuleComposition>()
                 // recursively replace the composition that contained the original
                 .ForEach(composition => 
                     composition.MutateComposition(composition.Rules!.Replace(original, replacement))
                 );
+
+            // replace all references to the original rule in meta rules
+            _registeredRules.Values
+                // find all meta rukes that reference the original rule
+                .Where(r => r is IMetaRule metaRule && metaRule.Subject == original)
+                .Cast<IMetaRule>()
+                // recursively replace the composition that contained the original
+                .ForEach(composition => composition.MutateSubject(replacement));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.rules;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -33,7 +34,7 @@ namespace gg.parse.tests.rules
                 Id = 42
             };
 
-            var evalRule = new MatchEvaluation<int>("operator", addFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction)
             {
                 Id = 3
             };
@@ -77,7 +78,7 @@ namespace gg.parse.tests.rules
                 Id = 42
             };
 
-            var evalRule = new MatchEvaluation<int>("operator", addFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction)
             {
                 Id = 3
             };
@@ -161,8 +162,7 @@ namespace gg.parse.tests.rules
                 Id = 5,
             };
 
-            // xxx resolve function is not necessary, just go through the options ?
-            var evalRule = new MatchEvaluation<int>("operator", addFunction, multFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction, multFunction)
             {
                 Id = 6
             };
@@ -246,7 +246,7 @@ namespace gg.parse.tests.rules
                 Id = 5,
             };
 
-            var evalRule = new MatchEvaluation<int>("operator", addFunction, multFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction, multFunction)
             {
                 Id = 6
             };
@@ -334,7 +334,7 @@ namespace gg.parse.tests.rules
                 Id = 5,
             };
 
-            var evalRule = new MatchEvaluation<int>("operator", addFunction, multFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction, multFunction)
             {
                 Id = 6
             };
@@ -431,7 +431,7 @@ namespace gg.parse.tests.rules
                 Id = 7,
             };
 
-            var evalRule = new MatchEvaluation<int>("operator", addFunction, multFunction, minusFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction, multFunction, minusFunction)
             {
                 Id = 8
             };
@@ -517,7 +517,7 @@ namespace gg.parse.tests.rules
                 Id = 7,
             };
 
-            var evalRule = new MatchEvaluation<int>("operator", addFunction, multFunction, minusFunction)
+            var evalRule = new MatchEvaluation<int>("operator", AnnotationPruning.None, 0, addFunction, multFunction, minusFunction)
             {
                 Id = 8
             };

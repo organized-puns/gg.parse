@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.util;
 
 namespace gg.parse.rules
@@ -12,7 +13,7 @@ namespace gg.parse.rules
     /// result. Convenient when debugging large rule graphs.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class CallbackRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class CallbackRule<T> : MetaRuleBase<T> where T : IComparable<T>
     {
         public enum CallbackCondition
         {
@@ -21,14 +22,6 @@ namespace gg.parse.rules
             Any
         }
 
-        public RuleBase<T> Rule { get; private set; }
-
-        public IEnumerable<RuleBase<T>> Rules => [Rule];
-        
-        public int Count => 1;
-
-        public RuleBase<T>? this[int index] => Rule;
-
         public CallbackCondition Condition { get; init; }
 
         public RuleCallbackAction<T>? ParseStartCallback { get; init; }
@@ -36,24 +29,24 @@ namespace gg.parse.rules
         public RuleCallbackAction<T>? ResultCallback { get; init; }
 
         public CallbackRule(
-
             string name, 
-            RuleBase<T> rule,            
+            IRule subject,            
             RuleCallbackAction<T> callback, 
             CallbackCondition condition = CallbackCondition.Success
         )
-            : base(name)
+        : base(name, AnnotationPruning.Root, 0, subject)
         {
-            Rule = rule;
             ResultCallback = callback;
             Condition = condition;
         }
 
         public override ParseResult Parse(T[] input, int start)
         {
+            Assertions.RequiresNotNull(Subject);
+
             ParseStartCallback?.Invoke(this, input);
            
-            var result = Rule.Parse(input, start);
+            var result = Subject.Parse(input, start);
 
             if (ResultCallback != null)
             {
@@ -80,20 +73,7 @@ namespace gg.parse.rules
             return result;
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
-            new CallbackRule<T>(
-                Name, 
-                composition.First(), 
-                ResultCallback!, 
-                Condition
-            );
-
-        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-            Assertions.RequiresNotNull(composition.Count() == 1);
-
-            Rule = composition.First();
-        }
+        public override CallbackRule<T> CloneWithSubject(IRule subject) =>
+            new (Name, subject, ResultCallback!, Condition);       
     }
 }

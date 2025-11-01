@@ -1,4 +1,5 @@
-﻿using gg.parse.script.common;
+﻿using gg.parse.core;
+using gg.parse.script.common;
 using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;

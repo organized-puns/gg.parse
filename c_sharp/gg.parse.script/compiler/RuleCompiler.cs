@@ -1,9 +1,10 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.util;
-using System.Collections.Immutable;
 
 namespace gg.parse.script.compiler
 {
@@ -204,7 +205,7 @@ namespace gg.parse.script.compiler
         /// <param name="name"></param>
         /// <returns></returns>
         /// <exception cref="RuleReferenceException"></exception>
-        private static RuleBase<T> FindRule<T>(RuleGraph<T> graph, string name) where T : IComparable<T>
+        private static IRule FindRule<T>(RuleGraph<T> graph, string name) where T : IComparable<T>
         {
             var referredRule = graph.FindRule(name);
 
@@ -223,22 +224,7 @@ namespace gg.parse.script.compiler
             {
                 try
                 {
-                    // make sure to put this before the next if as a RuleReference is also an IRuleComposition
-                    if (rule is RuleReference<T> referenceRule)
-                    {
-                        referenceRule.Rule = FindRule(graph, referenceRule.ReferenceName);
-                        referenceRule.IsTopLevel = true;
-                    }
-                    else if (rule is IRuleComposition<T> composition && composition.Rules != null)
-                    {
-                        foreach (var compositionReference in 
-                            composition.Rules.Where(r => r is RuleReference<T>).Cast<RuleReference<T>>())
-                        {
-                            compositionReference.Rule = FindRule(graph, compositionReference.ReferenceName);
-                            compositionReference.IsTopLevel = false;
-                        }
-                    }
-                    
+                    ResolveReference(graph, rule, true);
                 }
                 catch (Exception ex)
                 {
@@ -249,6 +235,23 @@ namespace gg.parse.script.compiler
             if (exceptions.Count > 0)
             {
                 throw new AggregateException("One or more errors occurred during reference resolution.", exceptions);
+            }
+        }
+
+        private static void ResolveReference<T>(RuleGraph<T> graph, IRule rule, bool isTopLevel) where T : IComparable<T>
+        {
+            if (rule is RuleReference<T> referenceRule)
+            {
+                referenceRule.MutateSubject(FindRule(graph, referenceRule.ReferenceName));
+                referenceRule.IsTopLevel = isTopLevel;
+            }
+            else if (rule is IMetaRule metaRule && metaRule.Subject != null)
+            {
+                ResolveReference(graph, metaRule.Subject, false);
+            }
+            else if (rule is IRuleComposition composition && composition.Rules != null)
+            {
+                composition.Rules.ForEach(rule => ResolveReference(graph, rule, false));
             }
         }
     }

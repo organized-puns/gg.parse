@@ -15,15 +15,7 @@ tools to make parsing of simple and complex data easy to do.
 - [Goals](#goals-use-cases-and-otherwise)
 - [Quickstart](#quickstart)
 - [Project structure](#project-structure)
-- [Rule references](#rule-references)
-  - [Data rules](#data-rules)
-    - [Match any](#match-any)
-    - [Match range](#match-data-range-az)
-  - [Meta rules](#meta-rules)
-    - [Match count](#match-count--)
-    - [Match evaluation](#match-evaluation--abc)
-  - [Look ahead rules](#look-ahead-rules)
-    - [Match condition](#match-condition--if-)
+- [Rule references](#rule-references)  
 - [More information](#more-information)
 
 License
@@ -148,29 +140,25 @@ Each of these main topics has each own corresponding test project.
 Rule References
 ---------------
 
-### Data rules
 #### [Match Any](./doc/match-any-data.md) (.)
+#### [Match Condition](./doc/match-condition.md)  (if ...)
+#### [Match Count](./doc/match-count.md) (*,+, ?)
 #### [Match Data Range](./doc/match-data-range.md) ({'a'..'z'})
 #### [Match Data Sequence](./doc/match-data-sequence.md) ('abc')
-
-### Meta rules
 #### [Match Evaluation](./doc/match-evaluation.md)  (a/b/c)
-#### [Match Count](./doc/match-count.md) (*,+, ?)
-#### [Rule reference](./doc/rule-reference.md) (foo)
-
-### Look-ahead rules
-#### [Match Condition](./doc/match-condition.md)  (if ...)
 #### [Match Not](./doc/match-not.md)  (!foo ...)
+#### [Rule reference](./doc/rule-reference.md) (foo)
 
 More information
 ----------------
 
-[Rule graph](./doc/rulegraph.md) details on working with - and implementation details of rule graphs.
+[Rule graph](./doc/rulegraph.md): details on working with - and implementation details of rule graphs.
 
-[Pruning](./doc/pruning.md) details on how to keep your syntax tree lean.
+[Rules](./doc/rules.md): details on the implementation of rules.
 
-[Extending parse script](./doc/extending_parse_script.md) steps required to add a new rule to the script.
+[Pruning](./doc/pruning.md): details on how to keep your syntax tree lean with pro-active pruning.
 
+[Extending parse script](./doc/extending_parse_script.md): steps required to add a new rule to the script.
 
-[To do list](./doc/todo.md) a list of all planned or unplanned tasks.
+[To do list](./doc/todo.md): a list of all planned or unplanned tasks.
 

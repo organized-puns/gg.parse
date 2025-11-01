@@ -7,6 +7,7 @@ using gg.parse.script.pipeline;
 using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using gg.parse.core;
 
 namespace gg.parse.script.tests.parserbuilder
 {
@@ -190,7 +191,7 @@ namespace gg.parse.script.tests.parserbuilder
             var topLevelRule = builder.TokenGraph.FindRule(topLevelRuleName) as MatchCount<char>;
 
             IsNotNull(topLevelRule);
-            IsTrue(topLevelRule.Rule is MatchDataSequence<char>);
+            IsTrue(topLevelRule.Subject is MatchDataSequence<char>);
             IsTrue(topLevelRule.Prune == AnnotationPruning.None);
 
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;
@@ -225,7 +226,7 @@ namespace gg.parse.script.tests.parserbuilder
             var topLevelRule = builder.TokenGraph.FindRule(topLevelRuleName) as MatchNot<char>;
 
             IsNotNull(topLevelRule);
-            IsTrue(topLevelRule.Rule is MatchDataSequence<char>);
+            IsTrue(topLevelRule.Subject is MatchDataSequence<char>);
             IsTrue(topLevelRule.Prune == AnnotationPruning.None);
 
             var anonymousRule = builder.TokenGraph.FindRule(anonymousRuleName) as MatchOneOf<char>;

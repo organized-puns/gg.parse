@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.rules;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -16,9 +17,9 @@ namespace gg.parse.tests.rules
         [TestMethod]
         public void CreateLogRuleWithoutConditions_Parse_ShouldMatchAnyInput()
         {
-            var logRule = new LogRule<char>("log", AnnotationPruning.None, "description");
+            var logRule = new LogRule<char>("log", AnnotationPruning.None, null, "description");
 
-            IsTrue(logRule.Condition == null);
+            IsTrue(logRule.Subject == null);
             IsTrue(logRule.Level == LogLevel.Info);
 
             var parseFooResult = logRule.Parse("foo".ToCharArray(), 0);
@@ -39,9 +40,9 @@ namespace gg.parse.tests.rules
         public void CreateLogRuleWithLiteralCondition_Parse_ShouldMatchLiteral()
         {
             var matchFoo = new MatchDataSequence<char>("matchFoo", "foo".ToCharArray());
-            var logRule = new LogRule<char>("log", AnnotationPruning.None, "description", matchFoo, LogLevel.Error);
+            var logRule = new LogRule<char>("log", AnnotationPruning.None, matchFoo, "description", LogLevel.Error);
 
-            IsTrue(logRule.Condition == matchFoo);
+            IsTrue(logRule.Subject == matchFoo);
             IsTrue(logRule.Level == LogLevel.Error);
 
             var parseFooResult = logRule.Parse("foo".ToCharArray(), 0);
@@ -67,9 +68,9 @@ namespace gg.parse.tests.rules
         public void CreateLogRuleWithFatalCondition_Parse_ShouldThrowExceptionWhenConditionIsMet()
         {
             var matchFoo = new MatchDataSequence<char>("matchFoo", "foo".ToCharArray());
-            var logRule = new LogRule<char>("log", AnnotationPruning.None, "description", matchFoo, LogLevel.Fatal);
+            var logRule = new LogRule<char>("log", AnnotationPruning.None, matchFoo, "description", LogLevel.Fatal);
 
-            IsTrue(logRule.Condition == matchFoo);
+            IsTrue(logRule.Subject == matchFoo);
             IsTrue(logRule.Level == LogLevel.Fatal);
 
             // negative cases

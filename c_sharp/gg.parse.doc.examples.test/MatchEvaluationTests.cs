@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.rules;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -98,13 +99,13 @@ namespace gg.parse.doc.examples.test
             var whitespace = new MatchDataSet<char>("whitespace", setValues: " \t\r\n".ToCharArray(), output: AnnotationPruning.All);
 
             var digit = new MatchDataRange<char>("digit", '0', '9');
-            var number = new MatchCount<char>("number", rule: digit, min: 1, max: 0, output: AnnotationPruning.None);
+            var number = new MatchCount<char>("number", AnnotationPruning.None, 0, digit, min: 1, max: 0);
 
             var plus = new MatchSingleData<char>("plus", '+');
             var mult = new MatchSingleData<char>("mult", '*');
 
-            var tokenEnumeration = new MatchOneOf<char>("tokens", rules: [whitespace, number, plus, mult], output: AnnotationPruning.Root);
-            var tokenStream = new MatchCount<char>("tokenStream", rule: tokenEnumeration, min: 1, max: 0, output: AnnotationPruning.Root);
+            var tokenEnumeration = new MatchOneOf<char>("tokens", AnnotationPruning.Root, 0, rules: [whitespace, number, plus, mult]);
+            var tokenStream = new MatchCount<char>("tokenStream", AnnotationPruning.Root, 0, tokenEnumeration, min: 1, max: 0);
 
             var tokenizer = new RuleGraph<char>();
 
@@ -125,7 +126,7 @@ namespace gg.parse.doc.examples.test
             var addOperation = new MatchRuleSequence<int>(AddOpName, pruning: AnnotationPruning.None, precedence: addPrecedence, numberToken, plusToken, numberToken);
             var multOperation = new MatchRuleSequence<int>(MultOpName, pruning: AnnotationPruning.None, precedence: multPrecedence, numberToken, multToken, numberToken);
 
-            var evaluation = new MatchEvaluation<int>(EvaluationName, output: AnnotationPruning.None, precedence: 0, addOperation, multOperation);
+            var evaluation = new MatchEvaluation<int>(EvaluationName, pruning: AnnotationPruning.None, precedence: 0, addOperation, multOperation);
 
             var parser = new RuleGraph<int>();
 

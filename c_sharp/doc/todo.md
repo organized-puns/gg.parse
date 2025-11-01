@@ -1,7 +1,7 @@
 Todo 
 ========
 
-Overview of all open items in order of priority for the upcoming release (0.1). Often badly defined.
+Overview of all open items in order of priority for the upcoming release (0.3). Often badly defined.
 
 ```mermaid
 ---
@@ -12,57 +12,25 @@ config:
 kanban
   Backlog
     
-    [Have parser names in ScriptParser/Tokenizer comply with compiler generated names]
+    [ Add callback scripting ]
+	[ Add repeat count to script ]
+	[ Implement properties file ]
   
   In progress
     
-    [Add rule examples]
-	
+    [ Add rule examples ]
+	[ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	
   Done
-	[implement explicit root, add documentation]
-	[Create Graph Documentation]
-	[Add rule reference documentation]
-	[Made rule, annotation slightly more immutable]
-	[Document Pruning]
-	[output passthrough unintuitive, possibly wrong]
-	[Add to nuget]	
-    [Add missing names to CompilerFunctionNameGenerator functions]   
-	[Fix all warnings]
-	[Validate github PR permssions]
-	[Add tests to check in rules]
-	[Change rule output in favor of 'prune']
+	[ Add meta rule vs data rule vs rule composition ]
 
 ```
 
 Details
 -------------
 
-### 3. Fix ambiguous root
-Should be able to set root based on name 'root', if there is no root specified the first rule will be chosen
-
 Future backlog
 --------------
-
-### Add meta rule vs data rule vs rule composition
-
-### Add replace rule to parser
-Add ReplaceRule(oldRuleName, newRule) to parser, allowing for different type with same name, rename existing replace
-to update.
-
-### Improve callback support
-
-### Adjust find/skip
-include 'inclusive' property to skip rules eg inclusive find +-> -->, inclusive skip +->> -->>
-	  or find, find_including, skip, skip_including  
-		or >>, +>>, >>>, +>>>, ->|, |->, ->>|, |->> stop_at, stop_after, skip_to, skip_after	 
-
-### Add repeat 
-Add repeat count to script '[3]' (min 3, max 3) [..,3] max 3 min 0 [3,..] min 3 max 0 [3,3] 
-
-
-### Add Properties File Example   
-Implement properties file
 
 ### Add annotation example
 

@@ -2,7 +2,7 @@
 // Copyright (c) Pointless pun
 
 using System.Diagnostics;
-
+using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script;
 using gg.parse.script.pipeline;
@@ -22,7 +22,7 @@ namespace gg.parse.doc.examples.test
         public void MatchCondition_SuccessExample()
         {
             var fooRule = new MatchDataSequence<char>("match_foo", [.."foo"]);
-            var isFooRule = new MatchCondition<char>("match_foo_condition", fooRule);
+            var isFooRule = new MatchCondition<char>("match_foo_condition", AnnotationPruning.None, 0, fooRule);
 
             IsTrue(isFooRule.Parse("foo", 0));
             // look-ahead does not return a length
@@ -33,7 +33,7 @@ namespace gg.parse.doc.examples.test
         public void MatchCondition_FailureExample()
         {
             var fooRule = new MatchDataSequence<char>("match_foo", [.."foo"]);
-            var isFooRule = new MatchCondition<char>("match_foo_condition", fooRule);
+            var isFooRule = new MatchCondition<char>("match_foo_condition", AnnotationPruning.None, 0, fooRule);
 
             // input is empty
             IsFalse(isFooRule.Parse([], 0));

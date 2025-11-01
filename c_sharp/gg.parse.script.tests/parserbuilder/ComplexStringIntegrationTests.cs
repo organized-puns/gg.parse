@@ -1,4 +1,5 @@
-﻿using gg.parse.rules;
+﻿using gg.parse.core;
+using gg.parse.rules;
 
 namespace gg.parse.script.tests.parserbuilder
 {
@@ -85,16 +86,16 @@ namespace gg.parse.script.tests.parserbuilder
                 ("\"bar\r\n\"", 0, 6),
             };
 
-            foreach (var testConfig in testConfigurations)
+            foreach (var (input, expectedPosition, expectedLength) in testConfigurations)
             {
                 // turn off exception throwing for this test so we can test the error annotations
-                var (result, _) = parser.Parse(testConfig.input, throwExceptionsOnError: false);
+                var (result, _) = parser.Parse(input, throwExceptionsOnError: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
                 Assert.IsTrue(result.Annotations[0].Rule == errEOLN);
-                Assert.IsTrue(result.Annotations[0].Start == testConfig.expectedPosition);
-                Assert.IsTrue(result.Annotations[0].Length == testConfig.expectedLength);
+                Assert.IsTrue(result.Annotations[0].Start == expectedPosition);
+                Assert.IsTrue(result.Annotations[0].Length == expectedLength);
                 Assert.IsTrue(result.Annotations[0].Children == null);
             }
         }
@@ -114,9 +115,10 @@ namespace gg.parse.script.tests.parserbuilder
             // modify the root to expect one or more strings
             parser.TokenGraph.Root = parser.TokenGraph.RegisterRule(
                 new MatchCount<char>(
-                    "#string_list", 
+                    "#string_list",
+                    AnnotationPruning.Root,
+                    0,
                     parser.TokenGraph.Root, 
-                    output: AnnotationPruning.Root, 
                     min: 1, 
                     max: 0
                 )
@@ -129,17 +131,17 @@ namespace gg.parse.script.tests.parserbuilder
                 ("\"foo\n\"\"\"bar", [errEOLN.Id, stringRule.Id, errEOF.Id]),
             };
 
-            foreach (var testConfig in testConfigurations)
+            foreach (var (input, functionIds) in testConfigurations)
             {
                 // turn off exception throwing for this test so we can test the error annotations
-                var (result, _) = parser.Parse(testConfig.input, throwExceptionsOnError: false);
+                var (result, _) = parser.Parse(input, throwExceptionsOnError: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
-                Assert.IsTrue(result.Annotations.Count == testConfig.functionIds.Length);
+                Assert.IsTrue(result.Annotations.Count == functionIds.Length);
 
                 Assert.IsTrue(result.Annotations.Select(a => a.Rule.Id)
-                                .SequenceEqual(testConfig.functionIds));
+                                .SequenceEqual(functionIds));
             }
         }
     }

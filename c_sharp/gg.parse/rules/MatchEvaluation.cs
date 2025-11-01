@@ -1,13 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.util;
 
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public sealed class MatchEvaluation<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchEvaluation<T> : RuleCompositionBase<T> where T : IComparable<T>
     {
         // we need to wrangle the resulting annotations so wrap the annotation we get from
         // parsing into a mutable structure we can manipulate
@@ -78,33 +79,10 @@ namespace gg.parse.rules
             }
 
         }
-
-        private RuleBase<T>[] _options;
         
-        public RuleBase<T>[] RuleOptions => _options;
-
-        public int Count => _options == null ? 0 : _options.Length;
-
-        public RuleBase<T>? this[int index] => _options[index];
-        
-        public IEnumerable<RuleBase<T>> Rules => RuleOptions;
-
-        public MatchEvaluation(string name, params RuleBase<T>[] options)
-            : base(name, AnnotationPruning.None)
+        public MatchEvaluation(string name, AnnotationPruning pruning, int precedence, params IRule[] options)
+            : base(name, pruning, precedence, options)
         {
-            Assertions.RequiresNotNull(options);
-            Assertions.Requires(options!.Any(v => v != null));
-
-            _options = options;
-        }
-
-        public MatchEvaluation(string name, AnnotationPruning output, int precedence, params RuleBase<T>[] options)
-            : base(name, output, precedence)
-        {
-            Assertions.Requires(options != null);
-            Assertions.Requires(options!.Any(v => v != null));
-
-            _options = options!;
         }
 
         /// <summary>
@@ -248,11 +226,10 @@ namespace gg.parse.rules
                 children == null ? null : [.. children],
                 parent?.Annotation);
         }        
-
         
         private ParseResult FindMatch(T[] input, int start)
         {
-            foreach (var option in RuleOptions)
+            foreach (var option in _rules)
             {   
                 var result = option.Parse(input, start);
                 if (result)
@@ -273,14 +250,7 @@ namespace gg.parse.rules
             return ParseResult.Failure;
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
-            new MatchEvaluation<T>(Name, Prune, Precedence, [.. composition]);
-
-        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-
-            _options = [.. composition];
-        }
+        public override MatchEvaluation<T> CloneWithComposition(IEnumerable<IRule> composition) =>
+            new (Name, Prune, Precedence, [.. composition]);       
     }
 }

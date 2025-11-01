@@ -1,4 +1,5 @@
-﻿using gg.parse.script.common;
+﻿using gg.parse.core;
+using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
 using System.Collections.Immutable;
@@ -177,7 +178,7 @@ namespace gg.parse.json
         public ParseResult Parse(ImmutableList<Annotation> tokens)
         {
             return Root != null
-                ? Root.Parse([.. tokens.Select(t => t.Rule.Id)], 0)
+                ? Root.Parse(tokens)
                 : throw new InvalidProgramException("Cannot call parse without defining a Root first."); 
         }
 

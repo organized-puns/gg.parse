@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.rules;
 
 namespace gg.parse.tests.rules
@@ -13,7 +14,7 @@ namespace gg.parse.tests.rules
         {
             var function1 = new MatchDataSequence<int>("TestFunction1", [1, 2]);
             var function2 = new MatchDataSequence<int>("TestFunction2", [3, 4]);
-            var rule = new MatchOneOf<int>("TestRule", function1, function2);
+            var rule = new MatchOneOf<int>("TestRule", AnnotationPruning.None, 0, function1, function2);
 
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);

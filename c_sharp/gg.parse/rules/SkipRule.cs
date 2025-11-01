@@ -1,8 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.util;
-using System.Data;
 
 namespace gg.parse.rules
 {
@@ -13,38 +13,24 @@ namespace gg.parse.rules
     /// skip_until_eof_or {condition} (implicit failOnEoF = false) 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class SkipRule<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class SkipRule<T> : MetaRuleBase<T>  where T : IComparable<T>
     {
         /// <summary>
         /// If initialized to true, this rule will fail when encountering eof (succeed otherwise)
         /// </summary>
         public bool FailOnEoF { get; init; }
 
-        /// <summary>
-        /// Condition which will cause this rule to skip input
-        /// </summary>
-        public RuleBase<T> StopCondition
-        {
-            get;
-            private set;
-        }
-
-        public IEnumerable<RuleBase<T>> Rules => [StopCondition];
-
-        public RuleBase<T>? this[int index] => StopCondition;
-
-        public int Count => 1;
-
         public SkipRule(
             string name,
             AnnotationPruning product,
             int precedence,
-            RuleBase<T> condition,
+            IRule subject,
             bool failOnEof = true
         ) 
-            : base(name, product, precedence)
+            : base(name, product, precedence, subject)
         {
-            StopCondition = condition;
+            Assertions.RequiresNotNull(subject);
+
             FailOnEoF = failOnEof;
         }
 
@@ -53,7 +39,7 @@ namespace gg.parse.rules
             var idx = start;
             while (idx < input.Length)
             {
-                var conditionalResult = StopCondition.Parse(input, idx);
+                var conditionalResult = Subject!.Parse(input, idx);
 
                 if (conditionalResult)
                 {
@@ -66,16 +52,7 @@ namespace gg.parse.rules
             return FailOnEoF ? ParseResult.Failure : BuildDataRuleResult(new(start, idx - start));
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
-            new SkipRule<T>(Name, Prune, Precedence, composition.First(), FailOnEoF);
-
-
-        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-            Assertions.RequiresNotNull(composition.Count() == 1);
-
-            StopCondition = composition.First();
-        }
+        public override SkipRule<T> CloneWithSubject(IRule subject) =>
+            new (Name, Prune, Precedence, subject, FailOnEoF);
     }
 }

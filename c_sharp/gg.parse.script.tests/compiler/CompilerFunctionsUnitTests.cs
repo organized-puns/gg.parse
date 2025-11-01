@@ -8,6 +8,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using static gg.parse.script.compiler.CompilerFunctions;
 
 using Range = gg.parse.util.Range;
+using gg.parse.core;
 
 namespace gg.parse.script.tests.compiler
 {
@@ -626,7 +627,7 @@ namespace gg.parse.script.tests.compiler
                 IsNotNull(result.Annotations[0].Children);
                 var literalChild = result.Annotations[0].Children[0];
 
-                IsTrue(literalChild.Rule == evalFunction.RuleOptions[i]);
+                IsTrue(literalChild.Rule == evalFunction[i]);
             }
 
         }

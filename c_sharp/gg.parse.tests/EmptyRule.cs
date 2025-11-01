@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
+
 namespace gg.parse.tests
 {
     public class EmptyRule : IRule
@@ -19,5 +21,10 @@ namespace gg.parse.tests
         }
 
         public object Clone() => MemberwiseClone();
+
+        ParseResult IRule.Parse(Array input, int start)
+        {
+            return ParseResult.Success;
+        }
     }
 }

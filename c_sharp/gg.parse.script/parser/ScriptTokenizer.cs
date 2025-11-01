@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.common;
 
@@ -60,7 +61,8 @@ namespace gg.parse.script.parser
         private MatchRuleSequence<char> MatchScriptKeyword() =>
             Sequence(
                     "-r matchKeyword",
-                    IfMatch(LowerCaseLetter()),
+                    // early rejection
+                    IfMatch("-r is_keyword", LowerCaseLetter()),
                     OneOf(
                         "-r keywordList",
 
