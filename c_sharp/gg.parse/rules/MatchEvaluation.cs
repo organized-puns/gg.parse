@@ -8,7 +8,7 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public sealed class MatchEvaluation<T> : RuleBase<T>, IRuleComposition where T : IComparable<T>
+    public sealed class MatchEvaluation<T> : RuleCompositionBase<T> where T : IComparable<T>
     {
         // we need to wrangle the resulting annotations so wrap the annotation we get from
         // parsing into a mutable structure we can manipulate
@@ -79,24 +79,10 @@ namespace gg.parse.rules
             }
 
         }
-
-        private IRule[] _options;
         
-        public IRule[] RuleOptions => _options;
-
-        public int Count => _options == null ? 0 : _options.Length;
-
-        public IRule? this[int index] => _options[index];
-        
-        public IEnumerable<IRule> Rules => RuleOptions;
-
         public MatchEvaluation(string name, AnnotationPruning pruning, int precedence, params IRule[] options)
-            : base(name, pruning, precedence)
+            : base(name, pruning, precedence, options)
         {
-            Assertions.Requires(options != null);
-            Assertions.Requires(options!.Any(v => v != null));
-
-            _options = options!;
         }
 
         /// <summary>
@@ -240,11 +226,10 @@ namespace gg.parse.rules
                 children == null ? null : [.. children],
                 parent?.Annotation);
         }        
-
         
         private ParseResult FindMatch(T[] input, int start)
         {
-            foreach (var option in RuleOptions)
+            foreach (var option in _rules)
             {   
                 var result = option.Parse(input, start);
                 if (result)
@@ -265,14 +250,7 @@ namespace gg.parse.rules
             return ParseResult.Failure;
         }
 
-        public IRuleComposition CloneWithComposition(IEnumerable<IRule> composition) =>
-            new MatchEvaluation<T>(Name, Prune, Precedence, [.. composition]);
-
-        public void MutateComposition(IEnumerable<IRule> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-
-            _options = [.. composition];
-        }
+        public override MatchEvaluation<T> CloneWithComposition(IEnumerable<IRule> composition) =>
+            new (Name, Prune, Precedence, [.. composition]);       
     }
 }

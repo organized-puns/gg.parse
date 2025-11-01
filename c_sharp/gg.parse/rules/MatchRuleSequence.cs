@@ -2,26 +2,16 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.core;
-using gg.parse.util;
 
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public sealed class MatchRuleSequence<T> : RuleBase<T>, IRuleComposition  where T : IComparable<T>
+    public sealed class MatchRuleSequence<T> : RuleCompositionBase<T> where T : IComparable<T>
     {
-        private IRule[] _rules;
-
-        public IRule? this[int index] => _rules[index];
-        
-        public int Count => _rules.Length;
-
-        public IEnumerable<IRule> Rules => _rules;
-
         public MatchRuleSequence(string name, AnnotationPruning pruning, int precedence, params IRule[] rules) 
-            : base(name, pruning, precedence) 
+            : base(name, pruning, precedence, rules) 
         {
-            _rules = rules;
         }
 
         public override ParseResult Parse(T[] input, int start)
@@ -51,15 +41,7 @@ namespace gg.parse.rules
             return BuildResult(new Range(start, index - start), children == null ? null : [.. children]);
         }
 
-        public IRuleComposition CloneWithComposition(IEnumerable<IRule> composition) =>
-            new MatchRuleSequence<T>(Name, Prune, Precedence, [..composition]);
-
-        public void MutateComposition(IEnumerable<IRule> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-            Assertions.Requires(!composition.Any(r => r == null));
-
-            _rules = [.. composition];
-        }
+        public override MatchRuleSequence<T> CloneWithComposition(IEnumerable<IRule> composition) =>
+            new (Name, Prune, Precedence, [..composition]);
     }
 }

@@ -627,7 +627,7 @@ namespace gg.parse.script.tests.compiler
                 IsNotNull(result.Annotations[0].Children);
                 var literalChild = result.Annotations[0].Children[0];
 
-                IsTrue(literalChild.Rule == evalFunction.RuleOptions[i]);
+                IsTrue(literalChild.Rule == evalFunction[i]);
             }
 
         }
