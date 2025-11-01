@@ -53,7 +53,7 @@ namespace gg.parse.tests.core
         public void CreateGraphWithReferentialCompositionRule_Replace_ExpectRuleToBeReplaced()
         {
             var graph = new RuleGraph<char>();
-            var composition1 = new MatchRuleSequence<char>("original", AnnotationPruning.None);
+            var composition1 = new MatchRuleSequence<char>("original", AnnotationPruning.None, 0);
             var composition2 = new MatchRuleSequence<char>("composition", AnnotationPruning.None, 0, composition1);
 
             composition1.MutateComposition([composition2]);
@@ -77,7 +77,7 @@ namespace gg.parse.tests.core
         public void CreateGraphWithSelfReferentialCompositionRule_Replace_ExpectRuleToBeReplaced()
         {
             var graph = new RuleGraph<char>();
-            var composition1 = new MatchRuleSequence<char>("original", AnnotationPruning.None);
+            var composition1 = new MatchRuleSequence<char>("original", AnnotationPruning.None, 0);
             
             composition1.MutateComposition([composition1]);
 

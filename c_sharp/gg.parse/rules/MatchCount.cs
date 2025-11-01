@@ -6,27 +6,26 @@ using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public sealed class MatchCount<T>(
-        string name, 
-        RuleBase<T> rule, 
-        AnnotationPruning output = AnnotationPruning.None, 
-        int min = 1, 
-        int max = 1, 
-        int precedence = 0
-    ) : RuleBase<T>(name, output, precedence), IRuleComposition<T> where T : IComparable<T>
+    public sealed class MatchCount<T> : MetaRuleBase<T> where T : IComparable<T>
     {
-        public RuleBase<T> Rule { get; private set; } = rule;
+        public int Min { get; init; }
         
-        public int Min { get; } = min;
-        
-        public int Max { get; } = max;
+        public int Max { get; init; } 
+                
+        public MatchCount(string name,
+            AnnotationPruning pruning,
+            int precedence,
+            IRule subject,
+            int min = 1,
+            int max = 1)
+            : base(name, pruning, precedence, subject)
+        {
+            Assertions.RequiresNotNull(subject);
 
-        public IEnumerable<RuleBase<T>> Rules => [Rule];
+            Min = min;
+            Max = max;
+        }
 
-        public int Count => 1;
-
-        public RuleBase<T>? this[int index] => Rule;
-        
         public override ParseResult Parse(T[] input, int start)
         {
             int count = 0;
@@ -35,7 +34,7 @@ namespace gg.parse.rules
 
             while (index < input.Length && (Max <= 0 || count < Max))
             {
-                var result = Rule.Parse(input, index);
+                var result = Subject!.Parse(input, index);
                 
                 if (!result)
                 {
@@ -44,7 +43,7 @@ namespace gg.parse.rules
         
                 if (result.MatchLength == 0 && Max <= 0)
                 {
-                    throw new InvalidProgramException($"Rule {Name} detected an infinite loop with its subrule {Rule.Name}.");
+                    throw new InvalidProgramException($"Rule {Name} detected an infinite loop with its subrule {Subject.Name}.");
                 }
 
                 count++;
@@ -63,24 +62,7 @@ namespace gg.parse.rules
                 : ParseResult.Failure;
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
-        
-            new MatchCount<T>(
-                Name, 
-                composition.First(), 
-                Prune, 
-                Min, 
-                Max, 
-                Precedence
-            );
-        
-
-        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-            Assertions.RequiresNotNull(composition.Count() == 1);
-
-            Rule = composition.First();
-        }
+        public override MatchCount<T> CloneWithSubject(IRule subject) =>
+            new(Name, Prune, Precedence, subject, Min, Max);
     }
 }

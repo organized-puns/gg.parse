@@ -3,7 +3,7 @@
 
 namespace gg.parse
 {
-    public partial interface IRule 
+    public interface IRule 
     {
         /// <summary>
         /// Unique id, used to identify a rule in a rule graph. Also used as tokens in the grammar parsers.
@@ -18,5 +18,7 @@ namespace gg.parse
         int Precedence { get; init; }
 
         AnnotationPruning Prune { get; init; }
+
+        ParseResult Parse(Array input, int start);
     }
 }

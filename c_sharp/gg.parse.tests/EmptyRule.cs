@@ -19,5 +19,10 @@ namespace gg.parse.tests
         }
 
         public object Clone() => MemberwiseClone();
+
+        ParseResult IRule.Parse(Array input, int start)
+        {
+            return ParseResult.Success;
+        }
     }
 }

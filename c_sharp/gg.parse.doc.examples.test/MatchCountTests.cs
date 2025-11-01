@@ -22,7 +22,7 @@ namespace gg.parse.doc.examples.test
         public void MatchSimpleData_SuccessExample()
         {
             var fooRule = new MatchDataSequence<char>("match_foo", [.."foo"]);
-            var match3Foos = new MatchCount<char>("match_three_foos", fooRule, min:3, max:3);
+            var match3Foos = new MatchCount<char>("match_three_foos", AnnotationPruning.None, 0, fooRule, min:3, max:3);
 
             // must get 3 foos on the input
             IsTrue(match3Foos.Parse("foofoofoo"));
@@ -35,7 +35,7 @@ namespace gg.parse.doc.examples.test
         public void MatchZeroOrMore_SuccessExample()
         {
             var fooRule = new MatchDataSequence<char>("match_foo", [.. "foo"]);
-            var matchZeroOrMoreFoos = new MatchCount<char>("match_*_foos", fooRule, min: 0, max: 0);
+            var matchZeroOrMoreFoos = new MatchCount<char>("match_*_foos", AnnotationPruning.None, 0, fooRule, min: 0, max: 0);
 
             // basically anything is fine for matchZeroOrMoreFoos, it will always succeed
             // the only thing that will differ is the match length
@@ -56,7 +56,7 @@ namespace gg.parse.doc.examples.test
         public void MatchOneOrMore_SuccessExample()
         {
             var fooRule = new MatchDataSequence<char>("match_foo", [.. "foo"]);
-            var matchOneOrMoreFoos = new MatchCount<char>("match_+_foos", fooRule, min: 1, max: 0);
+            var matchOneOrMoreFoos = new MatchCount<char>("match_+_foos", AnnotationPruning.None, 0, fooRule, min: 1, max: 0);
 
             // one or more must have at least one foo on the input to succeed
             IsFalse(matchOneOrMoreFoos.Parse(""));

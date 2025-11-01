@@ -30,7 +30,7 @@ namespace gg.parse.script.tests.compiler
 
             var tokens = result.Annotations;
 
-            result = parser.Root!.Parse(tokens);
+            result = parser.Root.Parse(tokens);
 
             IsTrue(result.FoundMatch);
             IsTrue(result.Annotations != null && result.Annotations.Count > 0);
@@ -155,7 +155,7 @@ namespace gg.parse.script.tests.compiler
             var fooLitRef = sequenceRule.Rules.ElementAt(0) as RuleReference<char>;
             IsNotNull(fooLitRef);
 
-            var fooLit = fooLitRef.Rule as MatchDataSequence<char>;
+            var fooLit = fooLitRef.Subject as MatchDataSequence<char>;
             IsNotNull(fooLit);
 
             IsTrue(fooLit.DataArray.SequenceEqual([.. "foo"]));
@@ -164,7 +164,7 @@ namespace gg.parse.script.tests.compiler
             var barLitRef = sequenceRule.Rules.ElementAt(1) as RuleReference<char>;
             IsNotNull(barLitRef);
 
-            var barLit = barLitRef.Rule as MatchDataSequence<char>;
+            var barLit = barLitRef.Subject as MatchDataSequence<char>;
             IsNotNull(barLit);
 
             IsTrue(barLit.DataArray.SequenceEqual([.. "bar"]));
@@ -214,11 +214,11 @@ namespace gg.parse.script.tests.compiler
             IsTrue(error.Text == "msg");
             IsTrue(error.Level == LogLevel.Error);
             var expectedName = ".not(.lit('bar'))";
-            IsTrue(error.Condition == table.FindRule(expectedName));
-            var matchFunction = error.Condition as MatchNot<char>;
+            IsTrue(error.Subject == table.FindRule(expectedName));
+            var matchFunction = error.Subject as MatchNot<char>;
             IsNotNull(matchFunction);
-            IsTrue(matchFunction.Rule == table.FindRule(".lit('bar')"));
-            IsTrue(matchFunction.Rule is MatchDataSequence<char>);
+            IsTrue(matchFunction.Subject == table.FindRule(".lit('bar')"));
+            IsTrue(matchFunction.Subject is MatchDataSequence<char>);
         }
 
         [TestMethod]

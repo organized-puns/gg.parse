@@ -110,7 +110,7 @@ namespace gg.parse.script.compiler
                 session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out referencePruning);
             }
 
-            return new RuleReference<T>(declaration.Name, referenceName, declaration.Prune, declaration.Precedence, referencePruning);
+            return new RuleReference<T>(declaration.Name, declaration.Prune, declaration.Precedence, referenceName, referencePruning);
         }
 
         public static TRule CompileBinaryOperator<T, TRule>(RuleHeader header, Annotation body, CompileSession session) 
@@ -217,12 +217,12 @@ namespace gg.parse.script.compiler
             // in most cases we're interested in the values in the operation not the fact that there is an binary operation.
             // The latter would result in much more overhead in specifying the parsers. Only when the rule is a 
             // toplevel rule (ie rule = a, b, c) we use the user specified output.
-            var output =
+            var pruning =
                 header.IsTopLevel
                     ? header.Prune
                     : AnnotationPruning.Root;
 
-            return new MatchCount<T>(header.Name, countRule, output, min, max, header.Precedence);
+            return new MatchCount<T>(header.Name, pruning, header.Precedence, countRule, min, max);
         }
 
         public static RuleBase<T> CompileZeroOrMore<T>(
@@ -379,7 +379,7 @@ namespace gg.parse.script.compiler
                 }
             }
 
-            return new LogRule<T>(header.Name, header.Prune, message, condition, logLevel);
+            return new LogRule<T>(header.Name, header.Prune, condition, message, logLevel);
         }
     }
 }

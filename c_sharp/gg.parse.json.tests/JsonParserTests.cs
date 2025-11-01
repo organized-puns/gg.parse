@@ -128,7 +128,7 @@ namespace gg.parse.json.tests
             // test the full set of tokens
             var validTokens = "{ } [ ] , : \"key\" 123 123.0 true false null @";
 
-            var tokens = generatedTokenizer.Root.Parse([.. validTokens], 0);
+            var tokens = generatedTokenizer.Root.Parse(validTokens);
 
             Assert.IsTrue(tokens.FoundMatch);
             Assert.IsTrue(tokens.Annotations != null);

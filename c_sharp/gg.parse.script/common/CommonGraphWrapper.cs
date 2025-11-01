@@ -14,7 +14,7 @@ namespace gg.parse.script.common
     {
         // -- Utility methods -----------------------------------------------------------------------------------------
 
-        public static (string name, AnnotationPruning output) CreateRuleNameAndOutput(string? name, string fallback) =>
+        public static (string name, AnnotationPruning pruning) CreateRuleNameAndpruning(string? name, string fallback) =>
             string.IsNullOrEmpty(name)
                 ? ($"{AnnotationPruning.All.GetTokenString()}{fallback}", AnnotationPruning.All)
                 : name.SplitNameAndPruning();
@@ -29,7 +29,7 @@ namespace gg.parse.script.common
             Func<string, AnnotationPruning, TRule> factoryMethod)
             where TRule : RuleBase<T>
         {
-            var (ruleName, product) = CreateRuleNameAndOutput(name, fallback);
+            var (ruleName, product) = CreateRuleNameAndpruning(name, fallback);
             return TryFindRule(ruleName, out TRule? existingRule)
                      ? existingRule!
                      : factoryMethod(ruleName, product);
@@ -63,8 +63,8 @@ namespace gg.parse.script.common
 
         public LogRule<T> Error(string name, string message, RuleBase<T>? condition = null) =>
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
-                        (ruleName, product) => RegisterRule(
-                            new LogRule<T>(ruleName, product, message, condition, LogLevel.Error)));
+                        (ruleName, pruning) => RegisterRule(
+                            new LogRule<T>(ruleName, pruning, condition, message, LogLevel.Error)));
 
         public MatchDataSet<T> InSet(params T[] set) =>
             InSet(null, set);   
@@ -79,37 +79,37 @@ namespace gg.parse.script.common
 
         public MatchDataRange<T> InRange(string? name, T from, T to) =>
             FindOrRegister(name, $"{CommonTokenNames.DataRange}({from}..{to})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchDataRange<T>(ruleName, from, to, output)));
+                        (ruleName, pruning) => RegisterRule(
+                            new MatchDataRange<T>(ruleName, from, to, pruning)));
 
         public MatchCondition<T> IfMatch(RuleBase<T> condition) =>
             IfMatch(null, condition);
 
         public MatchCondition<T> IfMatch(string? name, RuleBase<T> condition) =>
             FindOrRegister(name, $"{CommonTokenNames.If}({condition.Name})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchCondition<T>(ruleName, output, 0, condition)));
+                        (ruleName, pruning) => RegisterRule(
+                            new MatchCondition<T>(ruleName, pruning, 0, condition)));
         
         public MatchDataSequence<T> Literal(T[] sequence) =>
             Literal(null, sequence);
 
         public MatchDataSequence<T> Literal(string? name, T[] sequence) =>
             FindOrRegister(name, $"{CommonTokenNames.Literal}({JoinDataArray(sequence)})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchDataSequence<T>(ruleName, sequence, output)));
+                        (ruleName, pruning) => RegisterRule(
+                            new MatchDataSequence<T>(ruleName, sequence, pruning)));
 
         public MatchNot<T> Not(string? name, RuleBase<T> rule) =>
             FindOrRegister(name, $"{CommonTokenNames.Literal}({rule.Name})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchNot<T>(ruleName, output, 0, rule)));
+                        (ruleName, pruning) => RegisterRule(
+                            new MatchNot<T>(ruleName, pruning, 0, rule)));
 
         public MatchNot<T> Not(RuleBase<T> rule) =>
             Not(null, rule);
 
         public MatchOneOf<T> OneOf(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.OneOf}({string.Join(", ", rules.Select(r => r.Name))})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchOneOf<T>(ruleName, output, 0, rules)));
+                        (ruleName, pruning) => RegisterRule(
+                            new MatchOneOf<T>(ruleName, pruning, 0, rules)));
 
         public MatchOneOf<T> OneOf(params RuleBase<T>[] rules) =>
             OneOf(null, rules);
@@ -117,8 +117,8 @@ namespace gg.parse.script.common
         public MatchCount<T> OneOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.OneOrMore}({rule.Name})",
-                (ruleName, output) => RegisterRule(
-                    new MatchCount<T>(ruleName, rule, output, 1, 0)
+                (ruleName, pruning) => RegisterRule(
+                    new MatchCount<T>(ruleName, pruning, 0, rule, 1, 0)
                 )
             );
 
@@ -127,8 +127,8 @@ namespace gg.parse.script.common
 
         public MatchRuleSequence<T> Sequence(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.FunctionSequence}({string.Join(", ", rules.Select(r => r.Name))})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchRuleSequence<T>(ruleName, output, 0, rules)));
+                        (ruleName, pruning) => RegisterRule(
+                            new MatchRuleSequence<T>(ruleName, pruning, 0, rules)));
 
         public MatchRuleSequence<T> Sequence(params RuleBase<T>[] rules) =>
             Sequence(null, rules);
@@ -138,27 +138,26 @@ namespace gg.parse.script.common
 
         public MatchSingleData<T> MatchSingle(string? name, T data) =>
             FindOrRegister(name, $"{CommonTokenNames.SingleData}({data})",
-                        (ruleName, output) => RegisterRule(
-                            new MatchSingleData<T>(ruleName, data, output)));
+                        (ruleName, pruning) => RegisterRule(new MatchSingleData<T>(ruleName, data, pruning)));
 
         public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
             FindOrRegister(name, $"{CommonTokenNames.SkipOperator}({stopCondition}, {failOnEoF})",
-                        (ruleName, output) => RegisterRule(
-                            new SkipRule<T>(ruleName, output, 0, stopCondition, failOnEoF)));
+                        (ruleName, pruning) => RegisterRule(
+                            new SkipRule<T>(ruleName, pruning, 0, stopCondition, failOnEoF)));
 
         public SkipRule<T> Skip(RuleBase<T> stopCondition, bool failOnEoF = true) =>
             Skip(null, stopCondition, failOnEoF);
 
         public LogRule<T> Warning(string name, string message, RuleBase<T>? condition = null) =>
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
-                        (ruleName, output) => RegisterRule(
-                            new LogRule<T>(ruleName, output, message, condition, LogLevel.Warning)));
+                        (ruleName, pruning) => RegisterRule(
+                            new LogRule<T>(ruleName, pruning, condition, message, LogLevel.Warning)));
 
         public MatchCount<T> ZeroOrOne(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrOne}({rule.Name})",
-                (ruleName, output) => RegisterRule(
-                    new MatchCount<T>(ruleName, rule, output, 0, 1)
+                (ruleName, pruning) => RegisterRule(
+                    new MatchCount<T>(ruleName, pruning, 0, rule, 0, 1)
                 )
             );
 
@@ -168,8 +167,8 @@ namespace gg.parse.script.common
         public MatchCount<T> ZeroOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrMore}({rule.Name})",
-                (ruleName, output) => RegisterRule(
-                    new MatchCount<T>(ruleName, rule, output, 0, 0)
+                (ruleName, pruning) => RegisterRule(
+                    new MatchCount<T>(ruleName, pruning, 0, rule, 0, 0)
                 )
             );
 

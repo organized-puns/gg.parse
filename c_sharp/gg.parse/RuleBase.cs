@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using System.Collections.Immutable;
+using System.Diagnostics;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse
@@ -23,8 +24,13 @@ namespace gg.parse
         
         public abstract ParseResult Parse(T[] input, int start);
 
-        public override string ToString() => Name;
+        [DebuggerStepThrough]
+        ParseResult IRule.Parse(Array input, int start)
+        {
+            return Parse((T[])input, start);
+        }
 
+        public override string ToString() => Name;
 
         public ParseResult BuildDataRuleResult(Range dataRange) =>
         

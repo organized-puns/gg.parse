@@ -21,13 +21,12 @@ namespace gg.parse.doc.examples.test
         public void RuleReference_SuccessExample()
         {
             var fooRule = new MatchDataSequence<char>("match_foo", [.."foo"]);
-            var matchFooByReference = new RuleReference<char>("ref_match_foo", "match_foo")
-            {
-                // note when using references in a script, the compiler will automatically
-                // resolve this
-                Rule = fooRule
-            };
+            var matchFooByReference = new RuleReference<char>("ref_match_foo", AnnotationPruning.None, 0, "match_foo");
 
+            // note when using references in a script, the compiler will automatically
+            // resolve this
+            matchFooByReference.MutateSubject(fooRule);
+            
             IsTrue(matchFooByReference.Parse("foo"));
         }
     }

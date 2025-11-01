@@ -14,7 +14,7 @@ namespace gg.parse.tests.rules
         public void MatchFunctionCount_ValidSingleInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
-            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.None, 1, 3);
+            var rule = new MatchCount<int>("TestRule", AnnotationPruning.None, 0, function, 1, 3);
             var input = new[] { 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
             
@@ -30,7 +30,7 @@ namespace gg.parse.tests.rules
         public void MatchFunctionCount_ValidMultipleInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
-            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.None, 1, 2);
+            var rule = new MatchCount<int>("TestRule", AnnotationPruning.None,0, function, 1, 2);
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
 
@@ -53,7 +53,7 @@ namespace gg.parse.tests.rules
         public void MatchFunctionCount_ValidMultipleTransitiveInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
-            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.Root, 1, 2);
+            var rule = new MatchCount<int>("TestRule", AnnotationPruning.Root, 1, function, 1, 2);
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
 
@@ -74,7 +74,7 @@ namespace gg.parse.tests.rules
         public void MatchFunctionCount_ValidMultipleNoneInput_ReturnsSuccess()
         {
             var function = new MatchDataSequence<int>("TestFunction", [1, 2, 3]);
-            var rule = new MatchCount<int>("TestRule", function, AnnotationPruning.All, 1, 2);
+            var rule = new MatchCount<int>("TestRule", AnnotationPruning.All, 1, function, 1, 2);
 
             var input = new[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 4 };
             var result = rule.Parse(input, 0);
@@ -87,7 +87,7 @@ namespace gg.parse.tests.rules
         public void CreateZeroOrMoreFunctionWithLiteral_Parse_ExpectSuccess()
         {
             var fooLiteral = new MatchDataSequence<char>("fooLiteral", "foo".ToCharArray());
-            var function = new MatchCount<char>("TestFunction", fooLiteral, min: 0, max: 0);
+            var function = new MatchCount<char>("TestFunction", AnnotationPruning.None, 0, fooLiteral, min: 0, max: 0);
 
             var result = function.Parse("foo".ToCharArray(), 0);
 
@@ -115,8 +115,8 @@ namespace gg.parse.tests.rules
         public void CreateZeroOrMoreFunctionWithPotentialEndlessLoop_Parse_ExpectException()
         {
             var fooLiteral = new MatchDataSequence<char>("fooLiteral", "foo".ToCharArray());
-            var function1 = new MatchCount<char>("TestFunction1", fooLiteral, min: 0, max: 0);
-            var function2 = new MatchCount<char>("TestFunction2", function1, min: 0, max: 0);
+            var function1 = new MatchCount<char>("TestFunction1", AnnotationPruning.None, 0, fooLiteral, min: 0, max: 0);
+            var function2 = new MatchCount<char>("TestFunction2", AnnotationPruning.None, 0, function1, min: 0, max: 0);
 
             var result = function2.Parse("foo".ToCharArray(), 0);
 

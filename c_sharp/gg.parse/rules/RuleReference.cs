@@ -3,38 +3,19 @@
 
 using gg.parse.util;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.rules
 {
-    public sealed class RuleReference<T> : RuleBase<T>, IRuleComposition<T> where T : IComparable<T>
+    public sealed class RuleReference<T> : MetaRuleBase<T> where T : IComparable<T>
     {
-        private RuleBase<T>? _rule;
-
         public string ReferenceName { get; init; }
 
         /// <summary>
         /// Pruning applied to the refereced rule.
         /// </summary>
         public AnnotationPruning ReferencePrune { get; init; }
-
-        /// <summary>
-        /// Referenced rule, may be set at a later stage.
-        /// </summary>
-        [DisallowNull]
-        public RuleBase<T>? Rule 
-        {
-            get => _rule;
-           
-            set
-            {
-                Assertions.RequiresNotNull(value!);
-
-                _rule = value;
-            }
-        }
 
         /// <summary>
         /// If set to true then the result of this rule will be based on the referenced rule's output.
@@ -44,27 +25,14 @@ namespace gg.parse.rules
         /// </summary>
         public bool IsTopLevel { get; set; } = true;
 
-        public IEnumerable<RuleBase<T>>? Rules
-        {
-            get
-            {
-                Assertions.RequiresNotNull(Rule);
-                return [Rule!];
-            }
-        }
-
-        public int Count => 1;
-
-        public RuleBase<T>? this[int index] => Rule;
-
         public RuleReference(
             string name, 
-            string reference, 
-            AnnotationPruning prune = AnnotationPruning.None,
-            int precedence = 0,
+            AnnotationPruning prune,
+            int precedence,
+            string reference,
             AnnotationPruning referencePruning = AnnotationPruning.None
         )
-        : base(name, prune, precedence) 
+        : base(name, prune, precedence, null) 
         {
             ReferenceName = reference;
             ReferencePrune = referencePruning;
@@ -72,9 +40,9 @@ namespace gg.parse.rules
 
         public override ParseResult Parse(T[] input, int start)
         {
-            Assertions.RequiresNotNull(Rule);
+            Assertions.RequiresNotNull(Subject);
 
-            var result = Rule.Parse(input, start);
+            var result = Subject.Parse(input, start);
 
             if (result.FoundMatch)
             {
@@ -248,25 +216,11 @@ namespace gg.parse.rules
             return null;
         }
 
-        public IRuleComposition<T> CloneWithComposition(IEnumerable<RuleBase<T>> composition) =>
-            new RuleReference<T>(
-                Name, 
-                ReferenceName, 
-                Prune, 
-                Precedence, 
-                ReferencePrune
-            )
+        public override RuleReference<T> CloneWithSubject(IRule subject) =>
+            new (Name, Prune, Precedence, ReferenceName, ReferencePrune)
             {
                 // rule may be null in this case when the rule hasn't been resolved yet
-                _rule = composition.First()
+                Subject = subject
             };
-
-        public void MutateComposition(IEnumerable<RuleBase<T>> composition)
-        {
-            Assertions.RequiresNotNull(composition);
-            Assertions.RequiresNotNull(composition.Count() == 1);
-
-            Rule = composition.First();
-        }
     }
 }

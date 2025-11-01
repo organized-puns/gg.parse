@@ -1,8 +1,10 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse;
 using gg.parse.script.parser;
 using gg.parse.util;
+
 using System.Collections.Immutable;
 
 using ParseOutput = (gg.parse.ParseResult tokeninzeResult, gg.parse.ParseResult parseResult);
@@ -79,7 +81,7 @@ namespace gg.parse.script.common
             bool failOnWarning = false,
             bool throwExceptionOnErrors = true)
         {
-            RuleBase<int>? rule;
+            IRule? rule;
 
             if (!string.IsNullOrEmpty(usingRule))
             {
