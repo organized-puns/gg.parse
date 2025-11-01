@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 #nullable disable
 
+using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.common;
 

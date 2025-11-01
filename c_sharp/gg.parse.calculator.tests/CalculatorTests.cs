@@ -1,4 +1,5 @@
-﻿using gg.parse.rules;
+﻿using gg.parse.core;
+using gg.parse.rules;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 

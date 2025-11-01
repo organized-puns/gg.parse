@@ -7,6 +7,7 @@ using gg.parse.script.pipeline;
 using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using gg.parse.core;
 
 namespace gg.parse.script.tests.parserbuilder
 {

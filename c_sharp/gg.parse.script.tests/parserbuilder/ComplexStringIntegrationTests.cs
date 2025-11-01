@@ -1,4 +1,5 @@
-﻿using gg.parse.rules;
+﻿using gg.parse.core;
+using gg.parse.rules;
 
 namespace gg.parse.script.tests.parserbuilder
 {

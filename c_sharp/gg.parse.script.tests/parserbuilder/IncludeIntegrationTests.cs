@@ -4,6 +4,7 @@ using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using gg.parse.rules;
 using gg.parse.script.pipeline;
+using gg.parse.core;
 
 
 namespace gg.parse.script.tests.parserbuilder

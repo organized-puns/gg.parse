@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using System.Collections.Immutable;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 

@@ -6,6 +6,7 @@ using gg.parse.rules;
 using Range = gg.parse.util.Range;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using gg.parse.core;
 
 namespace gg.parse.tests.rules
 {

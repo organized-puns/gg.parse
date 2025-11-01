@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using Range = gg.parse.util.Range;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     public abstract class RuleBase<T>(
         string name, 

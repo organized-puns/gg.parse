@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
+
 namespace gg.parse.script.parser
 {
     public static class AnnotationPruningToken

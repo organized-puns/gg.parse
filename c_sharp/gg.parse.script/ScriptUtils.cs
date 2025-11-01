@@ -3,7 +3,7 @@
 using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using gg.parse.core;
 using gg.parse.script.compiler;
 
 namespace gg.parse.script

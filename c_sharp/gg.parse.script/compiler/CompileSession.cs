@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
 using gg.parse.util;
 using System.Collections.Immutable;
 using Range = gg.parse.util.Range;

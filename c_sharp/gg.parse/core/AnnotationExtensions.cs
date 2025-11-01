@@ -2,12 +2,11 @@
 // Copyright (c) Pointless pun
 
 using System.Collections.Immutable;
-
 using gg.parse.util;
 
 using Range = gg.parse.util.Range;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     public static class AnnotationExtensions
     {
@@ -24,7 +23,7 @@ namespace gg.parse
        
         public static string GetText(this Annotation grammarAnnotation, string text, ImmutableList<Annotation> tokens)
         {
-            var range = CombinedRange(tokens, grammarAnnotation.Range);
+            var range = tokens.CombinedRange(grammarAnnotation.Range);
             return text.Substring(range.Start, range.Length);
         }
 
@@ -32,7 +31,7 @@ namespace gg.parse
         {
             Assertions.RequiresNotNull(tokens.Annotations);
 
-            var range = CombinedRange(tokens.Annotations, grammarAnnotation.Range);
+            var range = tokens.Annotations.CombinedRange(grammarAnnotation.Range);
             return text.Substring(range.Start, range.Length);
         }
 
@@ -56,7 +55,7 @@ namespace gg.parse
                 {
                     // need to take in account possible white space
                     var token = tokens[tokensRange.Start + i];
-                    length += (token.Start - (startIndex + length)) + token.Length;
+                    length += token.Start - (startIndex + length) + token.Length;
                 }
 
                 return new Range(start, length);
@@ -79,7 +78,7 @@ namespace gg.parse
 
             foreach (var annotation in annotationList)
             {
-                WhereDfs(annotation, predicate, result);
+                annotation.WhereDfs(predicate, result);
             }
 
             return [.. result];

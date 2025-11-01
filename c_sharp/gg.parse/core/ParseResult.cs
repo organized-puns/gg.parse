@@ -4,7 +4,7 @@
 using System.Collections;
 using System.Collections.Immutable;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     public readonly struct ParseResult(bool isSuccess, int dataRead, ImmutableList<Annotation>? annotations = null) : IEnumerable<Annotation>
     {

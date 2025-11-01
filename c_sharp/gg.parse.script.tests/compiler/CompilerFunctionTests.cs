@@ -4,6 +4,7 @@ using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.compiler;
 using gg.parse.script.pipeline;
+using gg.parse.core;
 
 namespace gg.parse.script.tests.compiler
 {

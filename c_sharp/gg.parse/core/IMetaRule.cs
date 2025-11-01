@@ -1,4 +1,4 @@
-﻿namespace gg.parse
+﻿namespace gg.parse.core
 {
     public interface IMetaRule : IRule
     {

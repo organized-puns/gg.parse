@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 using Range = gg.parse.util.Range;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     public sealed class Annotation : IEnumerable<Annotation>
     {

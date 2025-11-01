@@ -2,10 +2,9 @@
 // Copyright (c) Pointless pun
 
 using System.Collections;
-
 using gg.parse.util;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     /// <summary>
     /// Graph of Rules. Has one rule which is designated as a Root
@@ -98,17 +97,25 @@ namespace gg.parse
         private IRuleComposition FindOrRegisterRuleCompositionAndSubRules(IRuleComposition ruleComposition) 
         {
             var composition = new IRule[ruleComposition.Count];
+            var isChanged = false;
 
             // potentially replace the rules making up the composition with registered versions
             for (var i = 0; i < ruleComposition.Count; i++)
             {
                 if (ruleComposition[i] != null)
                 {
-                    composition[i] = FindOrRegisterRuleAndSubRules(ruleComposition[i]!);
+                    var registeredSubrule = FindOrRegisterRuleAndSubRules(ruleComposition[i]!);
+
+                    if (registeredSubrule != ruleComposition[i])
+                    {
+                        isChanged = true;
+                    }   
+
+                    composition[i] = registeredSubrule;
                 }
             }
 
-            return RegisterRule(ruleComposition.CloneWithComposition(composition));
+            return RegisterRule(isChanged ? ruleComposition.CloneWithComposition(composition) : ruleComposition);
         }
 
         private IMetaRule FindOrRegisterMetaRuleAndSubject(IMetaRule metaRule)

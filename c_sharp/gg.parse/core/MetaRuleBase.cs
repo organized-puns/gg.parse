@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-namespace gg.parse
+namespace gg.parse.core
 {
     public abstract class MetaRuleBase<T> : RuleBase<T>, IMetaRule where T : IComparable<T>
     {

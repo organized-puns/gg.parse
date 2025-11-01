@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-namespace gg.parse
+namespace gg.parse.core
 {
     /// <summary>
     /// Rule which contains other rules 

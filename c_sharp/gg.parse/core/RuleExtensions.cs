@@ -4,7 +4,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 
-namespace gg.parse
+namespace gg.parse.core
 {
     public static class RuleExtensions
     {

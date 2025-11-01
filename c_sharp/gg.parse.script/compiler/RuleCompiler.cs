@@ -2,7 +2,7 @@
 // Copyright (c) Pointless pun
 
 using System.Collections.Immutable;
-
+using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.util;
 
