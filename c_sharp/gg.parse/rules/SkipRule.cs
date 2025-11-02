@@ -56,7 +56,11 @@ namespace gg.parse.rules
                         ? idx - start 
                         : (idx - start) + conditionalResult.MatchLength;
 
-                    return BuildResult(new(start, matchLength));
+                    var annotations = StopBeforeCondition
+                        ? null
+                        : conditionalResult.Annotations;
+
+                    return BuildResult(new(start, matchLength), annotations);
                 }
 
                 idx++;

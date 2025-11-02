@@ -142,7 +142,7 @@ namespace gg.parse.script.common
                         (ruleName, pruning) => RegisterRule(new MatchSingleData<T>(ruleName, data, pruning)));
 
         public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
-            FindOrRegister(name, $"{CommonTokenNames.SkipOperator}({stopCondition}, {failOnEoF})",
+            FindOrRegister(name, $"{CommonTokenNames.StopAt}({stopCondition}, {failOnEoF})",
                         (ruleName, pruning) => RegisterRule(
                             new SkipRule<T>(ruleName, pruning, 0, stopCondition, failOnEoF)));
 

@@ -99,16 +99,16 @@ Doing the same using a script (see `gg.parse.doc.examples.test\CreateFilenameTok
 
     // note this can also be read from a separate file
     public static readonly string _filenameScript =
-      "-r filenames       = +(find_filename, filename);\n" +
-      "-a find_filename   = >>> filename;\n" +
-      "filename           = drive, path;\n" +
-      "drive              = letter, ':', separator;\n" +
-      "path               = path_part, *(-a separator, path_part);\n" +
-      "path_part          = +(letter | number | special_character);\n" +
-      "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
-      "number             = {'0'..'9'};\n" +
-      "separator          = {'\\\\/'};\n" +
-      "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
+        "-r filenames       = +find_filename;\n" +
+        "-r find_filename   = stop_after filename;\n" +
+        "filename           = drive, path;\n" +
+        "drive              = letter, ':', separator;\n" +
+        "path               = path_part, *(-a separator, path_part);\n" +
+        "path_part          = +(letter | number | special_character);\n" +
+        "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
+        "number             = {'0'..'9'};\n" +
+        "separator          = {'\\\\/'};\n" +
+        "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
 
     ...
 

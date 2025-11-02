@@ -54,8 +54,8 @@ namespace gg.parse.doc.examples.test
         }
 
         public static readonly string _filenameScript =
-            "-r filenames       = +(find_filename, filename);\n" +
-            "-a find_filename   = >>> filename;\n" +
+            "-r filenames       = +find_filename;\n" +
+            "-r find_filename   = stop_after filename;\n" +
             "filename           = drive, path;\n" +
             "drive              = letter, ':', separator;\n" +
             "path               = path_part, *(-a separator, path_part);\n" +

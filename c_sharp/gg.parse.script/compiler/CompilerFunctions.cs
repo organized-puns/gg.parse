@@ -300,13 +300,21 @@ namespace gg.parse.script.compiler
             CompileUnary<T, MatchNot<T>>(header, bodyNode, session);
         
 
-        public static RuleBase<T> CompileSkip<T>(
+        public static RuleBase<T> CompileStopBefore<T>(
             RuleHeader header,
             Annotation bodyNode,
             CompileSession session) 
             where T : IComparable<T> =>
         
             CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false, true);
+
+        public static RuleBase<T> CompileStopAfter<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session)
+            where T : IComparable<T> =>
+
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false, false);
 
         public static RuleBase<T> CompileFind<T>(
             RuleHeader header, 

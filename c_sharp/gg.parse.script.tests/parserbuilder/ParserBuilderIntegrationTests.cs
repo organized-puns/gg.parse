@@ -66,7 +66,7 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void SetupFindBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new ParserBuilder().From($"foo = >> lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder().From($"foo = find lit; lit = 'bar';", "root = foo;");
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
@@ -92,7 +92,7 @@ namespace gg.parse.script.tests.parserbuilder
             var searchTerm = "bar";
             var tokenizer = new ParserBuilder().From(
                 $"{pr}find_all_bars = +( find_bar, '{searchTerm}' );" +
-                $"{pa}find_bar      = >> '{searchTerm}';"
+                $"{pa}find_bar      = find '{searchTerm}';"
             );
 
             var testStringWithBar = "123ba345bar567 bar ";
@@ -112,9 +112,9 @@ namespace gg.parse.script.tests.parserbuilder
 
 
         [TestMethod]
-        public void SetupSkipUntilBar_Parse_ExpectBarFoundIfPresentInString()
+        public void SetupStopBeforeBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new ParserBuilder().From($"foo = >>> lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder().From($"foo = stop_at lit; lit = 'bar';", "root = foo;");
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
@@ -124,7 +124,36 @@ namespace gg.parse.script.tests.parserbuilder
 
             var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
 
+            IsTrue(rangeTillBar.Start == 0);
             IsTrue(rangeTillBar.End == 8);
+
+            var testStringWithoutBar = "123ba345ar567";
+
+            (tokensResult, barParseResult) = parser.Parse(testStringWithoutBar);
+
+            // unlike find, skip will be happy if no bars are found
+            IsTrue(tokensResult.FoundMatch);
+
+            rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
+
+            IsTrue(rangeTillBar.End == testStringWithoutBar.Length);
+        }
+
+        [TestMethod]
+        public void SetupStopAfterBar_Parse_ExpectBarFoundIfPresentInString()
+        {
+            var parser = new ParserBuilder().From($"foo = stop_after lit; lit = 'bar';", "root = foo;");
+
+            var testStringWithBar = "123ba345bar567";
+            var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
+
+            IsTrue(barParseResult.FoundMatch);
+            IsTrue(barParseResult[0]!.Rule!.Name == "root");
+
+            var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
+
+            IsTrue(rangeTillBar.Start == 0);
+            IsTrue(rangeTillBar.End == 11);
 
             var testStringWithoutBar = "123ba345ar567";
 
