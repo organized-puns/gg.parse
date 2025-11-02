@@ -12,17 +12,17 @@ config:
 kanban
   Backlog
     
-    [ Add callback scripting ]
 	[ Add repeat count to script ]
 	[ Implement properties file ]
-	[ Implement linter]
+	[ Add linter to workflows ]
   
   In progress
     
     [ Add rule examples ]
-	[ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
+    [ Add callback scripting ]
 	
   Done
+    [ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	[ Add meta rule vs data rule vs rule composition ]
 
 ```
