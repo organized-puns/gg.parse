@@ -15,6 +15,7 @@ kanban
     [ Add callback scripting ]
 	[ Add repeat count to script ]
 	[ Implement properties file ]
+	[ Implement linter]
   
   In progress
     
@@ -77,7 +78,30 @@ add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer
 
 Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc to log
 
+### Linter
 
+dotnet format --verify-no-changes
+
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Check formatting
+        run: dotnet format --verify-no-changes
 
 ???
 ---

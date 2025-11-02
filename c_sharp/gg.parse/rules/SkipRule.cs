@@ -20,30 +20,43 @@ namespace gg.parse.rules
         /// </summary>
         public bool FailOnEoF { get; init; }
 
+        /// <summary>
+        /// If set to true , the rule will stop before the condition match, otherwise it will include the 
+        /// condition match in the result.
+        /// </summary>
+        public bool StopBeforeCondition { get; init; } 
+
         public SkipRule(
             string name,
             AnnotationPruning product,
             int precedence,
             IRule subject,
-            bool failOnEof = true
+            bool failOnEof = true,
+            bool stopBeforeCondition = true
         ) 
             : base(name, product, precedence, subject)
         {
             Assertions.RequiresNotNull(subject);
 
             FailOnEoF = failOnEof;
+            StopBeforeCondition = stopBeforeCondition;
         }
 
         public override ParseResult Parse(T[] input, int start)
         {
             var idx = start;
+            
             while (idx < input.Length)
             {
                 var conditionalResult = Subject!.Parse(input, idx);
-
+                
                 if (conditionalResult)
                 {
-                    return BuildResult(new(start, idx - start));
+                    var matchLength = StopBeforeCondition 
+                        ? idx - start 
+                        : (idx - start) + conditionalResult.MatchLength;
+
+                    return BuildResult(new(start, matchLength));
                 }
 
                 idx++;
@@ -53,6 +66,6 @@ namespace gg.parse.rules
         }
 
         public override SkipRule<T> CloneWithSubject(IRule subject) =>
-            new (Name, Prune, Precedence, subject, FailOnEoF);
+            new (Name, Prune, Precedence, subject, FailOnEoF, StopBeforeCondition);
     }
 }

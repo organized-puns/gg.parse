@@ -306,7 +306,7 @@ namespace gg.parse.script.compiler
             CompileSession session) 
             where T : IComparable<T> =>
         
-            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false);
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false, true);
 
         public static RuleBase<T> CompileFind<T>(
             RuleHeader header, 
@@ -314,7 +314,7 @@ namespace gg.parse.script.compiler
             CompileSession session) 
             where T : IComparable<T> =>
         
-            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, true);
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, true, true);
         
 
         public static RuleBase<T> CompileTryMatch<T>(
