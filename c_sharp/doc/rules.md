@@ -85,7 +85,7 @@ Return a result based on the outcome of its subject, but do not change the data 
 
 * [MatchCondition](./match-condition.md)
 * [MatchNot](./match-not.md)
-* SkipRule
+* [SkipRule](./skip_rule.md)
 
 #### Sequences (IRuleComposition)
 

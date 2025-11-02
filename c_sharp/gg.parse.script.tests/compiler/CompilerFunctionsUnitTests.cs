@@ -720,7 +720,7 @@ namespace gg.parse.script.tests.compiler
 
             var compiler = new RuleCompiler()
                 .MapRuleToCompilerFunction(literalId, CompileLiteral)
-                .MapRuleToCompilerFunction(tryMatchId, CompileTryMatch<char>);
+                .MapRuleToCompilerFunction(tryMatchId, CompileMatchCondition<char>);
 
             var graph = compiler.Compile<char>(
                 text: "rule=try 'foo'",

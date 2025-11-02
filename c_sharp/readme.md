@@ -15,7 +15,7 @@ tools to make parsing of simple and complex data easy to do.
 - [Goals](#goals-use-cases-and-otherwise)
 - [Quickstart](#quickstart)
 - [Project structure](#project-structure)
-- [Rule references](#rule-references)  
+- [Rules](#rules)  
 - [More information](#more-information)
 
 License
@@ -137,8 +137,8 @@ The project consists of 3 main topics:
 Each of these main topics has each own corresponding test project.
   
 
-Rule References
----------------
+Rules
+-----
 
 #### [Match Any](./doc/match-any-data.md) (.)
 #### [Match Condition](./doc/match-condition.md)  (if ...)
@@ -148,6 +148,7 @@ Rule References
 #### [Match Evaluation](./doc/match-evaluation.md)  (a/b/c)
 #### [Match Not](./doc/match-not.md)  (!foo ...)
 #### [Rule reference](./doc/rule-reference.md) (foo)
+#### [Skip Rules](./doc/skip_rule.md) (find, stop_before, stop_after)
 
 More information
 ----------------
