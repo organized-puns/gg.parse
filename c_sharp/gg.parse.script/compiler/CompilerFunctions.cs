@@ -85,7 +85,7 @@ namespace gg.parse.script.compiler
 
         // -- Generic functions ---------------------------------------------------------------------------------------
 
-        public static RuleBase<T> CompileIdentifier<T>(RuleHeader declaration, Annotation bodyNode, CompileSession session) 
+        public static RuleBase<T> CompileIdentifier<T>(RuleHeader header, Annotation bodyNode, CompileSession session) 
             where T : IComparable<T>
         {
             var hasOutputModifier = (bodyNode.Children != null && bodyNode.Children.Count > 1);
@@ -110,7 +110,7 @@ namespace gg.parse.script.compiler
                 session.Compiler.TryMatchOutputModifier(bodyNode.Children![0]!.Rule.Id, out referencePruning);
             }
 
-            return new RuleReference<T>(declaration.Name, declaration.Prune, declaration.Precedence, referenceName, referencePruning);
+            return new RuleReference<T>(header.Name, header.Prune, header.Precedence, referenceName, referencePruning);
         }
 
         public static TRule CompileBinaryOperator<T, TRule>(RuleHeader header, Annotation body, CompileSession session) 
@@ -263,6 +263,7 @@ namespace gg.parse.script.compiler
 
             // prune all if this is an inline rule as lookaheads never have a size
             // if it's a toplevel, it is up to the user 
+            // UNLESS it's a rule reference which will override the pruning anyway
             var pruning = header.IsTopLevel ? header.Prune : AnnotationPruning.All;
             var elementBody = bodyNode.Children[0];
             var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
@@ -300,13 +301,21 @@ namespace gg.parse.script.compiler
             CompileUnary<T, MatchNot<T>>(header, bodyNode, session);
         
 
-        public static RuleBase<T> CompileSkip<T>(
+        public static RuleBase<T> CompileStopBefore<T>(
             RuleHeader header,
             Annotation bodyNode,
             CompileSession session) 
             where T : IComparable<T> =>
         
-            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false);
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false, true);
+
+        public static RuleBase<T> CompileStopAfter<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session)
+            where T : IComparable<T> =>
+
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, false, false);
 
         public static RuleBase<T> CompileFind<T>(
             RuleHeader header, 
@@ -314,15 +323,15 @@ namespace gg.parse.script.compiler
             CompileSession session) 
             where T : IComparable<T> =>
         
-            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, true);
+            CompileUnary<T, SkipRule<T>>(header, bodyNode, session, true, true);
         
 
-        public static RuleBase<T> CompileTryMatch<T>(
+        public static RuleBase<T> CompileMatchCondition<T>(
             RuleHeader header,
             Annotation bodyNode,
             CompileSession session) where T : IComparable<T> =>
         
-        CompileUnary<T, MatchCondition<T>>(header, bodyNode, session);
+            CompileUnary<T, MatchCondition<T>>(header, bodyNode, session);
         
 
         public static RuleBase<T> CompileAny<T>(RuleHeader header, Annotation _, CompileSession __) 

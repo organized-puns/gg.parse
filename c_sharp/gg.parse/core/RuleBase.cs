@@ -43,7 +43,6 @@ namespace gg.parse.core
                 // children.
                 AnnotationPruning.Children =>                
                     new ParseResult(true, dataRange.Length),
-                //new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
 
                 AnnotationPruning.None => 
                     new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),
@@ -52,7 +51,6 @@ namespace gg.parse.core
                 // so when their children being asked, nothing is left
                 AnnotationPruning.Root =>
                     new ParseResult(true, dataRange.Length),
-                //new ParseResult(true, dataRange.Length, [new Annotation(this, dataRange)]),               
 
                 _ => throw new NotImplementedException($"No implementation to build a data rule result for enum value {Prune}."),
             };

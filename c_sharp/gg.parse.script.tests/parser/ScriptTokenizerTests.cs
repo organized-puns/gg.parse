@@ -85,7 +85,7 @@ namespace gg.parse.script.tests.parser
         public void CreateInputWithFindToken_Parse_ExpectFindSkipFound()
         {
             var tokenizer = new ScriptTokenizer();
-            var testText = ">> >>>";
+            var testText = "find stop_at stop_after";
             var result = tokenizer.Root!.Parse(testText);
 
             IsTrue(result.FoundMatch);
@@ -94,7 +94,7 @@ namespace gg.parse.script.tests.parser
             var expectedNames = new string[]
             {
                 CommonTokenNames.FindOperator,
-                CommonTokenNames.SkipOperator
+                CommonTokenNames.StopAt
             };
 
             for (var i = 0; i < expectedNames.Length; i++)

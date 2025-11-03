@@ -13,11 +13,11 @@ namespace gg.parse.script.tests.parser
     public class ScriptParserTest
     {
         [TestMethod]
-        public void CreateSkipScript_Parse_ExpectSkipNodes()
+        public void CreateStopBeforeScript_Parse_ExpectSkipNodes()
         {
             var parser = new ScriptParser();
 
-            var (tokens, nodes) = parser.Parse("rule = >>> 'foo';");
+            var (tokens, nodes) = parser.Parse("rule = stop_at 'foo';");
 
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
@@ -26,7 +26,27 @@ namespace gg.parse.script.tests.parser
             IsTrue(ruleNameRule == parser.MatchRuleName);
 
             var skipRule = nodes[0][1].Rule;
-            IsTrue(skipRule == parser.MatchSkipOperator);
+            IsTrue(skipRule == parser.MatchStopBeforeOperator);
+
+            var fooLiteral = nodes[0][1][0].Rule;
+            IsTrue(fooLiteral.Name == ScriptParser.Names.Literal);
+        }
+
+        [TestMethod]
+        public void CreateStopAfterScript_Parse_ExpectSkipNodes()
+        {
+            var parser = new ScriptParser();
+
+            var (tokens, nodes) = parser.Parse("rule = stop_after 'foo';");
+
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
+
+            var ruleNameRule = nodes[0][0].Rule;
+            IsTrue(ruleNameRule == parser.MatchRuleName);
+
+            var skipRule = nodes[0][1].Rule;
+            IsTrue(skipRule == parser.MatchStopAfterOperator);
 
             var fooLiteral = nodes[0][1][0].Rule;
             IsTrue(fooLiteral.Name == ScriptParser.Names.Literal);
@@ -37,7 +57,7 @@ namespace gg.parse.script.tests.parser
         {
             var parser = new ScriptParser();
 
-            var (tokens, nodes) = parser.Parse("rule = >> 'foo';");
+            var (tokens, nodes) = parser.Parse("rule = find 'foo';");
 
             IsTrue(tokens != null && tokens.Count > 0);
             IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);

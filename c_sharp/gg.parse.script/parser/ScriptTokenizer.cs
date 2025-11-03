@@ -72,7 +72,11 @@ namespace gg.parse.script.parser
                         Keyword(CommonTokenNames.LogInfo, "info"),
                         Keyword(CommonTokenNames.LogDebug, "debug"),
                         Keyword(CommonTokenNames.If, "if"),
-                        Keyword(CommonTokenNames.Include, "include")
+                        Keyword(CommonTokenNames.Include, "include"),
+                        Keyword(CommonTokenNames.FindOperator, "find"),
+                        Keyword(CommonTokenNames.StopAfter, "stop_after"),
+                        Keyword(CommonTokenNames.StopAt, "stop_at")
+                        
                     )
                 );
 
@@ -100,9 +104,7 @@ namespace gg.parse.script.parser
                 Literal(CommonTokenNames.PruneRoot, AnnotationPruningToken.Root),
                 Literal(CommonTokenNames.PruneAll, AnnotationPruningToken.All),
                 Literal(CommonTokenNames.PruneChildren, AnnotationPruningToken.Children),
-                Literal(CommonTokenNames.OptionWithPrecedence, "/"),
-                Literal(CommonTokenNames.SkipOperator, ">>>"),
-                Literal(CommonTokenNames.FindOperator, ">>")
+                Literal(CommonTokenNames.OptionWithPrecedence, "/")
             );
      }
 }

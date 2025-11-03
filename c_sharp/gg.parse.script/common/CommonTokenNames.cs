@@ -111,7 +111,9 @@ namespace gg.parse.script.common
 
         public static readonly string SingleQuotedString = "single_quoted_string";
 
-        public static readonly string SkipOperator = "skip_operator";
+        public static readonly string StopAfter = "stop_after_operator";
+
+        public static readonly string StopAt = "stop_at_operator";
 
         public static readonly string String = "_string";
 

@@ -200,14 +200,15 @@ namespace gg.parse.script.pipeline
                     .MapRuleToCompilerFunction(parser.MatchReference, CompileIdentifier<char>)
                     .MapRuleToCompilerFunction(parser.MatchLiteral, CompileLiteral)
                     .MapRuleToCompilerFunction(parser.MatchNotOperator, CompileNot<char>)
-                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileTryMatch<char>)
+                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileMatchCondition<char>)
                     .MapRuleToCompilerFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
                     .MapRuleToCompilerFunction(parser.MatchOneOf, CompileOption<char>)
                     .MapRuleToCompilerFunction(parser.MatchSequence, CompileSequence<char>)
                     .MapRuleToCompilerFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
                     .MapRuleToCompilerFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
                     .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<char>)
-                    .MapRuleToCompilerFunction(parser.MatchSkipOperator, CompileSkip<char>);
+                    .MapRuleToCompilerFunction(parser.MatchStopAfterOperator, CompileStopAfter<char>)
+                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<char>);
         }
 
         /// <summary>
@@ -223,7 +224,7 @@ namespace gg.parse.script.pipeline
                     .MapRuleToCompilerFunction(parser.MatchGroup, CompileGroup<int>)
                     .MapRuleToCompilerFunction(parser.MatchReference, CompileIdentifier<int>)
                     .MapRuleToCompilerFunction(parser.MatchNotOperator, CompileNot<int>)
-                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileTryMatch<int>)
+                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileMatchCondition<int>)
                     .MapRuleToCompilerFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
                     .MapRuleToCompilerFunction(parser.MatchOneOf, CompileOption<int>)
                     .MapRuleToCompilerFunction(parser.MatchSequence, CompileSequence<int>)
@@ -232,7 +233,8 @@ namespace gg.parse.script.pipeline
                     .MapRuleToCompilerFunction(parser.MatchEval, CompileEvaluation<int>)
                     .MapRuleToCompilerFunction(parser.MatchLog, CompileLog<int>)
                     .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<int>)
-                    .MapRuleToCompilerFunction(parser.MatchSkipOperator, CompileSkip<int>);
+                    .MapRuleToCompilerFunction(parser.MatchStopAfterOperator, CompileStopAfter<int>)
+                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<int>);
         }
 
         private static (ImmutableList<Annotation>? tokens, ImmutableList<Annotation>? syntaxTree) ParseSessionText<T>(PipelineSession<T> session)

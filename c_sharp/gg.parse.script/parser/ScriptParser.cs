@@ -46,7 +46,8 @@ namespace gg.parse.script.parser
             public const string Reference = "ref";
 
             public const string Sequence = "sequence";
-            public const string Skip = "skip";
+            public const string StopAfter = "stop_after";
+            public const string StopAt = "stop_at";
 
             public const string ZeroOrOne = "zero_or_one";
             public const string ZeroOrMore = "zero_or_more";
@@ -93,7 +94,9 @@ namespace gg.parse.script.parser
 
         public MatchRuleSequence<int> IfMatchOperator { get; private set; }
 
-        public MatchRuleSequence<int> MatchSkipOperator { get; private set; }
+        public MatchRuleSequence<int> MatchStopAfterOperator { get; private set; }
+
+        public MatchRuleSequence<int> MatchStopBeforeOperator { get; private set; }
 
         public MatchRuleSequence<int> MatchFindOperator { get; private set; }
 
@@ -406,17 +409,24 @@ namespace gg.parse.script.parser
                 unaryDataTermsOptions
             );
 
-            // >> a
+            // find a
             MatchFindOperator = Sequence(
                 Names.Find,
                 Token(CommonTokenNames.FindOperator),
                 unaryDataTermsOptions
             );
 
-            // >>> a
-            MatchSkipOperator = Sequence(
-                Names.Skip,
-                Token(CommonTokenNames.SkipOperator),
+            // stop_at foo
+            MatchStopBeforeOperator = Sequence(
+                Names.StopAt,
+                Token(CommonTokenNames.StopAt),
+                unaryDataTermsOptions
+            );
+
+            // stop_after foo
+            MatchStopAfterOperator = Sequence(
+                Names.StopAfter,
+                Token(CommonTokenNames.StopAfter),
                 unaryDataTermsOptions
             );
 
@@ -428,7 +438,8 @@ namespace gg.parse.script.parser
                 MatchNotOperator,
                 IfMatchOperator,
                 MatchFindOperator,
-                MatchSkipOperator
+                MatchStopAfterOperator,
+                MatchStopBeforeOperator
             ];
         }
 

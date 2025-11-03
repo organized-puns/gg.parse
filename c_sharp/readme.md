@@ -15,7 +15,7 @@ tools to make parsing of simple and complex data easy to do.
 - [Goals](#goals-use-cases-and-otherwise)
 - [Quickstart](#quickstart)
 - [Project structure](#project-structure)
-- [Rule references](#rule-references)  
+- [Rules](#rules)  
 - [More information](#more-information)
 
 License
@@ -99,16 +99,16 @@ Doing the same using a script (see `gg.parse.doc.examples.test\CreateFilenameTok
 
     // note this can also be read from a separate file
     public static readonly string _filenameScript =
-      "-r filenames       = +(find_filename, filename);\n" +
-      "-a find_filename   = >>> filename;\n" +
-      "filename           = drive, path;\n" +
-      "drive              = letter, ':', separator;\n" +
-      "path               = path_part, *(-a separator, path_part);\n" +
-      "path_part          = +(letter | number | special_character);\n" +
-      "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
-      "number             = {'0'..'9'};\n" +
-      "separator          = {'\\\\/'};\n" +
-      "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
+        "-r filenames       = +find_filename;\n" +
+        "-r find_filename   = stop_after filename;\n" +
+        "filename           = drive, path;\n" +
+        "drive              = letter, ':', separator;\n" +
+        "path               = path_part, *(-a separator, path_part);\n" +
+        "path_part          = +(letter | number | special_character);\n" +
+        "letter             = {'a'..'z'} | {'A'..'Z'};\n" +
+        "number             = {'0'..'9'};\n" +
+        "separator          = {'\\\\/'};\n" +
+        "special_character  = {\"_-~()[]{}+=@!#$%&`.'\"};\n";
 
     ...
 
@@ -137,8 +137,8 @@ The project consists of 3 main topics:
 Each of these main topics has each own corresponding test project.
   
 
-Rule References
----------------
+Rules
+-----
 
 #### [Match Any](./doc/match-any-data.md) (.)
 #### [Match Condition](./doc/match-condition.md)  (if ...)
@@ -148,6 +148,7 @@ Rule References
 #### [Match Evaluation](./doc/match-evaluation.md)  (a/b/c)
 #### [Match Not](./doc/match-not.md)  (!foo ...)
 #### [Rule reference](./doc/rule-reference.md) (foo)
+#### [Skip Rules](./doc/skip_rule.md) (find, stop_before, stop_after)
 
 More information
 ----------------

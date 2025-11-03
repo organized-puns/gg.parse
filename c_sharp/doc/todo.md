@@ -12,16 +12,17 @@ config:
 kanban
   Backlog
     
-    [ Add callback scripting ]
 	[ Add repeat count to script ]
 	[ Implement properties file ]
+	[ Add linter to workflows ]
   
   In progress
     
     [ Add rule examples ]
-	[ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
+    [ Add callback scripting ]
 	
   Done
+    [ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	[ Add meta rule vs data rule vs rule composition ]
 
 ```
@@ -77,7 +78,30 @@ add BuildMatcher() class (add function to Graphbuilder?) which takes a tokenizer
 
 Add interpolatable tokens to errors, eg {token}, {position}, {line}, {column}, {file} etc to log
 
+### Linter
 
+dotnet format --verify-no-changes
+
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Check formatting
+        run: dotnet format --verify-no-changes
 
 ???
 ---
