@@ -75,8 +75,8 @@ namespace gg.parse.script.parser
                         Keyword(CommonTokenNames.Include, "include"),
                         Keyword(CommonTokenNames.FindOperator, "find"),
                         Keyword(CommonTokenNames.StopAfter, "stop_after"),
-                        Keyword(CommonTokenNames.StopAt, "stop_at")
-                        
+                        Keyword(CommonTokenNames.StopAt, "stop_at"),
+                        Keyword(CommonTokenNames.BreakKeyword, "break")
                     )
                 );
 

@@ -158,15 +158,18 @@ namespace gg.parse.core
                      ? existingRule!
                      : factoryMethod(ruleName, product);
 
-        public void ReplaceRule(RuleBase<T> original, RuleBase<T> replacement)
+        public TRule ReplaceRule<TRule>(IRule original, TRule replacement) where TRule : IRule
         {
             Assertions.RequiresNotNull(original);
             Assertions.RequiresNotNullOrEmpty(original.Name);
             Assertions.Requires(_registeredRules.ContainsKey(original.Name));
             Assertions.RequiresNotNull(replacement);
-            Assertions.Requires(original != replacement);
+            Assertions.Requires(!ReferenceEquals(original, replacement));
             Assertions.Requires(original.Name == replacement.Name);
-            
+
+            // in order to replace rules which contains self-references we need to first
+            // replace the rule in the registry so the rule itself will be considered
+            // when replacing the original
             _registeredRules[original.Name] = replacement;
 
             // replace all references to the original rule in compositions
@@ -188,6 +191,13 @@ namespace gg.parse.core
                 .Cast<IMetaRule>()
                 // recursively replace the composition that contained the original
                 .ForEach(composition => composition.MutateSubject(replacement));
+
+            if (Root == original)
+            {
+                Root = replacement;
+            }
+
+            return (TRule) replacement;
         }
     }
 }

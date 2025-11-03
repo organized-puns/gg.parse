@@ -47,21 +47,6 @@ namespace gg.parse.script.common
                         (ruleName, product) => RegisterRule(
                             new MatchAnyData<T>(ruleName, product)));
 
-        public CallbackRule<T> Callback(
-            RuleBase<T> rule,
-            RuleCallbackAction<T> callback,
-            CallbackRule<T>.CallbackCondition condition = CallbackRule<T>.CallbackCondition.Success) =>
-            Callback(null, rule, callback, condition);
-
-        public CallbackRule<T> Callback(
-            string? name, 
-            RuleBase<T> rule,
-            RuleCallbackAction<T> callback,
-            CallbackRule<T>.CallbackCondition condition = CallbackRule<T>.CallbackCondition.Success) =>
-            FindOrRegister(name, $"{CommonTokenNames.Callback}({rule.Name})",
-                        (ruleName, product) => RegisterRule(
-                            new CallbackRule<T>(ruleName, rule, callback, condition)));
-
         public LogRule<T> Error(string name, string message, RuleBase<T>? condition = null) =>
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
                         (ruleName, pruning) => RegisterRule(
