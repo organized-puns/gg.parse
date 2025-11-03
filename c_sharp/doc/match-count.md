@@ -62,12 +62,14 @@ Currently there is no implementation in the script to set a specific min or max 
 * zero_or_one: '?'
 * zero_or_more: '*'
 * one_or_more: '+'
+* specific_range: '[min..max]'
 
 ```csharp
 // gg.parse.doc.examples.test\assets\match_count_example.tokens
 match_zero_or_more_foos = *foo, info "zero or more foos found";
 match_zero_or_one_foo = ?foo, info "zero or one foo found";
 match_one_or_more_foos = +foo, info "one or more foos found";
+match_three = [3..3]foo, info "three foos found";
 ```
 
 ```csharp
@@ -96,5 +98,8 @@ public void MatchCount_ScriptExample()
 
     // will output "no foos found :("
     IsTrue(tokenizer.Tokenize("bar", usingRule: "match_one_or_more_foos", processLogsOnResult: true));
+
+    // will output "three foos found"
+    IsTrue(tokenizer.Tokenize("foofoofoo", usingRule: "match_three_foos", processLogsOnResult: true));
 }
 ```

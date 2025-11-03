@@ -13,6 +13,32 @@ namespace gg.parse.script.tests.parser
     public class ScriptParserTest
     {
         [TestMethod]
+        public void CreateCountRangeScript_Parse_ExpectCount()
+        {
+            var parser = new ScriptParser();
+
+            var (tokens, nodes) = parser.Parse("rule = [1..2]'foo';");
+
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
+
+            var ruleNameRule = nodes[0][0].Rule;
+            IsTrue(ruleNameRule == parser.MatchRuleName);
+
+            var countRule = nodes[0][1].Rule;
+            IsTrue(countRule == parser.MatchCountOperator);
+
+            var min = nodes[0][1][0].Rule;
+            IsTrue(min.Name == CommonTokenNames.Integer);
+
+            var max = nodes[0][1][1].Rule;
+            IsTrue(max.Name == CommonTokenNames.Integer);
+
+            var fooLiteral = nodes[0][1][2].Rule;
+            IsTrue(fooLiteral.Name == ScriptParser.Names.Literal);
+        }
+
+        [TestMethod]
         public void CreateStopBeforeScript_Parse_ExpectSkipNodes()
         {
             var parser = new ScriptParser();
@@ -788,8 +814,6 @@ namespace gg.parse.script.tests.parser
             // no modifier selector
             IsTrue(sequenceNode[3][0].Rule == parser.IdentifierToken);
         }
-
-        
     }
 }
 

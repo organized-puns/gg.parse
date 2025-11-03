@@ -314,5 +314,46 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0]!.Rule!.Name == "root");
         }
+
+        [TestMethod]
+        public void CreateRangedCountScript_Parse_ExpectSuccess()
+        {          
+            var builder = new ParserBuilder().From($"foo=[2..3]'foo';");
+
+            var (tokens, _) = builder.Parse("foo");
+
+            IsFalse(tokens);
+
+            (tokens, _) = builder.Parse("foofoo");
+
+            IsTrue(tokens);
+            IsTrue(tokens[0].Children.Count == 2);
+
+            (tokens, _) = builder.Parse("foofoofoo");
+
+            IsTrue(tokens);
+            IsTrue(tokens[0].Children.Count == 3);
+        }
+
+        [TestMethod]
+        public void CreateRangedCountScriptWithoutLimit_Parse_ExpectSuccess()
+        {
+            // set no max
+            var builder = new ParserBuilder().From($"foo=[2..0]'foo';");
+
+            var (tokens, _) = builder.Parse("foo");
+
+            IsFalse(tokens);
+
+            (tokens, _) = builder.Parse("foofoo");
+
+            IsTrue(tokens);
+            IsTrue(tokens[0].Children.Count == 2);
+
+            (tokens, _) = builder.Parse("foofoofoo");
+
+            IsTrue(tokens);
+            IsTrue(tokens[0].Children.Count == 3);           
+        }
     }
 }

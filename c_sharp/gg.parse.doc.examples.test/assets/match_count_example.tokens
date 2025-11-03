@@ -8,7 +8,4 @@ foo = "foo";
 match_zero_or_more_foos = *foo, info "zero or more foos found";
 match_zero_or_one_foo = ?foo, info "zero or one foo found";
 match_one_or_more_foos = (+foo, info "one or more foos found") | info "no foos found :(";
-	
-// currently there is no script implementation to match an exact amount
-// so we'd have to resort to a sequence
-match_three_foos = foo, foo, foo;
+match_three_foos = [3..3]foo, info "three foos found";

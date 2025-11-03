@@ -191,11 +191,52 @@ namespace gg.parse.script.compiler
             return result ?? throw new CompilationException("Failed to compile group");
         }
 
+        public static RuleBase<T> CompileRangedCount<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T>
+        {
+            Assertions.Requires(bodyNode != null);
+            Assertions.Requires(bodyNode!.Children != null);
+            Assertions.Requires(bodyNode.Children!.Count > 0);
+
+            var min = int.Parse(session.GetText(bodyNode.Children[0].Range));
+            var max = int.Parse(session.GetText(bodyNode.Children[1].Range));
+
+            if (min > max && max > 0)
+            {
+                throw new CompilationException($"CompileRangedCount, min ({min}) should be equal or larger than max ({max}).");
+            }
+
+            var elementBody = bodyNode.Children[2];
+            var (compilationFunction, _) = session.Compiler.Functions[elementBody.Rule];
+
+            var elementName = elementBody.GenerateUnnamedRuleName(session, header.Name, 0);
+
+            var elementHeader = new RuleHeader(AnnotationPruning.None, elementName, 0, 0, false);
+
+            if (compilationFunction(elementHeader, elementBody, session) is not RuleBase<T> countRule)
+            {
+                throw new CompilationException("Cannot compile subject for MatchCountRange.", annotation: elementBody);
+            }
+
+            // by default unary (and binary) operators pass the result of the children because
+            // in most cases we're interested in the values in the operation not the fact that there is an binary operation.
+            // The latter would result in much more overhead in specifying the parsers. Only when the rule is a 
+            // toplevel rule (ie rule = a, b, c) we use the user specified output.
+            var pruning =
+                header.IsTopLevel
+                    ? header.Prune
+                    : AnnotationPruning.Root;
+
+            return new MatchCount<T>(header.Name, pruning, header.Precedence, countRule, min, max);
+        }
+
         public static RuleBase<T> CompileCount<T>(
             RuleHeader header,
             Annotation bodyNode,
             CompileSession session,
-            int min, 
+            int min,
             int max) where T : IComparable<T>
         {
             Assertions.Requires(bodyNode != null);
