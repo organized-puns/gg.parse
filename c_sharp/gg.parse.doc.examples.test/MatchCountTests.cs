@@ -93,6 +93,9 @@ namespace gg.parse.doc.examples.test
 
             // will output "no foos found :("
             IsTrue(tokenizer.Tokenize("bar", usingRule: "match_one_or_more_foos", processLogsOnResult: true));
+
+            // will output "three foos found"
+            IsTrue(tokenizer.Tokenize("foofoofoo", usingRule: "match_three_foos", processLogsOnResult: true));
         }
     }
 }

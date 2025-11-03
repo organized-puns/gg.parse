@@ -22,6 +22,7 @@ namespace gg.parse.script.parser
 
             public const string CharacterRange = "char_range";
             public const string CharacterSet = "char_set";
+            public const string Count = "count";
 
             public const string Find = "find";
 
@@ -56,12 +57,14 @@ namespace gg.parse.script.parser
         }
 
         // xxx put in alphabetical order
-        public MatchOneOf<int> MatchLiteral { get; private set; }
-
         public MatchSingleData<int> MatchAnyToken { get; private set; }
 
         public MatchRuleSequence<int> MatchBreakOperator { get; private set; }
 
+        public MatchRuleSequence<int> MatchCountOperator { get; private set; }
+
+        public MatchOneOf<int> MatchLiteral { get; private set; }
+                
         public MatchSingleData<int> MatchPruneRootToken { get; private set; }
 
         public MatchSingleData<int> MatchPruneChildrenToken { get; private set; }
@@ -441,6 +444,17 @@ namespace gg.parse.script.parser
                 unaryDataTermsOptions
             );
 
+            // match count [3..3]
+            MatchCountOperator = Sequence(
+                Names.Count,
+                Token(CommonTokenNames.ArrayStart),
+                Token(CommonTokenNames.Integer, CommonTokenNames.Integer),
+                Token(CommonTokenNames.Elipsis),
+                Token(CommonTokenNames.Integer, CommonTokenNames.Integer),
+                Token(CommonTokenNames.ArrayEnd),
+                unaryDataTermsOptions
+            );
+
             return [
                 MatchZeroOrMoreOperator,
                 MatchZeroOrOneOperator,
@@ -450,7 +464,8 @@ namespace gg.parse.script.parser
                 MatchFindOperator,
                 MatchStopAfterOperator,
                 MatchStopBeforeOperator,
-                MatchBreakOperator
+                MatchBreakOperator,
+                MatchCountOperator
             ];
         }
 

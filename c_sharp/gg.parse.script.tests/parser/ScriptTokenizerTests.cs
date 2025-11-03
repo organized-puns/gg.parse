@@ -199,6 +199,29 @@ namespace gg.parse.script.tests.parser
         }
 
         [TestMethod]
+        public void DefineCount_Parse_ExpectValidTokens()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var rule = "rule_name = [42..100]'foo';";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 9);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.ArrayStart));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.Integer));
+            IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.Elipsis));
+            IsTrue(annotations[5].Rule == tokenizer.FindRule(CommonTokenNames.Integer));
+            IsTrue(annotations[6].Rule == tokenizer.FindRule(CommonTokenNames.ArrayEnd));
+            IsTrue(annotations[7].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[8].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
+        }
+
+
+        [TestMethod]
         public void DefineEscapeTokensInString_Tokenize_ExpectValidTokens()
         {
             var tokenizer = new ScriptTokenizer();
