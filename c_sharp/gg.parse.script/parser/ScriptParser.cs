@@ -18,6 +18,8 @@ namespace gg.parse.script.parser
         {
             public const string Any = "any";
 
+            public const string Break = "break";
+
             public const string CharacterRange = "char_range";
             public const string CharacterSet = "char_set";
 
@@ -57,6 +59,8 @@ namespace gg.parse.script.parser
         public MatchOneOf<int> MatchLiteral { get; private set; }
 
         public MatchSingleData<int> MatchAnyToken { get; private set; }
+
+        public MatchRuleSequence<int> MatchBreakOperator { get; private set; }
 
         public MatchSingleData<int> MatchPruneRootToken { get; private set; }
 
@@ -430,8 +434,14 @@ namespace gg.parse.script.parser
                 unaryDataTermsOptions
             );
 
-            return
-            [
+            // break point
+            MatchBreakOperator = Sequence(
+                Names.Break,
+                Token(CommonTokenNames.BreakKeyword),
+                unaryDataTermsOptions
+            );
+
+            return [
                 MatchZeroOrMoreOperator,
                 MatchZeroOrOneOperator,
                 MatchOneOrMoreOperator,
@@ -439,7 +449,8 @@ namespace gg.parse.script.parser
                 IfMatchOperator,
                 MatchFindOperator,
                 MatchStopAfterOperator,
-                MatchStopBeforeOperator
+                MatchStopBeforeOperator,
+                MatchBreakOperator
             ];
         }
 

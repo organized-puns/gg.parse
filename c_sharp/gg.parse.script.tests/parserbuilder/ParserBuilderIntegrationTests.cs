@@ -1,5 +1,9 @@
-﻿using System.Diagnostics;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
 
+using System.Diagnostics;
+
+using gg.parse.core;
 using gg.parse.util;
 using gg.parse.rules;
 using gg.parse.script.compiler;
@@ -7,7 +11,6 @@ using gg.parse.script.pipeline;
 using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-using gg.parse.core;
 
 namespace gg.parse.script.tests.parserbuilder
 {
@@ -48,8 +51,6 @@ namespace gg.parse.script.tests.parserbuilder
                 IsTrue(ex.InnerException is AggregateException aex && aex.InnerExceptions.Count == 3);
             }
         }
-
-
 
         [TestMethod]
         public void SetupTrivalCase_Parse_ExpectAWorkingParser()
@@ -271,6 +272,47 @@ namespace gg.parse.script.tests.parserbuilder
             // !bar is a lookahead so it should prune all as well
             IsTrue(anonymousRule[1] is MatchNot<char>);
             IsTrue(anonymousRule[1].Prune == AnnotationPruning.All);
+        }
+
+        /// <summary>
+        /// Run in debugger to see the effect
+        /// </summary>
+        [TestMethod]
+        public void InsertBreakPointInCode_Parse_ExpectABreakpoint()
+        {
+            var token = "bar";
+            var builder = new ParserBuilder().From($"foo='{token}';", "root=foo;");
+            var breakPoint = builder.GrammarGraph.AddBreakpoint("foo");
+
+            // this should pause the debugger
+            var (_, barParseResult) = builder.Parse(token);
+
+            IsTrue(barParseResult.FoundMatch);
+            IsTrue(barParseResult[0].Rule.Name == "root");
+
+            builder.GrammarGraph.RemoveBreakpoint(breakPoint);
+
+            // this should not longer pause the debugger
+            (_, barParseResult) = builder.Parse(token);
+
+            IsTrue(barParseResult.FoundMatch);
+            IsTrue(barParseResult[0].Rule.Name == "root");
+        }
+
+        /// <summary>
+        /// Run in debugger to see the effect
+        /// </summary>
+        [TestMethod]
+        public void InsertBreakPointInScript_Parse_ExpectABreakpoint()
+        {
+            var token = "bar";
+            var builder = new ParserBuilder().From($"foo='{token}';", "root = break foo;");
+
+            // this should pause the debugger
+            var (_, barParseResult) = builder.Parse(token);
+
+            IsTrue(barParseResult.FoundMatch);
+            IsTrue(barParseResult[0]!.Rule!.Name == "root");
         }
     }
 }

@@ -208,7 +208,8 @@ namespace gg.parse.script.pipeline
                     .MapRuleToCompilerFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
                     .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<char>)
                     .MapRuleToCompilerFunction(parser.MatchStopAfterOperator, CompileStopAfter<char>)
-                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<char>);
+                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<char>)
+                    .MapRuleToCompilerFunction(parser.MatchBreakOperator, CompileBreakPoint<char>);
         }
 
         /// <summary>
@@ -234,7 +235,8 @@ namespace gg.parse.script.pipeline
                     .MapRuleToCompilerFunction(parser.MatchLog, CompileLog<int>)
                     .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<int>)
                     .MapRuleToCompilerFunction(parser.MatchStopAfterOperator, CompileStopAfter<int>)
-                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<int>);
+                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<int>)
+                    .MapRuleToCompilerFunction(parser.MatchBreakOperator, CompileBreakPoint<int>);
         }
 
         private static (ImmutableList<Annotation>? tokens, ImmutableList<Annotation>? syntaxTree) ParseSessionText<T>(PipelineSession<T> session)

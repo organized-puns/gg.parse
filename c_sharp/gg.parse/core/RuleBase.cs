@@ -54,7 +54,6 @@ namespace gg.parse.core
 
                 _ => throw new NotImplementedException($"No implementation to build a data rule result for enum value {Prune}."),
             };
-        
 
         public ParseResult BuildResult(Range dataRange, ImmutableList<Annotation>? children = null)
         {

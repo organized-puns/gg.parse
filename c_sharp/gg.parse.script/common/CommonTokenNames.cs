@@ -15,6 +15,8 @@ namespace gg.parse.script.common
 
         public static readonly string Boolean = "bool";
 
+        public static readonly string BreakKeyword = "break_keyword";
+
         public static readonly string Callback = "callback";
 
         public static readonly string CollectionSeparator = "collection_separator";

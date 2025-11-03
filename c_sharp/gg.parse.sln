@@ -46,6 +46,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.argparser.tests", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{8D303D6A-1B65-421D-ADC4-18EE58F8021A}"
 	ProjectSection(SolutionItems) = preProject
+		doc\breakpoint.md = doc\breakpoint.md
 		doc\extending_parse_script.md = doc\extending_parse_script.md
 		license.md = license.md
 		doc\match-any-data.md = doc\match-any-data.md

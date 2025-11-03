@@ -33,6 +33,26 @@ namespace gg.parse.script.tests.parser
         }
 
         [TestMethod]
+        public void CreateBreakScript_Parse_ExpectBreakNodes()
+        {
+            var parser = new ScriptParser();
+
+            var (tokens, nodes) = parser.Parse("rule = break 'foo';");
+
+            IsTrue(tokens != null && tokens.Count > 0);
+            IsTrue(nodes != null && nodes.Count == 1 && nodes[0].Children!.Count == 2);
+
+            var ruleNameRule = nodes[0][0].Rule;
+            IsTrue(ruleNameRule == parser.MatchRuleName);
+
+            var skipRule = nodes[0][1].Rule;
+            IsTrue(skipRule == parser.MatchBreakOperator);
+
+            var fooLiteral = nodes[0][1][0].Rule;
+            IsTrue(fooLiteral.Name == ScriptParser.Names.Literal);
+        }
+
+        [TestMethod]
         public void CreateStopAfterScript_Parse_ExpectSkipNodes()
         {
             var parser = new ScriptParser();

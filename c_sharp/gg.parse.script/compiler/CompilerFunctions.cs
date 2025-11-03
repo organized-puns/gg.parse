@@ -4,6 +4,7 @@
 using System.Text.RegularExpressions;
 using gg.parse.core;
 using gg.parse.rules;
+using gg.parse.script.parser;
 using gg.parse.util;
 
 namespace gg.parse.script.compiler
@@ -332,7 +333,15 @@ namespace gg.parse.script.compiler
             CompileSession session) where T : IComparable<T> =>
         
             CompileUnary<T, MatchCondition<T>>(header, bodyNode, session);
-        
+
+
+        public static RuleBase<T> CompileBreakPoint<T>(
+            RuleHeader header,
+            Annotation bodyNode,
+            CompileSession session) where T : IComparable<T> =>
+
+            CompileUnary<T, BreakPointRule<T>>(header, bodyNode, session);
+
 
         public static RuleBase<T> CompileAny<T>(RuleHeader header, Annotation _, CompileSession __) 
             where T : IComparable<T>

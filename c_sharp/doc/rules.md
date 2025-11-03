@@ -93,7 +93,6 @@ Return the result based on whether all subrules succeed in a specific order
 
 * MatchSequence
 
-
 #### Options (IRuleComposition)
 
 Return the results based on if one of the subrules succeed
@@ -103,8 +102,8 @@ Return the results based on if one of the subrules succeed
 
 #### Misc
 
-* Callback
+* [Break](./breakpoint.md) add debugger break points
 * Log
-* [RuleReference](./rule-reference.md)
+* [RuleReference](./rule-reference.md) re-use existing rules
 
 

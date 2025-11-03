@@ -140,6 +140,7 @@ Each of these main topics has each own corresponding test project.
 Rules
 -----
 
+#### [BreakPoint](./doc/breakpoint.md) (break)
 #### [Match Any](./doc/match-any-data.md) (.)
 #### [Match Condition](./doc/match-condition.md)  (if ...)
 #### [Match Count](./doc/match-count.md) (*,+, ?)

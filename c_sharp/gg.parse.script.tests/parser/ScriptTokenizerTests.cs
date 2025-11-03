@@ -54,7 +54,7 @@ namespace gg.parse.script.tests.parser
             for (var i = 0; i < expectedNames.Length; i++)
             {
                 var name = result.Annotations![i].Rule!.Name;
-                IsTrue(name.IndexOf(expectedNames[i]) >= 0);
+                IsTrue(name.Contains(expectedNames[i]));
             }
         }
 
@@ -157,6 +157,24 @@ namespace gg.parse.script.tests.parser
             IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
             IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
             IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.If));
+            IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
+            IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
+        }
+
+        [TestMethod]
+        public void DefineBreakPointRule_Tokenize_ExpectValidMatchAnyTokens()
+        {
+            var tokenizer = new ScriptTokenizer();
+            var rule = "rule_name = break 'literal';";
+
+            var (isSuccess, charactersRead, annotations) = tokenizer.Tokenize(rule);
+
+            IsTrue(isSuccess);
+            IsTrue(charactersRead == rule.Length);
+            IsTrue(annotations!.Count == 5);
+            IsTrue(annotations[0].Rule == tokenizer.FindRule(CommonTokenNames.Identifier));
+            IsTrue(annotations[1].Rule == tokenizer.FindRule(CommonTokenNames.Assignment));
+            IsTrue(annotations[2].Rule == tokenizer.FindRule(CommonTokenNames.BreakKeyword));
             IsTrue(annotations[3].Rule == tokenizer.FindRule(CommonTokenNames.SingleQuotedString));
             IsTrue(annotations[4].Rule == tokenizer.FindRule(CommonTokenNames.EndStatement));
         }
