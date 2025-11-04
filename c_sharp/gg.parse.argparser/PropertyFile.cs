@@ -71,16 +71,17 @@ namespace gg.parse.argparser
             }
         }
 
-        public static string Write<T>(T obj, string indent = "    ") where T : class
+        public static string Write<T>(T obj) where T : class =>
+            Write(obj, new PropertiesConfig());
+
+        public static string Write<T>(T obj, in PropertiesConfig config) where T : class
         {
             if (obj == null)
             {
                 return "null";
             }
 
-            return new StringBuilder()
-                        .Append($"// {obj.GetType()}\n")
-                        .AppendValue(obj, indent: indent).ToString();
+            return new StringBuilder().AppendValue(obj, config).ToString();
         }
     }
 }

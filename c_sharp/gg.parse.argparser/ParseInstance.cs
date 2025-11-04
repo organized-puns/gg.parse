@@ -2,20 +2,77 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.core;
-using gg.parse.script.common;
 using gg.parse.util;
+using System;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace gg.parse.argparser
 {
+    public enum PropertiesFormat
+    {
+        Default,
+        Json
+    }
+
+    public readonly struct PropertiesConfig
+    {
+        public bool AddMetaInformation
+        {
+            get;
+            init;
+        }
+
+        public PropertiesFormat Format 
+        { 
+            get; 
+            init; 
+        }
+
+        public string Indent 
+        { 
+            get; 
+            init; 
+        }
+
+        public int IndentCount 
+        { 
+            get; 
+            init; 
+        }
+
+        public PropertiesConfig()
+        {
+            Indent = "    ";
+            Format = PropertiesFormat.Default;
+            AddMetaInformation = true;
+        }
+
+        public PropertiesConfig(PropertiesFormat format = PropertiesFormat.Default, string indent = "    ", bool addMetaInfo = true)
+        {
+            Indent = indent;
+            Format = format;
+            AddMetaInformation = addMetaInfo;
+        }
+
+        public static PropertiesConfig operator +(PropertiesConfig left, int count)
+        {
+            return new PropertiesConfig(left.Format, left.Indent, left.AddMetaInformation)
+            {
+                IndentCount = left.IndentCount + count
+            };
+        }
+    }
+
     public static class ParseInstance
     {
+        public static readonly string MetaInfoKey = "__meta_information";
+
         public static object OfValue(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             if (targetType.IsArray)
@@ -156,7 +213,24 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
         }
 
-        public static object OfObject(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        private static string KeyToPropertyName(Annotation node, ImmutableList<Annotation> tokenList, string text)
+        {
+            var keyString = node.GetText(text, tokenList);
+
+            // can be a string in case of a json format
+            if (node == ArgParserNames.String)
+            {
+                return keyString.Substring(1, keyString.Length - 2);
+            }
+
+            return keyString;
+        }
+
+        public static object OfObject(
+            Type targetType, 
+            Annotation annotation, 
+            ImmutableList<Annotation> tokenList, 
+            string text)
         {
             if (annotation == ArgParserNames.Dictionary)
             {
@@ -168,8 +242,10 @@ namespace gg.parse.argparser
                 {
                     Assertions.RequiresNotNull(annotation[i]);
 
-                    // key needs to be an identifier
-                    var key      = annotation[i]![0]!.GetText(text, tokenList);
+                    var key      = KeyToPropertyName(annotation[i]![0]!, tokenList, text);
+
+                    if (key == MetaInfoKey) continue;
+
                     var property = targetType.GetProperty(key);
 
                     if (property != null)
@@ -236,6 +312,9 @@ namespace gg.parse.argparser
             }
         }
 
+        private static StringBuilder Indent(this StringBuilder builder, in PropertiesConfig context) =>
+            Indent(builder, context.IndentCount, context.Indent);
+
         private static StringBuilder Indent(this StringBuilder builder, int indentLength, string indent)
         {
             for (var i = 0; i < indentLength; i++)
@@ -246,11 +325,11 @@ namespace gg.parse.argparser
             return builder;
         }
 
-        public static StringBuilder AppendValue(this StringBuilder builder, object? value, int indentLength = 0, string indent = "    ")
+        public static StringBuilder AppendValue(this StringBuilder builder, object? value, in PropertiesConfig context)
         {
             if (value == null)
             {
-                builder.Indent(indentLength, indent).Append("null");
+                builder.Indent(in context).Append("null");
             }
             else
             {
@@ -258,7 +337,7 @@ namespace gg.parse.argparser
 
                 if (targetType.IsArray)
                 {
-                    AppendArray(builder, (Array)value, indentLength, indent);
+                    AppendArray(builder, (Array)value, in context);
                 }
                 else if (targetType.IsGenericType)
                 {
@@ -266,7 +345,7 @@ namespace gg.parse.argparser
 
                     if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
                     {
-                        AppendDictionary(builder, (IDictionary)value, indentLength, indent);
+                        AppendDictionary(builder, (IDictionary)value, in context);
                     }
                     else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>)))
                     {
@@ -281,26 +360,26 @@ namespace gg.parse.argparser
                 }
                 else if (targetType != typeof(string) && targetType.IsClass)
                 {
-                    AppendClassOrStruct(builder, value, indentLength, indent);
+                    AppendClassOrStruct(builder, value, context);
                 }
                 else if (targetType.IsValueType && !targetType.IsEnum && !targetType.IsPrimitive)
                 {
-                    AppendClassOrStruct(builder, value, indentLength, indent);
+                    AppendClassOrStruct(builder, value, context);
                 }
                 else
                 {
-                    AppendBasicValue(builder, value, indentLength, indent);
+                    AppendBasicValue(builder, value);
                 }
             }
 
             return builder;
         }
 
-        public static void AppendArray(this StringBuilder builder, Array a, int indentLength = 0, string indent = "    ")
+        public static void AppendArray(this StringBuilder builder, Array a, in PropertiesConfig context)
         {
             if (a == null)
             {
-                builder.Indent(indentLength, indent).Append("null");
+                builder.Indent(in context).Append("null");
             }
             else
             {
@@ -308,7 +387,7 @@ namespace gg.parse.argparser
 
                 for (var i = 0; i < a.Length; i++)
                 {
-                    AppendValue(builder, a.GetValue(i));
+                    AppendValue(builder, a.GetValue(i), in context);
 
                     if (i < a.Length - 1)
                     {
@@ -320,11 +399,11 @@ namespace gg.parse.argparser
             }
         }
 
-        public static void AppendDictionary(this StringBuilder builder, IDictionary dictionary, int indentLength = 0, string indent = "    ")
+        public static void AppendDictionary(this StringBuilder builder, IDictionary dictionary, in PropertiesConfig context)
         {
             if (dictionary == null)
             {
-                builder.Indent(indentLength, indent).Append("null");
+                builder.Indent(in context).Append("null");
             }
             else
             {
@@ -332,9 +411,17 @@ namespace gg.parse.argparser
 
                 foreach (DictionaryEntry kv in dictionary)
                 {
-                    builder.Indent(indentLength + 1, indent).AppendValue(kv.Key, indentLength + 1, indent);
+                    if (context.Format == PropertiesFormat.Default || kv.Key is string)
+                    {
+                        builder.Indent(context + 1).AppendValue(kv.Key, context + 1);
+                    }
+                    else
+                    {
+                        builder.Indent(context + 1).AppendValue($"\"{kv.Key}\"", context + 1);
+                    }
+
                     builder.Append(": ");
-                    builder.AppendValue(kv.Value);
+                    builder.AppendValue(kv.Value, in context);
 
                     builder.Append(",\n");
                 }
@@ -342,15 +429,15 @@ namespace gg.parse.argparser
                 // remove the last comma
                 builder.Remove(builder.Length - 2, 2);
 
-                builder.Append('\n').Indent(indentLength, indent).Append('}');
+                builder.Append('\n').Indent(in context).Append('}');
             }
         }
 
-        public static void AppendClassOrStruct(this StringBuilder builder, object value, int indentLength = 0, string indent = "    ")
+        public static void AppendClassOrStruct(this StringBuilder builder, object value, in PropertiesConfig config)
         {
             if (value == null)
             {
-                builder.Indent(indentLength, indent).Append("null");
+                builder.Indent(in config).Append("null");
             }
             else
             {
@@ -363,11 +450,33 @@ namespace gg.parse.argparser
                         BindingFlags.SetProperty
                     );
                 builder.Append("{\n");
-                               
+
+                if (config.AddMetaInformation)
+                {
+                    var key = config.Format == PropertiesFormat.Default
+                            ? MetaInfoKey
+                            : $"\"{MetaInfoKey}\"";
+
+                    builder.Indent(config + 1).Append($"{key}: \"{{type: {value.GetType().AssemblyQualifiedName}}}\"");
+
+                    if (properties.Length > 0)
+                    {
+                        builder.Append(",\n");
+                    }
+                }
+
                 foreach (var property in properties)
                 {
-                    builder.Indent(indentLength+1, indent).Append($"{property.Name}: ");
-                    AppendValue(builder, property.GetValue(value), indentLength + 1, indent);
+                    if (config.Format == PropertiesFormat.Default)
+                    { 
+                        builder.Indent(config + 1).Append($"{property.Name}: ");
+                    }
+                    else if (config.Format == PropertiesFormat.Json)
+                    {
+                        builder.Indent(config + 1).Append($"\"{property.Name}\": ");
+                    }
+
+                    AppendValue(builder, property.GetValue(value), config + 1);
 
                     builder.Append(",\n");
                 }
@@ -375,11 +484,11 @@ namespace gg.parse.argparser
                 // remove the last comma
                 builder.Remove(builder.Length - 2, 2);
 
-                builder.Append('\n').Indent(indentLength, indent).Append('}');
+                builder.Append('\n').Indent(in config).Append('}');
             }
         }
 
-        public static void AppendBasicValue(this StringBuilder builder, object? value, int indentLength = 0, string indent = "    ")
+        public static void AppendBasicValue(this StringBuilder builder, object? value)
         {
             if (value == null)
             {

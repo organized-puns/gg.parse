@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using System.Text;
+using static gg.parse.argparser.tests.PropertiesTests;
 
 namespace gg.parse.argparser.tests
 {
@@ -83,13 +84,14 @@ namespace gg.parse.argparser.tests
                 {
                     Name = "foo"
                 },
-                Arr = [ 1, 2, 3 ]
+                Arr = [1, 2, 3]
             };
 
-            var complexPropertyString = PropertyFile.Write(complexProperties, indent: "  ");
+            var complexPropertyString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: false));
 
             var properties = PropertyFile.Read<ComplexProperties>(complexPropertyString);
-         
+
             Assert.IsNotNull(properties);
             Assert.IsTrue(properties.Name == "foo");
             Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
@@ -97,5 +99,25 @@ namespace gg.parse.argparser.tests
             Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
             Assert.IsTrue(properties.SingleProperty.Name == "foo");
         }
+
+        // xxx For future, make a best guess based on the annotation
+        /*[TestMethod]
+        public void WriteAndReadDictionary_ExpectSameDictionary()
+        {
+            var dict = new Dictionary<string, object>()
+            {
+                { "key1", "foo" },
+                { "key2", 123 },
+                { "key3", new Dictionary<string, string>() { {"str1", "value1" } } },
+                { "key4", new SingleProperty() { Name = "key4" } }
+            };
+
+            var dictString = PropertyFile.Write(dict,
+                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: false));
+
+            var properties = PropertyFile.Read<Dictionary<string, object>>(dictString);
+
+            Assert.IsNotNull(properties);            
+        }*/
     }
 }
