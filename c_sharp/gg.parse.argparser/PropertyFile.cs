@@ -3,6 +3,7 @@
 
 using gg.parse.rules;
 using gg.parse.script;
+using System.Text;
 
 namespace gg.parse.argparser
 {
@@ -68,6 +69,18 @@ namespace gg.parse.argparser
                 var report = builder.GetReport(ex, LogLevel.Fatal | LogLevel.Error);
                 throw new ArgumentException($"Failed to read properties.\n{report}", ex);
             }
+        }
+
+        public static string Write<T>(T obj, string indent = "    ") where T : class
+        {
+            if (obj == null)
+            {
+                return "null";
+            }
+
+            return new StringBuilder()
+                        .Append($"// {obj.GetType()}\n")
+                        .AppendValue(obj, indent: indent).ToString();
         }
     }
 }

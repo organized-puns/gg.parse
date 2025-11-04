@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Text;
+
 namespace gg.parse.argparser.tests
 {
     [TestClass]
@@ -46,7 +48,7 @@ namespace gg.parse.argparser.tests
         {
             var fooValue = "foo";
             var properties = PropertyFile.Read<ComplexProperties>(
-                $"{{" + 
+                $"{{" +
                 $"  Name: '{fooValue}'," +
                 $"  SingleProperty: {{" +
                 $"      Name: '{fooValue}'" +
@@ -62,8 +64,38 @@ namespace gg.parse.argparser.tests
             Assert.IsTrue(properties.Name == fooValue);
             Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
             Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
-            Assert.IsTrue(properties.Arr.SequenceEqual([1,2,3]));
+            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
             Assert.IsTrue(properties.SingleProperty.Name == fooValue);
+        }
+
+        [TestMethod]
+        public void WriteAndReadComplexProperties_ExpectPropertiesSet()
+        {
+            var complexProperties = new ComplexProperties()
+            {
+                Name = "foo",
+                ExtendedProperties = new Dictionary<string, string>()
+                {
+                    { "key1", "value1" },
+                    { "key2", "value2" },
+                },
+                SingleProperty = new SingleProperty()
+                {
+                    Name = "foo"
+                },
+                Arr = [ 1, 2, 3 ]
+            };
+
+            var complexPropertyString = PropertyFile.Write(complexProperties, indent: "  ");
+
+            var properties = PropertyFile.Read<ComplexProperties>(complexPropertyString);
+         
+            Assert.IsNotNull(properties);
+            Assert.IsTrue(properties.Name == "foo");
+            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            Assert.IsTrue(properties.SingleProperty.Name == "foo");
         }
     }
 }

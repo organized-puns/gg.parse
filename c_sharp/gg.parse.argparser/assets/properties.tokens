@@ -16,7 +16,8 @@ include "common.tokens";
 					| scope_start | scope_end 
 					| array_start | array_end 
 					| kv_separator | item_separator
-					| identifier;
+					| identifier
+					| single_line_comment | multi_line_comment;
 
 boolean         = 'true' | 'false';
 
@@ -34,5 +35,8 @@ identifier		= (underscore | letter ), *(underscore | letter | digit);
 
 kv_separator	= ('=' | ':');
 item_separator	= ',';
+
+-a single_line_comment = "//", stop_after '\n';
+-a multi_line_comment = "/*", stop_after '*/';
 
 unknown_property_error	= error "unknown token found." if *(!property_token_list, .);

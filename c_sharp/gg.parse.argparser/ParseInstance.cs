@@ -1,12 +1,16 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.core;
+using gg.parse.script.common;
+using gg.parse.util;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Globalization;
-
-using gg.parse.core;
-using gg.parse.util;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace gg.parse.argparser
 {
@@ -230,7 +234,166 @@ namespace gg.parse.argparser
             {
                 throw new NotImplementedException($"No backing implementation to parse type {targetType}.");
             }
+        }
 
+        private static StringBuilder Indent(this StringBuilder builder, int indentLength, string indent)
+        {
+            for (var i = 0; i < indentLength; i++)
+            {
+                builder.Append(indent);
+            }
+
+            return builder;
+        }
+
+        public static StringBuilder AppendValue(this StringBuilder builder, object? value, int indentLength = 0, string indent = "    ")
+        {
+            if (value == null)
+            {
+                builder.Indent(indentLength, indent).Append("null");
+            }
+            else
+            {
+                var targetType = value.GetType();
+
+                if (targetType.IsArray)
+                {
+                    AppendArray(builder, (Array)value, indentLength, indent);
+                }
+                else if (targetType.IsGenericType)
+                {
+                    var interfaces = targetType.GetInterfaces();
+
+                    if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
+                    {
+                        AppendDictionary(builder, (IDictionary)value, indentLength, indent);
+                    }
+                    else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>)))
+                    {
+                    }
+                    else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISet<>)))
+                    {
+                    }
+                    else
+                    { 
+                        throw new NotImplementedException($"No backing implementation for type {targetType}.");
+                    }
+                }
+                else if (targetType != typeof(string) && targetType.IsClass)
+                {
+                    AppendClassOrStruct(builder, value, indentLength, indent);
+                }
+                else if (targetType.IsValueType && !targetType.IsEnum && !targetType.IsPrimitive)
+                {
+                    AppendClassOrStruct(builder, value, indentLength, indent);
+                }
+                else
+                {
+                    AppendBasicValue(builder, value, indentLength, indent);
+                }
+            }
+
+            return builder;
+        }
+
+        public static void AppendArray(this StringBuilder builder, Array a, int indentLength = 0, string indent = "    ")
+        {
+            if (a == null)
+            {
+                builder.Indent(indentLength, indent).Append("null");
+            }
+            else
+            {
+                builder.Append('[');
+
+                for (var i = 0; i < a.Length; i++)
+                {
+                    AppendValue(builder, a.GetValue(i));
+
+                    if (i < a.Length - 1)
+                    {
+                        builder.Append(", ");
+                    }
+                }
+
+                builder.Append(']');
+            }
+        }
+
+        public static void AppendDictionary(this StringBuilder builder, IDictionary dictionary, int indentLength = 0, string indent = "    ")
+        {
+            if (dictionary == null)
+            {
+                builder.Indent(indentLength, indent).Append("null");
+            }
+            else
+            {
+                builder.Append("{\n");
+
+                foreach (DictionaryEntry kv in dictionary)
+                {
+                    builder.Indent(indentLength + 1, indent).AppendValue(kv.Key, indentLength + 1, indent);
+                    builder.Append(": ");
+                    builder.AppendValue(kv.Value);
+
+                    builder.Append(",\n");
+                }
+
+                // remove the last comma
+                builder.Remove(builder.Length - 2, 2);
+
+                builder.Append('\n').Indent(indentLength, indent).Append('}');
+            }
+        }
+
+        public static void AppendClassOrStruct(this StringBuilder builder, object value, int indentLength = 0, string indent = "    ")
+        {
+            if (value == null)
+            {
+                builder.Indent(indentLength, indent).Append("null");
+            }
+            else
+            {
+                var properties = value
+                    .GetType()
+                    .GetProperties(
+                        BindingFlags.Public | 
+                        BindingFlags.Instance | 
+                        BindingFlags.GetProperty | 
+                        BindingFlags.SetProperty
+                    );
+                builder.Append("{\n");
+                               
+                foreach (var property in properties)
+                {
+                    builder.Indent(indentLength+1, indent).Append($"{property.Name}: ");
+                    AppendValue(builder, property.GetValue(value), indentLength + 1, indent);
+
+                    builder.Append(",\n");
+                }
+
+                // remove the last comma
+                builder.Remove(builder.Length - 2, 2);
+
+                builder.Append('\n').Indent(indentLength, indent).Append('}');
+            }
+        }
+
+        public static void AppendBasicValue(this StringBuilder builder, object? value, int indentLength = 0, string indent = "    ")
+        {
+            if (value == null)
+            {
+                builder.Append("null");
+            }
+            else if (value is string str)
+            {
+                builder.Append('"' + Regex.Escape(str) + '"');
+            }
+            else
+            {
+                var result = value.ToString();
+                builder.Append(result ?? "null");
+            }
         }
     }
 }
