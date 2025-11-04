@@ -1,5 +1,5 @@
 
-properties		  = eof | *value;
+properties		  = eof | *(-r value);
 
 value			  = string | int | float | boolean | null | dictionary | array | identifier;
 

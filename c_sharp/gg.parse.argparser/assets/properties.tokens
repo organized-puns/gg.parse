@@ -4,6 +4,10 @@
 
 include "common.tokens";
 
+// in case of tokens read as stand alone properties
+-r property_tokens = *(property_token_list | -a white_space | unknown_property_error);
+
+// in case properties are used as arguments where whitespace matters
 -r property_token	= property_token_list | white_space | unknown_property_error;
 
 -r property_token_list = float | int 

@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Globalization;
+
 using gg.parse.core;
 using gg.parse.util;
 
@@ -11,11 +12,11 @@ namespace gg.parse.argparser
 {
     public static class ParseInstance
     {
-        public static object OfValue<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static object OfValue(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             if (targetType.IsArray)
             {
-                return OfArray<T>(targetType, annotation, tokenList, text);
+                return OfArray(targetType, annotation, tokenList, text);
             }
             else if (targetType.IsGenericType)
             {
@@ -23,27 +24,27 @@ namespace gg.parse.argparser
 
                 if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
                 {
-                    return OfDictionary<T>(targetType, annotation, tokenList, text);
+                    return OfDictionary(targetType, annotation, tokenList, text);
                 }
                 else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>)))
                 {
-                    return OfList<T>(targetType, annotation, tokenList, text);
+                    return OfList(targetType, annotation, tokenList, text);
                 }
                 else if (interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISet<>)))
                 {
-                    return OfSet<T>(targetType, annotation, tokenList, text);
+                    return OfSet(targetType, annotation, tokenList, text);
                 }
 
                 throw new NotImplementedException($"No backing implementation for type {targetType}.");
             }
             else if (targetType != typeof(string) && targetType.IsClass)
             {
-                return OfObject<T>(targetType, annotation, tokenList, text);
+                return OfObject(targetType, annotation, tokenList, text);
             }
             else if (targetType.IsValueType && !targetType.IsEnum && !targetType.IsPrimitive)
             {
                 // treat structs as objects
-                return OfObject<T>(targetType, annotation, tokenList, text);
+                return OfObject(targetType, annotation, tokenList, text);
             }
             else
             {
@@ -51,7 +52,7 @@ namespace gg.parse.argparser
             }
         }
 
-        public static Array OfArray<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static Array OfArray(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             var arrayType = targetType.GetElementType();
 
@@ -63,7 +64,7 @@ namespace gg.parse.argparser
                 // need to skip the array start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.SetValue(OfValue<T>(arrayType, annotation[i]!, tokenList, text), i - 1);
+                    result.SetValue(OfValue(arrayType, annotation[i]!, tokenList, text), i - 1);
                 }
 
                 return result;
@@ -74,7 +75,7 @@ namespace gg.parse.argparser
                 : new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
         }
 
-        public static IList OfList<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static IList OfList(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);           
@@ -90,7 +91,7 @@ namespace gg.parse.argparser
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.Add(OfValue<T>(listType, annotation[i]!, tokenList, text));
+                    result.Add(OfValue(listType, annotation[i]!, tokenList, text));
                 }
 
                 return result;
@@ -99,7 +100,7 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Array<{listType}> but provided value is not a valid array.");
         }
 
-        public static object OfSet<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static object OfSet(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             var setType = targetType.GetGenericArguments()[0];
 
@@ -113,7 +114,7 @@ namespace gg.parse.argparser
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    addMethod!.Invoke(result, [OfValue<T>(setType, annotation[i]!, tokenList, text)]);
+                    addMethod!.Invoke(result, [OfValue(setType, annotation[i]!, tokenList, text)]);
                 }
 
                 return result;
@@ -122,7 +123,7 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Set<{setType}> but provided value is not a valid set (must be defined as an array).");
         }
 
-        public static IDictionary OfDictionary<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static IDictionary OfDictionary(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);
@@ -139,8 +140,8 @@ namespace gg.parse.argparser
                 // need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    var key = OfValue<T>(keyType, annotation[i]![0]!, tokenList, text);
-                    var value = OfValue<T>(valueType, annotation[i]![1]!, tokenList, text);
+                    var key = OfValue(keyType, annotation[i]![0]!, tokenList, text);
+                    var value = OfValue(valueType, annotation[i]![1]!, tokenList, text);
 
                     result.Add(key, value);
                 }
@@ -151,7 +152,7 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
         }
 
-        public static object OfObject<T>(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static object OfObject(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
         {
             if (annotation == ArgParserNames.Dictionary)
             {
@@ -169,7 +170,7 @@ namespace gg.parse.argparser
 
                     if (property != null)
                     {
-                        var value = OfValue<T>(property.PropertyType, annotation[i]![1]!, tokenList, text);
+                        var value = OfValue(property.PropertyType, annotation[i]![1]!, tokenList, text);
                         property.SetValue(result, value);
                     }
                     else
@@ -180,7 +181,7 @@ namespace gg.parse.argparser
                         {
                             Assertions.Requires(annotation[i]!.Count >= 2);
 
-                            var value = OfValue<T>(field.FieldType, annotation[i]![1]!, tokenList, text);
+                            var value = OfValue(field.FieldType, annotation[i]![1]!, tokenList, text);
                             field.SetValue(result, value);
                         }
                         else

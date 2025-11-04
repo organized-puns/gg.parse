@@ -11,13 +11,13 @@ config:
 ---
 kanban
   Backlog
-    
-    [ Implement properties file ]
+        
 	[ Add linter to workflows ]
   
   In progress
     
     [ Add rule examples ]
+    [ Implement properties file ]
     	
   Done
     [ Add repeat count to script ]

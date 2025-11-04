@@ -24,12 +24,12 @@ namespace gg.parse.argparser
 
         public string GetErrorReport(Exception e)
         {
-            
-            var parserErrors = Parser.LogHandler?.ReceivedLogs?.Where(l => l.level == rules.LogLevel.Error);
+            return Parser.GetReport(e, rules.LogLevel.Error | rules.LogLevel.Fatal);
+            /*var parserErrors = Parser.LogHandler?.ReceivedLogs?.Where(l => l.level == rules.LogLevel.Error);
 
             return parserErrors != null && parserErrors.Any()
                 ? string.Join("\n", parserErrors)
-                : e.Message;
+                : e.Message;*/
         }
         
         public T Parse(string[] args) =>
@@ -109,7 +109,7 @@ namespace gg.parse.argparser
                 {
                     property.SetValue(
                         target!,
-                        ParseInstance.OfValue<T>(property!.ArgType, node[0]!, tokens.Annotations!, args)
+                        ParseInstance.OfValue(property!.ArgType, node[0]!, tokens.Annotations!, args)
                     );
                 }
                 catch (Exception ex)
@@ -153,7 +153,7 @@ namespace gg.parse.argparser
                     object value = node.Count == 2
                         // assumed structure is -a=b where node[0] is a key, node[1] = value and node[1][0]
                         // the actual value type
-                        ? ParseInstance.OfValue<T>(argType.ArgType, node[1]![0]!, tokens.Annotations, args)
+                        ? ParseInstance.OfValue(argType.ArgType, node[1]![0]!, tokens.Annotations, args)
                         // assume its a bool
                         : true;
 
