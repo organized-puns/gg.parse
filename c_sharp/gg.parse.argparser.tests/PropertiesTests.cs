@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Linq;
 using System.Text;
 using static gg.parse.argparser.tests.PropertiesTests;
 
@@ -42,6 +43,10 @@ namespace gg.parse.argparser.tests
             public int[] Arr { get; set; }
 
             public SingleProperty SingleProperty { get; set; }
+
+            public List<bool> BoolList { get; set; }
+
+            public HashSet<string> StringSet { get; set; }
         }
 
         [TestMethod]
@@ -58,7 +63,8 @@ namespace gg.parse.argparser.tests
                 $"  ExtendedProperties: {{" +
                 $"      'key1': 'value1'," +
                 $"      'key2': 'value2'" +
-                $"  }}" +
+                $"  }}," +
+                $"  StringSet: ['foo', 'bar']" +
                 $"}}");
 
             Assert.IsNotNull(properties);
@@ -67,6 +73,36 @@ namespace gg.parse.argparser.tests
             Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
             Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
             Assert.IsTrue(properties.SingleProperty.Name == fooValue);
+            Assert.IsTrue(properties.BoolList == null);
+            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+        }
+
+        [TestMethod]
+        public void ReadComplexPropertiesWithDefaultFormat_ExpectPropertiesSet()
+        {
+            var fooValue = "foo";
+            var properties = PropertyFile.Read<ComplexProperties>(
+                $"{{" +
+                $"  Name: '{fooValue}'," +
+                $"  SingleProperty: {{" +
+                $"      Name: '{fooValue}'" +
+                $"  }}," +
+                $"  Arr: [1, 2, 3]," +
+                $"  ExtendedProperties: {{" +
+                $"      'key1': 'value1'," +
+                $"      'key2': 'value2'" +
+                $"  }}," +
+                $"  StringSet: ['foo', 'bar']" +
+                $"}}");
+
+            Assert.IsNotNull(properties);
+            Assert.IsTrue(properties.Name == fooValue);
+            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
+            Assert.IsTrue(properties.BoolList == null);
+            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
         }
 
         [TestMethod]
@@ -84,7 +120,8 @@ namespace gg.parse.argparser.tests
                 {
                     Name = "foo"
                 },
-                Arr = [1, 2, 3]
+                Arr = [1, 2, 3],
+                BoolList = [true, false, true]
             };
 
             var complexPropertyString = PropertyFile.Write(complexProperties,
@@ -98,6 +135,8 @@ namespace gg.parse.argparser.tests
             Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
             Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
             Assert.IsTrue(properties.SingleProperty.Name == "foo");
+            Assert.IsTrue(properties.BoolList.SequenceEqual(complexProperties.BoolList));
+            Assert.IsTrue(properties.StringSet == null);
         }
 
         // xxx For future, make a best guess based on the annotation

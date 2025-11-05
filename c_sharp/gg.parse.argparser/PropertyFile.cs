@@ -1,14 +1,23 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Text;
+
 using gg.parse.rules;
 using gg.parse.script;
-using System.Text;
 
 namespace gg.parse.argparser
 {
     public class PropertyFile
     {
+        /// <summary>
+        /// Reads a property - or json file and returns an object of type T
+        /// with the properties set to the values in said file.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static T? ReadFile<T>(string filename) where T : class
         {
             if (string.IsNullOrEmpty(filename))
@@ -22,8 +31,16 @@ namespace gg.parse.argparser
             }
 
             return Read<T>(File.ReadAllText(filename));
-        }           
+        }
 
+        /// <summary>
+        /// Reads a property - or json text and returns an object of type T
+        /// with the properties set to the values in said text.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static T? Read<T>(string propertiesText) where T : class
         {
             if (string.IsNullOrEmpty(propertiesText))
@@ -49,10 +66,10 @@ namespace gg.parse.argparser
                     {
                         if (syntaxTree.Annotations[0].Count > 0)
                         {
-                            return (T)ParseInstance.OfValue(
-                                typeof(T), 
-                                syntaxTree.Annotations[0][0]!, 
-                                tokens.Annotations, 
+                            return (T?)PropertyReader.OfValue(
+                                typeof(T),
+                                syntaxTree.Annotations[0][0]!,
+                                tokens.Annotations,
                                 propertiesText
                             );
                         }
@@ -71,9 +88,23 @@ namespace gg.parse.argparser
             }
         }
 
+        /// <summary>
+        /// Write an object to a property file using a default PropertiesConfig
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        /// <see cref="PropertiesConfig"/>
         public static string Write<T>(T obj) where T : class =>
             Write(obj, new PropertiesConfig());
 
+        /// <summary>
+        /// Write an object to a property string using the given config
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public static string Write<T>(T obj, in PropertiesConfig config) where T : class
         {
             if (obj == null)
@@ -82,6 +113,23 @@ namespace gg.parse.argparser
             }
 
             return new StringBuilder().AppendValue(obj, config).ToString();
+        }
+
+        /// <summary>
+        /// Write a property file using the given object to the given path 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="path"></param>
+        /// <param name="obj"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static string WriteFile<T>(string path, T obj, in PropertiesConfig config) where T : class
+        {
+            var result = Write(obj, config);
+
+            File.WriteAllText(path, result);
+
+            return result;
         }
     }
 }

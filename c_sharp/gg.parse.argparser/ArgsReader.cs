@@ -109,7 +109,7 @@ namespace gg.parse.argparser
                 {
                     property.SetValue(
                         target!,
-                        ParseInstance.OfValue(property!.ArgType, node[0]!, tokens.Annotations!, args)
+                        PropertyReader.OfValue(property!.ArgType, node[0]!, tokens.Annotations!, args)!
                     );
                 }
                 catch (Exception ex)
@@ -150,14 +150,14 @@ namespace gg.parse.argparser
             {
                 try
                 {
-                    object value = node.Count == 2
+                    object? value = node.Count == 2
                         // assumed structure is -a=b where node[0] is a key, node[1] = value and node[1][0]
                         // the actual value type
-                        ? ParseInstance.OfValue(argType.ArgType, node[1]![0]!, tokens.Annotations, args)
+                        ? PropertyReader.OfValue(argType.ArgType, node[1]![0]!, tokens.Annotations, args)
                         // assume its a bool
                         : true;
 
-                    argType.SetValue(target!, value);
+                    argType.SetValue(target!, value!);
 
                     return argType;
                 }
