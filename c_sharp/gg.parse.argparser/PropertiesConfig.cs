@@ -36,7 +36,7 @@ namespace gg.parse.argparser
             AddMetaInformation = true;
         }
 
-        public PropertiesConfig(PropertiesFormat format = PropertiesFormat.Default, string indent = "    ", bool addMetaInfo = true)
+        public PropertiesConfig(PropertiesFormat format = PropertiesFormat.Default, string indent = "    ", bool addMetaInfo = false)
         {
             Indent = indent;
             Format = format;

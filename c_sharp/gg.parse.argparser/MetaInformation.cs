@@ -19,7 +19,7 @@ namespace gg.parse.argparser
         {
             var key = config.Format == PropertiesFormat.Default ? Key : $"\"{Key}\"";
 
-            builder.Indent(config.IndentCount + 1, config.Indent)
+            builder.Indent(config.IndentCount, config.Indent)
                 .Append($"{key}{PropertyFileTokens.KvSeparatorColon} ")
                 .Append($"{{\"{nameof(ObjectType)}\"{PropertyFileTokens.KvSeparatorColon} \"{target.GetType().AssemblyQualifiedName}\"}}");
         }

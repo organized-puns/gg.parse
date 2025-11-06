@@ -106,16 +106,92 @@ namespace gg.parse.argparser.tests
         }
 
         [TestMethod]
+        public void ReadComplexPropertiesWithDefaultFormatNoItemSeparators_ExpectPropertiesSet()
+        {
+            var fooValue = "foo";
+            var properties = PropertyFile.Read<ComplexProperties>(
+                $"{{" +
+                $"  Name: '{fooValue}'" +
+                $"  SingleProperty: {{" +
+                $"      Name: '{fooValue}'" +
+                $"  }}" +
+                $"  Arr: [1 2 3]" +
+                $"  ExtendedProperties: {{" +
+                $"      'key1': 'value1'" +
+                $"      'key2': 'value2'" +
+                $"  }}" +
+                $"  StringSet: ['foo' 'bar']" +
+                $"}}");
+
+            Assert.IsNotNull(properties);
+            Assert.IsTrue(properties.Name == fooValue);
+            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
+            Assert.IsTrue(properties.BoolList == null);
+            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+        }
+
+        [TestMethod]
+        public void ReadComplexPropertiesWithDefaultFormatNoItemSeparatorsKvpOnly_ExpectPropertiesSet()
+        {
+            var fooValue = "foo";
+            var properties = PropertyFile.Read<ComplexProperties>(
+                $"// header comments\n" +
+                $"Name: '{fooValue}'" +
+                $"SingleProperty: {{" +
+                $"    Name: '{fooValue}'" +
+                $"}}" +
+                // mix in item separators to see if it works
+                $"Arr: [1, 2, 3]" +
+                $"ExtendedProperties: {{" +
+                $"    'key1': 'value1'" +
+                $"    'key2': 'value2'" +
+                $"}}" +
+                $"StringSet: ['foo' 'bar']" +
+                $"/* footer comments */");
+
+            Assert.IsNotNull(properties);
+            Assert.IsTrue(properties.Name == fooValue);
+            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
+            Assert.IsTrue(properties.BoolList == null);
+            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+        }
+
+        [TestMethod]
         public void WriteAndReadComplexProperties_ExpectPropertiesSet()
         {
-            var complexProperties = new ComplexProperties()
+            var complexProperties = CreateTestObject();
+            
+            var complexDefaultPropertyString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  "));
+
+            ValidateTestObject(complexProperties, complexDefaultPropertyString);
+
+            var complexDefaultPropertyWithMetaString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  ", addMetaInfo: true));
+
+            ValidateTestObject(complexProperties, complexDefaultPropertyWithMetaString);
+
+            var complexJsonPropertyString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: true));
+
+            ValidateTestObject(complexProperties, complexJsonPropertyString);
+        }
+
+        private static ComplexProperties CreateTestObject() =>
+            new ()
             {
                 Name = "foo",
                 ExtendedProperties = new Dictionary<string, string>()
-                {
-                    { "key1", "value1" },
-                    { "key2", "value2" },
-                },
+                    {
+                        { "key1", "value1" },
+                        { "key2", "value2" },
+                    },
                 SingleProperty = new SingleProperty()
                 {
                     Name = "foo"
@@ -124,9 +200,8 @@ namespace gg.parse.argparser.tests
                 BoolList = [true, false, true]
             };
 
-            var complexPropertyString = PropertyFile.Write(complexProperties,
-                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: true));
-
+        private static void ValidateTestObject(ComplexProperties original, string complexPropertyString)
+        {
             var properties = PropertyFile.Read<ComplexProperties>(complexPropertyString);
 
             Assert.IsNotNull(properties);
@@ -135,34 +210,14 @@ namespace gg.parse.argparser.tests
             Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
             Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
             Assert.IsTrue(properties.SingleProperty.Name == "foo");
-            Assert.IsTrue(properties.BoolList.SequenceEqual(complexProperties.BoolList));
+            Assert.IsTrue(properties.BoolList.SequenceEqual(original.BoolList));
             Assert.IsTrue(properties.StringSet == null);
         }
 
-        [TestMethod]
+        /*[TestMethod]
         public void ExportNames()
         {
             PropertyFile.ExportNames();
-        }
-
-        // xxx For future, make a best guess based on the annotation
-        /*[TestMethod]
-        public void WriteAndReadDictionary_ExpectSameDictionary()
-        {
-            var dict = new Dictionary<string, object>()
-            {
-                { "key1", "foo" },
-                { "key2", 123 },
-                { "key3", new Dictionary<string, string>() { {"str1", "value1" } } },
-                { "key4", new SingleProperty() { Name = "key4" } }
-            };
-
-            var dictString = PropertyFile.Write(dict,
-                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: false));
-
-            var properties = PropertyFile.Read<Dictionary<string, object>>(dictString);
-
-            Assert.IsNotNull(properties);            
         }*/
     }
 }

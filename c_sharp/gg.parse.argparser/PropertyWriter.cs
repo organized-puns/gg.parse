@@ -13,8 +13,24 @@ namespace gg.parse.argparser
 {
     public static class PropertyWriter
     {
-        private static StringBuilder Indent(this StringBuilder builder, in PropertiesConfig context) =>
-            builder.Indent(context.IndentCount, context.Indent);
+        private static StringBuilder Indent(this StringBuilder builder, in PropertiesConfig config) =>
+            builder.Indent(config.IndentCount, config.Indent);
+
+
+        public static StringBuilder AppendAsKeyValuePairs<T>(this StringBuilder builder, T? value, in PropertiesConfig config)
+            where T : class
+        {
+            if (value == null)
+            {
+                builder.Append(PropertyFileTokens.Null);
+            }
+            else
+            {
+                AppendProperties(builder, value, config);
+            }
+
+            return builder;
+        }
 
         public static StringBuilder AppendValue(this StringBuilder builder, object? value, in PropertiesConfig context)
         {
@@ -68,7 +84,7 @@ namespace gg.parse.argparser
             return builder;
         }
 
-        public static void AppendListCompatbileEnumerable(this StringBuilder builder, IEnumerable enumeration, in PropertiesConfig context)
+        public static StringBuilder AppendListCompatbileEnumerable(this StringBuilder builder, IEnumerable enumeration, in PropertiesConfig context)
         {
             if (enumeration == null)
             {
@@ -92,9 +108,11 @@ namespace gg.parse.argparser
 
                 builder.Append(PropertyFileTokens.ArrayEnd);
             }
+
+            return builder;
         }
 
-        public static void AppendDictionary(this StringBuilder builder, IDictionary dictionary, in PropertiesConfig context)
+        public static StringBuilder AppendDictionary(this StringBuilder builder, IDictionary dictionary, in PropertiesConfig context)
         {
             if (dictionary == null)
             {
@@ -126,9 +144,11 @@ namespace gg.parse.argparser
 
                 builder.Append('\n').Indent(in context).Append(PropertyFileTokens.ScopeEnd);
             }
+
+            return builder;
         }
 
-        public static void AppendClassOrStruct(this StringBuilder builder, object value, in PropertiesConfig config)
+        public static StringBuilder AppendClassOrStruct(this StringBuilder builder, object value, in PropertiesConfig config)
         {
             if (value == null)
             {
@@ -136,50 +156,83 @@ namespace gg.parse.argparser
             }
             else
             {
-                var properties = value
-                    .GetType()
-                    .GetProperties(
-                        BindingFlags.Public | 
-                        BindingFlags.Instance | 
-                        BindingFlags.GetProperty | 
-                        BindingFlags.SetProperty
-                    );
                 builder.Append($"{PropertyFileTokens.ScopeStart}\n");
 
-                if (config.AddMetaInformation)
-                {
-                    MetaInformation.Write(value.GetType(), builder, config);
-
-                    if (properties.Length > 0)
-                    {
-                        builder.Append($"{PropertyFileTokens.ItemSeparator}\n");
-                    }
-                }
-
-                foreach (var property in properties)
-                {
-                    if (config.Format == PropertiesFormat.Default)
-                    { 
-                        builder.Indent(config + 1).Append($"{property.Name}{PropertyFileTokens.KvSeparatorColon} ");
-                    }
-                    else if (config.Format == PropertiesFormat.Json)
-                    {
-                        builder.Indent(config + 1).Append($"\"{property.Name}\"{PropertyFileTokens.KvSeparatorColon} ");
-                    }
-
-                    AppendValue(builder, property.GetValue(value), config + 1);
-
-                    builder.Append($"{PropertyFileTokens.ItemSeparator}\n");
-                }
-
-                // remove the last comma
-                builder.Remove(builder.Length - 2, 2);
+                AppendProperties(builder, value, config + 1);
 
                 builder.Append('\n').Indent(in config).Append(PropertyFileTokens.ScopeEnd);
             }
+
+            return builder;
         }
 
-        public static void AppendBasicValue(this StringBuilder builder, object? value)
+        private static StringBuilder AppendItemSeparator(this StringBuilder builder, in PropertiesConfig config, string defaultSeparator = "\n")
+        {
+            if (config.Format == PropertiesFormat.Default)
+            {
+                builder.Append(defaultSeparator);
+            }
+            else
+            {
+                builder.Append($"{PropertyFileTokens.ItemSeparator}\n");
+            }
+
+            return builder;
+        }
+
+        private static StringBuilder AppendProperties(this StringBuilder builder, object value, in PropertiesConfig config)
+        {
+            var properties = value
+                .GetType()
+                .GetProperties(
+                    BindingFlags.Public |
+                    BindingFlags.Instance |
+                    BindingFlags.GetProperty |
+                    BindingFlags.SetProperty
+                );
+
+            if (config.AddMetaInformation)
+            {
+                MetaInformation.Write(value.GetType(), builder, config);
+
+                // don't add separators in the default format
+                if (properties.Length > 0)
+                {
+                    builder.AppendItemSeparator(config);
+                }
+            }
+
+            foreach (var property in properties)
+            {
+                if (config.Format == PropertiesFormat.Default)
+                {
+                    builder.Indent(config).Append($"{property.Name}{PropertyFileTokens.KvSeparatorColon} ");
+                }
+                else if (config.Format == PropertiesFormat.Json)
+                {
+                    builder.Indent(config).Append($"\"{property.Name}\"{PropertyFileTokens.KvSeparatorColon} ");
+                }
+
+                AppendValue(builder, property.GetValue(value), config);
+
+                builder.AppendItemSeparator(config);
+            }
+
+            if (config.Format == PropertiesFormat.Default)
+            {
+                // remove the new line
+                builder.Remove(builder.Length - 1, 1);
+            }
+            else
+            { 
+                // remove the last comma
+                builder.Remove(builder.Length - 2, 2);
+            }
+
+            return builder;
+        }
+
+        public static StringBuilder AppendBasicValue(this StringBuilder builder, object? value)
         {
             if (value == null)
             {
@@ -200,6 +253,8 @@ namespace gg.parse.argparser
                 var result = value.ToString();
                 builder.Append(result ?? PropertyFileTokens.Null);
             }
+
+            return builder;
         }
     }
 }

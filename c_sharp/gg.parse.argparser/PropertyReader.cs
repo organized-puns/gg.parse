@@ -16,6 +16,24 @@ namespace gg.parse.argparser
     /// </summary>
     public static class PropertyReader
     {
+        public static T? OfValue<T>(
+            Annotation annotation,
+            ImmutableList<Annotation> tokenList,
+            string text
+        )
+        {
+            if ( annotation == PropertyFileNames.Dictionary)
+            {
+                return (T?) OfValue(typeof(T), annotation, tokenList, text);
+            }
+            else if (annotation == PropertyFileNames.KvpList)
+            {
+                return (T?)OfKeyValuePairList(typeof(T), annotation, tokenList, text);
+            }
+
+            throw new ArgumentException($"Expected the annotation to be either '{PropertyFileNames.Dictionary}' or '{PropertyFileNames.KvpList}', but found '{annotation.Rule.Name}'.");
+        }
+
         public static object? OfValue(
             Type targetType, 
             Annotation annotation, 
@@ -196,6 +214,30 @@ namespace gg.parse.argparser
             return keyString;
         }
 
+        public static object? OfKeyValuePairList(
+            Type targetType,
+            Annotation annotation,
+            ImmutableList<Annotation> tokenList,
+            string text)
+        {
+            var result = Activator.CreateInstance(targetType)
+                    ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
+
+            for (var i = 0; i < annotation.Count; i++)
+            {
+                var kvp = annotation[i];
+
+                Assertions.RequiresNotNull(kvp);
+                Assertions.Requires(kvp == PropertyFileNames.KvpPair);
+                Assertions.Requires(kvp.Count >= 2);
+
+                // xxx note we don't care if this fails, but ideally we should issue a warning
+                TrySetObjectProperty(result, kvp, tokenList, text);
+            }
+
+            return result;
+        }
+
         public static object? OfObject(
             Type targetType,
             Annotation annotation,
@@ -210,33 +252,14 @@ namespace gg.parse.argparser
                 // need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    Assertions.RequiresNotNull(annotation[i]);
+                    var kvp = annotation[i];
 
-                    var key = KeyToPropertyName(annotation[i]![0]!, tokenList, text);
+                    Assertions.RequiresNotNull(kvp);
+                    Assertions.Requires(kvp == PropertyFileNames.KvpPair);
+                    Assertions.Requires(kvp.Count >= 2);
 
-                    var property = targetType.GetProperty(key);
-
-                    if (property != null)
-                    {
-                        var value = OfValue(property.PropertyType, annotation[i]![1]!, tokenList, text);
-                        property.SetValue(result, value);
-                    }
-                    else
-                    {
-                        var field = targetType.GetField(key);
-
-                        if (field != null)
-                        {
-                            Assertions.Requires(annotation[i]!.Count >= 2);
-
-                            var value = OfValue(field.FieldType, annotation[i]![1]!, tokenList, text);
-                            field.SetValue(result, value);
-                        }
-                        else
-                        {
-                            // ignore values we can't map, should yield a warning xxx
-                        }
-                    }
+                    // xxx note we don't care if this fails, but ideally we should issue a warning
+                    TrySetObjectProperty(result, kvp, tokenList, text);
                 }
 
                 return result;
@@ -247,6 +270,35 @@ namespace gg.parse.argparser
             }
 
             throw new ArgumentException($"Looking for a value of type '{targetType}' but value found is not a object/dictionary but a '{annotation.Rule.Name}'.");
+        }
+
+        private static bool TrySetObjectProperty(
+            object target,
+            Annotation annotation,
+            ImmutableList<Annotation> tokenList,
+            string text)
+        {
+            var key = KeyToPropertyName(annotation[0]!, tokenList, text);
+
+            var property = target.GetType().GetProperty(key);
+
+            if (property != null)
+            {
+                property.SetValue(target, OfValue(property.PropertyType, annotation[1]!, tokenList, text));
+                return true;
+            }
+            else
+            {
+                var field = target.GetType().GetField(key);
+
+                if (field != null)
+                {
+                    field.SetValue(target, OfValue(field.FieldType, annotation[1]!, tokenList, text));
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static object? OfBasicValue(Type targetType, Annotation annotation, string text)
