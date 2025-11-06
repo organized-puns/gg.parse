@@ -9,11 +9,53 @@ using System.Text;
 
 namespace gg.parse.argparser
 {
+    public class TypeNotFoundException : Exception
+    {
+        public TypeNotFoundException() { }
+
+        public TypeNotFoundException(string message) : base(message) {}
+    }
+
     public class MetaInformation
     {
         public static readonly string Key = "__meta_information";
+        public static readonly string QuotedKey = "\"__meta_information\"";
 
-        public string? ObjectType { get; set; } 
+        public string? ObjectType { get; set; }
+
+        public Type ResolveObjectType()
+        {
+            if (!string.IsNullOrEmpty(ObjectType))
+            {
+                return Type.GetType(ObjectType) ?? throw new TypeNotFoundException($"Cannot resolve type '{ObjectType}'.");
+            }
+
+            throw new NullReferenceException($"{nameof(MetaInformation)} No object type defined");
+        }
+
+        public static MetaInformation? FindMetaInformation(
+            Annotation annotation,
+            ImmutableList<Annotation> tokenList,
+            string text)
+        {
+            var predicate = new Func<Annotation, bool>(a =>
+            {
+                if (a == PropertyFileNames.KvpPair)
+                {
+                    var keyName = a![0]!.GetText(text, tokenList);
+                    return keyName == MetaInformation.Key
+                        || keyName == MetaInformation.QuotedKey;
+                }
+
+                return false;
+            });
+            var metaInformationNode = annotation.FirstOrDefaultDfs(predicate);
+
+            return metaInformationNode != null && metaInformationNode.Count >= 2
+                ? Read(metaInformationNode[1]!, tokenList, text)
+                : null;
+        }
+
 
         public static void Write(object target, StringBuilder builder, in PropertiesConfig config)
         {

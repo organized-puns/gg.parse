@@ -1,4 +1,8 @@
-﻿using System.Diagnostics;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using System.Diagnostics;
+
 using gg.parse.core;
 using gg.parse.script;
 using gg.parse.script.parser;

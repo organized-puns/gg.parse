@@ -1,10 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Linq;
-using System.Text;
-using static gg.parse.argparser.tests.PropertiesTests;
-
 namespace gg.parse.argparser.tests
 {
     [TestClass]

@@ -1,0 +1,240 @@
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using System.Collections.Immutable;
+
+using gg.parse.core;
+using gg.parse.properties;
+using gg.parse.script;
+using gg.parse.tests;
+
+using static gg.parse.argparser.tests.PropertiesTests;
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using Range = gg.parse.util.Range;
+
+namespace gg.parse.argparser.tests
+{
+    [TestClass]
+    public class PropertyReaderTests
+    {
+        private static readonly IRule identifierRule = new EmptyRule(PropertyFileNames.Identifier);
+        private static readonly IRule stringRule = new EmptyRule(PropertyFileNames.String);
+        private static readonly IRule intRule = new EmptyRule(PropertyFileNames.Int);
+        private static readonly IRule kvpRule = new EmptyRule(PropertyFileNames.KvpPair);
+        private static readonly IRule kvpListRule = new EmptyRule(PropertyFileNames.KvpList);
+        private static readonly IRule dictionaryRule = new EmptyRule(PropertyFileNames.Dictionary);
+        private static readonly IRule scopeStartRule = new EmptyRule(PropertyFileNames.ScopeStart);
+        private static readonly IRule scopeEndRule = new EmptyRule(PropertyFileNames.ScopeEnd);
+        private static readonly IRule boolRule = new EmptyRule(PropertyFileNames.Boolean);
+
+        private static readonly ParserBuilder PropertyParser = 
+            new ParserBuilder().FromFile("./assets/properties.tokens", "./assets/properties.grammar");
+
+        [TestMethod]
+        public void SetupIntAnnotation_CallInterpret_ExpectIntValue()
+        {
+            // setup
+            var (intAnnotation, tokens, text) = SetupSingleTokenTest("123", PropertyFileNames.Int);
+
+            // act
+            var result = (int) PropertyReader.Interpret(intAnnotation, tokens, text);
+
+            // test
+            IsTrue(result == 123);
+        }
+
+        [TestMethod]
+        public void SetupStringAnnotation_CallInterpret_ExpectIntValue()
+        {
+            // setup
+            var (stringAnnotation, tokens, text) = SetupSingleTokenTest("'foo'", PropertyFileNames.String);
+
+            // act
+            var result = (string)PropertyReader.Interpret(stringAnnotation, tokens, text);
+
+            // test
+            IsTrue(result == "foo");
+        }
+
+        [TestMethod]
+        public void SetupKvpAnnotation_CallInterpret_ExpectStringObjectDictionary()
+        {
+            // setup
+            var text = "foo: 'bar', count: 3";
+
+            var tokens = ImmutableList<Annotation>
+                .Empty
+                .AddRange([
+                    new Annotation(identifierRule, new Range(0, 3)),
+                    new Annotation(stringRule, new Range(5, 5)),
+                    new Annotation(identifierRule, new Range(12, 5)),
+                    new Annotation(intRule, new Range(19, 1))
+                ]);
+
+            var kvPair1 = new Annotation(kvpRule, new Range(0, 2), [
+                new Annotation(identifierRule, new Range(0, 1)),
+                new Annotation(stringRule, new Range(1, 1)),
+            ]);
+
+            var kvPair2 = new Annotation(kvpRule, new Range(2, 2), [
+                new Annotation(identifierRule, new Range(2, 1)),
+                new Annotation(intRule, new Range(3, 1)),
+            ]);
+
+            var kvpList = new Annotation(kvpListRule, new Range(0, tokens.Count), [kvPair1, kvPair2]);
+
+            // act
+            var result = PropertyReader.Interpret(kvpList, tokens, text) as Dictionary<string, object>;
+
+            // test
+            IsNotNull(result);
+            IsTrue(((string)result["foo"]) == "bar");
+            IsTrue(((int)result["count"]) == 3);
+        }
+
+        [TestMethod]
+        public void SetupDictionaryAnnotation_CallInterpret_ExpectStringObjectDictionary()
+        {
+            // setup
+            var text = "{ 1: true, 2: false }";
+
+            var tokens = ImmutableList<Annotation>
+                .Empty
+                .AddRange([
+                    new Annotation(scopeStartRule, new Range(0, 1)),
+                    new Annotation(intRule, new Range(2, 1)),
+                    new Annotation(boolRule, new Range(5, 4)),
+                    new Annotation(intRule, new Range(11, 1)),
+                    new Annotation(boolRule, new Range(14, 5)),
+                    new Annotation(scopeEndRule, new Range(20, 1))
+                ]);
+
+            var kvPair1 = new Annotation(kvpRule, new Range(1, 2), [
+                new Annotation(intRule, new Range(1, 1)),
+                new Annotation(boolRule, new Range(2, 1)),
+            ]);
+
+            var kvPair2 = new Annotation(kvpRule, new Range(3, 2), [
+                new Annotation(intRule, new Range(3, 1)),
+                new Annotation(boolRule, new Range(4, 1)),
+            ]);
+
+            var dictionary = new Annotation(
+                dictionaryRule, 
+                new Range(0, tokens.Count), 
+                [
+                    new Annotation(scopeStartRule, new Range(0, 1)),
+                    kvPair1, 
+                    kvPair2,
+                    new Annotation(scopeEndRule, new Range(5, 1)),
+                ]
+            );
+
+            // act
+            var result = PropertyReader.Interpret(dictionary, tokens, text) as Dictionary<int, bool>;
+
+            // test
+            IsNotNull(result);
+            IsTrue(result[1] == true);
+            IsTrue(result[2] == false);
+        }
+
+        [TestMethod]
+        public void ParseDictionary_CallInterpret_ExpectStringObjectDictionary()
+        {
+            // setup
+            var text = "{ 1: true, 2: false }";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text, usingRule: "dictionary");
+
+            // act
+            var result = PropertyReader.Interpret(syntaxTree[0], tokens.Annotations, text) as Dictionary<int, bool>;
+
+            // test
+            IsNotNull(result);
+            IsTrue(result[1] == true);
+            IsTrue(result[2] == false);
+        }
+
+        [TestMethod]
+        public void ParseObjectWithMetaDataInDefaultFormat_CallInterpret_ExpectComplexObject()
+        {
+            // setup
+            var text = "// autogenerated property file\r\n__meta_information: {\"ObjectType\": \"gg.parse.argparser.tests.PropertiesTests+ComplexProperties, gg.parse.argparser.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"}\r\nName: \"foo\"\r\nExtendedProperties: {\r\n  \"key1\": \"value1\",\r\n  \"key2\": \"value2\"\r\n}\r\nArr: [1, 2, 3]\r\nSingleProperty: {\r\n  __meta_information: {\"ObjectType\": \"gg.parse.argparser.tests.PropertiesTests+SingleProperty, gg.parse.argparser.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"}\r\n  Name: \"foo\"\r\n}\r\nBoolList: [true, false, true]\r\nStringSet: null";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text);
+
+            // act
+            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as PropertiesTests.ComplexProperties;
+
+            // test
+            IsNotNull(result);
+            // spot check
+            IsTrue(result.Name == "foo");
+            IsTrue(result.Arr.SequenceEqual([1,2,3]));
+        }
+
+        [TestMethod]
+        public void ParseObjectWithMetaDataInJsonFormat_CallInterpret_ExpectComplexObject()
+        {
+            // setup
+            var text = "{\r\n  \"__meta_information\": {\"ObjectType\": \"gg.parse.argparser.tests.PropertiesTests+ComplexProperties, gg.parse.argparser.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"},\r\n  \"Name\": \"foo\",\r\n  \"ExtendedProperties\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  },\r\n  \"Arr\": [1, 2, 3],\r\n  \"SingleProperty\": {\r\n    \"__meta_information\": {\"ObjectType\": \"gg.parse.argparser.tests.PropertiesTests+SingleProperty, gg.parse.argparser.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"},\r\n    \"Name\": \"foo\"\r\n  },\r\n  \"BoolList\": [true, false, true],\r\n  \"StringSet\": null\r\n}";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text);
+
+            // act
+            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as PropertiesTests.ComplexProperties;
+
+            // test
+            IsNotNull(result);
+            // spot check
+            IsTrue(result.Name == "foo");
+            IsTrue(result.Arr.SequenceEqual([1, 2, 3]));
+        }
+
+        [TestMethod]
+        public void ParseObjectWithoutMetaDataInJsonFormat_CallInterpret_ExpectObjectDictionary()
+        {
+            // setup
+            var text = "{\r\n  \"Name\": \"foo\",\r\n  \"ExtendedProperties\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  },\r\n  \"Arr\": [1, 2, 3],\r\n  \"SingleProperty\": {\r\n    \"Name\": \"foo\"\r\n  },\r\n  \"BoolList\": [true, false, true],\r\n  \"StringSet\": null\r\n}";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text);
+
+            // act
+            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as Dictionary<string, object>;
+
+            // test
+            IsNotNull(result);
+            // spot check
+            IsTrue(((string)result["Name"]) == "foo");
+            IsTrue(((Dictionary<string, string>)result["ExtendedProperties"]).Count == 2);
+            IsTrue(((int[])result["Arr"]).SequenceEqual([1, 2, 3]));
+        }
+
+        [TestMethod]
+        public void ParseObjectWithoutMetaDataInDefaultFormat_CallInterpret_ExpectObjectDictionary()
+        {
+            // setup
+            var text = "// autogenerated property file\r\nName: \"foo\"\r\nExtendedProperties: {\r\n  \"key1\": \"value1\",\r\n  \"key2\": \"value2\"\r\n}\r\nArr: [1, 2, 3]\r\nSingleProperty: {\r\n  Name: \"foo\"\r\n}\r\nBoolList: [true, false, true]\r\nStringSet: null";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text);
+
+            // act
+            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as Dictionary<string, object>;
+
+            // test
+            IsNotNull(result);
+            // spot check
+            IsTrue(((string)result["Name"]) == "foo");
+            IsTrue(((Dictionary<string, string>)result["ExtendedProperties"]).Count == 2);
+            IsTrue(((int[])result["Arr"]).SequenceEqual([1, 2, 3]));
+        }
+
+        // --- Private / util methods ---------------------------------------------------------------------------------
+
+        private static (Annotation grammarAnnotation, ImmutableList<Annotation> tokens, string text)
+            SetupSingleTokenTest(string text, string tokenName)
+        {
+            var token = new EmptyRule(tokenName);
+            var tokens = ImmutableList<Annotation>.Empty.Add(new Annotation(token, new Range(0, text.Length)));
+            var grammarAnnotation = new Annotation(new EmptyRule(0, tokenName), new Range(0, 1));
+
+            return (grammarAnnotation, tokens, text);
+        }
+    }
+}

@@ -12,12 +12,27 @@ namespace gg.parse.tests
         public int Precedence { get; init; }
         public AnnotationPruning Prune { get; init; }
 
-        public EmptyRule(int id, string name = "DummyRule", int precedence = 0, AnnotationPruning product = AnnotationPruning.None)
+        public EmptyRule(
+            string name, 
+            int precedence = 0,
+            AnnotationPruning pruning = AnnotationPruning.None
+        )
+        {
+            Name = name;
+            Precedence = precedence;
+            Prune = pruning;
+        }
+
+        public EmptyRule(
+            int id, 
+            string name = "DummyRule", 
+            int precedence = 0, 
+            AnnotationPruning pruning = AnnotationPruning.None)
         {
             Id = id;
             Name = name;
             Precedence = precedence;
-            Prune = product;
+            Prune = pruning;
         }
 
         public object Clone() => MemberwiseClone();

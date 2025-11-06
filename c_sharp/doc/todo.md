@@ -18,6 +18,12 @@ kanban
     
     [ Add rule examples ]
     [ Implement properties file ]
+    [ properties files - allow for simpler meta information types ]
+    [ properties files - move examples to subdirectory ]
+    [ properties files - move parser graphs to read only, thread safe implementations ]
+    [ properties files - move properties to its own project ]
+    [ properties files - split interpreter from reader ]
+    [ properties files - test empty arrays, dictionaries ]
     	
   Done
     [ Add repeat count to script ]
@@ -113,3 +119,4 @@ Implement a function console
 ---
 - Figure out a way to capture the annotation associated with a reference, so in case of errors we can report the correct line/column
   (probably by adding a property to ReferenceRule which is set during compilation)
+

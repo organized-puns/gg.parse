@@ -193,7 +193,7 @@ namespace gg.parse.argparser
 
             if (config.AddMetaInformation)
             {
-                MetaInformation.Write(value.GetType(), builder, config);
+                MetaInformation.Write(value, builder, config);
 
                 // don't add separators in the default format
                 if (properties.Length > 0)
