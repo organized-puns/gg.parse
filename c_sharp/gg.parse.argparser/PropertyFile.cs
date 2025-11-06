@@ -11,6 +11,26 @@ namespace gg.parse.argparser
     public class PropertyFile
     {
         /// <summary>
+        /// Writes all the tokens and ast nodes names to a filename.
+        /// (Needs to be updated if the grammar / tokens change).
+        /// </summary>
+        /// <param name="targetNameSpace"></param>
+        /// <param name="filenamePrefix"></param>
+        public static void ExportNames(string targetNameSpace = "gg.parse.properties", string filenamePrefix = "PropertyFile")
+        {
+            var builder = new ParserBuilder()
+                            .FromFile("./assets/properties.tokens", "./assets/properties.grammar");
+
+            var tokens = ScriptUtils.ExportTokens(builder.TokenGraph, targetNameSpace, $"{filenamePrefix}Tokens");
+
+            File.WriteAllText($"{filenamePrefix}Tokens.cs", tokens);
+
+            var names = ScriptUtils.ExportNames(builder.TokenGraph, builder.GrammarGraph, targetNameSpace, $"{filenamePrefix}Names");
+
+            File.WriteAllText($"{filenamePrefix}Names.cs", names);
+        }
+
+        /// <summary>
         /// Reads a property - or json file and returns an object of type T
         /// with the properties set to the values in said file.
         /// </summary>

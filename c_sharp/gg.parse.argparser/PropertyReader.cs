@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 
 using gg.parse.core;
+using gg.parse.properties;
 using gg.parse.util;
 
 namespace gg.parse.argparser
@@ -15,7 +16,11 @@ namespace gg.parse.argparser
     /// </summary>
     public static class PropertyReader
     {
-        public static object? OfValue(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
+        public static object? OfValue(
+            Type targetType, 
+            Annotation annotation, 
+            ImmutableList<Annotation> tokenList, 
+            string text)
         {
             if (targetType.IsArray)
             {
@@ -59,7 +64,7 @@ namespace gg.parse.argparser
         {
             var arrayType = targetType.GetElementType();
 
-            if (arrayType != null && annotation == ArgParserNames.Array)
+            if (arrayType != null && annotation == PropertyFileNames.Array)
             {
                 // remove the start and end of the array from the count
                 var result = Array.CreateInstance(arrayType, annotation.Count - 2);
@@ -72,7 +77,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == ArgParserNames.Null)
+            else if (annotation == PropertyFileNames.Null)
             {
                 return null;
             }
@@ -89,7 +94,7 @@ namespace gg.parse.argparser
 
             var listType = targetType.GetGenericArguments()[0];
 
-            if (annotation == ArgParserNames.Array)
+            if (annotation == PropertyFileNames.Array)
             {
                 var genericType = typeof(List<>).MakeGenericType(listType);
                 var result = Activator.CreateInstance(genericType) as IList
@@ -103,7 +108,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == ArgParserNames.Null)
+            else if (annotation == PropertyFileNames.Null)
             {
                 return null;
             }
@@ -115,7 +120,7 @@ namespace gg.parse.argparser
         {
             var setType = targetType.GetGenericArguments()[0];
 
-            if (annotation == ArgParserNames.Array)
+            if (annotation == PropertyFileNames.Array)
             {
                 var genericType = typeof(HashSet<>).MakeGenericType(setType);
                 var result = Activator.CreateInstance(genericType)
@@ -130,7 +135,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == ArgParserNames.Null)
+            else if (annotation == PropertyFileNames.Null)
             {
                 return null;
             }
@@ -146,7 +151,7 @@ namespace gg.parse.argparser
             var keyType = targetType.GetGenericArguments()[0];
             var valueType = targetType.GetGenericArguments()[1];
 
-            if (annotation == ArgParserNames.Dictionary)
+            if (annotation == PropertyFileNames.Dictionary)
             {
                 var genericType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
                 var result = Activator.CreateInstance(genericType) as IDictionary
@@ -170,7 +175,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == ArgParserNames.Null)
+            else if (annotation == PropertyFileNames.Null)
             {
                 return null;
             }
@@ -183,7 +188,7 @@ namespace gg.parse.argparser
             var keyString = node.GetText(text, tokenList);
 
             // can be a string in case of a json format
-            if (node == ArgParserNames.String)
+            if (node == PropertyFileNames.String)
             {
                 return keyString.Substring(1, keyString.Length - 2);
             }
@@ -197,7 +202,7 @@ namespace gg.parse.argparser
             ImmutableList<Annotation> tokenList,
             string text)
         {
-            if (annotation == ArgParserNames.Dictionary)
+            if (annotation == PropertyFileNames.Dictionary)
             {
                 var result = Activator.CreateInstance(targetType)
                     ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
@@ -236,7 +241,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == ArgParserNames.Null)
+            else if (annotation == PropertyFileNames.Null)
             {
                 return null;
             }
@@ -252,7 +257,7 @@ namespace gg.parse.argparser
             }
             else if (targetType == typeof(string))
             {
-                if (annotation == ArgParserNames.String)
+                if (annotation == PropertyFileNames.String)
                 {
                     if (text.StartsWith('"') || text.StartsWith('\''))
                     {
@@ -261,7 +266,7 @@ namespace gg.parse.argparser
 #pragma warning restore IDE0057 // Use range operator
                     }
                 }
-                else if (annotation == ArgParserNames.Null)
+                else if (annotation == PropertyFileNames.Null)
                 {
                     return null;
                 }

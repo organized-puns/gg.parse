@@ -33,23 +33,17 @@ Details
 Future backlog
 --------------
 
-### Add annotation example
-
-### Implement (json) annotations in its main program
 
 ### Fix/extend literal
 
 Having a literal in a grammar leads to very confusing errors. Should be handled better.
 Add literalRule which allows for case senstive matching or not
 
-### Namespaces
-Add optional namespaces to avoid grammar / token name clash 
-
-### Example, small function console
-Implement a function console
-
 ### Add transpiling
 Transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
+
+### Deal with endless loop, ie loop = loop;
+? can set the out come to fail or throw exception ?
 
 ### Add extend to parser
 Add Extend() to existing parser, similar to merge
@@ -102,6 +96,18 @@ jobs:
       
       - name: Check formatting
         run: dotnet format --verify-no-changes
+
+### Add annotation example
+
+### Implement (json) annotations in its main program
+
+
+### Namespaces
+Add optional namespaces to avoid grammar / token name clash 
+
+### Example, small function console
+Implement a function console
+
 
 ???
 ---

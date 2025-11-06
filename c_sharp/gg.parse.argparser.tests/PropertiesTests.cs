@@ -125,7 +125,7 @@ namespace gg.parse.argparser.tests
             };
 
             var complexPropertyString = PropertyFile.Write(complexProperties,
-                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: false));
+                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: true));
 
             var properties = PropertyFile.Read<ComplexProperties>(complexPropertyString);
 
@@ -137,6 +137,12 @@ namespace gg.parse.argparser.tests
             Assert.IsTrue(properties.SingleProperty.Name == "foo");
             Assert.IsTrue(properties.BoolList.SequenceEqual(complexProperties.BoolList));
             Assert.IsTrue(properties.StringSet == null);
+        }
+
+        [TestMethod]
+        public void ExportNames()
+        {
+            PropertyFile.ExportNames();
         }
 
         // xxx For future, make a best guess based on the annotation

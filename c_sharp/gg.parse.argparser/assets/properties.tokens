@@ -19,11 +19,13 @@ include "common.tokens";
 					| identifier
 					| single_line_comment | multi_line_comment;
 
-boolean         = 'true' | 'false';
+bool_true		= 'true';
+bool_false		= 'false';
+boolean         = bool_true | bool_false;
 
 null			= 'null';
 
-underscore		= "_";
+underscore		= '_';
 
 scope_start		= '{';
 scope_end		= '}';
@@ -33,10 +35,17 @@ array_end		= ']';
 
 identifier		= (underscore | letter ), *(underscore | letter | digit);
 
-kv_separator	= ('=' | ':');
-item_separator	= ',';
+kv_separator_colon   = ':';
+kv_separator_equals  = '=';
+kv_separator		 = kv_separator_equals | kv_separator_colon;
 
--a single_line_comment = "//", stop_after '\n';
--a multi_line_comment = "/*", stop_after '*/';
+item_separator			  = ',';
+
+single_line_comment_start = '//';
+-a single_line_comment	  = single_line_comment_start, stop_after '\n';
+
+multi_line_comment_start = '/*';
+multi_line_comment_end	 = '*/';
+-a multi_line_comment    = multi_line_comment_start, stop_after multi_line_comment_end;
 
 unknown_property_error	= error "unknown token found." if *(!property_token_list, .);
