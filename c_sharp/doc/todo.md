@@ -18,12 +18,15 @@ kanban
     
     [ Add rule examples ]
     [ Implement properties file ]
+    [ properties files - test empty arrays, dictionaries ]
+    [ properties files - compiler base ]
+    [ properties files - enums ]
+    [ properties files - safe instantiation ]
     [ properties files - allow for simpler meta information types ]
     [ properties files - move examples to subdirectory ]
     [ properties files - move parser graphs to read only, thread safe implementations ]
     [ properties files - move properties to its own project ]
-    [ properties files - split interpreter from reader ]
-    [ properties files - test empty arrays, dictionaries ]
+    [ properties files - split interpreter from reader ]    
     	
   Done
     [ Add repeat count to script ]

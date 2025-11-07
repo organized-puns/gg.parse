@@ -92,7 +92,7 @@ namespace gg.parse.argparser
             }
             else
             {
-                builder.Append(PropertyFileTokens.ArrayStart);
+                builder.Append(PropertyFileTokens.ArrayStart[0]);
 
                 foreach (var value in enumeration)
                 {
@@ -106,7 +106,7 @@ namespace gg.parse.argparser
                     builder.Remove(builder.Length - 2, 2);
                 }
 
-                builder.Append(PropertyFileTokens.ArrayEnd);
+                builder.Append(PropertyFileTokens.ArrayEnd[0]);
             }
 
             return builder;
@@ -142,7 +142,7 @@ namespace gg.parse.argparser
                 // remove the last comma
                 builder.Remove(builder.Length - 2, 2);
 
-                builder.Append('\n').Indent(in context).Append(PropertyFileTokens.ScopeEnd);
+                builder.Append('\n').Indent(in context).Append(PropertyFileTokens.ScopeEnd[0]);
             }
 
             return builder;
@@ -160,7 +160,7 @@ namespace gg.parse.argparser
 
                 AppendProperties(builder, value, config + 1);
 
-                builder.Append('\n').Indent(in config).Append(PropertyFileTokens.ScopeEnd);
+                builder.Append('\n').Indent(in config).Append(PropertyFileTokens.ScopeEnd[0]);
             }
 
             return builder;
@@ -193,7 +193,7 @@ namespace gg.parse.argparser
 
             if (config.AddMetaInformation)
             {
-                MetaInformation.Write(value, builder, config);
+                MetaInformation.AppendMetaInformation(builder, value, config);
 
                 // don't add separators in the default format
                 if (properties.Length > 0)

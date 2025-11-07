@@ -123,7 +123,9 @@ namespace gg.parse.argparser
             string text
         )
         {
-            if (annotation.Children == null || annotation.Children.Count == 0)
+            // children count should be more than 2 as the first and last child
+            // are expected to be delimiters
+            if (annotation.Children == null || annotation.Children.Count <= 2)
             {
                 return null;
             }

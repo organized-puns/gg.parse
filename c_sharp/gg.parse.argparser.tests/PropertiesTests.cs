@@ -4,12 +4,8 @@
 namespace gg.parse.argparser.tests
 {
     [TestClass]
-    public class PropertiesTests
+    public partial class PropertiesTests
     {
-        public class SingleProperty
-        {
-            public string Name { get; set; }
-        }
 
         [TestMethod]
         public void ReadEmptyProperty_ExpectEmptyProperty()
@@ -28,21 +24,6 @@ namespace gg.parse.argparser.tests
 
             Assert.IsNotNull(property);
             Assert.IsTrue(property.Name == fooValue);
-        }
-
-        public class ComplexProperties
-        {
-            public string Name { get; set; }
-
-            public Dictionary<string, string> ExtendedProperties { get; set; }
-
-            public int[] Arr { get; set; }
-
-            public SingleProperty SingleProperty { get; set; }
-
-            public List<bool> BoolList { get; set; }
-
-            public HashSet<string> StringSet { get; set; }
         }
 
         [TestMethod]

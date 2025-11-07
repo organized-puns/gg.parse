@@ -57,13 +57,15 @@ namespace gg.parse.argparser
         }
 
 
-        public static void Write(object target, StringBuilder builder, in PropertiesConfig config)
+        public static StringBuilder AppendMetaInformation(StringBuilder builder, object target, in PropertiesConfig config)
         {
             var key = config.Format == PropertiesFormat.Default ? Key : $"\"{Key}\"";
 
             builder.Indent(config.IndentCount, config.Indent)
                 .Append($"{key}{PropertyFileTokens.KvSeparatorColon} ")
                 .Append($"{{\"{nameof(ObjectType)}\"{PropertyFileTokens.KvSeparatorColon} \"{target.GetType().AssemblyQualifiedName}\"}}");
+
+            return builder;
         }
 
         public static MetaInformation? Read(Annotation annotation, ImmutableList<Annotation> tokenList, string text) =>
