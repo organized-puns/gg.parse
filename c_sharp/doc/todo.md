@@ -18,7 +18,6 @@ kanban
     
     [ Add rule examples ]
     [ Implement properties file ]
-    [ properties files - test empty arrays, dictionaries ]
     [ properties files - compiler base ]
     [ properties files - enums ]
     [ properties files - safe instantiation ]

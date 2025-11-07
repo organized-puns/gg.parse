@@ -4,6 +4,7 @@
 using gg.parse.core;
 using gg.parse.properties;
 using gg.parse.script;
+using gg.parse.script.compiler;
 using gg.parse.tests;
 using System.Collections.Immutable;
 using System.Text;
@@ -38,7 +39,8 @@ namespace gg.parse.argparser.tests
             var (intAnnotation, tokens, text) = SetupSingleTokenTest("123", PropertyFileNames.Int);
 
             // act
-            var result = (int) PropertyReader.Interpret(intAnnotation, tokens, text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens);
+            var result = (int) context.Compile(intAnnotation);
 
             // test
             IsTrue(result == 123);
@@ -51,7 +53,8 @@ namespace gg.parse.argparser.tests
             var (stringAnnotation, tokens, text) = SetupSingleTokenTest("'foo'", PropertyFileNames.String);
 
             // act
-            var result = (string)PropertyReader.Interpret(stringAnnotation, tokens, text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens);
+            var result = (string)context.Compile(stringAnnotation);
 
             // test
             IsTrue(result == "foo");
@@ -85,7 +88,8 @@ namespace gg.parse.argparser.tests
             var kvpList = new Annotation(kvpListRule, new Range(0, tokens.Count), [kvPair1, kvPair2]);
 
             // act
-            var result = PropertyReader.Interpret(kvpList, tokens, text) as Dictionary<string, object>;
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens);
+            var result = context.Compile(kvpList) as Dictionary<string, object>;
 
             // test
             IsNotNull(result);
@@ -112,7 +116,8 @@ namespace gg.parse.argparser.tests
             ]);
 
             // act
-            var result = PropertyReader.Interpret(arrayAnnotation, tokens, text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens);
+            var result = context.Compile(arrayAnnotation);
 
             // test
             IsNull(result);
@@ -137,7 +142,8 @@ namespace gg.parse.argparser.tests
             ]);
 
             // act
-            var result = PropertyReader.Interpret(dictionaryAnnotation, tokens, text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens);
+            var result = context.Compile(dictionaryAnnotation);
 
             // test
             IsNull(result);
@@ -158,7 +164,8 @@ namespace gg.parse.argparser.tests
             var (tokens, syntaxTree) = PropertyParser.Parse(text, usingRule: "kvp_list");
 
             // act
-            var result = PropertyReader.Interpret(syntaxTree.Annotations[0], tokens.Annotations, text) as ComplexProperties;
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens.Annotations);
+            var result = context.Compile(syntaxTree.Annotations[0]) as ComplexProperties;
 
             // test
             IsNotNull(result);
@@ -204,7 +211,8 @@ namespace gg.parse.argparser.tests
             );
 
             // act
-            var result = PropertyReader.Interpret(dictionary, tokens, text) as Dictionary<int, bool>;
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens);
+            var result = context.Compile(dictionary) as Dictionary<int, bool>;
 
             // test
             IsNotNull(result);
@@ -220,7 +228,8 @@ namespace gg.parse.argparser.tests
             var (tokens, syntaxTree) = PropertyParser.Parse(text, usingRule: "dictionary");
 
             // act
-            var result = PropertyReader.Interpret(syntaxTree[0], tokens.Annotations, text) as Dictionary<int, bool>;
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens.Annotations);
+            var result = context.Compile(syntaxTree[0]) as Dictionary<int, bool>;
 
             // test
             IsNotNull(result);
@@ -236,7 +245,8 @@ namespace gg.parse.argparser.tests
             var (tokens, syntaxTree) = PropertyParser.Parse(text);
 
             // act
-            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as ComplexProperties;
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens.Annotations);
+            var result = context.Compile(syntaxTree[0][0]) as ComplexProperties;
 
             // test
             IsNotNull(result);
@@ -251,9 +261,10 @@ namespace gg.parse.argparser.tests
             // setup
             var text = "{\r\n  \"__meta_information\": {\"ObjectType\": \"gg.parse.argparser.tests.ComplexProperties, gg.parse.argparser.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"},\r\n  \"Name\": \"foo\",\r\n  \"ExtendedProperties\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  },\r\n  \"Arr\": [1, 2, 3],\r\n  \"SingleProperty\": {\r\n    \"__meta_information\": {\"ObjectType\": \"gg.parse.argparser.tests.PropertiesTests+SingleProperty, gg.parse.argparser.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"},\r\n    \"Name\": \"foo\"\r\n  },\r\n  \"BoolList\": [true, false, true],\r\n  \"StringSet\": null\r\n}";
             var (tokens, syntaxTree) = PropertyParser.Parse(text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens.Annotations);
 
             // act
-            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as ComplexProperties;
+            var result = context.Compile(syntaxTree[0][0]) as ComplexProperties;
 
             // test
             IsNotNull(result);
@@ -268,9 +279,10 @@ namespace gg.parse.argparser.tests
             // setup
             var text = "{\r\n  \"Name\": \"foo\",\r\n  \"ExtendedProperties\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  },\r\n  \"Arr\": [1, 2, 3],\r\n  \"SingleProperty\": {\r\n    \"Name\": \"foo\"\r\n  },\r\n  \"BoolList\": [true, false, true],\r\n  \"StringSet\": null\r\n}";
             var (tokens, syntaxTree) = PropertyParser.Parse(text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens.Annotations);
 
             // act
-            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as Dictionary<string, object>;
+            var result = context.Compile(syntaxTree[0][0]) as Dictionary<string, object>;
 
             // test
             IsNotNull(result);
@@ -286,9 +298,10 @@ namespace gg.parse.argparser.tests
             // setup
             var text = "// autogenerated property file\r\nName: \"foo\"\r\nExtendedProperties: {\r\n  \"key1\": \"value1\",\r\n  \"key2\": \"value2\"\r\n}\r\nArr: [1, 2, 3]\r\nSingleProperty: {\r\n  Name: \"foo\"\r\n}\r\nBoolList: [true, false, true]\r\nStringSet: null";
             var (tokens, syntaxTree) = PropertyParser.Parse(text);
+            var context = new CompileContext<object>(text, new PropertyInterpreter(), tokens.Annotations);
 
             // act
-            var result = PropertyReader.Interpret(syntaxTree[0][0], tokens.Annotations, text) as Dictionary<string, object>;
+            var result = context.Compile(syntaxTree[0][0]) as Dictionary<string, object>;
 
             // test
             IsNotNull(result);
