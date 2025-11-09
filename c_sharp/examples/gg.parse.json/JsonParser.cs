@@ -1,9 +1,13 @@
-﻿using gg.parse.core;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using System.Collections.Immutable;
+using System.Text;
+
+using gg.parse.core;
 using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
-using System.Collections.Immutable;
-using System.Text;
 
 namespace gg.parse.json
 {

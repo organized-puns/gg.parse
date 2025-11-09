@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/3.6.4">
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -9,10 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\gg.parse.script\gg.parse.script.csproj" />
+    <ProjectReference Include="..\..\gg.parse.tests\gg.parse.tests.csproj" />
     <ProjectReference Include="..\gg.parse.argparser\gg.parse.argparser.csproj" />
-    <ProjectReference Include="..\gg.parse.script\gg.parse.script.csproj" />
-    <ProjectReference Include="..\gg.parse.tests\gg.parse.tests.csproj" />
-    <ProjectReference Include="..\gg.parse\gg.parse.csproj" />
   </ItemGroup>
 
   <ItemGroup>
