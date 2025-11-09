@@ -1,9 +1,12 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Reflection;
+// xxx needs revisiting after completing the property reader
+
+/*using System.Reflection;
 using gg.parse.core;
 using gg.parse.script;
+using gg.parse.script.compiler;
 using gg.parse.util;
 
 namespace gg.parse.argparser
@@ -25,11 +28,6 @@ namespace gg.parse.argparser
         public string GetErrorReport(Exception e)
         {
             return Parser.GetReport(e, rules.LogLevel.Error | rules.LogLevel.Fatal);
-            /*var parserErrors = Parser.LogHandler?.ReceivedLogs?.Where(l => l.level == rules.LogLevel.Error);
-
-            return parserErrors != null && parserErrors.Any()
-                ? string.Join("\n", parserErrors)
-                : e.Message;*/
         }
         
         public T Parse(string[] args) =>
@@ -42,6 +40,7 @@ namespace gg.parse.argparser
             var index = 0;
             var errors = new List<string>();
             var requiredArgs = new HashSet<PropertyArgs>(_propertyDescriptors.Where(attr => attr.IsRequired));
+            var compileContext = new CompileContext(args, new PropertyReaderr(), tokens.Annotations!, syntaxTree.Annotations!);
 
             // set all default values
             _propertyDescriptors
@@ -193,3 +192,4 @@ namespace gg.parse.argparser
         }               
     }
 }
+*/

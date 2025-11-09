@@ -1,4 +1,5 @@
-﻿using gg.parse.script.common;
+﻿/* xxx needs revisiting after arg reader has been implemented
+using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
 using System.Diagnostics;
@@ -260,4 +261,4 @@ namespace gg.parse.argparser.tests
             }
         }
     }
-}
+}*/

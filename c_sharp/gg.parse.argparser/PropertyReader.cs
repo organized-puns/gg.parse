@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
-
+/*
 using gg.parse.core;
 using gg.parse.properties;
 using gg.parse.util;
@@ -131,7 +131,7 @@ namespace gg.parse.argparser
                 return null;
             }
             
-            throw new ArgumentException($"Request Array<{listType}> but provided value is not a valid array.");
+            throw new ArgumentException($"Request List<{listType}> but the annotation doesn't describe a list.");
         }
 
         public static object? OfSet(Type targetType, Annotation annotation, ImmutableList<Annotation> tokenList, string text)
@@ -201,18 +201,12 @@ namespace gg.parse.argparser
             throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
         }
 
-        private static string KeyToPropertyName(Annotation node, ImmutableList<Annotation> tokenList, string text)
-        {
-            var keyString = node.GetText(text, tokenList);
-
+        private static string KeyToPropertyName(Annotation node, ImmutableList<Annotation> tokenList, string text) =>
             // can be a string in case of a json format
-            if (node == PropertyFileNames.String)
-            {
-                return keyString.Substring(1, keyString.Length - 2);
-            }
-
-            return keyString;
-        }
+            node == PropertyFileNames.String
+                ? node.GetText(text, tokenList)[1..^1]
+                : node.GetText(text, tokenList);
+        
 
         public static object? OfKeyValuePairList(
             Type targetType,
@@ -344,3 +338,4 @@ namespace gg.parse.argparser
         }
     }
 }
+*/

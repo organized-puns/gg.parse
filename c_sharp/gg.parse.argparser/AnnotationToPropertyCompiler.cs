@@ -12,12 +12,24 @@ using gg.parse.util;
 namespace gg.parse.argparser
 {
     /// <summary>
-    /// Class trying to interpret the value of an annotation and create
+    /// Class trying to interpret the value of an annotation (ignoring the targetType) and create
     /// a c# value from the annotation.
     /// </summary>
-    public sealed class PropertyInterpreter : CompilerTemplate<object>
+    public sealed class AnnotationToPropertyCompiler : CompilerTemplate<string>
     {
-        public PropertyInterpreter()
+        private static readonly PropertyReaderr _propertyReader = new();
+
+        public AnnotationToPropertyCompiler()
+        {
+            RegisterDefaultFunctions();
+        }
+
+        public AnnotationToPropertyCompiler(Dictionary<string, CompileFunc> properties)
+            : base(properties)
+        {
+        }
+
+        public override ICompilerTemplate RegisterDefaultFunctions()
         {
             Register(PropertyFileNames.Array, CompileArray);
             Register(PropertyFileNames.Boolean, CompileBoolean);
@@ -28,9 +40,11 @@ namespace gg.parse.argparser
             Register(PropertyFileNames.KvpList, CompileKeyValueListOrObject);
             Register(PropertyFileNames.Null, CompileNull);
             Register(PropertyFileNames.String, CompileString);
+
+            return this;
         }
 
-        public static object? CompileArray(Annotation annotation, CompileContext<object> context)
+        public object? CompileArray(Type? targetType, Annotation annotation, CompileContext context)
         {
             if (annotation.Children != null && annotation.Children.Count > 2)
             {
@@ -46,7 +60,7 @@ namespace gg.parse.argparser
                     
                     Assertions.RequiresNotNull(child);
 
-                    tempValues[i - 1] = context.Compile(child);
+                    tempValues[i - 1] = Compile(targetType, child, context);
                     commonArrayType = GetCommonValueType(tempValues[i - 1], commonArrayType);
                 }
 
@@ -61,26 +75,24 @@ namespace gg.parse.argparser
             return null;
         }
 
-        public static object? CompileBoolean(Annotation annotation, CompileContext<object> context) =>
+        public static object? CompileBoolean(Type? targetType, Annotation annotation, CompileContext context) =>
             bool.Parse(context.GetText(annotation));
 
-
-        public static object? CompileDictionaryOrObject(Annotation annotation, CompileContext<object> context)
+        public object? CompileDictionaryOrObject(Type? targetType, Annotation annotation, CompileContext context)
         {
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context.Tokens, context.Text);
+            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _propertyReader);
 
             return metaInformationNode == null
-                ? CompileDictionary(annotation, context)
-                : PropertyReader.
-                        OfObject(
+                ? CompileDictionary(targetType, annotation, context)
+                : _propertyReader.
+                        CompileClass(
                             metaInformationNode.ResolveObjectType(),
                             annotation,
-                            context.Tokens,
-                            context.Text
+                            context
                         );
         }
 
-        public static object? CompileDictionary(Annotation annotation, CompileContext<object> context)
+        public object? CompileDictionary(Type? targetType, Annotation annotation, CompileContext context)
         {
             // children count should be more than 2 as the first and last child
             // are expected to be delimiters
@@ -96,7 +108,10 @@ namespace gg.parse.argparser
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
                     (object? key, object? value) keyValuePair = 
-                        (context.Compile(annotation[i]![0]!), context.Compile(annotation[i]![1]!));
+                        (
+                            Compile(targetType, annotation[i]![0]!, context),
+                            Compile(targetType, annotation[i]![1]!, context)
+                        );
 
                     keyValues.Add(keyValuePair);
 
@@ -121,31 +136,30 @@ namespace gg.parse.argparser
             return null;
         }
 
-        public static object? CompileFloat(Annotation annotation, CompileContext<object> context) =>
+        public static object? CompileFloat(Type? targetType, Annotation annotation, CompileContext context) =>
             float.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
-        public static object? CompileIdentifier(Annotation annotation, CompileContext<object> context) =>
+        public static object? CompileIdentifier(Type? targetType, Annotation annotation, CompileContext context) =>
             context.GetText(annotation);
 
-        public static object? CompileInt(Annotation annotation, CompileContext<object> context) =>
+        public static object? CompileInt(Type? targetType, Annotation annotation, CompileContext context) =>
             int.Parse(context.GetText(annotation));
 
-        public static object? CompileKeyValueListOrObject(Annotation annotation, CompileContext<object> context)
+        public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, CompileContext context)
         {
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context.Tokens, context.Text);
+            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _propertyReader);
 
             return metaInformationNode == null
-                ? CompileKeyValueList(annotation, context)
-                : PropertyReader.
-                        OfKeyValuePairList(
+                ? CompileKeyValueList(targetType, annotation, context)
+                : _propertyReader.
+                        CompileKeyValuePairs(
                             metaInformationNode.ResolveObjectType(),
                             annotation,
-                            context.Tokens,
-                            context.Text
+                            context
                         );
         }
 
-        public static object? CompileKeyValueList(Annotation annotation, CompileContext<object> context)
+        public object? CompileKeyValueList(Type? targetType, Annotation annotation, CompileContext context)
         {
             if (annotation.Children != null && annotation.Children.Count > 0)
             {
@@ -154,10 +168,10 @@ namespace gg.parse.argparser
                 foreach (var kvpNode in annotation)
                 {
                     var key = (string) (kvpNode[0]! == PropertyFileNames.String
-                        ? CompileString(kvpNode[0]!, context)
-                        : CompileIdentifier(kvpNode[0]!, context))!;
+                        ? CompileString(targetType, kvpNode[0]!, context)
+                        : CompileIdentifier(targetType, kvpNode[0]!, context))!;
 
-                    var value = context.Compile(kvpNode[1]!);
+                    var value = Compile(targetType, kvpNode[1]!, context);
 
                     result[key] = value;
                 }
@@ -168,12 +182,17 @@ namespace gg.parse.argparser
             return null;
         }
 
-        public static object? CompileNull(Annotation annotation, CompileContext<object> context) => 
+        public static object? CompileNull(Type? targetType, Annotation annotation, CompileContext context) => 
             null;
 
-        public static object? CompileString(Annotation annotation, CompileContext<object> context) =>
+        public static object? CompileString(Type? targetType, Annotation annotation, CompileContext context) =>
             context.GetText(annotation)[1..^1];
-        
+
+
+        // -- Protected methods ---------------------------------------------------------------------------------------
+
+        protected override string SelectKey(Type? targetType, Annotation annotation, CompileContext context) =>
+            annotation.Rule.Name;
 
         // -- Private methods -----------------------------------------------------------------------------------------
 
@@ -194,5 +213,7 @@ namespace gg.parse.argparser
 
             return currentType;
         }
+
+        
     }
 }

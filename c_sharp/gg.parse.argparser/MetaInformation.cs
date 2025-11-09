@@ -3,6 +3,7 @@
 
 using gg.parse.core;
 using gg.parse.properties;
+using gg.parse.script.compiler;
 using gg.parse.util;
 using System.Collections.Immutable;
 using System.Text;
@@ -35,16 +36,16 @@ namespace gg.parse.argparser
 
         public static MetaInformation? FindMetaInformation(
             Annotation annotation,
-            ImmutableList<Annotation> tokenList,
-            string text)
+            CompileContext context,
+            PropertyReaderr reader)
         {
             var predicate = new Func<Annotation, bool>(a =>
             {
                 if (a == PropertyFileNames.KvpPair)
                 {
-                    var keyName = a![0]!.GetText(text, tokenList);
-                    return keyName == MetaInformation.Key
-                        || keyName == MetaInformation.QuotedKey;
+                    var keyName = context.GetText(a![0]!);
+                    return keyName == Key
+                        || keyName == QuotedKey;
                 }
 
                 return false;
@@ -52,7 +53,7 @@ namespace gg.parse.argparser
             var metaInformationNode = annotation.FirstOrDefaultDfs(predicate);
 
             return metaInformationNode != null && metaInformationNode.Count >= 2
-                ? Read(metaInformationNode[1]!, tokenList, text)
+                ? (MetaInformation?) reader.CompileClass(typeof(MetaInformation), metaInformationNode[1]!, context)
                 : null;
         }
 
@@ -68,7 +69,7 @@ namespace gg.parse.argparser
             return builder;
         }
 
-        public static MetaInformation? Read(Annotation annotation, ImmutableList<Annotation> tokenList, string text) =>
-            (MetaInformation?) PropertyReader.OfObject(typeof(MetaInformation), annotation, tokenList, text);
+        //public static MetaInformation? Read(Annotation annotation, CompileContext context) =>
+          //  (MetaInformation?) PropertyReaderr.CompileClass(typeof(MetaInformation), annotation, context);
     }
 }

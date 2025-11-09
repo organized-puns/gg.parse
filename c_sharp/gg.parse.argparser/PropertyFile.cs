@@ -6,6 +6,7 @@ using System.Text;
 using gg.parse.properties;
 using gg.parse.rules;
 using gg.parse.script;
+using gg.parse.script.compiler;
 
 namespace gg.parse.argparser
 {
@@ -67,11 +68,19 @@ namespace gg.parse.argparser
                     {
                         if (syntaxTree.Annotations[0].Count > 0)
                         {
-                            return PropertyReader.OfValue<T>(
+                            var context = new CompileContext(
+                                propertiesText,
+                                tokens.Annotations,
+                                syntaxTree.Annotations
+                            );
+
+                            return new PropertyReaderr().Compile<T?>(syntaxTree.Annotations[0][0]!, context);
+
+                            /*return reader.Compile<T>(
                                 syntaxTree.Annotations[0][0]!,
                                 tokens.Annotations,
                                 propertiesText
-                            );
+                            );*/
                         }
 
                         // empty property set
