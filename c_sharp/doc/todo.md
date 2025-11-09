@@ -18,16 +18,17 @@ kanban
   In progress
     
     [ Add rule examples ]
-    [ Implement properties file ]
-        [ properties files - move properties to its own project ]
-        [ properties files - enums ]
+    [ Implement properties file ]        
         [ properties files - safe instantiation, allow for simpler meta information types ]
+        [ properties files - enums ]
         [ properties files - move parser graphs to read only, thread safe implementations ]
+        [ properties files - allow for ini files/java properties ]
         [ properties files - redo arg parser based on compiler template ]
         [ properties files - redo calculator based on compiler template ]
         [ properties files - redo rule compiler based on compiler template ]
         	
   Done
+    [ properties files - move properties to its own project ]
     [ properties files - moving examples to subdirectory ]
     [ properties files - split interpreter from reader ]    
     [ properties files - compiler base ]

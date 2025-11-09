@@ -15,7 +15,7 @@ namespace gg.parse.properties
     /// Class trying to interpret the value of an annotation (ignoring the targetType) and create
     /// a c# value from the annotation.
     /// </summary>
-    public sealed class AnnotationToPropertyCompiler : CompilerTemplate<string>
+    public sealed class AnnotationToPropertyCompiler : CompilerTemplate<string, PropertyContext>
     {
         private static readonly TypeToPropertyCompiler _typeCompiler = new();
 
@@ -24,12 +24,12 @@ namespace gg.parse.properties
             RegisterDefaultFunctions();
         }
 
-        public AnnotationToPropertyCompiler(Dictionary<string, CompileFunc> properties)
+        public AnnotationToPropertyCompiler(Dictionary<string, CompileFunc<PropertyContext>> properties)
             : base(properties)
         {
         }
 
-        public override ICompilerTemplate RegisterDefaultFunctions()
+        public override ICompilerTemplate<PropertyContext> RegisterDefaultFunctions()
         {
             Register(PropertiesNames.Array, CompileArray);
             Register(PropertiesNames.Boolean, CompileBoolean);
@@ -44,7 +44,7 @@ namespace gg.parse.properties
             return this;
         }
 
-        public object? CompileArray(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileArray(Type? targetType, Annotation annotation, PropertyContext context)
         {
             if (annotation.Children != null && annotation.Children.Count > 2)
             {
@@ -75,10 +75,10 @@ namespace gg.parse.properties
             return null;
         }
 
-        public static object? CompileBoolean(Type? targetType, Annotation annotation, CompileContext context) =>
+        public static object? CompileBoolean(Type? targetType, Annotation annotation, PropertyContext context) =>
             bool.Parse(context.GetText(annotation));
 
-        public object? CompileDictionaryOrObject(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileDictionaryOrObject(Type? targetType, Annotation annotation, PropertyContext context)
         {
             var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _typeCompiler);
 
@@ -86,13 +86,13 @@ namespace gg.parse.properties
                 ? CompileDictionary(targetType, annotation, context)
                 : _typeCompiler.
                         CompileClass(
-                            metaInformationNode.ResolveObjectType(),
+                            context.FindType(metaInformationNode.ObjectType),
                             annotation,
                             context
                         );
         }
 
-        public object? CompileDictionary(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileDictionary(Type? targetType, Annotation annotation, PropertyContext context)
         {
             // children count should be more than 2 as the first and last child
             // are expected to be delimiters
@@ -145,7 +145,7 @@ namespace gg.parse.properties
         public static object? CompileInt(Type? targetType, Annotation annotation, CompileContext context) =>
             int.Parse(context.GetText(annotation));
 
-        public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, PropertyContext  context)
         {
             var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _typeCompiler);
 
@@ -153,13 +153,13 @@ namespace gg.parse.properties
                 ? CompileKeyValueList(targetType, annotation, context)
                 : _typeCompiler.
                         CompileKeyValuePairs(
-                            metaInformationNode.ResolveObjectType(),
+                            context.FindType(metaInformationNode.ObjectType),
                             annotation,
                             context
                         );
         }
 
-        public object? CompileKeyValueList(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileKeyValueList(Type? targetType, Annotation annotation, PropertyContext context)
         {
             if (annotation.Children != null && annotation.Children.Count > 0)
             {
@@ -191,7 +191,7 @@ namespace gg.parse.properties
 
         // -- Protected methods ---------------------------------------------------------------------------------------
 
-        protected override string SelectKey(Type? targetType, Annotation annotation, CompileContext context) =>
+        protected override string SelectKey(Type? targetType, Annotation annotation, PropertyContext context) =>
             annotation.Rule.Name;
 
         // -- Private methods -----------------------------------------------------------------------------------------

@@ -1,10 +1,11 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using gg.parse.core;
-using gg.parse.util;
 using System.Collections;
 using System.Collections.Immutable;
+
+using gg.parse.core;
+using gg.parse.util;
 
 namespace gg.parse.script.compiler
 {    
@@ -13,95 +14,27 @@ namespace gg.parse.script.compiler
         void AddOutput(object output);
     }
 
-    public interface ICompilerTemplate
+    public delegate object? CompileFunc<TContext>(Type? targetType, Annotation annotation, TContext context)
+        where TContext : CompileContext;
+
+
+    public abstract class CompilerTemplate<TKey, TContext> : ICompilerTemplate<TContext>
+        where TKey : notnull
+        where TContext: CompileContext
     {
-        ICompileOutputCollection Compile(
-            Type targetType,
-            ImmutableList<Annotation> annotations,
-            CompileContext context,
-            ICompileOutputCollection container
-        );
-
-        ICompilerTemplate RegisterDefaultFunctions();
-
-        T? Compile<T>(Annotation annotation, CompileContext context);
-
-        object? Compile(Type? targetType, Annotation annotation, CompileContext context);
-    }
-
-
-    public class CompileContext
-    {
-        public string Text { get; init; }
-
-        // xxx keep this out of the context
-        // public ICompilerTemplate Compiler { get; init; }
-
-        public ImmutableList<Annotation> Tokens { get; init; }
-
-        public ImmutableList<Annotation>? SyntaxTree { get; init; }
-
-        public List<Exception> Exceptions { get; init; }
-
-        public CompileContext(
-            string text,
-            //ICompilerTemplate compiler, 
-            ImmutableList<Annotation> tokens
-        )
-        {
-            Text = text;
-            //Compiler = compiler;
-            Tokens = tokens;
-            SyntaxTree = null;
-            Exceptions = [];
-        }
-
-        public CompileContext(
-            string text,
-            //ICompilerTemplate compiler, 
-            ImmutableList<Annotation> tokens, 
-            ImmutableList<Annotation> syntaxTree
-        )
-        {
-            Text = text;
-            //Compiler = compiler;
-            Tokens = tokens;
-            SyntaxTree = syntaxTree;
-            Exceptions = [];
-        }
-
-        public string GetText(Annotation annotation) =>
-            Text.Substring(Tokens.CombinedRange(annotation.Range));
-
-
-        /*public T? Compile<T>(Annotation annotation) =>
-            (T?) Compiler.Compile(typeof(T), annotation, this);
-
-        public object? Compile(Annotation annotation) =>
-            Compiler.Compile(null, annotation, this);
-
-        public object? Compile(Type? targetType, Annotation annotation) =>
-            Compiler.Compile(targetType, annotation, this);*/
-    }
-
-    public delegate object? CompileFunc(Type? targetType, Annotation annotation, CompileContext context);
-
-    
-    public abstract class CompilerTemplate<TKey> : ICompilerTemplate where TKey : notnull
-    {
-        private readonly Dictionary<TKey, CompileFunc> _functionLookup = [];
+        private readonly Dictionary<TKey, CompileFunc<TContext>> _functionLookup = [];
 
         public CompilerTemplate() 
         { 
         }
 
-        public CompilerTemplate(Dictionary<TKey, CompileFunc> functions) => 
+        public CompilerTemplate(Dictionary<TKey, CompileFunc<TContext>> functions) => 
             functions.ForEach(kvp => _functionLookup.Add(kvp.Key, kvp.Value));
 
 
-        public abstract ICompilerTemplate RegisterDefaultFunctions();
+        public abstract ICompilerTemplate<TContext> RegisterDefaultFunctions();
 
-        public void Register(TKey key, CompileFunc function)
+        public void Register(TKey key, CompileFunc<TContext> function)
         {
             Assertions.RequiresNotNull(key);
             Assertions.RequiresNotNull(function);
@@ -110,7 +43,7 @@ namespace gg.parse.script.compiler
             _functionLookup[key] = function;
         }
 
-        public T? Compile<T>(Annotation annotation, CompileContext context) =>
+        public T? Compile<T>(Annotation annotation, TContext context) =>
             (T?)Compile(typeof(T), annotation, context);
 
 
@@ -121,7 +54,7 @@ namespace gg.parse.script.compiler
         /// <param name="context"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public ICompileOutputCollection Compile(Type targetType, CompileContext context, ICompileOutputCollection result) =>
+        public ICompileOutputCollection Compile(Type targetType, TContext context, ICompileOutputCollection result) =>
         
             context.SyntaxTree == null
                 ? Compile(targetType, context.Tokens, context, result)
@@ -129,8 +62,8 @@ namespace gg.parse.script.compiler
 
         public ICompileOutputCollection Compile(
             Type targetType,
-            ImmutableList<Annotation> annotations, 
-            CompileContext context, 
+            ImmutableList<Annotation> annotations,
+            TContext context, 
             ICompileOutputCollection container
         )
         {
@@ -158,7 +91,7 @@ namespace gg.parse.script.compiler
         }
 
         
-        public object? Compile(Type? targetType, Annotation annotation, CompileContext context)
+        public object? Compile(Type? targetType, Annotation annotation, TContext context)
         {
             object? result = default;
             
@@ -174,11 +107,11 @@ namespace gg.parse.script.compiler
             return result;
         }
 
-        public virtual ICompileOutputCollection PostCompile(CompileContext context, ICompileOutputCollection result)
+        public virtual ICompileOutputCollection PostCompile(TContext context, ICompileOutputCollection result)
         {
             return result;
         }
 
-        protected abstract TKey SelectKey(Type? targetType, Annotation annotation, CompileContext context);
+        protected abstract TKey SelectKey(Type? targetType, Annotation annotation, TContext context);
     }
 }

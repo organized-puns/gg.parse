@@ -68,7 +68,7 @@ namespace gg.parse.properties
                     {
                         if (syntaxTree.Annotations[0].Count > 0)
                         {
-                            var context = new CompileContext(
+                            var context = new PropertyContext(
                                 propertiesText,
                                 tokens.Annotations,
                                 syntaxTree.Annotations

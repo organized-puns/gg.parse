@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-namespace gg.parse.properties.tests
+namespace gg.parse.properties.tests.testclasses
 {
     public class SingleProperty
     {

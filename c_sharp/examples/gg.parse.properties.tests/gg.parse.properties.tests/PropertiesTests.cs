@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using gg.parse.properties.tests.testclasses;
+
 namespace gg.parse.properties.tests
 {
     [TestClass]

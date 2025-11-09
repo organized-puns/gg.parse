@@ -33,19 +33,19 @@ namespace gg.parse.properties
         Struct
     }
 
-    public class TypeToPropertyCompiler : CompilerTemplate<TypeCategory>
+    public class TypeToPropertyCompiler : CompilerTemplate<TypeCategory, PropertyContext>
     {
         public TypeToPropertyCompiler()
         {
             RegisterDefaultFunctions();
         }
 
-        public TypeToPropertyCompiler(Dictionary<TypeCategory, CompileFunc> properties)
+        public TypeToPropertyCompiler(Dictionary<TypeCategory, CompileFunc<PropertyContext>> properties)
             : base(properties) 
         {
         }
 
-        public override ICompilerTemplate RegisterDefaultFunctions()
+        public override ICompilerTemplate<PropertyContext> RegisterDefaultFunctions()
         {
             Register(TypeCategory.Array, CompileArray);
             Register(TypeCategory.Boolean, CompileBoolean);
@@ -64,7 +64,7 @@ namespace gg.parse.properties
             return this;
         }
 
-        public object? CompileArray(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileArray(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
 
@@ -99,7 +99,7 @@ namespace gg.parse.properties
         public static object? CompileChar(Type? targetType, Annotation annotation, CompileContext context) =>
             context.GetText(annotation)[0];
 
-        public object? CompileClass(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileClass(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
 
@@ -131,7 +131,7 @@ namespace gg.parse.properties
             throw new ArgumentException($"Looking for a value of type '{targetType}' but value found is not a object/dictionary but a '{annotation.Rule.Name}'.");
         }
 
-        public object? CompileDictionary(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileDictionary(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);
@@ -180,7 +180,7 @@ namespace gg.parse.properties
         public static object? CompileInt(Type? targetType, Annotation annotation, CompileContext context) =>
             int.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
-        public object? CompileKeyValuePairs(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
 
@@ -202,7 +202,7 @@ namespace gg.parse.properties
             return result;
         }
 
-        public object? CompileList(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileList(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);
@@ -231,7 +231,7 @@ namespace gg.parse.properties
             throw new ArgumentException($"Request List<{listType}> but the annotation doesn't describe a list.");
         }
 
-        public object? CompileSet(Type? targetType, Annotation annotation, CompileContext context)
+        public object? CompileSet(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
             Assertions.RequiresNotNull(annotation);
@@ -283,7 +283,7 @@ namespace gg.parse.properties
 
         // -- Protected methods ---------------------------------------------------------------------------------------
 
-        protected override TypeCategory SelectKey(Type? targetType, Annotation annotation, CompileContext context)
+        protected override TypeCategory SelectKey(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
 
@@ -356,7 +356,7 @@ namespace gg.parse.properties
         private bool TrySetObjectProperty(
             object target,
             Annotation annotation,
-            CompileContext context
+            PropertyContext context
         )
         {
             var keyAnnotation = annotation[0];

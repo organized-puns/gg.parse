@@ -3,6 +3,7 @@
 
 namespace gg.parse.properties
 {
+    // xxx add allowed types
     public readonly struct PropertiesConfig
     {
         public bool AddMetaInformation

@@ -23,19 +23,9 @@ namespace gg.parse.properties
 
         public string? ObjectType { get; set; }
 
-        public Type ResolveObjectType()
-        {
-            if (!string.IsNullOrEmpty(ObjectType))
-            {
-                return Type.GetType(ObjectType) ?? throw new TypeNotFoundException($"Cannot resolve type '{ObjectType}'.");
-            }
-
-            throw new NullReferenceException($"{nameof(MetaInformation)} No object type defined");
-        }
-
         public static MetaInformation? FindMetaInformation(
             Annotation annotation,
-            CompileContext context,
+            PropertyContext context,
             TypeToPropertyCompiler reader)
         {
             var predicate = new Func<Annotation, bool>(a =>
@@ -67,8 +57,5 @@ namespace gg.parse.properties
 
             return builder;
         }
-
-        //public static MetaInformation? Read(Annotation annotation, CompileContext context) =>
-          //  (MetaInformation?) PropertyReaderr.CompileClass(typeof(MetaInformation), annotation, context);
     }
 }
