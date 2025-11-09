@@ -3,9 +3,14 @@
 
 namespace gg.parse.properties
 {
-    // xxx add allowed types
     public readonly struct PropertiesConfig
     {
+        public TypePermissions AllowedTypes
+        {
+            get;
+            init;
+        }
+
         public bool AddMetaInformation
         {
             get;
@@ -35,21 +40,30 @@ namespace gg.parse.properties
             Indent = "    ";
             Format = PropertiesFormat.Default;
             AddMetaInformation = true;
+            AllowedTypes = new TypePermissions();
         }
 
-        public PropertiesConfig(PropertiesFormat format = PropertiesFormat.Default, string indent = "    ", bool addMetaInfo = false)
+        public PropertiesConfig(
+            PropertiesFormat format = PropertiesFormat.Default, 
+            string indent = "    ", 
+            bool addMetaInfo = false,
+            TypePermissions? allowedTypes = null)
         {
             Indent = indent;
             Format = format;
             AddMetaInformation = addMetaInfo;
+            AllowedTypes = allowedTypes ?? new TypePermissions();
         }
 
         public static PropertiesConfig operator +(PropertiesConfig left, int count)
         {
-            return new PropertiesConfig(left.Format, left.Indent, left.AddMetaInformation)
+            return new PropertiesConfig(left.Format, left.Indent, left.AddMetaInformation, left.AllowedTypes)
             {
-                IndentCount = left.IndentCount + count
+                IndentCount = left.IndentCount + count,
             };
         }
+
+        public Type ResolveType(string? name) =>
+            AllowedTypes.ResolveType(name);
     }
 }

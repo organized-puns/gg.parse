@@ -142,25 +142,48 @@ namespace gg.parse.properties.tests
         }
 
         [TestMethod]
-        public void WriteAndReadComplexProperties_ExpectPropertiesSet()
+        public void WriteAndReadComplexPropertiesWithUnmanagedTypes_ExpectPropertiesSet()
         {
             var complexProperties = CreateTestObject();
-            
+            var allowedTypes = new TypePermissions() { AllowUnmanagedTypes = true };
             var complexDefaultPropertyString = PropertyFile.Write(complexProperties,
-                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  "));
+                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  ", allowedTypes: allowedTypes));
 
-            ValidateTestObject(complexProperties, complexDefaultPropertyString);
+            ValidateTestObject(complexProperties, complexDefaultPropertyString, allowedTypes);
 
             var complexDefaultPropertyWithMetaString = PropertyFile.Write(complexProperties,
-                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  ", addMetaInfo: true));
+                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  ", addMetaInfo: true, allowedTypes: allowedTypes));
 
-            ValidateTestObject(complexProperties, complexDefaultPropertyWithMetaString);
+            ValidateTestObject(complexProperties, complexDefaultPropertyWithMetaString, allowedTypes);
 
             var complexJsonPropertyString = PropertyFile.Write(complexProperties,
-                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: true));
+                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: true, allowedTypes: allowedTypes));
 
-            ValidateTestObject(complexProperties, complexJsonPropertyString);
+            ValidateTestObject(complexProperties, complexJsonPropertyString, allowedTypes);
         }
+
+        [TestMethod]
+        public void WriteAndReadComplexPropertiesWithManagedTypes_ExpectPropertiesSet()
+        {
+            var complexProperties = CreateTestObject();
+            var allowedTypes = new TypePermissions().AllowTypes(typeof(ComplexProperties), typeof(SingleProperty));
+            var complexDefaultPropertyString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  ", allowedTypes: allowedTypes));
+
+            ValidateTestObject(complexProperties, complexDefaultPropertyString, allowedTypes);
+
+            var complexDefaultPropertyWithMetaString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Default, indent: "  ", addMetaInfo: true, allowedTypes: allowedTypes));
+
+            ValidateTestObject(complexProperties, complexDefaultPropertyWithMetaString, allowedTypes);
+
+            var complexJsonPropertyString = PropertyFile.Write(complexProperties,
+                new PropertiesConfig(format: PropertiesFormat.Json, indent: "  ", addMetaInfo: true, allowedTypes: allowedTypes));
+
+            ValidateTestObject(complexProperties, complexJsonPropertyString, allowedTypes);
+        }
+
+
 
         private static ComplexProperties CreateTestObject() =>
             new ()
@@ -179,9 +202,17 @@ namespace gg.parse.properties.tests
                 BoolList = [true, false, true]
             };
 
-        private static void ValidateTestObject(ComplexProperties original, string complexPropertyString)
+        private static void ValidateTestObject(
+            ComplexProperties original, 
+            string complexPropertyString, 
+            TypePermissions permissions
+        )
         {
-            var properties = PropertyFile.Read<ComplexProperties>(complexPropertyString);
+            var properties = PropertyFile
+                                .Read<ComplexProperties>(
+                                    complexPropertyString, 
+                                    permissions 
+                                );
 
             Assert.IsNotNull(properties);
             Assert.IsTrue(properties.Name == "foo");

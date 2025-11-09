@@ -50,10 +50,11 @@ namespace gg.parse.properties
         public static StringBuilder AppendMetaInformation(StringBuilder builder, object target, in PropertiesConfig config)
         {
             var key = config.Format == PropertiesFormat.Default ? Key : $"\"{Key}\"";
+            var typeName = config.AllowedTypes.ResolveName(target.GetType());
 
             builder.Indent(config.IndentCount, config.Indent)
                 .Append($"{key}{PropertiesTokens.KvSeparatorColon} ")
-                .Append($"{{\"{nameof(ObjectType)}\"{PropertiesTokens.KvSeparatorColon} \"{target.GetType().AssemblyQualifiedName}\"}}");
+                .Append($"{{\"{nameof(ObjectType)}\"{PropertiesTokens.KvSeparatorColon} \"{typeName}\"}}");
 
             return builder;
         }

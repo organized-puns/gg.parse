@@ -5,7 +5,6 @@ using System.Text;
 
 using gg.parse.rules;
 using gg.parse.script;
-using gg.parse.script.compiler;
 using gg.parse.script.parser;
 
 namespace gg.parse.properties
@@ -20,7 +19,7 @@ namespace gg.parse.properties
         /// <param name="filename"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static T? ReadFile<T>(string filename) where T : class
+        public static T? ReadFile<T>(string filename, TypePermissions? allowedTypes = null) where T : class
         {
             if (string.IsNullOrEmpty(filename))
             {
@@ -32,7 +31,7 @@ namespace gg.parse.properties
                 throw new ArgumentException($"Filename {filename} does not exist");
             }
 
-            return Read<T>(File.ReadAllText(filename));
+            return Read<T>(File.ReadAllText(filename), allowedTypes);
         }
 
         /// <summary>
@@ -43,7 +42,7 @@ namespace gg.parse.properties
         /// <param name="filename"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static T? Read<T>(string propertiesText) where T : class
+        public static T? Read<T>(string propertiesText, TypePermissions? allowedTypes = null) where T : class
         {
             if (string.IsNullOrEmpty(propertiesText))
             {
@@ -71,7 +70,8 @@ namespace gg.parse.properties
                             var context = new PropertyContext(
                                 propertiesText,
                                 tokens.Annotations,
-                                syntaxTree.Annotations
+                                syntaxTree.Annotations,
+                                allowedTypes ?? new TypePermissions()
                             );
 
                             return new TypeToPropertyCompiler().Compile<T?>(syntaxTree.Annotations[0][0]!, context);
@@ -98,8 +98,8 @@ namespace gg.parse.properties
         /// <param name="obj"></param>
         /// <returns></returns>
         /// <see cref="PropertiesConfig"/>
-        public static string Write<T>(T obj) where T : class =>
-            Write(obj, new PropertiesConfig());
+        public static string Write<T>(T obj, TypePermissions? allowedTypes = null) where T : class =>
+            Write(obj, new PropertiesConfig(allowedTypes: allowedTypes));
 
         /// <summary>
         /// Write an object to a property string using the given config

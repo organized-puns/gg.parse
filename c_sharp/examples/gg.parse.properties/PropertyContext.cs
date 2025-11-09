@@ -1,80 +1,77 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections.Immutable;
-using System.Reflection;
-
 using gg.parse.core;
 using gg.parse.script.compiler;
 using gg.parse.util;
+using System.Collections.Immutable;
+using System.Reflection;
 
 namespace gg.parse.properties
 {
     public class PropertyContext : CompileContext
     {
-        private Dictionary<string, Type> AllowedTypes { get; init; } = [];
+        public TypePermissions AllowedTypes
+        {
+            get;
+            private set;
+        }        
 
-        public bool AllowUnmanagedTypes { get; init; } = false;
-
-        public PropertyContext(string text, ImmutableList<Annotation> tokens) 
+        public PropertyContext(
+            string text, 
+            ImmutableList<Annotation> tokens, 
+            bool allowUnmanagedTypes = false) 
             : base(text, tokens)
         {
+            AllowedTypes = new TypePermissions()
+            {
+                AllowUnmanagedTypes = allowUnmanagedTypes
+            };
         }
 
-        public PropertyContext(string text, ImmutableList<Annotation> tokens, ImmutableList<Annotation> syntaxTree)
+        public PropertyContext(
+            string text, 
+            ImmutableList<Annotation> tokens, 
+            ImmutableList<Annotation> syntaxTree,
+            bool allowUnmanagedTypes = false)
             : base(text, tokens, syntaxTree)
         {
+            AllowedTypes = new TypePermissions()
+            {
+                AllowUnmanagedTypes = allowUnmanagedTypes
+            };
         }
 
-        public PropertyContext AllowType(string id, Type type)
+        public PropertyContext(
+            string text,
+            ImmutableList<Annotation> tokens,
+            ImmutableList<Annotation> syntaxTree,
+            TypePermissions allowedTypes)
+            : base(text, tokens, syntaxTree)
         {
-            AllowedTypes.Add(id, type);
-            return this;
+            AllowedTypes = allowedTypes;
         }
 
         public PropertyContext AllowType(Type type)
         {
-            AllowedTypes.Add(type.Name, type);
+            AllowedTypes.AllowType(type);
             return this;
         }
 
         public PropertyContext AllowTypes(params Type[] types)
         {
-            types.ForEach(t => AllowedTypes.Add(t.Name, t));
+            AllowedTypes.AllowTypes(types);
             return this;
         }
 
         public PropertyContext AllowTypes(Assembly assembly, string typeNamespace)
         {
-            return AllowTypes([.. assembly.GetTypes()
-                                .Where(t => t.IsPublic &&
-                                        t.Namespace != null &&
-                                        t.Namespace.StartsWith(typeNamespace))]);
+            AllowedTypes.AllowTypes(assembly, typeNamespace);
+            return this;
         }
 
-        public Type FindType(string? name) 
-        {
-            if (!string.IsNullOrEmpty(name))
-            {
-                if (AllowedTypes.TryGetValue(name, out var type))
-                {
-                    return type;
-                }
-
-                if (AllowUnmanagedTypes)
-                {
-                    var unmanagedType = Type.GetType(name);
-
-                    if (unmanagedType != null)
-                    {
-                        return unmanagedType;
-                    }
-                }
-
-                throw new PropertiesException($"No allowed type declared for '{name}'.");
-            }
-
-            throw new PropertiesException($"No name provided.");
-        }
+        public Type ResolveType(string? name) => 
+            AllowedTypes.ResolveType(name);
+        
     }
 }
