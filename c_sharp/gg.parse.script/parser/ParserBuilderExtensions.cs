@@ -1,11 +1,12 @@
-﻿using gg.parse.rules;
-using gg.parse.script;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
 
-namespace gg.parse.argparser
+using gg.parse.rules;
+
+namespace gg.parse.script.parser
 {
-    public static class ParserBuilderExtension
+    public static class ParserBuilderExtensions
     {
-        // xxx move to parser
         public static string GetReport(this ParserBuilder builder, Exception? e = null, LogLevel level = LogLevel.Info )
         {
             var logs = builder.LogHandler?.ReceivedLogs?.Where(l => (l.level & level) > 0);

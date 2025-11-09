@@ -2,7 +2,7 @@
 // Strongly recommend to refrain from making changes in this class as they made be overwritten.
 namespace gg.parse.properties
 {
-   public static class PropertyFileNames
+   public static class PropertiesNames
    {
         public const string Array = "array";
         public const string ArrayEnd = "array_end";

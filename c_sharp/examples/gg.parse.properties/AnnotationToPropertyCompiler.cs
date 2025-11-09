@@ -9,7 +9,7 @@ using gg.parse.properties;
 using gg.parse.script.compiler;
 using gg.parse.util;
 
-namespace gg.parse.argparser
+namespace gg.parse.properties
 {
     /// <summary>
     /// Class trying to interpret the value of an annotation (ignoring the targetType) and create
@@ -31,15 +31,15 @@ namespace gg.parse.argparser
 
         public override ICompilerTemplate RegisterDefaultFunctions()
         {
-            Register(PropertyFileNames.Array, CompileArray);
-            Register(PropertyFileNames.Boolean, CompileBoolean);
-            Register(PropertyFileNames.Dictionary, CompileDictionaryOrObject);
-            Register(PropertyFileNames.Float, CompileFloat);
-            Register(PropertyFileNames.Identifier, CompileIdentifier);
-            Register(PropertyFileNames.Int, CompileInt);
-            Register(PropertyFileNames.KvpList, CompileKeyValueListOrObject);
-            Register(PropertyFileNames.Null, CompileNull);
-            Register(PropertyFileNames.String, CompileString);
+            Register(PropertiesNames.Array, CompileArray);
+            Register(PropertiesNames.Boolean, CompileBoolean);
+            Register(PropertiesNames.Dictionary, CompileDictionaryOrObject);
+            Register(PropertiesNames.Float, CompileFloat);
+            Register(PropertiesNames.Identifier, CompileIdentifier);
+            Register(PropertiesNames.Int, CompileInt);
+            Register(PropertiesNames.KvpList, CompileKeyValueListOrObject);
+            Register(PropertiesNames.Null, CompileNull);
+            Register(PropertiesNames.String, CompileString);
 
             return this;
         }
@@ -167,7 +167,7 @@ namespace gg.parse.argparser
 
                 foreach (var kvpNode in annotation)
                 {
-                    var key = (string) (kvpNode[0]! == PropertyFileNames.String
+                    var key = (string) (kvpNode[0]! == PropertiesNames.String
                         ? CompileString(targetType, kvpNode[0]!, context)
                         : CompileIdentifier(targetType, kvpNode[0]!, context))!;
 

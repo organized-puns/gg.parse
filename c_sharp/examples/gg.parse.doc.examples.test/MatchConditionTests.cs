@@ -5,7 +5,7 @@ using System.Diagnostics;
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script;
-using gg.parse.script.pipeline;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 

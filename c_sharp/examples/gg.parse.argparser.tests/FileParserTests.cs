@@ -1,7 +1,11 @@
-﻿using System.Diagnostics;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using System.Diagnostics;
+
 using gg.parse.core;
 using gg.parse.script;
-using gg.parse.script.pipeline;
+using gg.parse.script.parser;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -12,7 +16,6 @@ namespace gg.parse.argparser.tests
     {
         static readonly string TokenFileName = "assets/filename.tokens";
         static readonly string GrammarFileName = "assets/filename.grammar";
-
 
         [TestMethod]
         public void SetupLoadTokensAndGrammar_ExpectNoExceptions()

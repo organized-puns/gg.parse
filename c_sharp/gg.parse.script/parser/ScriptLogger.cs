@@ -4,13 +4,12 @@
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.compiler;
-using gg.parse.script.parser;
 using System.Collections.Immutable;
 using static gg.parse.util.Assertions;
 
 using Range = gg.parse.util.Range;
 
-namespace gg.parse.script.pipeline
+namespace gg.parse.script.parser
 {
     public class ScriptLogger   
     {
@@ -220,7 +219,7 @@ namespace gg.parse.script.pipeline
             Requires(maxStringLength > 4);
 
             var textLength = token.Length == 0
-                ? Math.Max(0, Math.Min(minStringLength, (text.Length - token.Start)))
+                ? Math.Max(0, Math.Min(minStringLength, text.Length - token.Start))
                 : token.Length;
 
             var annotationText = text.Substring(token.Start, textLength);

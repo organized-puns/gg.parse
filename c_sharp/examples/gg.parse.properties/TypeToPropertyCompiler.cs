@@ -2,15 +2,13 @@
 // Copyright (c) Pointless pun
 
 using System.Collections;
-using System.Collections.Immutable;
 using System.Globalization;
 
 using gg.parse.core;
-using gg.parse.properties;
 using gg.parse.script.compiler;
 using gg.parse.util;
 
-namespace gg.parse.argparser
+namespace gg.parse.properties
 {
 
     /// <summary>
@@ -72,7 +70,7 @@ namespace gg.parse.argparser
 
             var arrayType = targetType.GetElementType();
 
-            if (arrayType != null && annotation == PropertyFileNames.Array)
+            if (arrayType != null && annotation == PropertiesNames.Array)
             {
                 // remove the start and end of the array from the count
                 var result = Array.CreateInstance(arrayType, annotation.Count - 2);
@@ -85,7 +83,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == PropertyFileNames.Null)
+            else if (annotation == PropertiesNames.Null)
             {
                 return null;
             }
@@ -105,7 +103,7 @@ namespace gg.parse.argparser
         {
             Assertions.RequiresNotNull(targetType);
 
-            if (annotation == PropertyFileNames.Dictionary)
+            if (annotation == PropertiesNames.Dictionary)
             {
                 var result = Activator.CreateInstance(targetType)
                     ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
@@ -116,7 +114,7 @@ namespace gg.parse.argparser
                     var kvp = annotation[i];
 
                     Assertions.RequiresNotNull(kvp);
-                    Assertions.Requires(kvp == PropertyFileNames.KvpPair);
+                    Assertions.Requires(kvp == PropertiesNames.KvpPair);
                     Assertions.Requires(kvp.Count >= 2);
 
                     // xxx note we don't care if this fails, but ideally we should issue a warning
@@ -125,7 +123,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == PropertyFileNames.Null)
+            else if (annotation == PropertiesNames.Null)
             {
                 return null;
             }
@@ -141,7 +139,7 @@ namespace gg.parse.argparser
             var keyType = targetType.GetGenericArguments()[0];
             var valueType = targetType.GetGenericArguments()[1];
 
-            if (annotation == PropertyFileNames.Dictionary)
+            if (annotation == PropertiesNames.Dictionary)
             {
                 var genericType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
                 var result = Activator.CreateInstance(genericType) as IDictionary
@@ -165,7 +163,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == PropertyFileNames.Null)
+            else if (annotation == PropertiesNames.Null)
             {
                 return null;
             }
@@ -194,7 +192,7 @@ namespace gg.parse.argparser
                 var kvp = annotation[i];
 
                 Assertions.RequiresNotNull(kvp);
-                Assertions.Requires(kvp == PropertyFileNames.KvpPair);
+                Assertions.Requires(kvp == PropertiesNames.KvpPair);
                 Assertions.Requires(kvp.Count >= 2);
 
                 // xxx note we don't care if this fails, but ideally we should issue a warning
@@ -211,7 +209,7 @@ namespace gg.parse.argparser
 
             var listType = targetType.GetGenericArguments()[0];
 
-            if (annotation == PropertyFileNames.Array)
+            if (annotation == PropertiesNames.Array)
             {
                 var genericType = typeof(List<>).MakeGenericType(listType);
                 var result = Activator.CreateInstance(genericType) as IList
@@ -225,7 +223,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == PropertyFileNames.Null)
+            else if (annotation == PropertiesNames.Null)
             {
                 return null;
             }
@@ -240,7 +238,7 @@ namespace gg.parse.argparser
 
             var setType = targetType.GetGenericArguments()[0];
 
-            if (annotation == PropertyFileNames.Array)
+            if (annotation == PropertiesNames.Array)
             {
                 var genericType = typeof(HashSet<>).MakeGenericType(setType);
                 var result = Activator.CreateInstance(genericType)
@@ -255,7 +253,7 @@ namespace gg.parse.argparser
 
                 return result;
             }
-            else if (annotation == PropertyFileNames.Null)
+            else if (annotation == PropertiesNames.Null)
             {
                 return null;
             }
@@ -267,7 +265,7 @@ namespace gg.parse.argparser
         {
             var text = context.GetText(annotation);
 
-            if (annotation == PropertyFileNames.String)
+            if (annotation == PropertiesNames.String)
             {
                 // xxx replace with tokens
                 if (text.StartsWith('"') || text.StartsWith('\''))
@@ -275,7 +273,7 @@ namespace gg.parse.argparser
                     return text[1..^1];
                 }
             }
-            else if (annotation == PropertyFileNames.Null)
+            else if (annotation == PropertiesNames.Null)
             {
                 return null;
             }
@@ -291,7 +289,7 @@ namespace gg.parse.argparser
 
             // need to check this annotation first before looking at the types
             // to deal that the format may omit the first values
-            if (annotation == PropertyFileNames.KvpList)
+            if (annotation == PropertiesNames.KvpList)
             {
                 return TypeCategory.KeyValuePairs;
             }
@@ -392,7 +390,7 @@ namespace gg.parse.argparser
 
         private static string KeyToPropertyName(Annotation node, string text) =>
             // can be a string in case of a json format
-            node == PropertyFileNames.String
+            node == PropertiesNames.String
                 ? text[1..^1]
                 // else it's an identifier which has no quotes
                 : text;

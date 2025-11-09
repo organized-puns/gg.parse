@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using gg.parse.properties;
 using gg.parse.util;
 
-namespace gg.parse.argparser
+namespace gg.parse.properties
 {
     public static class PropertyWriter
     {
@@ -22,7 +22,7 @@ namespace gg.parse.argparser
         {
             if (value == null)
             {
-                builder.Append(PropertyFileTokens.Null);
+                builder.Append(PropertiesTokens.Null);
             }
             else
             {
@@ -36,7 +36,7 @@ namespace gg.parse.argparser
         {
             if (value == null)
             {
-                builder.Append(PropertyFileTokens.Null);
+                builder.Append(PropertiesTokens.Null);
             }
             else
             {
@@ -88,16 +88,16 @@ namespace gg.parse.argparser
         {
             if (enumeration == null)
             {
-                builder.Append(PropertyFileTokens.Null);
+                builder.Append(PropertiesTokens.Null);
             }
             else
             {
-                builder.Append(PropertyFileTokens.ArrayStart[0]);
+                builder.Append(PropertiesTokens.ArrayStart[0]);
 
                 foreach (var value in enumeration)
                 {
                     AppendValue(builder, value, in context);                 
-                    builder.Append($"{PropertyFileTokens.ItemSeparator} ");
+                    builder.Append($"{PropertiesTokens.ItemSeparator} ");
                 }
 
                 // remove the last ,
@@ -106,7 +106,7 @@ namespace gg.parse.argparser
                     builder.Remove(builder.Length - 2, 2);
                 }
 
-                builder.Append(PropertyFileTokens.ArrayEnd[0]);
+                builder.Append(PropertiesTokens.ArrayEnd[0]);
             }
 
             return builder;
@@ -116,11 +116,11 @@ namespace gg.parse.argparser
         {
             if (dictionary == null)
             {
-                builder.Append(PropertyFileTokens.Null);
+                builder.Append(PropertiesTokens.Null);
             }
             else
             {
-                builder.Append($"{PropertyFileTokens.ScopeStart}\n");
+                builder.Append($"{PropertiesTokens.ScopeStart}\n");
 
                 foreach (DictionaryEntry kv in dictionary)
                 {
@@ -133,16 +133,16 @@ namespace gg.parse.argparser
                         builder.Indent(context + 1).AppendValue($"\"{kv.Key}\"", context + 1);
                     }
 
-                    builder.Append($"{PropertyFileTokens.KvSeparatorColon} ");
+                    builder.Append($"{PropertiesTokens.KvSeparatorColon} ");
                     builder.AppendValue(kv.Value, in context);
 
-                    builder.Append($"{PropertyFileTokens.ItemSeparator}\n");
+                    builder.Append($"{PropertiesTokens.ItemSeparator}\n");
                 }
 
                 // remove the last comma
                 builder.Remove(builder.Length - 2, 2);
 
-                builder.Append('\n').Indent(in context).Append(PropertyFileTokens.ScopeEnd[0]);
+                builder.Append('\n').Indent(in context).Append(PropertiesTokens.ScopeEnd[0]);
             }
 
             return builder;
@@ -152,15 +152,15 @@ namespace gg.parse.argparser
         {
             if (value == null)
             {
-                builder.Append(PropertyFileTokens.Null);
+                builder.Append(PropertiesTokens.Null);
             }
             else
             {
-                builder.Append($"{PropertyFileTokens.ScopeStart}\n");
+                builder.Append($"{PropertiesTokens.ScopeStart}\n");
 
                 AppendProperties(builder, value, config + 1);
 
-                builder.Append('\n').Indent(in config).Append(PropertyFileTokens.ScopeEnd[0]);
+                builder.Append('\n').Indent(in config).Append(PropertiesTokens.ScopeEnd[0]);
             }
 
             return builder;
@@ -174,7 +174,7 @@ namespace gg.parse.argparser
             }
             else
             {
-                builder.Append($"{PropertyFileTokens.ItemSeparator}\n");
+                builder.Append($"{PropertiesTokens.ItemSeparator}\n");
             }
 
             return builder;
@@ -206,11 +206,11 @@ namespace gg.parse.argparser
             {
                 if (config.Format == PropertiesFormat.Default)
                 {
-                    builder.Indent(config).Append($"{property.Name}{PropertyFileTokens.KvSeparatorColon} ");
+                    builder.Indent(config).Append($"{property.Name}{PropertiesTokens.KvSeparatorColon} ");
                 }
                 else if (config.Format == PropertiesFormat.Json)
                 {
-                    builder.Indent(config).Append($"\"{property.Name}\"{PropertyFileTokens.KvSeparatorColon} ");
+                    builder.Indent(config).Append($"\"{property.Name}\"{PropertiesTokens.KvSeparatorColon} ");
                 }
 
                 AppendValue(builder, property.GetValue(value), config);
@@ -236,7 +236,7 @@ namespace gg.parse.argparser
         {
             if (value == null)
             {
-                builder.Append(PropertyFileTokens.Null);
+                builder.Append(PropertiesTokens.Null);
             }
             else if (value is string str)
             {
@@ -246,12 +246,12 @@ namespace gg.parse.argparser
             {
                 // c# boolean is compatible with json but not vice versa, so use this explicit
                 // approach since we want to support both
-                builder.Append(b ? PropertyFileTokens.BoolTrue : PropertyFileTokens.BoolFalse);
+                builder.Append(b ? PropertiesTokens.BoolTrue : PropertiesTokens.BoolFalse);
             }
             else
             {
                 var result = value.ToString();
-                builder.Append(result ?? PropertyFileTokens.Null);
+                builder.Append(result ?? PropertiesTokens.Null);
             }
 
             return builder;

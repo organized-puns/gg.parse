@@ -1,27 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="assets\filename.grammar" />
-    <None Remove="assets\filename.tokens" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="assets\args.grammar">
+    <Content Include="assets\common.tokens">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\args.tokens">
+    <Content Include="assets\properties.grammar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\filename.grammar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\filename.tokens">
+    <Content Include="assets\properties.tokens">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -29,7 +22,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\gg.parse.script\gg.parse.script.csproj" />
     <ProjectReference Include="..\..\gg.parse\gg.parse.csproj" />
-    <ProjectReference Include="..\gg.parse.properties\gg.parse.properties.csproj" />
   </ItemGroup>
 
 </Project>

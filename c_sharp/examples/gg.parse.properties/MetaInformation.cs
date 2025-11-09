@@ -1,14 +1,13 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using gg.parse.core;
-using gg.parse.properties;
-using gg.parse.script.compiler;
-using gg.parse.util;
-using System.Collections.Immutable;
 using System.Text;
 
-namespace gg.parse.argparser
+using gg.parse.core;
+using gg.parse.script.compiler;
+using gg.parse.util;
+
+namespace gg.parse.properties
 {
     public class TypeNotFoundException : Exception
     {
@@ -41,7 +40,7 @@ namespace gg.parse.argparser
         {
             var predicate = new Func<Annotation, bool>(a =>
             {
-                if (a == PropertyFileNames.KvpPair)
+                if (a == PropertiesNames.KvpPair)
                 {
                     var keyName = context.GetText(a![0]!);
                     return keyName == Key
@@ -63,8 +62,8 @@ namespace gg.parse.argparser
             var key = config.Format == PropertiesFormat.Default ? Key : $"\"{Key}\"";
 
             builder.Indent(config.IndentCount, config.Indent)
-                .Append($"{key}{PropertyFileTokens.KvSeparatorColon} ")
-                .Append($"{{\"{nameof(ObjectType)}\"{PropertyFileTokens.KvSeparatorColon} \"{target.GetType().AssemblyQualifiedName}\"}}");
+                .Append($"{key}{PropertiesTokens.KvSeparatorColon} ")
+                .Append($"{{\"{nameof(ObjectType)}\"{PropertiesTokens.KvSeparatorColon} \"{target.GetType().AssemblyQualifiedName}\"}}");
 
             return builder;
         }
