@@ -17,7 +17,7 @@ namespace gg.parse.argparser
     /// </summary>
     public sealed class AnnotationToPropertyCompiler : CompilerTemplate<string>
     {
-        private static readonly PropertyReaderr _propertyReader = new();
+        private static readonly TypeToPropertyCompiler _typeCompiler = new();
 
         public AnnotationToPropertyCompiler()
         {
@@ -80,11 +80,11 @@ namespace gg.parse.argparser
 
         public object? CompileDictionaryOrObject(Type? targetType, Annotation annotation, CompileContext context)
         {
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _propertyReader);
+            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _typeCompiler);
 
             return metaInformationNode == null
                 ? CompileDictionary(targetType, annotation, context)
-                : _propertyReader.
+                : _typeCompiler.
                         CompileClass(
                             metaInformationNode.ResolveObjectType(),
                             annotation,
@@ -147,11 +147,11 @@ namespace gg.parse.argparser
 
         public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, CompileContext context)
         {
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _propertyReader);
+            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _typeCompiler);
 
             return metaInformationNode == null
                 ? CompileKeyValueList(targetType, annotation, context)
-                : _propertyReader.
+                : _typeCompiler.
                         CompileKeyValuePairs(
                             metaInformationNode.ResolveObjectType(),
                             annotation,
@@ -213,7 +213,5 @@ namespace gg.parse.argparser
 
             return currentType;
         }
-
-        
     }
 }

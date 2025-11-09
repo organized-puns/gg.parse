@@ -74,7 +74,7 @@ namespace gg.parse.argparser
                                 syntaxTree.Annotations
                             );
 
-                            return new PropertyReaderr().Compile<T?>(syntaxTree.Annotations[0][0]!, context);
+                            return new TypeToPropertyCompiler().Compile<T?>(syntaxTree.Annotations[0][0]!, context);
 
                             /*return reader.Compile<T>(
                                 syntaxTree.Annotations[0][0]!,

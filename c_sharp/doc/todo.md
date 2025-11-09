@@ -11,23 +11,27 @@ config:
 ---
 kanban
   Backlog
-        
+       
+    [ add loop guard ]
 	[ Add linter to workflows ]
   
   In progress
     
     [ Add rule examples ]
     [ Implement properties file ]
-    [ properties files - compiler base ]
-    [ properties files - enums ]
-    [ properties files - safe instantiation ]
-    [ properties files - allow for simpler meta information types ]
     [ properties files - move examples to subdirectory ]
-    [ properties files - move parser graphs to read only, thread safe implementations ]
     [ properties files - move properties to its own project ]
-    [ properties files - split interpreter from reader ]    
+    [ properties files - enums ]
+    [ properties files - safe instantiation, allow for simpler meta information types ]
+    [ properties files - move parser graphs to read only, thread safe implementations ]
+    [ properties files - redo arg parser based on compiler template ]
+    [ properties files - redo calculator based on compiler template ]
+    [ properties files - redo rule compiler based on compiler template ]
+    
     	
   Done
+    [ properties files - split interpreter from reader ]    
+    [ properties files - compiler base ]
     [ Add repeat count to script ]
     [ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	[ Add meta rule vs data rule vs rule composition ]

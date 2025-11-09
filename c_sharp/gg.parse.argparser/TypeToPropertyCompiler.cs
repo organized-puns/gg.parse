@@ -35,14 +35,14 @@ namespace gg.parse.argparser
         Struct
     }
 
-    public class PropertyReaderr : CompilerTemplate<TypeCategory>
+    public class TypeToPropertyCompiler : CompilerTemplate<TypeCategory>
     {
-        public PropertyReaderr()
+        public TypeToPropertyCompiler()
         {
             RegisterDefaultFunctions();
         }
 
-        public PropertyReaderr(Dictionary<TypeCategory, CompileFunc> properties)
+        public TypeToPropertyCompiler(Dictionary<TypeCategory, CompileFunc> properties)
             : base(properties) 
         {
         }

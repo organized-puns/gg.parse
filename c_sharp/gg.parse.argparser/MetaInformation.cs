@@ -37,7 +37,7 @@ namespace gg.parse.argparser
         public static MetaInformation? FindMetaInformation(
             Annotation annotation,
             CompileContext context,
-            PropertyReaderr reader)
+            TypeToPropertyCompiler reader)
         {
             var predicate = new Func<Annotation, bool>(a =>
             {
