@@ -3,6 +3,8 @@
 
 using gg.parse.properties.tests.testclasses;
 
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
 namespace gg.parse.properties.tests
 {
     [TestClass]
@@ -163,6 +165,40 @@ namespace gg.parse.properties.tests
         }
 
         [TestMethod]
+        public void WriteAndReadMixedTypeDictionary_Compile_ExpectSameDictionary()
+        {
+            // setup
+            var mixedDictionary = new Dictionary<object, object>()
+            {
+                { "str", "lorem" },
+                { 2, "enum.TestEnum.Foo" },
+                { TestEnum.Bar, new float[] { 42.0f, -1f } }
+            };
+
+            var permissions = new TypePermissions(typeof(TestEnum));
+            var config = new PropertiesConfig(allowedTypes: permissions);
+
+            // act
+            var dictString = PropertyFile.Write(mixedDictionary, config);
+            var compiledDict = PropertyFile
+                                .Read<Dictionary<object, object>>(
+                                    dictString,
+                                    permissions
+                                );
+
+            IsTrue(compiledDict.Count == mixedDictionary.Count);
+            
+            IsTrue(((string)mixedDictionary["str"]) == (string)compiledDict["str"]);
+
+            var mixedValue = (TestEnum) EnumProperty.Parse((string) mixedDictionary[2], permissions);
+
+            IsTrue(mixedValue == (TestEnum) compiledDict[2]);
+            IsTrue(((float[])mixedDictionary[TestEnum.Bar])
+                        .SequenceEqual(((float[])compiledDict[TestEnum.Bar])));
+        }
+
+
+            [TestMethod]
         public void WriteAndReadComplexPropertiesWithManagedTypes_ExpectPropertiesSet()
         {
             var complexProperties = CreateTestObject();

@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Text.RegularExpressions;
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.parser;
@@ -20,9 +19,8 @@ namespace gg.parse.script.compiler
         public static RuleBase<char> CompileLiteral(RuleHeader header, Annotation bodyNode, CompileSession context)
         {
             var literalText = context.GetText(bodyNode.Range);
-#pragma warning disable IDE0057 // Use range operator
-            var unescapedLiteralText = Regex.Unescape(literalText.Substring(1, literalText.Length - 2));
-#pragma warning restore IDE0057 // Use range operator
+
+            var unescapedLiteralText = literalText.Substring(1, literalText.Length - 2).SimpleUnescape();
 
             if (string.IsNullOrEmpty(unescapedLiteralText))
             {
@@ -45,9 +43,7 @@ namespace gg.parse.script.compiler
                 throw new CompilationException("Text defining the MatchDataSet text is null or empty", annotation: bodyNode);
             }
 
-#pragma warning disable IDE0057 // Use range operator
-            setText = Regex.Unescape(setText.Substring(1, setText.Length - 2));
-#pragma warning restore IDE0057 // Use range operator
+            setText = setText.Substring(1, setText.Length - 2).SimpleUnescape();
 
             return new MatchDataSet<char>(header.Name, header.Prune, [.. setText], header.Precedence);
         }

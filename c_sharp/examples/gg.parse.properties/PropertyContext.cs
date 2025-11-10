@@ -30,6 +30,15 @@ namespace gg.parse.properties
         }
 
         public PropertyContext(
+            string text,
+            ImmutableList<Annotation> tokens,
+            TypePermissions permissions)
+            : base(text, tokens)
+        {
+            AllowedTypes = permissions;
+        }
+
+        public PropertyContext(
             string text, 
             ImmutableList<Annotation> tokens, 
             ImmutableList<Annotation> syntaxTree,

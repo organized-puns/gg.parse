@@ -39,7 +39,7 @@ namespace gg.parse.properties.tests
         public void SetupIntAnnotation_CallInterpret_ExpectIntValue()
         {
             // setup
-            var (intAnnotation, tokens, text) = SetupSingleTokenTest("123", PropertiesNames.Int);
+            var (intAnnotation, tokens, text) = PropertyCompilerTestsHelpers.SetupSingleTokenTest("123", PropertiesNames.Int);
 
             // act
             var result = new AnnotationToPropertyCompiler()
@@ -53,7 +53,7 @@ namespace gg.parse.properties.tests
         public void SetupStringAnnotation_CallInterpret_ExpectIntValue()
         {
             // setup
-            var (stringAnnotation, tokens, text) = SetupSingleTokenTest("'foo'", PropertiesNames.String);
+            var (stringAnnotation, tokens, text) = PropertyCompilerTestsHelpers.SetupSingleTokenTest("'foo'", PropertiesNames.String);
 
             // act
             var context = new PropertyContext(text, tokens, true);
@@ -378,16 +378,25 @@ namespace gg.parse.properties.tests
             IsTrue(((int[])result["Arr"]).SequenceEqual([1, 2, 3]));
         }
 
-        // --- Private / util methods ---------------------------------------------------------------------------------
-
-        private static (Annotation grammarAnnotation, ImmutableList<Annotation> tokens, string text)
-            SetupSingleTokenTest(string text, string tokenName)
+        [TestMethod]
+        public void ParseObjectEnumDictionary_CallInterpret_ExpectEnumDictionary()
         {
-            var token = new EmptyRule(tokenName);
-            var tokens = ImmutableList<Annotation>.Empty.Add(new Annotation(token, new Range(0, text.Length)));
-            var grammarAnnotation = new Annotation(new EmptyRule(0, tokenName), new Range(0, 1));
+            // setup
+            // use mixed enum types: qualified identifiers and strings
+            var text = "{ 'foo': enum.TestEnum.Foo, 'bar': 'enum.TestEnum.Bar' }";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text);
 
-            return (grammarAnnotation, tokens, text);
+            var context = new PropertyContext(text, tokens.Annotations, new TypePermissions(typeof(TestEnum)));
+
+            // act
+            var result = new AnnotationToPropertyCompiler().Compile<Dictionary<string, TestEnum>>(syntaxTree[0][0], context);
+
+            // test
+            IsNotNull(result);
+
+            // spot check
+            IsTrue(result["foo"] == TestEnum.Foo);
+            IsTrue(result["bar"] == TestEnum.Bar);
         }
     }
 }

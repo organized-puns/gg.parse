@@ -1,7 +1,7 @@
 
 properties		  = eof | *(kvp_list | -r value);
 
-value			  = string | int | float | boolean | null | dictionary | array | identifier;
+value			  = string | int | float | boolean | null | dictionary | array | qualified_identifier | identifier;
 
 kvp_pair		  = -r value, -a kv_separator, -r value;
 

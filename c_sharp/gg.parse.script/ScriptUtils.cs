@@ -1,13 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
+
+using System.Collections.Immutable;
+using System.Data;
+using System.Text;
+
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.util;
-using System.Collections.Immutable;
-using System.Data;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace gg.parse.script
 {
@@ -40,7 +41,7 @@ namespace gg.parse.script
                 builder.Append(indentStr);
             }
 
-            var nodeText = Regex.Escape(token.GetText(text));
+            var nodeText = token.GetText(text).SimpleEscape();
 
             if (nodeText.Length > 20)
             {
@@ -87,7 +88,7 @@ namespace gg.parse.script
                 builder.Append(indentStr);
             }
 
-            var nodeText = Regex.Escape(node.GetText(text, tokens));
+            var nodeText = node.GetText(text, tokens).SimpleEscape();
 
             if (nodeText.Length > 20)
             {

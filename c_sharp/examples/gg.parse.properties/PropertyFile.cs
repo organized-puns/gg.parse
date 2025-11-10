@@ -74,7 +74,8 @@ namespace gg.parse.properties
                                 allowedTypes ?? new TypePermissions()
                             );
 
-                            return new TypeToPropertyCompiler().Compile<T?>(syntaxTree.Annotations[0][0]!, context);
+                            return new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
+                                .Compile<T?>(syntaxTree.Annotations[0][0]!, context);
                         }
 
                         // empty property set
@@ -146,7 +147,7 @@ namespace gg.parse.properties
         /// </summary>
         /// <param name="targetNameSpace"></param>
         /// <param name="filenamePrefix"></param>
-        public static void ExportNames(string targetNameSpace = "gg.parse.properties", string filenamePrefix = "PropertyFile")
+        public static void ExportNames(string targetNameSpace = "gg.parse.properties", string filenamePrefix = "Properties")
         {
             var builder = new ParserBuilder()
                             .FromFile("./assets/properties.tokens", "./assets/properties.grammar");

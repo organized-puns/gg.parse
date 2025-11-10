@@ -2,9 +2,9 @@
 // Copyright (c) Pointless pun
 
 using System.Collections;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 using gg.parse.properties;
 using gg.parse.util;
@@ -26,7 +26,21 @@ namespace gg.parse.properties
             }
             else
             {
-                AppendProperties(builder, value, config);
+                var targetType = value.GetType();
+
+                if (targetType.IsDictionary())
+                { 
+                    return AppendDictionary(builder, (IDictionary)value, config, false);
+                }
+
+                if (targetType.IsObjectClass() || targetType.IsStruct())
+                {
+                    return AppendProperties(builder, value, config);
+                }
+                else
+                {
+                    throw new PropertiesException($"Value of type {targetType} has no backing implementation to decompose it into key/value pairs.");
+                }
             }
 
             return builder;
@@ -67,13 +81,17 @@ namespace gg.parse.properties
                         throw new NotImplementedException($"No backing implementation for type {targetType}.");
                     }
                 }
-                else if (targetType != typeof(string) && targetType.IsClass)
+                else if (targetType.IsObjectClass())
                 {
                     AppendClassOrStruct(builder, value, context);
                 }
-                else if (targetType.IsValueType && !targetType.IsEnum && !targetType.IsPrimitive)
+                else if (targetType.IsStruct())
                 {
                     AppendClassOrStruct(builder, value, context);
+                }
+                else if (targetType.IsEnum)
+                {
+                    AppendEnum(builder, value, context);
                 }
                 else
                 {
@@ -112,7 +130,11 @@ namespace gg.parse.properties
             return builder;
         }
 
-        public static StringBuilder AppendDictionary(this StringBuilder builder, IDictionary dictionary, in PropertiesConfig context)
+        public static StringBuilder AppendDictionary(
+            this StringBuilder builder, 
+            IDictionary dictionary, 
+            in PropertiesConfig context,
+            bool addDelimiters = true)
         {
             if (dictionary == null)
             {
@@ -120,7 +142,10 @@ namespace gg.parse.properties
             }
             else
             {
-                builder.Append($"{PropertiesTokens.ScopeStart}\n");
+                if (addDelimiters)
+                {
+                    builder.Append($"{PropertiesTokens.ScopeStart}\n");
+                }
 
                 foreach (DictionaryEntry kv in dictionary)
                 {
@@ -142,7 +167,14 @@ namespace gg.parse.properties
                 // remove the last comma
                 builder.Remove(builder.Length - 2, 2);
 
-                builder.Append('\n').Indent(in context).Append(PropertiesTokens.ScopeEnd[0]);
+                if (addDelimiters)
+                {
+                    builder.Append('\n').Indent(in context).Append(PropertiesTokens.ScopeEnd[0]);
+                }
+                else
+                {
+                    builder.Append('\n');
+                }
             }
 
             return builder;
@@ -175,6 +207,20 @@ namespace gg.parse.properties
             else
             {
                 builder.Append($"{PropertiesTokens.ItemSeparator}\n");
+            }
+
+            return builder;
+        }
+
+        private static StringBuilder AppendEnum(this StringBuilder builder, object value, in PropertiesConfig config)
+        {
+            if (config.Format == PropertiesFormat.Default)
+            {
+                builder.Append(EnumProperty.ToText(value));
+            }
+            else
+            {
+                builder.Append($"{EnumProperty.ToText(value)}\n");
             }
 
             return builder;
@@ -240,13 +286,21 @@ namespace gg.parse.properties
             }
             else if (value is string str)
             {
-                builder.Append('"' + Regex.Escape(str) + '"');
+                builder.Append('"' + str.SimpleEscape() + '"');
             }
             else if (value is bool b)
             {
                 // c# boolean is compatible with json but not vice versa, so use this explicit
                 // approach since we want to support both
                 builder.Append(b ? PropertiesTokens.BoolTrue : PropertiesTokens.BoolFalse);
+            }
+            else if (value is float f)
+            {
+                builder.Append(f.ToString("0.0######", CultureInfo.InvariantCulture));
+            }
+            else if (value is double d)
+            {
+                builder.Append(d.ToString("0.0############", CultureInfo.InvariantCulture));
             }
             else
             {

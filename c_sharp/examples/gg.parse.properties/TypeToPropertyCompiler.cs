@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections;
-using System.Globalization;
-
 using gg.parse.core;
 using gg.parse.script.compiler;
 using gg.parse.util;
+using System;
+using System.Collections;
+using System.Globalization;
 
 namespace gg.parse.properties
 {
@@ -24,6 +24,7 @@ namespace gg.parse.properties
         Class,
         Dictionary,
         Double,
+        Enum,
         Float,
         Int,
         List,
@@ -35,14 +36,20 @@ namespace gg.parse.properties
 
     public class TypeToPropertyCompiler : CompilerTemplate<TypeCategory, PropertyContext>
     {
-        public TypeToPropertyCompiler()
+        private ICompilerTemplate<PropertyContext>? _annotationBasedCompiler;
+
+        public TypeToPropertyCompiler(ICompilerTemplate<PropertyContext>? annotationBasedCompiler = null)
         {
             RegisterDefaultFunctions();
+            _annotationBasedCompiler = annotationBasedCompiler;
         }
 
-        public TypeToPropertyCompiler(Dictionary<TypeCategory, CompileFunc<PropertyContext>> properties)
+        public TypeToPropertyCompiler(
+            Dictionary<TypeCategory, CompileFunc<PropertyContext>> properties,
+            ICompilerTemplate<PropertyContext>? annotationBasedCompiler = null)
             : base(properties) 
         {
+            _annotationBasedCompiler = annotationBasedCompiler;
         }
 
         public override ICompilerTemplate<PropertyContext> RegisterDefaultFunctions()
@@ -53,6 +60,7 @@ namespace gg.parse.properties
             Register(TypeCategory.Class, CompileClass);
             Register(TypeCategory.Dictionary, CompileDictionary);
             Register(TypeCategory.Double, CompileDouble);
+            Register(TypeCategory.Enum, CompileEnum);
             Register(TypeCategory.Float, CompileFloat);
             Register(TypeCategory.Int, CompileInt);
             Register(TypeCategory.KeyValuePairs, CompileKeyValuePairs);
@@ -171,18 +179,75 @@ namespace gg.parse.properties
             throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
         }
 
-        public static object? CompileDouble(Type? targetType, Annotation annotation, CompileContext context) =>
+        public static object? CompileDouble(Type? targetType, Annotation annotation, PropertyContext context) =>
             double.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
-        public static object? CompileFloat(Type? targetType, Annotation annotation, CompileContext context) =>
+        public static object? CompileEnum(Type? targetType, Annotation annotation, PropertyContext context) =>
+            EnumProperty.Parse(KeyToPropertyName(annotation, context.GetText(annotation)), context.AllowedTypes);
+            
+        public static object? CompileFloat(Type? targetType, Annotation annotation, PropertyContext context) =>
             float.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
-        public static object? CompileInt(Type? targetType, Annotation annotation, CompileContext context) =>
+        public static object? CompileInt(Type? targetType, Annotation annotation, PropertyContext context) =>
             int.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
         public object? CompileKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
+
+            if (targetType.IsDictionary())
+            {
+                return CompileDictionaryKeyValuePairs(targetType, annotation, context);
+            }
+            else if (targetType.IsObjectClass() || targetType.IsStruct())
+            {
+                return CompileObjectKeyValuePairs(targetType, annotation, context);
+            }
+
+            throw new PropertiesException($"No backing implementation to CompileKeyValuePairs for target type {targetType}");
+        }
+
+        public object? CompileDictionaryKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
+        {
+            Assertions.RequiresNotNull(targetType);
+            Assertions.Requires(targetType.IsObjectClass() || targetType.IsStruct());
+
+            var result = (IDictionary?) Activator.CreateInstance(targetType)
+                    ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
+
+            var keyType = targetType.GetGenericArguments()[0];
+            var keyCompiler = keyType == typeof(object)
+                ? _annotationBasedCompiler
+                : this;
+
+            var valueCompiler = targetType.GetGenericArguments()[0] == typeof(object)
+                ? _annotationBasedCompiler
+                : this;
+
+            Assertions.RequiresNotNull(keyCompiler);
+            Assertions.RequiresNotNull(valueCompiler);
+
+            for (var i = 0; i < annotation.Count; i++)
+            {
+                var kvp = annotation[i];
+
+                Assertions.RequiresNotNull(kvp);
+                Assertions.Requires(kvp == PropertiesNames.KvpPair);
+                Assertions.Requires(kvp.Count >= 2);
+
+                result.Add(
+                    keyCompiler.Compile(keyType, kvp[0]!, context)!, 
+                    valueCompiler.Compile(keyType, kvp[1]!, context)
+                );
+            }
+
+            return result;
+        }
+
+        public object? CompileObjectKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
+        {
+            Assertions.RequiresNotNull(targetType);
+            Assertions.Requires(targetType.IsObjectClass() || targetType.IsStruct());
 
             var result = Activator.CreateInstance(targetType)
                     ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
@@ -261,7 +326,7 @@ namespace gg.parse.properties
             throw new ArgumentException($"Request Set<{setType}> but the annotation does not describe a set (must be defined as an array).");
         }
 
-        public static object? CompileString(Type? targetType, Annotation annotation, CompileContext context)
+        public static object? CompileString(Type? targetType, Annotation annotation, PropertyContext context)
         {
             var text = context.GetText(annotation);
 
@@ -313,6 +378,8 @@ namespace gg.parse.properties
                 {
                     return TypeCategory.Set;
                 }
+
+                throw new PropertiesException($"No backing implementation defined to compile generic type {targetType}.");
             }
             else if (targetType == typeof(string))
             {
@@ -323,11 +390,15 @@ namespace gg.parse.properties
             {
                 return TypeCategory.Class;
             }
+            else if (targetType.IsEnum)
+            {
+                return TypeCategory.Enum;
+            }
             else if (targetType.IsValueType && !targetType.IsEnum && !targetType.IsPrimitive)
             {
                 return TypeCategory.Struct;
             }
-            if (targetType == typeof(bool))
+            else if (targetType == typeof(bool))
             {
                 return TypeCategory.Boolean;
             }

@@ -16,7 +16,7 @@ include "common.tokens";
 					| scope_start | scope_end 
 					| array_start | array_end 
 					| kv_separator | item_separator
-					| identifier
+					| qualified_identifier | identifier
 					| single_line_comment | multi_line_comment;
 
 bool_true		= 'true';
@@ -33,6 +33,7 @@ scope_end		= '}';
 array_start		= '[';
 array_end		= ']';
 
+qualified_identifier = identifier, +('.', identifier);
 identifier		= (underscore | letter ), *(underscore | letter | digit);
 
 kv_separator_colon   = ':';

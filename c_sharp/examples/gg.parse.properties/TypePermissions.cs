@@ -12,6 +12,16 @@ namespace gg.parse.properties
         private Dictionary<string, Type> AllowedTypes { get; init; } = [];
 
         public bool AllowUnmanagedTypes { get; init; } = false;
+        
+        public TypePermissions()
+        {
+        }
+
+        public TypePermissions(params Type[] allowedTypes)
+        {
+            AllowTypes(allowedTypes);
+        }
+
 
         public TypePermissions AllowType(string id, Type type)
         {

@@ -39,7 +39,8 @@ namespace gg.parse.properties
             Register(PropertiesNames.Int, CompileInt);
             Register(PropertiesNames.KvpList, CompileKeyValueListOrObject);
             Register(PropertiesNames.Null, CompileNull);
-            Register(PropertiesNames.String, CompileString);
+            Register(PropertiesNames.QualifiedIdentifier, CompileQualifiedIdentifierOrEnum);
+            Register(PropertiesNames.String, CompileStringOrEnum);
 
             return this;
         }
@@ -61,7 +62,7 @@ namespace gg.parse.properties
                     Assertions.RequiresNotNull(child);
 
                     tempValues[i - 1] = Compile(targetType, child, context);
-                    commonArrayType = GetCommonValueType(tempValues[i - 1], commonArrayType);
+                    commonArrayType = GetCommonValueType(tempValues[i - 1], commonArrayType, context);
                 }
 
                 // default to object in case the entire dictionary consists of null values
@@ -115,8 +116,8 @@ namespace gg.parse.properties
 
                     keyValues.Add(keyValuePair);
 
-                    keyType = GetCommonValueType(keyValuePair.key, keyType);
-                    valueType = GetCommonValueType(keyValuePair.value, valueType);
+                    keyType = GetCommonValueType(keyValuePair.key, keyType, context);
+                    valueType = GetCommonValueType(keyValuePair.value, valueType, context);
                 }
 
                 // create the resulting dictionary and return the results
@@ -136,13 +137,14 @@ namespace gg.parse.properties
             return null;
         }
 
-        public static object? CompileFloat(Type? targetType, Annotation annotation, CompileContext context) =>
+        
+        public static object? CompileFloat(Type? targetType, Annotation annotation, PropertyContext context) =>
             float.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
-        public static object? CompileIdentifier(Type? targetType, Annotation annotation, CompileContext context) =>
+        public static object? CompileIdentifier(Type? targetType, Annotation annotation, PropertyContext context) =>
             context.GetText(annotation);
-
-        public static object? CompileInt(Type? targetType, Annotation annotation, CompileContext context) =>
+        
+        public static object? CompileInt(Type? targetType, Annotation annotation, PropertyContext context) =>
             int.Parse(context.GetText(annotation));
 
         public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, PropertyContext  context)
@@ -182,11 +184,29 @@ namespace gg.parse.properties
             return null;
         }
 
-        public static object? CompileNull(Type? targetType, Annotation annotation, CompileContext context) => 
+        public static object? CompileNull(Type? targetType, Annotation annotation, PropertyContext context) => 
             null;
 
-        public static object? CompileString(Type? targetType, Annotation annotation, CompileContext context) =>
+        public static object? CompileQualifiedIdentifierOrEnum(Type? targetType, Annotation annotation, PropertyContext context)
+        {
+            var text = context.GetText(annotation);
+
+            return EnumProperty.IsEnum(text)
+                ? EnumProperty.Parse(text, context.AllowedTypes)
+                : text;
+        }
+
+        public static object? CompileString(Type? targetType, Annotation annotation, PropertyContext context) =>
             context.GetText(annotation)[1..^1];
+
+        public static object? CompileStringOrEnum(Type? targetType, Annotation annotation, PropertyContext context)
+        { 
+            var text = context.GetText(annotation)[1..^1];
+
+            return EnumProperty.IsEnum(text)
+                ? EnumProperty.Parse(text, context.AllowedTypes)
+                : text;
+        }
 
 
         // -- Protected methods ---------------------------------------------------------------------------------------
@@ -196,15 +216,30 @@ namespace gg.parse.properties
 
         // -- Private methods -----------------------------------------------------------------------------------------
 
-        private static Type? GetCommonValueType(object? value, Type? currentType)
+        private static Type ResolveType(object value, PropertyContext context)
+        {
+            var primaryType = value.GetType();
+
+            if (primaryType == typeof(string))
+            { 
+                if (EnumProperty.IsEnum((string) value))
+                {
+                    return context.ResolveType((string) value);
+                }
+            }
+
+            return primaryType;
+        }
+
+        private static Type? GetCommonValueType(object? value, Type? currentType, PropertyContext context)
         {
             if (value != null)
             {
                 if (currentType == null)
                 {
-                    return value.GetType();
+                    return ResolveType(value, context);
                 }
-                else if (currentType != typeof(object) && value.GetType() != currentType)
+                else if (currentType != typeof(object) && ResolveType(value, context) != currentType)
                 {
                     // multiple different types can only be covered by object
                     return typeof(object);
