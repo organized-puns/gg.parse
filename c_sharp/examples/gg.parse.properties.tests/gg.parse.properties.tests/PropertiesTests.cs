@@ -172,7 +172,8 @@ namespace gg.parse.properties.tests
             {
                 { "str", "lorem" },
                 { 2, "enum.TestEnum.Foo" },
-                { TestEnum.Bar, new float[] { 42.0f, -1f } }
+                { TestEnum.Bar, new float[] { 42.0f, -1f } },
+                { 3.0f, null },
             };
 
             var permissions = new TypePermissions(typeof(TestEnum));
@@ -198,7 +199,85 @@ namespace gg.parse.properties.tests
         }
 
 
-            [TestMethod]
+        [TestMethod]
+        public void WriteAndReadMixedTypeList_Compile_ExpectSameList()
+        {
+            // setup
+            var mixedList = new List<object>()
+            {
+                "str",
+                2, 
+                "enum.TestEnum.Foo",
+                TestEnum.Bar, 
+                new float[] { 42.0f, -1f }
+            };
+
+            var permissions = new TypePermissions(typeof(TestEnum));
+            var config = new PropertiesConfig(allowedTypes: permissions);
+
+            // act
+            var listString = PropertyFile.Write(mixedList, config);
+            var compiledList = PropertyFile
+                                .Read<List<object>>(
+                                    listString,
+                                    permissions
+                                );
+
+            // test
+            IsTrue(compiledList.Count == mixedList.Count);
+
+            IsTrue(((string)mixedList[0]) == (string)compiledList[0]);
+            IsTrue(((int)mixedList[1]) == (int)compiledList[1]);
+
+            var mixedValue = (TestEnum)EnumProperty.Parse((string)mixedList[2], permissions);
+            IsTrue(mixedValue == (TestEnum)compiledList[2]);
+
+            IsTrue(((TestEnum)mixedList[3]) == (TestEnum)compiledList[3]);
+
+            IsTrue(((float[])mixedList[4])
+                        .SequenceEqual(((float[])compiledList[4])));
+        }
+
+        [TestMethod]
+        public void WriteAndReadMixedTypeArray_Compile_ExpectSameArray()
+        {
+            // setup
+            var mixedArray = new object[]
+            {
+                "str",
+                2,
+                "enum.TestEnum.Foo",
+                TestEnum.Bar,
+                new float[] { 42.0f, -1f }
+            };
+
+            var permissions = new TypePermissions(typeof(TestEnum));
+            var config = new PropertiesConfig(allowedTypes: permissions);
+
+            // act
+            var arrayString = PropertyFile.Write(mixedArray, config);
+            var compiledArray = PropertyFile
+                                .Read<object[]>(
+                                    arrayString,
+                                    permissions
+                                );
+
+            // test
+            IsTrue(compiledArray.Length == mixedArray.Length);
+
+            IsTrue(((string)mixedArray[0]) == (string)compiledArray[0]);
+            IsTrue(((int)mixedArray[1]) == (int)compiledArray[1]);
+
+            var mixedValue = (TestEnum)EnumProperty.Parse((string)mixedArray[2], permissions);
+            IsTrue(mixedValue == (TestEnum)compiledArray[2]);
+
+            IsTrue(((TestEnum)mixedArray[3]) == (TestEnum)compiledArray[3]);
+
+            IsTrue(((float[])mixedArray[4])
+                        .SequenceEqual(((float[])compiledArray[4])));
+        }
+
+        [TestMethod]
         public void WriteAndReadComplexPropertiesWithManagedTypes_ExpectPropertiesSet()
         {
             var complexProperties = CreateTestObject();

@@ -33,7 +33,7 @@ namespace gg.parse.properties
                     return AppendDictionary(builder, (IDictionary)value, config, false);
                 }
 
-                if (targetType.IsObjectClass() || targetType.IsStruct())
+                if (targetType.IsClass() || targetType.IsStruct())
                 {
                     return AppendProperties(builder, value, config);
                 }
@@ -81,7 +81,7 @@ namespace gg.parse.properties
                         throw new NotImplementedException($"No backing implementation for type {targetType}.");
                     }
                 }
-                else if (targetType.IsObjectClass())
+                else if (targetType.IsClass())
                 {
                     AppendClassOrStruct(builder, value, context);
                 }

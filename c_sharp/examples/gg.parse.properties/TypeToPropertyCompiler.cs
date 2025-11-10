@@ -36,12 +36,16 @@ namespace gg.parse.properties
 
     public class TypeToPropertyCompiler : CompilerTemplate<TypeCategory, PropertyContext>
     {
-        private ICompilerTemplate<PropertyContext>? _annotationBasedCompiler;
+        public ICompilerTemplate<PropertyContext>? AnnotationCompiler
+        {
+            get;
+            set;
+        }
 
         public TypeToPropertyCompiler(ICompilerTemplate<PropertyContext>? annotationBasedCompiler = null)
         {
             RegisterDefaultFunctions();
-            _annotationBasedCompiler = annotationBasedCompiler;
+            AnnotationCompiler = annotationBasedCompiler;
         }
 
         public TypeToPropertyCompiler(
@@ -49,7 +53,7 @@ namespace gg.parse.properties
             ICompilerTemplate<PropertyContext>? annotationBasedCompiler = null)
             : base(properties) 
         {
-            _annotationBasedCompiler = annotationBasedCompiler;
+            AnnotationCompiler = annotationBasedCompiler;
         }
 
         public override ICompilerTemplate<PropertyContext> RegisterDefaultFunctions()
@@ -82,11 +86,12 @@ namespace gg.parse.properties
             {
                 // remove the start and end of the array from the count
                 var result = Array.CreateInstance(arrayType, annotation.Count - 2);
+                var valueCompiler = SelectCompiler(arrayType);
 
                 // need to skip the array start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.SetValue(Compile(arrayType, annotation[i]!, context), i - 1);
+                    result.SetValue(valueCompiler.Compile(arrayType, annotation[i]!, context), i - 1);
                 }
 
                 return result;
@@ -147,6 +152,9 @@ namespace gg.parse.properties
             var keyType = targetType.GetGenericArguments()[0];
             var valueType = targetType.GetGenericArguments()[1];
 
+            var keyCompiler = SelectCompiler(keyType);
+            var valueCompiler = SelectCompiler(keyType);
+
             if (annotation == PropertiesNames.Dictionary)
             {
                 var genericType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
@@ -156,8 +164,8 @@ namespace gg.parse.properties
                 // may need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    var key = Compile(keyType, annotation[i]![0]!, context);
-                    var value = Compile(valueType, annotation[i]![1]!, context);
+                    var key = keyCompiler.Compile(keyType, annotation[i]![0]!, context);
+                    var value = valueCompiler.Compile(valueType, annotation[i]![1]!, context);
 
                     if (key != null)
                     {
@@ -199,7 +207,7 @@ namespace gg.parse.properties
             {
                 return CompileDictionaryKeyValuePairs(targetType, annotation, context);
             }
-            else if (targetType.IsObjectClass() || targetType.IsStruct())
+            else if (targetType.IsClass() || targetType.IsStruct())
             {
                 return CompileObjectKeyValuePairs(targetType, annotation, context);
             }
@@ -210,22 +218,13 @@ namespace gg.parse.properties
         public object? CompileDictionaryKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
-            Assertions.Requires(targetType.IsObjectClass() || targetType.IsStruct());
 
             var result = (IDictionary?) Activator.CreateInstance(targetType)
                     ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
 
             var keyType = targetType.GetGenericArguments()[0];
-            var keyCompiler = keyType == typeof(object)
-                ? _annotationBasedCompiler
-                : this;
-
-            var valueCompiler = targetType.GetGenericArguments()[0] == typeof(object)
-                ? _annotationBasedCompiler
-                : this;
-
-            Assertions.RequiresNotNull(keyCompiler);
-            Assertions.RequiresNotNull(valueCompiler);
+            var keyCompiler = SelectCompiler(targetType.GetGenericArguments()[0]);
+            var valueCompiler = SelectCompiler(targetType.GetGenericArguments()[1]);
 
             for (var i = 0; i < annotation.Count; i++)
             {
@@ -247,7 +246,7 @@ namespace gg.parse.properties
         public object? CompileObjectKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
         {
             Assertions.RequiresNotNull(targetType);
-            Assertions.Requires(targetType.IsObjectClass() || targetType.IsStruct());
+            Assertions.Requires(targetType.IsClass() || targetType.IsStruct());
 
             var result = Activator.CreateInstance(targetType)
                     ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
@@ -274,6 +273,10 @@ namespace gg.parse.properties
 
             var listType = targetType.GetGenericArguments()[0];
 
+            var valueCompiler = SelectCompiler(targetType.GetGenericArguments()[0]);
+
+            Assertions.RequiresNotNull(valueCompiler);
+
             if (annotation == PropertiesNames.Array)
             {
                 var genericType = typeof(List<>).MakeGenericType(listType);
@@ -283,7 +286,7 @@ namespace gg.parse.properties
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    result.Add(Compile(listType, annotation[i]!, context));
+                    result.Add(valueCompiler.Compile(listType, annotation[i]!, context));
                 }
 
                 return result;
@@ -302,6 +305,7 @@ namespace gg.parse.properties
             Assertions.RequiresNotNull(annotation);
 
             var setType = targetType.GetGenericArguments()[0];
+            var valueCompiler = SelectCompiler(targetType.GetGenericArguments()[0]);
 
             if (annotation == PropertiesNames.Array)
             {
@@ -313,7 +317,7 @@ namespace gg.parse.properties
                 // need to skip start and end, so start at 1 and end at -1 
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    addMethod!.Invoke(result, [Compile(setType, annotation[i]!, context)]);
+                    addMethod!.Invoke(result, [valueCompiler.Compile(setType, annotation[i]!, context)]);
                 }
 
                 return result;
@@ -442,7 +446,8 @@ namespace gg.parse.properties
 
             if (property != null)
             {
-                property.SetValue(target, Compile(property.PropertyType, valueAnnotation, context));
+                var valueCompiler = SelectCompiler(property.PropertyType);
+                property.SetValue(target, valueCompiler.Compile(property.PropertyType, valueAnnotation, context));
                 return true;
             }
             else
@@ -457,6 +462,13 @@ namespace gg.parse.properties
             }
 
             return false;
+        }
+
+        private ICompilerTemplate<PropertyContext> SelectCompiler(Type t)
+        {
+            var result = t == typeof(object) ? AnnotationCompiler : this;
+            Assertions.RequiresNotNull(result);
+            return result;
         }
 
         private static string KeyToPropertyName(Annotation node, string text) =>

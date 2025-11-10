@@ -2,8 +2,8 @@
 // Copyright (c) Pointless pun
 
 using System.Text;
-
 using gg.parse.core;
+using gg.parse.properties;
 using gg.parse.script.compiler;
 using gg.parse.util;
 
@@ -26,7 +26,7 @@ namespace gg.parse.properties
         public static MetaInformation? FindMetaInformation(
             Annotation annotation,
             PropertyContext context,
-            TypeToPropertyCompiler reader)
+            ICompilerTemplate<PropertyContext> compiler)
         {
             var predicate = new Func<Annotation, bool>(a =>
             {
@@ -42,7 +42,7 @@ namespace gg.parse.properties
             var metaInformationNode = annotation.FirstOrDefaultDfs(predicate);
 
             return metaInformationNode != null && metaInformationNode.Count >= 2
-                ? (MetaInformation?) reader.CompileClass(typeof(MetaInformation), metaInformationNode[1]!, context)
+                ? (MetaInformation?) compiler.Compile(typeof(MetaInformation), metaInformationNode[1]!, context)
                 : null;
         }
 

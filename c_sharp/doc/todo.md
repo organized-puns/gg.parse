@@ -18,8 +18,12 @@ kanban
   In progress
     
     [ Add rule examples ]
-    [ Implement properties file ]        
-        [ properties files - enums ]
+    [ Implement properties file ]                
+        [ properties files - test read<obj> behavior (should default to annotation based)]
+        [ properties files - add precision: double, float to options ]
+        [ properties files - test for errors ]
+        [ properties files - allow a read without type, defaulting to dic<obj, obj> ]
+        [ properties files - simplify meta information to '_type': 'str' ]
         [ properties files - move parser graphs to read only, thread safe implementations ]
         [ properties files - allow for ini files/java properties ]
         [ properties files - redo arg parser based on compiler template ]
@@ -27,6 +31,8 @@ kanban
         [ properties files - redo rule compiler based on compiler template ]
         	
   Done
+    [ properties files - allow for reading of array<obj> list<obj> and set<obj> ]
+    [ properties files - enums ]
     [ properties files - safe instantiation, allow for simpler meta information types ]
     [ properties files - move properties to its own project ]
     [ properties files - moving examples to subdirectory ]

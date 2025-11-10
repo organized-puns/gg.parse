@@ -5,7 +5,7 @@ using gg.parse.util;
 
 namespace gg.parse.properties
 {
-    public class EnumProperty
+    public static class EnumProperty
     {
         public const string EnumSeparator = ".";
         public const string EnumKey = $"enum{EnumSeparator}";

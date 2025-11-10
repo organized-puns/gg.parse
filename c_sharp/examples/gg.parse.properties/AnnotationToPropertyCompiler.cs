@@ -5,7 +5,6 @@ using System.Collections;
 using System.Globalization;
 
 using gg.parse.core;
-using gg.parse.properties;
 using gg.parse.script.compiler;
 using gg.parse.util;
 
@@ -17,16 +16,24 @@ namespace gg.parse.properties
     /// </summary>
     public sealed class AnnotationToPropertyCompiler : CompilerTemplate<string, PropertyContext>
     {
-        private static readonly TypeToPropertyCompiler _typeCompiler = new();
-
-        public AnnotationToPropertyCompiler()
+        public ICompilerTemplate<PropertyContext>? TypeBasedCompiler
         {
-            RegisterDefaultFunctions();
+            get;
+            set;
         }
 
-        public AnnotationToPropertyCompiler(Dictionary<string, CompileFunc<PropertyContext>> properties)
+        public AnnotationToPropertyCompiler(ICompilerTemplate<PropertyContext>? typeBasedCompiler = null)
+        {
+            RegisterDefaultFunctions();
+            TypeBasedCompiler = typeBasedCompiler;
+        }
+
+        public AnnotationToPropertyCompiler(
+            Dictionary<string, CompileFunc<PropertyContext>> properties,
+            ICompilerTemplate<PropertyContext>? typeBasedCompiler = null)
             : base(properties)
         {
+            TypeBasedCompiler = typeBasedCompiler;
         }
 
         public override ICompilerTemplate<PropertyContext> RegisterDefaultFunctions()
@@ -81,12 +88,14 @@ namespace gg.parse.properties
 
         public object? CompileDictionaryOrObject(Type? targetType, Annotation annotation, PropertyContext context)
         {
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _typeCompiler);
+            Assertions.RequiresNotNull(TypeBasedCompiler);
+
+            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, TypeBasedCompiler);
 
             return metaInformationNode == null
                 ? CompileDictionary(targetType, annotation, context)
-                : _typeCompiler.
-                        CompileClass(
+                : TypeBasedCompiler.
+                        Compile(
                             context.ResolveType(metaInformationNode.ObjectType),
                             annotation,
                             context
@@ -149,12 +158,14 @@ namespace gg.parse.properties
 
         public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, PropertyContext  context)
         {
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, _typeCompiler);
+            Assertions.RequiresNotNull(TypeBasedCompiler);
+
+            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, TypeBasedCompiler);
 
             return metaInformationNode == null
                 ? CompileKeyValueList(targetType, annotation, context)
-                : _typeCompiler.
-                        CompileKeyValuePairs(
+                : TypeBasedCompiler.
+                        Compile(
                             context.ResolveType(metaInformationNode.ObjectType),
                             annotation,
                             context
