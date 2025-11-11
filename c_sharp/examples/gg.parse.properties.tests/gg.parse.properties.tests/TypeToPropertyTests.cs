@@ -23,7 +23,8 @@ namespace gg.parse.properties.tests
             var context = new PropertyContext(text, tokens, null, allowedTypes);
 
             // act
-            var result = new TypeToPropertyCompiler().Compile<TestEnum>(enumAnnotation, context);
+            var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
+                            .Compile<TestEnum>(enumAnnotation, context);
 
             // test
             IsTrue(result == TestEnum.Foo);
@@ -38,7 +39,8 @@ namespace gg.parse.properties.tests
             var context = new PropertyContext(text, tokens, null, allowedTypes);
 
             // act
-            var result = new TypeToPropertyCompiler().Compile<TestEnum>(enumAnnotation, context);
+            var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
+                            .Compile<TestEnum>(enumAnnotation, context);
 
             // test
             IsTrue(result == TestEnum.Foo);
@@ -54,7 +56,8 @@ namespace gg.parse.properties.tests
             // act
             var permissions = new TypePermissions(typeof(TestEnum));
             var context = new PropertyContext(text, tokens.Annotations, permissions);
-            var result = new TypeToPropertyCompiler().Compile<Dictionary<int, TestEnum>>(syntaxTree[0], context);
+            var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
+                            .Compile<Dictionary<int, TestEnum>>(syntaxTree[0], context);
 
             // test
             IsNotNull(result);
@@ -72,12 +75,34 @@ namespace gg.parse.properties.tests
             // act
             var permissions = new TypePermissions(typeof(TestEnum));
             var context = new PropertyContext(text, tokens.Annotations, permissions);
-            var result = new TypeToPropertyCompiler().Compile<Dictionary<int, TestEnum>>(syntaxTree[0], context);
+            var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
+                            .Compile<Dictionary<int, TestEnum>>(syntaxTree[0], context);
 
             // test
             IsNotNull(result);
             IsTrue(result[1] == TestEnum.Foo);
             IsTrue(result[2] == TestEnum.Bar);
+        }
+
+        [TestMethod]
+        public void ParseArrayAsObject_CallInterpret_ExpectObjectArray()
+        {
+            // setup
+            var text = "[ 1, \"enum.TestEnum.Foo\", 2, enum.TestEnum.Bar ]";
+            var (tokens, syntaxTree) = PropertyParser.Parse(text);
+
+            // act
+            var permissions = new TypePermissions(typeof(TestEnum));
+            var context = new PropertyContext(text, tokens.Annotations, permissions);
+            var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
+                            .Compile<object>(syntaxTree[0][0], context) as Array;
+
+            // test
+            IsNotNull(result);
+            IsTrue(((int)result.GetValue(0)) == 1);
+            IsTrue(((TestEnum)result.GetValue(1)) == TestEnum.Foo);
+            IsTrue(((int)result.GetValue(2)) == 2);
+            IsTrue(((TestEnum)result.GetValue(3)) == TestEnum.Bar);
         }
     }
 }

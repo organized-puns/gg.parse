@@ -36,6 +36,9 @@ namespace gg.parse.properties
             return Read<T>(File.ReadAllText(filename), allowedTypes);
         }
 
+        public static object? Read(string propertiesText, TypePermissions? allowedTypes = null) =>
+            Read<object>(propertiesText, allowedTypes);
+
         /// <summary>
         /// Reads a property - or json text and returns an object of type T
         /// with the properties set to the values in said text.

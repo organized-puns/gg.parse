@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections;
+using System.Globalization;
+
 using gg.parse.core;
 using gg.parse.script.compiler;
 using gg.parse.util;
-using System;
-using System.Collections;
-using System.Globalization;
 
 namespace gg.parse.properties
 {
@@ -34,8 +34,10 @@ namespace gg.parse.properties
         Struct
     }
 
-    public class TypeToPropertyCompiler : CompilerTemplate<TypeCategory, PropertyContext>
+    public sealed class TypeToPropertyCompiler : CompilerTemplate<TypeCategory, PropertyContext>
     {
+        // as there can be a co-dependency between TypeToPropertyCompiler and AnnotationCompiler
+        // this needs to be settable
         public ICompilerTemplate<PropertyContext>? AnnotationCompiler
         {
             get;
@@ -74,6 +76,18 @@ namespace gg.parse.properties
             Register(TypeCategory.Struct, CompileClass);
 
             return this;
+        }
+
+        public override object? Compile(Type? targetType, Annotation annotation, PropertyContext context)
+        {
+            Assertions.RequiresNotNull(AnnotationCompiler, 
+                "Initialization not complete, property 'AnnotationCompiler' set.");
+
+            // need to intercept "object" type as this can't be compiled by type
+            return targetType == typeof(object)
+                ? AnnotationCompiler.Compile(targetType, annotation, context)
+                : base.Compile(targetType, annotation, context);
+
         }
 
         public object? CompileArray(Type? targetType, Annotation annotation, PropertyContext context)

@@ -16,8 +16,8 @@ namespace gg.parse.properties.tests
         {
             var property = PropertyFile.Read<SingleProperty>($"{{}}");
 
-            Assert.IsNotNull(property);
-            Assert.IsTrue(property.Name == null);
+            IsNotNull(property);
+            IsTrue(property.Name == null);
         }
 
         [TestMethod]
@@ -26,8 +26,8 @@ namespace gg.parse.properties.tests
             var fooValue = "foo";
             var property = PropertyFile.Read<SingleProperty>($"{{ Name: '{fooValue}' }}");
 
-            Assert.IsNotNull(property);
-            Assert.IsTrue(property.Name == fooValue);
+            IsNotNull(property);
+            IsTrue(property.Name == fooValue);
         }
 
         [TestMethod]
@@ -48,14 +48,14 @@ namespace gg.parse.properties.tests
                 $"  StringSet: ['foo', 'bar']" +
                 $"}}");
 
-            Assert.IsNotNull(properties);
-            Assert.IsTrue(properties.Name == fooValue);
-            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
-            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
-            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
-            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
-            Assert.IsTrue(properties.BoolList == null);
-            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+            IsNotNull(properties);
+            IsTrue(properties.Name == fooValue);
+            IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            IsTrue(properties.SingleProperty.Name == fooValue);
+            IsTrue(properties.BoolList == null);
+            IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
         }
 
         [TestMethod]
@@ -76,14 +76,14 @@ namespace gg.parse.properties.tests
                 $"  StringSet: ['foo', 'bar']" +
                 $"}}");
 
-            Assert.IsNotNull(properties);
-            Assert.IsTrue(properties.Name == fooValue);
-            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
-            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
-            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
-            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
-            Assert.IsTrue(properties.BoolList == null);
-            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+            IsNotNull(properties);
+            IsTrue(properties.Name == fooValue);
+            IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            IsTrue(properties.SingleProperty.Name == fooValue);
+            IsTrue(properties.BoolList == null);
+            IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
         }
 
         [TestMethod]
@@ -104,14 +104,14 @@ namespace gg.parse.properties.tests
                 $"  StringSet: ['foo' 'bar']" +
                 $"}}");
 
-            Assert.IsNotNull(properties);
-            Assert.IsTrue(properties.Name == fooValue);
-            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
-            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
-            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
-            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
-            Assert.IsTrue(properties.BoolList == null);
-            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+            IsNotNull(properties);
+            IsTrue(properties.Name == fooValue);
+            IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            IsTrue(properties.SingleProperty.Name == fooValue);
+            IsTrue(properties.BoolList == null);
+            IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
         }
 
         [TestMethod]
@@ -133,14 +133,52 @@ namespace gg.parse.properties.tests
                 $"StringSet: ['foo' 'bar']" +
                 $"/* footer comments */");
 
-            Assert.IsNotNull(properties);
-            Assert.IsTrue(properties.Name == fooValue);
-            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
-            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
-            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
-            Assert.IsTrue(properties.SingleProperty.Name == fooValue);
-            Assert.IsTrue(properties.BoolList == null);
-            Assert.IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+            IsNotNull(properties);
+            IsTrue(properties.Name == fooValue);
+            IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            IsTrue(properties.SingleProperty.Name == fooValue);
+            IsTrue(properties.BoolList == null);
+            IsTrue(properties.StringSet.SequenceEqual(["foo", "bar"]));
+        }
+
+        [TestMethod]
+        public void ReadUnspecifiedObject_ExpectStringObjectDictionary()
+        {
+            var fooValue = "foo";
+            var properties = PropertyFile.Read(
+                $"name: '{fooValue}'" +
+                $"arr: [1, 2, 3]" +
+                $"extendedProperties: {{" +
+                $"    'key1': 'value1'" +
+                $"    'key2': 'value2'" +
+                $"}}" +
+                $"stringSet: ['foo' 'bar']");
+
+            IsNotNull(properties);
+
+            var resultDict = properties as Dictionary<string, object>;
+
+            IsNotNull(resultDict);
+
+            IsTrue(((string)resultDict["name"]) == fooValue);
+
+            var extendedProperties = resultDict["extendedProperties"] as Dictionary<string, string>;
+
+            IsNotNull(extendedProperties);
+
+            IsTrue(extendedProperties["key1"] == "value1");
+            IsTrue(extendedProperties["key2"] == "value2");
+
+            var arr = resultDict["arr"] as int[];
+
+            IsNotNull(arr);
+            IsTrue(arr.SequenceEqual([1, 2, 3]));
+
+            var stringSet = resultDict["stringSet"] as string[];
+
+            IsTrue(stringSet.SequenceEqual(["foo", "bar"]));
         }
 
         [TestMethod]
@@ -329,14 +367,14 @@ namespace gg.parse.properties.tests
                                     permissions 
                                 );
 
-            Assert.IsNotNull(properties);
-            Assert.IsTrue(properties.Name == "foo");
-            Assert.IsTrue(properties.ExtendedProperties["key1"] == "value1");
-            Assert.IsTrue(properties.ExtendedProperties["key2"] == "value2");
-            Assert.IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
-            Assert.IsTrue(properties.SingleProperty.Name == "foo");
-            Assert.IsTrue(properties.BoolList.SequenceEqual(original.BoolList));
-            Assert.IsTrue(properties.StringSet == null);
+            IsNotNull(properties);
+            IsTrue(properties.Name == "foo");
+            IsTrue(properties.ExtendedProperties["key1"] == "value1");
+            IsTrue(properties.ExtendedProperties["key2"] == "value2");
+            IsTrue(properties.Arr.SequenceEqual([1, 2, 3]));
+            IsTrue(properties.SingleProperty.Name == "foo");
+            IsTrue(properties.BoolList.SequenceEqual(original.BoolList));
+            IsTrue(properties.StringSet == null);
         }
 
         /*[TestMethod]

@@ -168,12 +168,15 @@ namespace gg.parse.properties.tests
             // too complex to build a manual token / syntax sets. So drop the unit
             // test constraints and make this an integration test
             var (tokens, syntaxTree) = PropertyParser.Parse(text, usingRule: "kvp_list");
-
-            // act
-            var context = new PropertyContext(text, tokens.Annotations, true);
             var typeCompiler = new TypeToPropertyCompiler();
-            var result = new AnnotationToPropertyCompiler(typeCompiler)
-                .Compile<ComplexProperties>(syntaxTree.Annotations[0], context);
+            var annotationCompiler = new AnnotationToPropertyCompiler(typeCompiler);
+            var context = new PropertyContext(text, tokens.Annotations, true);
+
+            typeCompiler.AnnotationCompiler = annotationCompiler;
+            
+            
+            // act            
+            var result = annotationCompiler.Compile<ComplexProperties>(syntaxTree.Annotations[0], context);
 
             // test
             IsNotNull(result);
@@ -258,9 +261,12 @@ namespace gg.parse.properties.tests
             var (tokens, syntaxTree) = PropertyParser.Parse(text);
             var context = new PropertyContext(text, tokens.Annotations, true);
             var typeCompiler = new TypeToPropertyCompiler();
+            var annotationCompiler = new AnnotationToPropertyCompiler(typeCompiler);
+
+            typeCompiler.AnnotationCompiler = annotationCompiler;
 
             // act
-            var result = new AnnotationToPropertyCompiler(typeCompiler).Compile<ComplexProperties>(syntaxTree[0][0], context);
+            var result = annotationCompiler.Compile<ComplexProperties>(syntaxTree[0][0], context);
 
             // test
             IsNotNull(result);
@@ -279,13 +285,16 @@ namespace gg.parse.properties.tests
             // context by default doesn't allow unmanaged types, ie types that are
             // not in the allowed list
             var context = new PropertyContext(text, tokens.Annotations);
+            var typeCompiler = new TypeToPropertyCompiler();
+            var annotationCompiler = new AnnotationToPropertyCompiler(typeCompiler);
+
+            typeCompiler.AnnotationCompiler = annotationCompiler;
 
             // act
             try
-            {
-                var typeCompiler = new TypeToPropertyCompiler();
-                var result = new AnnotationToPropertyCompiler(typeCompiler)
-                            .Compile<ComplexProperties>(syntaxTree[0][0], context);
+            {           
+                var result = annotationCompiler
+                    .Compile<ComplexProperties>(syntaxTree[0][0], context);
                 Fail();
             }
             catch (PropertiesException)
@@ -304,10 +313,13 @@ namespace gg.parse.properties.tests
             // not in the allowed list. We need to explicitely allow specific types
             var context = new PropertyContext(text, tokens.Annotations)
                             .AllowTypes(typeof(ComplexProperties), typeof(SingleProperty));
+            var typeCompiler = new TypeToPropertyCompiler();
+            var annotationCompiler = new AnnotationToPropertyCompiler(typeCompiler);
+
+            typeCompiler.AnnotationCompiler = annotationCompiler;
 
             // act
-            var typeCompiler = new TypeToPropertyCompiler();
-            var result = new AnnotationToPropertyCompiler(typeCompiler).Compile<ComplexProperties>(syntaxTree[0][0], context);
+            var result = annotationCompiler.Compile<ComplexProperties>(syntaxTree[0][0], context);
 
             // test
             IsNotNull(result);
@@ -328,9 +340,14 @@ namespace gg.parse.properties.tests
             var context = new PropertyContext(text, tokens.Annotations)
                             .AllowTypes(Assembly.GetExecutingAssembly(), "gg.parse.properties.tests.testclasses");
 
-            // act
             var typeCompiler = new TypeToPropertyCompiler();
-            var result = new AnnotationToPropertyCompiler(typeCompiler).Compile<ComplexProperties>(syntaxTree[0][0], context);
+            var annotationCompiler = new AnnotationToPropertyCompiler(typeCompiler);
+
+            typeCompiler.AnnotationCompiler = annotationCompiler;
+
+            // act
+
+            var result = annotationCompiler.Compile<ComplexProperties>(syntaxTree[0][0], context);
 
             // test
             IsNotNull(result);
@@ -345,10 +362,14 @@ namespace gg.parse.properties.tests
             var text = "{\r\n  \"__meta_information\": {\"ObjectType\": \"gg.parse.properties.tests.testclasses.ComplexProperties, gg.parse.properties.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"},\r\n  \"Name\": \"foo\",\r\n  \"ExtendedProperties\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  },\r\n  \"Arr\": [1, 2, 3],\r\n  \"SingleProperty\": {\r\n    \"__meta_information\": {\"ObjectType\": \"gg.parse.properties.tests.testclasses.SingleProperty, gg.parse.properties.tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"},\r\n    \"Name\": \"foo\"\r\n  },\r\n  \"BoolList\": [true, false, true],\r\n  \"StringSet\": null\r\n}";
             var (tokens, syntaxTree) = PropertyParser.Parse(text);
             var context = new PropertyContext(text, tokens.Annotations, true);
+            var typeCompiler = new TypeToPropertyCompiler();
+            var annotationCompiler = new AnnotationToPropertyCompiler(typeCompiler);
+
+            typeCompiler.AnnotationCompiler = annotationCompiler;
 
             // act
-            var typeCompiler = new TypeToPropertyCompiler();
-            var result = new AnnotationToPropertyCompiler(typeCompiler).Compile<ComplexProperties>(syntaxTree[0][0], context);
+
+            var result = annotationCompiler.Compile<ComplexProperties>(syntaxTree[0][0], context);
 
             // test
             IsNotNull(result);

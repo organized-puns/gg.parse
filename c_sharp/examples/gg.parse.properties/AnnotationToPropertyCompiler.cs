@@ -207,7 +207,7 @@ namespace gg.parse.properties
                 : text;
         }
 
-        public static object? CompileString(Type? targetType, Annotation annotation, PropertyContext context) =>
+        public static object? CompileString(Type? _, Annotation annotation, PropertyContext context) =>
             context.GetText(annotation)[1..^1];
 
         public static object? CompileStringOrEnum(Type? targetType, Annotation annotation, PropertyContext context)

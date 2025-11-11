@@ -91,7 +91,7 @@ namespace gg.parse.script.compiler
         }
 
         
-        public object? Compile(Type? targetType, Annotation annotation, TContext context)
+        public virtual object? Compile(Type? targetType, Annotation annotation, TContext context)
         {
             object? result = default;
             
