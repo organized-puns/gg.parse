@@ -10,12 +10,6 @@ using gg.parse.util;
 
 namespace gg.parse.properties
 {
-
-    /// <summary>
-    /// Supported types 
-    /// xxx missing enum
-    /// </summary>
-
     public enum TypeCategory
     {
         Array,
@@ -36,25 +30,28 @@ namespace gg.parse.properties
 
     public sealed class TypeToPropertyCompiler : CompilerTemplate<TypeCategory, PropertyContext>
     {
-        // as there can be a co-dependency between TypeToPropertyCompiler and AnnotationCompiler
-        // this needs to be settable
-        public ICompilerTemplate<PropertyContext>? AnnotationCompiler
+        public ICompilerTemplate<PropertyContext> AnnotationCompiler
         {
             get;
-            set;
+            init;
         }
 
-        public TypeToPropertyCompiler(ICompilerTemplate<PropertyContext>? annotationBasedCompiler = null)
+        public TypeToPropertyCompiler(ICompilerTemplate<PropertyContext> annotationBasedCompiler)
         {
-            RegisterDefaultFunctions();
+            Assertions.RequiresNotNull(annotationBasedCompiler);
+            
             AnnotationCompiler = annotationBasedCompiler;
+
+            RegisterDefaultFunctions();
         }
 
         public TypeToPropertyCompiler(
             Dictionary<TypeCategory, CompileFunc<PropertyContext>> properties,
-            ICompilerTemplate<PropertyContext>? annotationBasedCompiler = null)
+            ICompilerTemplate<PropertyContext> annotationBasedCompiler)
             : base(properties) 
         {
+            Assertions.RequiresNotNull(annotationBasedCompiler);
+
             AnnotationCompiler = annotationBasedCompiler;
         }
 

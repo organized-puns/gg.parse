@@ -88,62 +88,19 @@ namespace gg.parse.properties
 
         public object? CompileDictionaryOrObject(Type? targetType, Annotation annotation, PropertyContext context)
         {
-            Assertions.RequiresNotNull(TypeBasedCompiler);
+            // is there type info available ?
+            var metaInformation = MetaInformation.FindMetaInformation(annotation, context);
 
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, TypeBasedCompiler);
-
-            return metaInformationNode == null
+            return metaInformation == null || TypeBasedCompiler == null
+                // no type info or type compiler available - continue using the annotation based compiler
                 ? CompileDictionary(targetType, annotation, context)
+                // type info is available, switch using the type based compiler
                 : TypeBasedCompiler.
                         Compile(
-                            context.ResolveType(metaInformationNode.ObjectType),
+                            context.ResolveType(metaInformation.ObjectType),
                             annotation,
                             context
                         );
-        }
-
-        public object? CompileDictionary(Type? targetType, Annotation annotation, PropertyContext context)
-        {
-            // children count should be more than 2 as the first and last child
-            // are expected to be delimiters
-            if (annotation.Children != null && annotation.Children.Count > 2)
-            {
-                var keyValues = new List<(object? key, object? value)>();
-                Type? keyType = null;
-                Type? valueType = null;
-
-                // capture all keys and values and try to guess the type
-                // skip the first and last child of this annotation because those should
-                // be the delimiters
-                for (var i = 1; i < annotation.Count - 1; i++)
-                {
-                    (object? key, object? value) keyValuePair = 
-                        (
-                            Compile(targetType, annotation[i]![0]!, context),
-                            Compile(targetType, annotation[i]![1]!, context)
-                        );
-
-                    keyValues.Add(keyValuePair);
-
-                    keyType = GetCommonValueType(keyValuePair.key, keyType, context);
-                    valueType = GetCommonValueType(keyValuePair.value, valueType, context);
-                }
-
-                // create the resulting dictionary and return the results
-                var genericType = typeof(Dictionary<,>).MakeGenericType(keyType!, valueType ?? typeof(object));
-                var result = 
-                    Activator.CreateInstance(genericType) as IDictionary
-                    ?? throw new CompilationException($"Can't create an instance of dictionary with key/value type <{keyType}, {valueType}>.");
-
-                for (var i = 0; i < keyValues.Count; i++)
-                {
-                    result.Add(keyValues[i].key!, keyValues[i].value);
-                }
-
-                return result;
-            }
-
-            return null;
         }
 
         public static object? CompileIdentifier(Type? targetType, Annotation annotation, PropertyContext context) =>
@@ -154,15 +111,16 @@ namespace gg.parse.properties
 
         public object? CompileKeyValueListOrObject(Type? targetType, Annotation annotation, PropertyContext  context)
         {
-            Assertions.RequiresNotNull(TypeBasedCompiler);
+            // is there type info available ?
+            var metaInformation = MetaInformation.FindMetaInformation(annotation, context);
 
-            var metaInformationNode = MetaInformation.FindMetaInformation(annotation, context, TypeBasedCompiler);
-
-            return metaInformationNode == null
+            return metaInformation == null || TypeBasedCompiler == null
+                // no type info or type compiler available - continue using the annotation based compiler
                 ? CompileKeyValueList(targetType, annotation, context)
+                // try to compile with a target type
                 : TypeBasedCompiler.
                         Compile(
-                            context.ResolveType(metaInformationNode.ObjectType),
+                            context.ResolveType(metaInformation.ObjectType),
                             annotation,
                             context
                         );
@@ -222,6 +180,50 @@ namespace gg.parse.properties
             annotation.Rule.Name;
 
         // -- Private methods -----------------------------------------------------------------------------------------
+
+        private object? CompileDictionary(Type? targetType, Annotation annotation, PropertyContext context)
+        {
+            // children count should be more than 2 as the first and last child
+            // are expected to be delimiters
+            if (annotation.Children != null && annotation.Children.Count > 2)
+            {
+                var keyValues = new List<(object? key, object? value)>();
+                Type? keyType = null;
+                Type? valueType = null;
+
+                // capture all keys and values and try to guess the type
+                // skip the first and last child of this annotation because those should
+                // be the delimiters
+                for (var i = 1; i < annotation.Count - 1; i++)
+                {
+                    (object? key, object? value) keyValuePair =
+                        (
+                            Compile(targetType, annotation[i]![0]!, context),
+                            Compile(targetType, annotation[i]![1]!, context)
+                        );
+
+                    keyValues.Add(keyValuePair);
+
+                    keyType = GetCommonValueType(keyValuePair.key, keyType, context);
+                    valueType = GetCommonValueType(keyValuePair.value, valueType, context);
+                }
+
+                // create the resulting dictionary and return the results
+                var genericType = typeof(Dictionary<,>).MakeGenericType(keyType!, valueType ?? typeof(object));
+                var result =
+                    Activator.CreateInstance(genericType) as IDictionary
+                    ?? throw new CompilationException($"Can't create an instance of dictionary with key/value type <{keyType}, {valueType}>.");
+
+                for (var i = 0; i < keyValues.Count; i++)
+                {
+                    result.Add(keyValues[i].key!, keyValues[i].value);
+                }
+
+                return result;
+            }
+
+            return null;
+        }
 
         private static Type ResolveType(object value, PropertyContext context)
         {

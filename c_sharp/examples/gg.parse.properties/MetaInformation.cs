@@ -23,10 +23,7 @@ namespace gg.parse.properties
 
         public string? ObjectType { get; set; }
 
-        public static MetaInformation? FindMetaInformation(
-            Annotation annotation,
-            PropertyContext context,
-            ICompilerTemplate<PropertyContext> compiler)
+        public static MetaInformation? FindMetaInformation(Annotation annotation, PropertyContext context)
         {
             var predicate = new Func<Annotation, bool>(a =>
             {

@@ -75,6 +75,8 @@ namespace gg.parse.properties
                     {
                         if (syntaxTree.Annotations[0].Count > 0)
                         {
+                            var (typeCompiler, _) = PropertyCompilers.CreateCompilers();
+
                             var context = new PropertyContext(
                                 propertiesText,
                                 tokens.Annotations,
@@ -82,12 +84,6 @@ namespace gg.parse.properties
                                 allowedTypes ?? new TypePermissions(),
                                 precision
                             );
-
-                            var annotationCompiler = new AnnotationToPropertyCompiler();
-                            var typeCompiler = new TypeToPropertyCompiler();
-
-                            annotationCompiler.TypeBasedCompiler = typeCompiler;
-                            typeCompiler.AnnotationCompiler = annotationCompiler;
 
                             return typeCompiler.Compile<T?>(syntaxTree.Annotations[0][0]!, context);
                         }
