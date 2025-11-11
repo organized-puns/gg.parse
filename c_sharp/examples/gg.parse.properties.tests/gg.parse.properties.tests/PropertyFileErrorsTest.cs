@@ -15,12 +15,12 @@ namespace gg.parse.properties.tests
     public class PropertyFileErrorsTest
     {
         [TestMethod]
-        public void CreateScriptError_Read_ExpectErrors()
+        public void CreateScriptTokenError_Read_ExpectErrors()
         {
             try
             {
                 // invalid token
-                PropertyFile.Read("^");
+                PropertyFile.Read("^ @\n %");
                 Fail();
             }
             catch (PropertiesException e)
@@ -31,6 +31,25 @@ namespace gg.parse.properties.tests
                 Debug.WriteLine(e.ErrorReport);
             }
         }
+
+        [TestMethod]
+        public void CreateScriptGrammarError_Read_ExpectError()
+        {
+            try
+            {
+                // invalid grammar
+                PropertyFile.Read("[ [ var = 'boo', } }");
+                Fail();
+            }
+            catch (PropertiesException e)
+            {
+                IsTrue(e.InnerException != null);
+                IsFalse(string.IsNullOrEmpty(e.ErrorReport));
+
+                Debug.WriteLine(e.ErrorReport);
+            }
+        }
+
 
         [TestMethod]
         public void CreateTypeError_Read_ExpectErrors()

@@ -13,6 +13,21 @@ namespace gg.parse.properties
     public class PropertyFile
     {
 
+        private static readonly Parser _parser;
+
+        static PropertyFile()
+        {
+            try
+            {
+                _parser = new ParserBuilder().
+                    FromFile("./assets/properties.tokens", "./assets/properties.grammar")
+                    .Build();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         /// <summary>
         /// Reads a property - or json file and returns an object of type T
@@ -58,13 +73,16 @@ namespace gg.parse.properties
                 return default;
             }
 
-            var parser = new ParserBuilder();
+            var logHandler = new ScriptLogger();
 
             try
             {
-                parser.FromFile("./assets/properties.tokens", "./assets/properties.grammar");
-
-                var (tokens, syntaxTree) = parser.Parse(propertiesText);
+                var config = new ParseConfiguration(propertiesText)
+                {
+                    ThrowExceptionsOnError = true,
+                    LogHandler = logHandler
+                };
+                var (tokens, syntaxTree) = _parser.Parse(config);
 
                 if (syntaxTree
                     && syntaxTree.Annotations != null
@@ -111,7 +129,12 @@ namespace gg.parse.properties
                 {
                     // don't include LogLevel.Fatal as this contains the exception which creates a
                     // lot of noise
-                    parser.WriteLogs((_, str) => report.Append(str), LogLevel.Error);
+                    logHandler
+                        .ReceivedLogs?
+                        .Where(log => (log.level & LogLevel.Error) > 0)
+                        .ForEach(log => report.AppendLine($"{log.level} {log.message}"));
+                    
+                    //parser.WriteLogs((_, str) => report.Append(str), LogLevel.Error);
                 }
                 else if (ex is AggregateException ae)
                 {

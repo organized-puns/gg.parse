@@ -17,7 +17,7 @@ namespace gg.parse.script.pipeline
 
         public HashSet<string> IncludePaths { get; set; } = [];
 
-        public Dictionary<string, RuleGraph<T>?> IncludedFiles { get; set; } = [];
+        public Dictionary<string, MutableRuleGraph<T>?> IncludedFiles { get; set; } = [];
 
         // -- services -----------------------------------------------
         public ScriptTokenizer? Tokenizer { get; set; }
@@ -30,7 +30,7 @@ namespace gg.parse.script.pipeline
 
         // -- output -------------------------------------------------
         
-        public RuleGraph<T>? RuleGraph { get; set; }
+        public MutableRuleGraph<T>? RuleGraph { get; set; }
 
         public ImmutableList<Annotation>? Tokens { get; set; }
 

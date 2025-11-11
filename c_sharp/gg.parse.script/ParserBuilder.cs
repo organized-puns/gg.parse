@@ -12,9 +12,9 @@ namespace gg.parse.script
 {
     public class ParserBuilder
     {
-        public RuleGraph<char>? TokenGraph {get;set;}
+        public MutableRuleGraph<char>? TokenGraph {get;set;}
 
-        public RuleGraph<int>? GrammarGraph { get; set; }
+        public MutableRuleGraph<int>? GrammarGraph { get; set; }
 
         public ScriptLogger? LogHandler { get; set; }
 
@@ -22,6 +22,14 @@ namespace gg.parse.script
 
         public PipelineSession<int>? GrammarSession { get; private set; }
 
+        public Parser Build()
+        {
+            Assertions.RequiresNotNull(TokenGraph);
+
+            return GrammarGraph != null
+                ? new Parser(TokenGraph.ToImmutable(), GrammarGraph.ToImmutable())
+                : new Parser(TokenGraph.ToImmutable());
+        }
 
         public ParserBuilder FromFile(
             string tokensFilename, 
@@ -81,6 +89,7 @@ namespace gg.parse.script
         {
             Assertions.RequiresNotNull(TokenGraph!);
             Assertions.RequiresNotNull(TokenGraph!.Root!);
+
 
             try
             {

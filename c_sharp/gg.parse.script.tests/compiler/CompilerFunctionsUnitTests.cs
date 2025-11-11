@@ -241,7 +241,7 @@ namespace gg.parse.script.tests.compiler
             var compiler = new RuleCompiler()
                     .MapRuleToCompilerFunction(indentifierId, CompileIdentifier<char>);
 
-            var table = new RuleGraph<char>();
+            var table = new MutableRuleGraph<char>();
 
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar
@@ -313,7 +313,7 @@ namespace gg.parse.script.tests.compiler
                 .MapRuleToCompilerFunction(indentifierId, CompileIdentifier<char>);
 
             // compile a rule table which can tokenize foo
-            var table = new RuleGraph<char>();
+            var table = new MutableRuleGraph<char>();
 
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar

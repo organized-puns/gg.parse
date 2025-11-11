@@ -355,5 +355,29 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(tokens);
             IsTrue(tokens[0].Children.Count == 3);           
         }
+
+        [TestMethod]
+        public void SetupFindBarCreateParser_Parse_ExpectBarFoundIfPresentInString()
+        {
+            var parser = new ParserBuilder()
+                            .From($"foo = find lit; lit = 'bar';", "root = foo;")
+                            .Build();
+
+            var testStringWithBar = "123ba345bar567";
+            var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
+
+            IsTrue(barParseResult.FoundMatch);
+            IsTrue(barParseResult[0]!.Rule!.Name == "root");
+
+            var rangeTillBar = tokensResult.Annotations.CombinedRange(barParseResult[0].Range);
+
+            IsTrue(rangeTillBar.End == 8);
+
+            var testStringWithoutBar = "123ba345ar567";
+
+            (tokensResult, _) = parser.Parse(testStringWithoutBar);
+
+            IsFalse(tokensResult.FoundMatch);
+        }
     }
 }

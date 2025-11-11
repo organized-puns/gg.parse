@@ -48,19 +48,19 @@ namespace gg.parse.script.compiler
                 rule: rule);
         }
 
-        public RuleGraph<T> Compile<T>(
+        public MutableRuleGraph<T> Compile<T>(
             string text,
             ImmutableList<Annotation> tokens,
             ImmutableList<Annotation> syntaxTree,
-            RuleGraph<T>? resultGraph = null) where T : IComparable<T>
+            MutableRuleGraph<T>? resultGraph = null) where T : IComparable<T>
         {
             Assertions.RequiresNotNull(tokens);
             Assertions.RequiresNotNull(syntaxTree);
 
-            return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? new RuleGraph<T>());
+            return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? new MutableRuleGraph<T>());
         }
 
-        private RuleGraph<T> Compile<T>(CompileSession session, RuleGraph<T> resultGraph) where T : IComparable<T>
+        private MutableRuleGraph<T> Compile<T>(CompileSession session, MutableRuleGraph<T> resultGraph) where T : IComparable<T>
         {
             foreach (var node in session.SyntaxTree!)
             {
@@ -116,7 +116,7 @@ namespace gg.parse.script.compiler
         private RuleBase<T> CompileRule<T>(
             CompileSession session, 
             Annotation node, 
-            RuleGraph<T> resultGraph)
+            MutableRuleGraph<T> resultGraph)
             where T : IComparable<T>
         {
             var ruleHeader = ReadRuleHeader(session, node.Children!, 0);
@@ -205,7 +205,7 @@ namespace gg.parse.script.compiler
         /// <param name="name"></param>
         /// <returns></returns>
         /// <exception cref="RuleReferenceException"></exception>
-        private static IRule FindRule<T>(RuleGraph<T> graph, string name) where T : IComparable<T>
+        private static IRule FindRule<T>(MutableRuleGraph<T> graph, string name) where T : IComparable<T>
         {
             var referredRule = graph.FindRule(name);
 
@@ -216,7 +216,7 @@ namespace gg.parse.script.compiler
         /// In all RuleReference rules in the graph find and set the actual rule they refer to.
         /// </summary>
         /// <param name="graph"></param>
-        private static void ResolveReferences<T>(RuleGraph<T> graph) where T : IComparable<T>
+        private static void ResolveReferences<T>(MutableRuleGraph<T> graph) where T : IComparable<T>
         {
             List<Exception> exceptions = [];
 
@@ -238,7 +238,7 @@ namespace gg.parse.script.compiler
             }
         }
 
-        private static void ResolveReference<T>(RuleGraph<T> graph, IRule rule, bool isTopLevel) where T : IComparable<T>
+        private static void ResolveReference<T>(MutableRuleGraph<T> graph, IRule rule, bool isTopLevel) where T : IComparable<T>
         {
             if (rule is RuleReference<T> referenceRule)
             {

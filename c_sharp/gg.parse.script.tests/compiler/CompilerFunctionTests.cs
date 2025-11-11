@@ -19,7 +19,7 @@ namespace gg.parse.script.tests.compiler
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        private static RuleGraph<char> Compile(string text)
+        private static MutableRuleGraph<char> Compile(string text)
         {
             var tokenizer = new ScriptTokenizer();
             var parser = new ScriptParser(tokenizer);

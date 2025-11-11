@@ -109,8 +109,8 @@ namespace gg.parse.script
         }
 
         public static string ExportNames<TTokens, TGrammar>(
-            RuleGraph<TTokens>? tokenGraph, 
-            RuleGraph<TGrammar>? grammarGraph, 
+            MutableRuleGraph<TTokens>? tokenGraph, 
+            MutableRuleGraph<TGrammar>? grammarGraph, 
             string usingNameSpace,
             string className) 
             where TTokens : IComparable<TTokens>
@@ -146,7 +146,7 @@ namespace gg.parse.script
 
             return builder.ToString();
 
-            static void CollectRules<T>(RuleGraph<T> graph, Dictionary<string, string> ruleSet) where T : IComparable<T>
+            static void CollectRules<T>(MutableRuleGraph<T> graph, Dictionary<string, string> ruleSet) where T : IComparable<T>
             {
                 graph.Where(rule => !string.IsNullOrEmpty(rule.Name)
                         && !rule.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
@@ -155,7 +155,7 @@ namespace gg.parse.script
         }
 
         public static string ExportTokens<TTokens>(
-            RuleGraph<TTokens>? tokenGraph,
+            MutableRuleGraph<TTokens>? tokenGraph,
             string usingNameSpace,
             string className)
             where TTokens : IComparable<TTokens>

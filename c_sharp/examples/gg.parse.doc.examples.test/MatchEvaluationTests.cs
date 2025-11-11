@@ -94,7 +94,7 @@ namespace gg.parse.doc.examples.test
         /// <param name="multPrecedence"></param>
         /// <param name="addPrecedence"></param>
         /// <returns></returns>
-        private static (RuleGraph<char> tokenizer, RuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
+        private static (MutableRuleGraph<char> tokenizer, MutableRuleGraph<int> parser) CreateTokenizerAndParser(int multPrecedence, int addPrecedence)
         {
             var whitespace = new MatchDataSet<char>("whitespace", setValues: " \t\r\n".ToCharArray(), output: AnnotationPruning.All);
 
@@ -107,7 +107,7 @@ namespace gg.parse.doc.examples.test
             var tokenEnumeration = new MatchOneOf<char>("tokens", AnnotationPruning.Root, 0, rules: [whitespace, number, plus, mult]);
             var tokenStream = new MatchCount<char>("tokenStream", AnnotationPruning.Root, 0, tokenEnumeration, min: 1, max: 0);
 
-            var tokenizer = new RuleGraph<char>();
+            var tokenizer = new MutableRuleGraph<char>();
 
             tokenizer.RegisterRule(whitespace);
             tokenizer.RegisterRule(digit);
@@ -128,7 +128,7 @@ namespace gg.parse.doc.examples.test
 
             var evaluation = new MatchEvaluation<int>(EvaluationName, pruning: AnnotationPruning.None, precedence: 0, addOperation, multOperation);
 
-            var parser = new RuleGraph<int>();
+            var parser = new MutableRuleGraph<int>();
 
             parser.RegisterRule(numberToken);
             parser.RegisterRule(plusToken);

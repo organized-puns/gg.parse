@@ -65,7 +65,7 @@ namespace gg.parse.calculator
                 : throw new NotImplementedException();
         
 
-        private Dictionary<IRule, CalculatorFunction> CreateFunctionLookup(RuleGraph<int> graph) =>       
+        private Dictionary<IRule, CalculatorFunction> CreateFunctionLookup(MutableRuleGraph<int> graph) =>       
 #nullable disable
             new()
             {                
