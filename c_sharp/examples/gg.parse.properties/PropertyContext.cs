@@ -1,14 +1,20 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using gg.parse.core;
-using gg.parse.script.compiler;
-using gg.parse.util;
 using System.Collections.Immutable;
 using System.Reflection;
 
+using gg.parse.core;
+using gg.parse.script.compiler;
+
 namespace gg.parse.properties
 {
+    public enum NumericPrecision
+    {
+        Float,
+        Double
+    }
+
     public class PropertyContext : CompileContext
     {
         public TypePermissions AllowedTypes
@@ -17,48 +23,64 @@ namespace gg.parse.properties
             private set;
         }        
 
+        public NumericPrecision Precision
+        {
+            get;
+            init;
+        }
+
         public PropertyContext(
             string text, 
             ImmutableList<Annotation> tokens, 
-            bool allowUnmanagedTypes = false) 
+            bool allowUnmanagedTypes = false,
+            NumericPrecision precision = NumericPrecision.Float) 
             : base(text, tokens)
         {
             AllowedTypes = new TypePermissions()
             {
                 AllowUnmanagedTypes = allowUnmanagedTypes
             };
+
+            Precision = precision;
         }
 
         public PropertyContext(
             string text,
             ImmutableList<Annotation> tokens,
-            TypePermissions permissions)
+            TypePermissions permissions,
+            NumericPrecision precision = NumericPrecision.Float)
             : base(text, tokens)
         {
             AllowedTypes = permissions;
+            Precision = precision;
         }
 
         public PropertyContext(
             string text, 
             ImmutableList<Annotation> tokens, 
             ImmutableList<Annotation> syntaxTree,
-            bool allowUnmanagedTypes = false)
+            bool allowUnmanagedTypes = false,
+            NumericPrecision precision = NumericPrecision.Float)
             : base(text, tokens, syntaxTree)
         {
             AllowedTypes = new TypePermissions()
             {
                 AllowUnmanagedTypes = allowUnmanagedTypes
             };
+
+            Precision = precision;
         }
 
         public PropertyContext(
             string text,
             ImmutableList<Annotation> tokens,
             ImmutableList<Annotation> syntaxTree,
-            TypePermissions allowedTypes)
+            TypePermissions allowedTypes,
+            NumericPrecision precision = NumericPrecision.Float)
             : base(text, tokens, syntaxTree)
         {
             AllowedTypes = allowedTypes;
+            Precision = precision;
         }
 
         public PropertyContext AllowType(Type type)

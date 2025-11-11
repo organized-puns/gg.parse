@@ -18,8 +18,7 @@ kanban
   In progress
     
     [ Add rule examples ]
-    [ Implement properties file ]                
-        [ properties files - add precision: double, float to compile options ]
+    [ Implement properties file ]                   
         [ properties files - test for deliberate errors ]
         [ properties files - move parser graphs to read only, thread safe implementations ]
         [ properties files - allow for ini files/java properties ]
@@ -29,6 +28,7 @@ kanban
         [ clean up, write doc ]
         	
   Done
+    [ properties files - adding precision: double, float to compile options ]
     [ properties files - simplify meta information to '_type': 'str' ]
     [ properties files - test read<obj> behavior (should default to annotation based)]
     [ properties files - allow for reading of array<obj> list<obj> and set<obj> ]

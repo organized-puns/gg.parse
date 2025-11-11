@@ -41,7 +41,7 @@ namespace gg.parse.properties
             Register(PropertiesNames.Array, CompileArray);
             Register(PropertiesNames.Boolean, CompileBoolean);
             Register(PropertiesNames.Dictionary, CompileDictionaryOrObject);
-            Register(PropertiesNames.Float, CompileFloat);
+            Register(PropertiesNames.Float, DecimalProperty.CompileDecimal);
             Register(PropertiesNames.Identifier, CompileIdentifier);
             Register(PropertiesNames.Int, CompileInt);
             Register(PropertiesNames.KvpList, CompileKeyValueListOrObject);
@@ -96,7 +96,7 @@ namespace gg.parse.properties
                 ? CompileDictionary(targetType, annotation, context)
                 : TypeBasedCompiler.
                         Compile(
-                            context.ResolveType(metaInformationNode.PropertyType),
+                            context.ResolveType(metaInformationNode.ObjectType),
                             annotation,
                             context
                         );
@@ -146,10 +146,6 @@ namespace gg.parse.properties
             return null;
         }
 
-        
-        public static object? CompileFloat(Type? targetType, Annotation annotation, PropertyContext context) =>
-            float.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
-
         public static object? CompileIdentifier(Type? targetType, Annotation annotation, PropertyContext context) =>
             context.GetText(annotation);
         
@@ -166,7 +162,7 @@ namespace gg.parse.properties
                 ? CompileKeyValueList(targetType, annotation, context)
                 : TypeBasedCompiler.
                         Compile(
-                            context.ResolveType(metaInformationNode.PropertyType),
+                            context.ResolveType(metaInformationNode.ObjectType),
                             annotation,
                             context
                         );

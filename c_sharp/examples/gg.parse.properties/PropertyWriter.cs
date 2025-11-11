@@ -294,13 +294,9 @@ namespace gg.parse.properties
                 // approach since we want to support both
                 builder.Append(b ? PropertiesTokens.BoolTrue : PropertiesTokens.BoolFalse);
             }
-            else if (value is float f)
+            else if (DecimalProperty.IsDecimal(value))
             {
-                builder.Append(f.ToString("0.0######", CultureInfo.InvariantCulture));
-            }
-            else if (value is double d)
-            {
-                builder.Append(d.ToString("0.0############", CultureInfo.InvariantCulture));
+                builder.AppendDecimal(value);
             }
             else
             {

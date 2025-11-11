@@ -316,6 +316,37 @@ namespace gg.parse.properties.tests
         }
 
         [TestMethod]
+        public void WriteAndReadWithDoublePrecision_Compile_ExpectSameDoubles()
+        {
+            // setup
+            var mixedArray = new object[]
+            {
+                1.0f,
+                2.0,
+                new float[] { 42.0f, -1f }
+            };
+
+            var permissions = new TypePermissions(typeof(TestEnum));
+            var config = new PropertiesConfig(allowedTypes: permissions);
+
+            // act
+            var arrayString = PropertyFile.Write(mixedArray, config);
+            var compiledArray = PropertyFile
+                                .Read<object[]>(
+                                    arrayString,
+                                    permissions,
+                                    NumericPrecision.Double
+                                );
+
+            // test
+            IsTrue(compiledArray.Length == mixedArray.Length);
+
+            IsTrue(compiledArray[0] is double);
+            IsTrue(compiledArray[1] is double);
+            IsTrue(compiledArray[2] is double[]);
+        }
+
+        [TestMethod]
         public void WriteAndReadComplexPropertiesWithManagedTypes_ExpectPropertiesSet()
         {
             var complexProperties = CreateTestObject();
@@ -335,8 +366,6 @@ namespace gg.parse.properties.tests
 
             ValidateTestObject(complexProperties, complexJsonPropertyString, allowedTypes);
         }
-
-
 
         private static ComplexProperties CreateTestObject() =>
             new ()

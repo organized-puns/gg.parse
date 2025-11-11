@@ -47,7 +47,10 @@ namespace gg.parse.properties
         /// <param name="filename"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static T? Read<T>(string propertiesText, TypePermissions? allowedTypes = null) where T : class
+        public static T? Read<T>(
+            string propertiesText, 
+            TypePermissions? allowedTypes = null,
+            NumericPrecision precision = NumericPrecision.Float) where T : class
         {
             if (string.IsNullOrEmpty(propertiesText))
             {
@@ -76,7 +79,8 @@ namespace gg.parse.properties
                                 propertiesText,
                                 tokens.Annotations,
                                 syntaxTree.Annotations,
-                                allowedTypes ?? new TypePermissions()
+                                allowedTypes ?? new TypePermissions(),
+                                precision
                             );
 
                             var annotationCompiler = new AnnotationToPropertyCompiler();

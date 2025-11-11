@@ -67,7 +67,7 @@ namespace gg.parse.properties
             Register(TypeCategory.Dictionary, CompileDictionary);
             Register(TypeCategory.Double, CompileDouble);
             Register(TypeCategory.Enum, CompileEnum);
-            Register(TypeCategory.Float, CompileFloat);
+            Register(TypeCategory.Float, DecimalProperty.CompileDecimal);
             Register(TypeCategory.Int, CompileInt);
             Register(TypeCategory.KeyValuePairs, CompileKeyValuePairs);
             Register(TypeCategory.List, CompileList);
@@ -206,9 +206,6 @@ namespace gg.parse.properties
 
         public static object? CompileEnum(Type? targetType, Annotation annotation, PropertyContext context) =>
             EnumProperty.Parse(annotation.KeyToPropertyName(context.GetText(annotation)), context.AllowedTypes);
-            
-        public static object? CompileFloat(Type? targetType, Annotation annotation, PropertyContext context) =>
-            float.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
         public static object? CompileInt(Type? targetType, Annotation annotation, PropertyContext context) =>
             int.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);

@@ -21,7 +21,7 @@ namespace gg.parse.properties
         public static readonly string Key = "property.type";
         public static readonly string QuotedKey = "\"property.type\"";
 
-        public string? PropertyType { get; set; }
+        public string? ObjectType { get; set; }
 
         public static MetaInformation? FindMetaInformation(
             Annotation annotation,
@@ -46,7 +46,7 @@ namespace gg.parse.properties
             {
                 var valueNode = metaInformationNode![1]!;
                 var nodeText = context.GetText(valueNode);
-                return new MetaInformation() { PropertyType = valueNode.KeyToPropertyName(nodeText) };
+                return new MetaInformation() { ObjectType = valueNode.KeyToPropertyName(nodeText) };
             }
 
             return  null;
@@ -59,8 +59,7 @@ namespace gg.parse.properties
             var typeName = config.AllowedTypes.ResolveName(target.GetType());
 
             builder.Indent(config.IndentCount, config.Indent)
-                .Append($"{key}{PropertiesTokens.KvSeparatorColon} ")
-                .Append($"\"{typeName}\"}}");
+                .Append($"{key}{PropertiesTokens.KvSeparatorColon} \"{typeName}\"");
 
             return builder;
         }
