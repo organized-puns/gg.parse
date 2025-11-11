@@ -18,8 +18,7 @@ kanban
   In progress
     
     [ Add rule examples ]
-    [ Implement properties file ]                      
-        [ properties files - improving token/grammar recovery, both fail after just one error and don't recover ]
+    [ Implement properties file ]                         
         [ properties files - replace parserbuilder with parser where possible, eg examples ]
         [ properties files - allow for ini files/java properties ]
         [ properties files - redo calculator based on compiler template ]
@@ -28,6 +27,7 @@ kanban
         [ clean up, write doc ]
         	
   Done
+    [ properties files - improving token/grammar recovery, both fail after just one error and don't recover ]
     [ properties files - move parser graphs to read only, thread safe implementations ]
     [ properties files - test for deliberate errors, adding basic error reporting. ]
     [ properties files - adding precision: double, float to compile options ]

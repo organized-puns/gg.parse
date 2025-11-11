@@ -20,7 +20,7 @@ namespace gg.parse.properties.tests
             try
             {
                 // invalid token
-                PropertyFile.Read("^ @\n %");
+                PropertyFile.Read("^ '1' @ '2' %");
                 Fail();
             }
             catch (PropertiesException e)
@@ -38,7 +38,7 @@ namespace gg.parse.properties.tests
             try
             {
                 // invalid grammar
-                PropertyFile.Read("[ [ var = 'boo', } }");
+                PropertyFile.Read("[ var = 'boo', } }");
                 Fail();
             }
             catch (PropertiesException e)

@@ -1,5 +1,5 @@
 
-properties		  = eof | *(kvp_list | -r value);
+properties		  = eof | *(kvp_list | -r value | syntax_error);
 
 value			  = string | int | float | boolean | null | dictionary | array | qualified_identifier | identifier;
 
@@ -27,6 +27,8 @@ array			  = array_start, (
 							// valid array
 							(?-r array_item_list, array_end)
 							// missing closing ]
-							| (error "missing ']'." if (?array_item_list, !array_end))
+							| error "missing ']'." if (?array_item_list, !array_end)
 						)
 					); 
+
+syntax_error = error "syntax error" if +(!value, .);

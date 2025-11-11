@@ -49,4 +49,4 @@ multi_line_comment_start = '/*';
 multi_line_comment_end	 = '*/';
 -a multi_line_comment    = multi_line_comment_start, stop_after multi_line_comment_end;
 
-unknown_property_error	= error "unknown token found." if *(!property_token_list, .);
+unknown_property_error	= error "no match for token(s)." if +(!property_token_list, .);
