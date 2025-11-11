@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections;
-using System.Globalization;
-
 using gg.parse.core;
 using gg.parse.script.compiler;
+using gg.parse.script.parser;
 using gg.parse.util;
+using System.Collections;
+using System.Globalization;
 
 namespace gg.parse.properties
 {
@@ -23,6 +23,7 @@ namespace gg.parse.properties
         Int,
         List,
         KeyValuePairs,
+        None,
         Set,
         String,
         Struct
@@ -72,6 +73,11 @@ namespace gg.parse.properties
             Register(TypeCategory.String, CompileString);
             Register(TypeCategory.Struct, CompileClass);
 
+            Register(TypeCategory.None, (t, a, c) => {
+                c.ReportException<PropertiesException>($"No backing implementation to parse type {t}.", a);
+                return null;
+            });
+
             return this;
         }
 
@@ -112,15 +118,30 @@ namespace gg.parse.properties
                 return null;
             }
 
-            throw arrayType == null
-                ? new ArgumentException($"Request Array but provided target type ({targetType}) is not contain an element type.")
-                : new ArgumentException($"Request Array<{arrayType}> but provided value is not a valid array.");
+            if (arrayType == null)
+            {
+                context.ReportException<PropertiesException>(
+                    $"Trying to compile an array but provided target type '{targetType}' element type is null.",
+                    annotation
+                );
+            }
+            else
+            {
+                context.ReportException<PropertiesException>(
+                    $"Trying to compile an array<{ arrayType }>, but the annotation is not marked as an array but '{annotation.Rule.Name}'",
+                    annotation
+                );
+            }
+
+            return null;
         }
 
         public static object? CompileBoolean(Type? targetType, Annotation annotation, CompileContext context) =>
+            // xxx add exception in case of failure
             bool.Parse(context.GetText(annotation));
 
         public static object? CompileChar(Type? targetType, Annotation annotation, CompileContext context) =>
+            // xxx add exception in case of failure
             context.GetText(annotation)[0];
 
         public object? CompileClass(Type? targetType, Annotation annotation, PropertyContext context)
@@ -129,8 +150,16 @@ namespace gg.parse.properties
 
             if (annotation == PropertiesNames.Dictionary)
             {
-                var result = Activator.CreateInstance(targetType)
-                    ?? throw new ArgumentException($"Can't create an instance of object type <{targetType}>.");
+                var result = Activator.CreateInstance(targetType);
+
+                if (result == null)
+                {
+                    context.ReportException<PropertiesException>(
+                        $"Can't create an instance of object type <{targetType}>.", 
+                        annotation
+                    );
+                    return null;
+                }
 
                 // need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
@@ -152,7 +181,13 @@ namespace gg.parse.properties
                 return null;
             }
 
-            throw new ArgumentException($"Looking for a value of type '{targetType}' but value found is not a object/dictionary but a '{annotation.Rule.Name}'.");
+            // don't throw try to find as many errors as possible
+            context.ReportException<PropertiesException>(
+                $"Trying to compile an object of type '{targetType}' but the annotation is marked as but a '{annotation.Rule.Name}'.",
+                annotation
+            );
+            
+            return null;
         }
 
         public object? CompileDictionary(Type? targetType, Annotation annotation, PropertyContext context)
@@ -175,16 +210,37 @@ namespace gg.parse.properties
                 // may need to skip scope start and end, so start at 1 and end at -1
                 for (var i = 1; i < annotation.Count - 1; i++)
                 {
-                    var key = keyCompiler.Compile(keyType, annotation[i]![0]!, context);
-                    var value = valueCompiler.Compile(valueType, annotation[i]![1]!, context);
+                    var keyNode = annotation[i]![0]!;
 
-                    if (key != null)
+                    if (keyNode != PropertiesNames.Null)
                     {
-                        result.Add(key, value);
+                        var key = keyCompiler.Compile(keyType, keyNode, context);
+
+                        // something went wrong - hope this is reported by the actual compile
+                        if (key != null)
+                        {
+                            var valueNode = annotation[i]![1]!;
+                            var value = valueCompiler.Compile(valueType, valueNode, context);
+
+                            try
+                            {
+                                result.Add(key, value);
+                            }
+                            catch (Exception)
+                            {
+                                context.ReportException<PropertiesException>(
+                                    $"Can't add '{key}', with value annotation: '{valueNode.Name}'", 
+                                    valueNode
+                                );
+                            }
+                        }
                     }
                     else
                     {
-                        throw new ArgumentException($"Can't create an instance of dictionary with a null key.");
+                        context.ReportException<PropertiesException>(
+                            $"Can't create an instance of dictionary with a null key.", 
+                            annotation[i]![0]!
+                        );
                     }
                 }
 
@@ -195,7 +251,13 @@ namespace gg.parse.properties
                 return null;
             }
 
-            throw new ArgumentException($"Request Dictionary<{keyType}, {valueType}> but provided value is not a valid dictionary of those types.");
+            // don't throw try to find as many errors as possible
+            context.ReportException<PropertiesException>(
+                $"Trying to compile Dictionary<{keyType}, {valueType}>, but the annotation is not marked as a dictionary but '{annotation.Rule.Name}'.",
+                annotation
+            );
+
+            return null;
         }
 
         public static object? CompileDouble(Type? targetType, Annotation annotation, PropertyContext context) =>
@@ -220,7 +282,12 @@ namespace gg.parse.properties
                 return CompileObjectKeyValuePairs(targetType, annotation, context);
             }
 
-            throw new PropertiesException($"No backing implementation to CompileKeyValuePairs for target type {targetType}");
+            context.ReportException<PropertiesException>(
+                $"No backing implementation to CompileKeyValuePairs for target type {targetType}",
+                annotation
+            ); 
+            
+            return null;
         }
 
         public object? CompileDictionaryKeyValuePairs(Type? targetType, Annotation annotation, PropertyContext context)
@@ -304,7 +371,12 @@ namespace gg.parse.properties
                 return null;
             }
 
-            throw new ArgumentException($"Request List<{listType}> but the annotation doesn't describe a list.");
+            context.ReportException<PropertiesException>(
+                $"Trying to compile List<{listType}> but the annotation doesn't describe a list.",
+                annotation
+            );
+
+            return null;
         }
 
         public object? CompileSet(Type? targetType, Annotation annotation, PropertyContext context)
@@ -335,7 +407,12 @@ namespace gg.parse.properties
                 return null;
             }
 
-            throw new ArgumentException($"Request Set<{setType}> but the annotation does not describe a set (must be defined as an array).");
+            context.ReportException<PropertiesException>(
+                $"Trying to compile Set<{setType}> but the annotation does not describe a set (must be defined as an array).",
+                annotation         
+            );
+
+            return null;
         }
 
         public static object? CompileString(Type? targetType, Annotation annotation, PropertyContext context)
@@ -391,7 +468,7 @@ namespace gg.parse.properties
                     return TypeCategory.Set;
                 }
 
-                throw new PropertiesException($"No backing implementation defined to compile generic type {targetType}.");
+                return TypeCategory.None;
             }
             else if (targetType == typeof(string))
             {
@@ -431,7 +508,7 @@ namespace gg.parse.properties
                 return TypeCategory.Char;
             }
 
-            throw new NotImplementedException($"No backing implementation to parse type {targetType}.");
+            return TypeCategory.None;
         }
 
         // -- Private methods -----------------------------------------------------------------------------------------

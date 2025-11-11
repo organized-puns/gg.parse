@@ -11,6 +11,10 @@ namespace gg.parse.script.compiler
 
         public IRule? Rule { get; init; }
 
+        public CompilationException(string message) : base(message) 
+        {
+        }
+
         public CompilationException(
             string message,
             Annotation? annotation = null,

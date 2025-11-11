@@ -277,14 +277,9 @@ namespace gg.parse.properties.tests
             var (_, annotationCompiler) = PropertyCompilers.CreateCompilers();
 
             // act
-            try
-            {           
-                var result = annotationCompiler.Compile<ComplexProperties>(syntaxTree[0][0], context);
-                Fail();
-            }
-            catch (PropertiesException)
-            {
-            }
+            annotationCompiler.Compile<ComplexProperties>(syntaxTree[0][0], context);
+
+            IsTrue(context.Exceptions.Count > 0);
         }
 
         [TestMethod]

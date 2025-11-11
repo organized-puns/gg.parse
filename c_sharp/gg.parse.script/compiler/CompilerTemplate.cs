@@ -44,7 +44,7 @@ namespace gg.parse.script.compiler
         }
 
         public T? Compile<T>(Annotation annotation, TContext context) =>
-            (T?)Compile(typeof(T), annotation, context);
+            (T?) Compile(typeof(T), annotation, context);
 
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace gg.parse.script.compiler
                 catch (Exception ex)
                 {
                     // add the exception and continue with the other rules
-                    context.Exceptions.Add(ex);
+                    context.ReportException<CompilationException>(ex.Message, node);
                 }
             }
 
@@ -94,14 +94,27 @@ namespace gg.parse.script.compiler
         public virtual object? Compile(Type? targetType, Annotation annotation, TContext context)
         {
             object? result = default;
-            
-            if (_functionLookup.TryGetValue(SelectKey(targetType, annotation, context), out var func))
+
+            try
             {
-                result = func(targetType,annotation, context);
+                if (_functionLookup.TryGetValue(SelectKey(targetType, annotation, context), out var func))
+                {
+                    result = func(targetType, annotation, context);
+                }
+                else
+                {
+                    context.ReportException<CompilationException>(
+                        $"Can't find a compile function matching '{annotation.Rule.Name}'.",
+                        annotation
+                    );
+                }
             }
-            else
+            catch (Exception e)
             {
-                context.Exceptions.Add(new CompilationException($"Can't find a function matching {annotation.Rule.Name}."));
+                context.ReportException<CompilationException>(
+                    e.Message,
+                    annotation
+                );
             }
 
             return result;

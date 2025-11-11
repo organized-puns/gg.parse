@@ -6,6 +6,7 @@ using System.Text;
 using gg.parse.rules;
 using gg.parse.script;
 using gg.parse.script.parser;
+using gg.parse.util;
 
 namespace gg.parse.properties
 {
@@ -57,13 +58,13 @@ namespace gg.parse.properties
                 return default;
             }
 
-            var builder = new ParserBuilder();
+            var parser = new ParserBuilder();
 
             try
             {
-                builder.FromFile("./assets/properties.tokens", "./assets/properties.grammar");
+                parser.FromFile("./assets/properties.tokens", "./assets/properties.grammar");
 
-                var (tokens, syntaxTree) = builder.Parse(propertiesText);
+                var (tokens, syntaxTree) = parser.Parse(propertiesText);
 
                 if (syntaxTree
                     && syntaxTree.Annotations != null
@@ -85,7 +86,14 @@ namespace gg.parse.properties
                                 precision
                             );
 
-                            return typeCompiler.Compile<T?>(syntaxTree.Annotations[0][0]!, context);
+                            var result = typeCompiler.Compile<T?>(syntaxTree.Annotations[0][0]!, context);
+
+                            if (context.Exceptions.Count > 0)
+                            {
+                                throw new AggregateException("Exception(s) were thrown during the compile stage", context.Exceptions);
+                            }
+
+                            return result;
                         }
 
                         // empty property set
@@ -93,12 +101,28 @@ namespace gg.parse.properties
                     }
                 }
 
-                throw new ArgumentException($"Can't parse property text.");
+                throw new ArgumentException($"Parsing failed, no details provided.");
             }
             catch (Exception ex)
             {
-                var report = builder.GetReport(ex, LogLevel.Fatal | LogLevel.Error);
-                throw new ArgumentException($"Failed to read properties.\n{report}", ex);
+                var report = new StringBuilder();
+
+                if (ex is ScriptException)
+                {
+                    // don't include LogLevel.Fatal as this contains the exception which creates a
+                    // lot of noise
+                    parser.WriteLogs((_, str) => report.Append(str), LogLevel.Error);
+                }
+                else if (ex is AggregateException ae)
+                {
+                    ae.InnerExceptions.ForEach(ie => report.AppendLine(ie.Message));
+                }
+                else
+                {
+                    report.Append(ex.ToString());   
+                }
+
+                throw new PropertiesException($"Failed to read or create properties.", ex, report.ToString());
             }
         }
 

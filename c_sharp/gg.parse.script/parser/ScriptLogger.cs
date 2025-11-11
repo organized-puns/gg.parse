@@ -4,15 +4,18 @@
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.compiler;
+using gg.parse.util;
 using System.Collections.Immutable;
 using static gg.parse.util.Assertions;
-
+using static System.Net.Mime.MediaTypeNames;
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.parser
 {
     public class ScriptLogger   
     {
+        private TextPositionMap? _positionMap;
+
         // Note: not thread safe, application will need to deal with this
         public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
 
@@ -63,12 +66,12 @@ namespace gg.parse.script.parser
             var logs = tokens
                 .WhereDfs(node => node.Rule is LogRule<char> rule)
                 .Select(node => new Tuple<Annotation, LogRule<char>>(node, (LogRule<char>)node.Rule));
-            
-            var lineRanges = CollectLineRanges(text);
+
+            _positionMap = TextPositionMap.CreateOrUpdate(_positionMap, text);
 
             foreach (var (annotation, log) in logs)
             {
-                var (line, column) = MapRangeToLineColumn(annotation.Range, lineRanges);
+                var (line, column) = _positionMap.GetTokenPosition(annotation); 
                 var message = $"({line}, {column}) {log.Text} near: \"{GetTokenText(annotation, text)}\".";
 
                 Log(log.Level, message);
@@ -81,11 +84,11 @@ namespace gg.parse.script.parser
                         .WhereDfs(node => node.Rule is LogRule<int> rule)
                         .Select(node => new Tuple<Annotation, LogRule<int>>(node, (LogRule<int>)node.Rule));
 
-            var lineRanges = CollectLineRanges(text);
+            _positionMap = TextPositionMap.CreateOrUpdate(_positionMap, text);
 
             foreach (var (annotation, log) in logs) 
             {
-                var (line, column) = MapAnnotationRangeToLineColumn(annotation, tokens, lineRanges);
+                var (line, column) = _positionMap.GetGrammarPosition(annotation, tokens);
                 var message = $"({line}, {column}) {log.Text} near \"{GetAnnotationText(annotation, text, tokens)}\".";
 
                 Log(log.Level, message);
@@ -144,8 +147,8 @@ namespace gg.parse.script.parser
             string text,
             ImmutableList<Annotation> tokens)
         {
-            var lineRanges = CollectLineRanges(text);
-
+            _positionMap = TextPositionMap.CreateOrUpdate(_positionMap, text);
+                
             foreach (var ex in exceptions)
             {
                 if (ex is ScriptException scriptEx)
@@ -154,7 +157,7 @@ namespace gg.parse.script.parser
                 }
                 else if (ex is CompilationException ce)
                 {
-                    ProcessException(ce, tokens, lineRanges);
+                    ProcessException(ce, tokens);
                 }
                 else
                 {
@@ -163,11 +166,13 @@ namespace gg.parse.script.parser
             }
         }
 
-        public void ProcessException(CompilationException exception, ImmutableList<Annotation> tokens, List<Range> lineRanges)
+        public void ProcessException(CompilationException exception, ImmutableList<Annotation> tokens/*, List<Range> lineRanges*/)
         {
             if (exception.Annotation != null)
             {
-                var (line, column) = MapAnnotationRangeToLineColumn(exception.Annotation, tokens, lineRanges);
+                RequiresNotNull(_positionMap);
+
+                var (line, column) = _positionMap.GetGrammarPosition(exception.Annotation, tokens);
                 Log(LogLevel.Error, $"({line}, {column}) Compilation error: {exception.Message}");
             }          
             else
@@ -242,46 +247,5 @@ namespace gg.parse.script.parser
 
             return annotationText;
         }
-
-        private static List<Range> CollectLineRanges(string text)
-        {
-            var result = new List<Range>();
-            var start = 0;
-
-            for (var i = 0; i < text.Length; i++)
-            {
-                if (text[i] == '\n')
-                {
-                    result.Add(new Range(start, i - start));
-                    start = i + 1;
-                }
-            }
-
-            result.Add(new(start, text.Length - start));
-
-            return result;
-        }
-
-        public static (int line, int column) MapRangeToLineColumn(Range textRange, List<Range> lineRanges)
-        {
-            int line;
-
-            for (line = 0; line < lineRanges.Count; line++)
-            {
-                if (textRange.Start >= lineRanges[line].Start && textRange.Start <= lineRanges[line].End)
-                {
-                    break;
-                }
-            }
-
-            return (line + 1, textRange.Start - lineRanges[line].Start + 1);
-        }
-
-        private static (int line, int column) MapAnnotationRangeToLineColumn(
-            Annotation annotation,
-            ImmutableList<Annotation> tokens, 
-            List<Range> lineRanges) =>
-
-           MapRangeToLineColumn(tokens.CombinedRange(annotation.Range), lineRanges);         
     }
 }

@@ -1,15 +1,17 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections.Immutable;
-
 using gg.parse.core;
+using gg.parse.script.parser;
 using gg.parse.util;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.compiler
 {
     public class CompileContext
     {
+        private TextPositionMap? _positionMap;
+
         public string Text { get; init; }
 
         // xxx keep this out of the context
@@ -46,5 +48,15 @@ namespace gg.parse.script.compiler
 
         public string GetText(Annotation annotation) =>
             Text.Substring(Tokens.CombinedRange(annotation.Range));
+
+        public void ReportException<TException>(string message, Annotation annotation) where TException : Exception
+        {
+            _positionMap = TextPositionMap.CreateOrUpdate(_positionMap, Text);
+
+            var (line, column) = _positionMap.GetGrammarPosition(annotation, Tokens);
+            var exception = Activator.CreateInstance(typeof(TException), $"({line}, {column}) {message}");
+                        
+            Exceptions.Add((TException) exception!);
+        }
     }
 }
