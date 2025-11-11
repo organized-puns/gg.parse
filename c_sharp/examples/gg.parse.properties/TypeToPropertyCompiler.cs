@@ -205,7 +205,7 @@ namespace gg.parse.properties
             double.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
 
         public static object? CompileEnum(Type? targetType, Annotation annotation, PropertyContext context) =>
-            EnumProperty.Parse(KeyToPropertyName(annotation, context.GetText(annotation)), context.AllowedTypes);
+            EnumProperty.Parse(annotation.KeyToPropertyName(context.GetText(annotation)), context.AllowedTypes);
             
         public static object? CompileFloat(Type? targetType, Annotation annotation, PropertyContext context) =>
             float.Parse(context.GetText(annotation), CultureInfo.InvariantCulture);
@@ -454,7 +454,7 @@ namespace gg.parse.properties
             Assertions.RequiresNotNull(keyAnnotation);
             Assertions.RequiresNotNull(valueAnnotation);
 
-            var key = KeyToPropertyName(keyAnnotation, context.GetText(keyAnnotation));
+            var key = keyAnnotation.KeyToPropertyName(context.GetText(keyAnnotation));
 
             var property = target.GetType().GetProperty(key);
 
@@ -484,12 +484,5 @@ namespace gg.parse.properties
             Assertions.RequiresNotNull(result);
             return result;
         }
-
-        private static string KeyToPropertyName(Annotation node, string text) =>
-            // can be a string in case of a json format
-            node == PropertiesNames.String
-                ? text[1..^1]
-                // else it's an identifier which has no quotes
-                : text;
     }
 }

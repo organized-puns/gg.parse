@@ -96,7 +96,7 @@ namespace gg.parse.properties
                 ? CompileDictionary(targetType, annotation, context)
                 : TypeBasedCompiler.
                         Compile(
-                            context.ResolveType(metaInformationNode.ObjectType),
+                            context.ResolveType(metaInformationNode.PropertyType),
                             annotation,
                             context
                         );
@@ -166,7 +166,7 @@ namespace gg.parse.properties
                 ? CompileKeyValueList(targetType, annotation, context)
                 : TypeBasedCompiler.
                         Compile(
-                            context.ResolveType(metaInformationNode.ObjectType),
+                            context.ResolveType(metaInformationNode.PropertyType),
                             annotation,
                             context
                         );

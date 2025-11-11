@@ -18,10 +18,10 @@ namespace gg.parse.properties
 
     public class MetaInformation
     {
-        public static readonly string Key = "__meta_information";
-        public static readonly string QuotedKey = "\"__meta_information\"";
+        public static readonly string Key = "property.type";
+        public static readonly string QuotedKey = "\"property.type\"";
 
-        public string? ObjectType { get; set; }
+        public string? PropertyType { get; set; }
 
         public static MetaInformation? FindMetaInformation(
             Annotation annotation,
@@ -39,11 +39,17 @@ namespace gg.parse.properties
 
                 return false;
             });
+            
             var metaInformationNode = annotation.FirstOrDefaultDfs(predicate);
 
-            return metaInformationNode != null && metaInformationNode.Count >= 2
-                ? (MetaInformation?) compiler.Compile(typeof(MetaInformation), metaInformationNode[1]!, context)
-                : null;
+            if (metaInformationNode != null && metaInformationNode.Count >= 2)
+            {
+                var valueNode = metaInformationNode![1]!;
+                var nodeText = context.GetText(valueNode);
+                return new MetaInformation() { PropertyType = valueNode.KeyToPropertyName(nodeText) };
+            }
+
+            return  null;
         }
 
 
@@ -54,7 +60,7 @@ namespace gg.parse.properties
 
             builder.Indent(config.IndentCount, config.Indent)
                 .Append($"{key}{PropertiesTokens.KvSeparatorColon} ")
-                .Append($"{{\"{nameof(ObjectType)}\"{PropertiesTokens.KvSeparatorColon} \"{typeName}\"}}");
+                .Append($"\"{typeName}\"}}");
 
             return builder;
         }
