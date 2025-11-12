@@ -17,7 +17,6 @@ namespace gg.parse.script.compiler
     public delegate object? CompileFunc<TContext>(Type? targetType, Annotation annotation, TContext context)
         where TContext : CompileContext;
 
-
     public abstract class CompilerTemplate<TKey, TContext> : ICompilerTemplate<TContext>
         where TKey : notnull
         where TContext: CompileContext

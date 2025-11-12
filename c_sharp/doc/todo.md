@@ -17,10 +17,10 @@ kanban
     
     [ Add rule examples ]
     [ Implement properties file ]                         
-        [ properties files - allow for ini files/java properties ]
         [ properties files - redo calculator based on compiler template ]
         [ properties files - redo rule compiler based on compiler template ]
         [ properties files - redo arg parser ]
+        [ properties files - allow for ini files/java properties ]
         [ clean up, write doc, update example docs for new parser / parserbuilder ]
         	
   Done

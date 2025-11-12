@@ -1,5 +1,9 @@
-﻿using gg.parse.core;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using gg.parse.core;
 using gg.parse.rules;
+using gg.parse.script;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -17,8 +21,8 @@ namespace gg.parse.calculator.tests
         [TestMethod]
         public void CreateInterpreter_FindRules_ExpectRulesToValidate()
         {
-            var calculator = new CalculatorInterpreter(_tokenizerSpec, _grammarSpec);
-            var grammar = calculator.Parser.Grammar;
+            var calculator = new CalculatorCompiler(_tokenizerSpec, _grammarSpec);
+            var grammar = calculator.Grammar;
             
             // this is the compiled version of the grammar (script)
             var expressionRule = grammar["expression"] as MatchOneOf<int>;
@@ -49,7 +53,8 @@ namespace gg.parse.calculator.tests
         [TestMethod]
         public void CreateTokenizerAndGrammar_ParseAndCalculate_ExpectMatchingOutpout()
         {
-            var calculator = new CalculatorInterpreter(_tokenizerSpec, _grammarSpec);
+
+            var calculator = new CalculatorCompiler(_tokenizerSpec, _grammarSpec);
 
             (string input, double expectedOutput)[] testValues = [
                 ("42", 42.0),
@@ -82,5 +87,16 @@ namespace gg.parse.calculator.tests
                 IsTrue(Math.Abs(output - expectedOutput) < 0.000001);
             }
         }
+
+        // export the names so we address results by reference
+        /*[TestMethod]
+        public void ExportNames()
+        {
+            var builder = new ParserBuilder().From(_tokenizerSpec, _grammarSpec);
+
+            var output = ScriptUtils.ExportNames(builder.TokenGraph, builder.GrammarGraph, "gg.parse.calculator", "CalculatorNames");
+
+            File.WriteAllText("CalculatorNames.cs", output);
+        }*/
     }
 }

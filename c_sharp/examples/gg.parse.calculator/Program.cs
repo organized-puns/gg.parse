@@ -11,14 +11,14 @@ namespace gg.parse.calculator
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             // write a welcome message
             Console.WriteLine("Welcome to the gg.parse.calculator example.");
             Console.WriteLine("Type 'exit' or 'x' to quit, or enter a simple equation like 1+2.\n");
 
             // load the tokenizer and grammar from file
-            var interpreter = new CalculatorInterpreter(
+            var interpreter = new CalculatorCompiler(
                 File.ReadAllText("assets/calculator.tokens"),
                 File.ReadAllText("assets/calculator.grammar")
             );
