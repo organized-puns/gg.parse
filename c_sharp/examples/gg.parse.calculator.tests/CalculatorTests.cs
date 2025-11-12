@@ -18,10 +18,10 @@ namespace gg.parse.calculator.tests
         public void CreateInterpreter_FindRules_ExpectRulesToValidate()
         {
             var calculator = new CalculatorInterpreter(_tokenizerSpec, _grammarSpec);
-            var parser = calculator.Builder.GrammarGraph;
+            var grammar = calculator.Parser.Grammar;
             
             // this is the compiled version of the grammar (script)
-            var expressionRule = parser.FindRule("expression") as MatchOneOf<int>;
+            var expressionRule = grammar["expression"] as MatchOneOf<int>;
 
             IsNotNull(expressionRule);
             IsTrue(expressionRule.Prune == AnnotationPruning.Root);

@@ -60,8 +60,8 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupSingleShorthand_Parse_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
-            var (tokens, syntaxTree) = builder.Parse("-v");
+            var parser = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
+            var (tokens, syntaxTree) = parser.Parse("-v");
 
             IsTrue(tokens);
             IsTrue(tokens.Count == 2);
@@ -86,7 +86,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupSingleVerbose_Parse_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
             var argText = "--value";
             var (tokens, syntaxTree) = builder.Parse(argText);
 
@@ -105,10 +105,10 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupSingleConfigArg_ParseWithConfigArgRule_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var parser = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
             var argText = "--key=value";
 
-            var (tokens, syntaxTree) = builder.Parse(argText);
+            var (tokens, syntaxTree) = parser.Parse(argText);
 
             IsTrue(tokens);
             IsTrue(tokens[0].Name == ArgParserNames.ArgKeySwitch);
@@ -128,7 +128,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupSingleRequired_Parse_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
             var (tokens, syntaxTree) = builder.Parse("value");
 
             IsTrue(syntaxTree);
@@ -142,7 +142,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupOptionalAndRequired_Parse_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
 
             var argText = "-s=123 --input=c:\\some\\file.txt command";
             //var argText = "--input=c:\\some\\file.txt";
@@ -179,7 +179,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupMultipleOptionalAndRequired_Parse_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
 
             var argText = "-s=123 command1 command2 --next_option:-1.0 command3";
             var (tokens, syntaxTree) = builder.Parse(argText);
@@ -207,7 +207,9 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupObject_Parse_ExpectMatch()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder()
+                .FromFile(TokenFileName, GrammarFileName)
+                .Build();
 
             var argText = "-s={}";
             var (tokens, syntaxTree) = builder.Parse(argText);
@@ -226,15 +228,16 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupUnknownToken_Parse_ExpectScriptException()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
+            var logger = new ScriptLogger()
+            {
+                Out = (level, message) => Debug.WriteLine(message)
+            };
             var argText = "|";
-
-
-            builder.LogHandler.Out = (level, message) => Debug.WriteLine(message);
 
             try
             {
-                builder.Parse(argText);
+                builder.Parse(argText, logger: logger);
                 Fail();
             }
             catch (ScriptException)
@@ -245,15 +248,18 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void SetupUnknownGrammar_Parse_ExpectScriptException()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var parser = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
             var argText = ":boo";
 
 
-            builder.LogHandler.Out = (level, message) => Debug.WriteLine(message);
-
+            var logger = new ScriptLogger()
+            {
+                Out = (level, message) => Debug.WriteLine(message)
+            };
+            
             try
             {
-                var (tokens, syntaxTree) = builder.Parse(argText);
+                var (tokens, syntaxTree) = parser.Parse(argText);
                 Fail();
             }
             catch (ScriptException)

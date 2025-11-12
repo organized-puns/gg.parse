@@ -1,4 +1,7 @@
-﻿using gg.parse.core;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using gg.parse.core;
 using gg.parse.rules;
 
 namespace gg.parse.script.tests.parserbuilder
@@ -15,8 +18,8 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void CreateParse_ParseValidStrings_ExpectNoErrors()
         {
-            var parser = new ParserBuilder().From(StringTokenizationText);
-            var stringRule = parser.TokenGraph.FindRule("string");
+            var parser = new ParserBuilder().From(StringTokenizationText).Build();
+            var stringRule = parser.Tokens["string"];
 
             var validStrings = new string[]
             {
@@ -27,7 +30,7 @@ namespace gg.parse.script.tests.parserbuilder
 
             foreach (var validString in validStrings)
             {
-                var (result, _) = parser.Parse(validString);
+                var result = parser.Tokenize(validString);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
@@ -46,8 +49,8 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void InvalidEOFTerminatedString_Parse_ExpectErrors()
         {
-            var parser = new ParserBuilder().From(StringTokenizationText);
-            var errEOF = parser.TokenGraph.FindRule("err_string_eof");
+            var parser = new ParserBuilder().From(StringTokenizationText).Build();
+            var errEOF = parser.Tokens["err_string_eof"];
 
             var invalidStrings = new string[]
             {
@@ -58,7 +61,7 @@ namespace gg.parse.script.tests.parserbuilder
             foreach (var testString in invalidStrings)
             {
                 // turn off exception throwing for this test so we can test the error annotations
-                var (result, _) = parser.Parse(testString, throwExceptionsOnError: false);
+                var result = parser.Tokenize(testString, throwExceptions: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
@@ -76,20 +79,19 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void InvalidEOLNTerminatedString_Parse_ExpectErrors()
         {
-            var parser = new ParserBuilder().From(StringTokenizationText);
-            var errEOLN = parser.TokenGraph.FindRule("log_err_string_eoln");
+            var parser = new ParserBuilder().From(StringTokenizationText).Build();
+            var errEOLN = parser.Tokens["log_err_string_eoln"];
 
             var testConfigurations = new (string input, int expectedPosition, int expectedLength) []
             {
                 ("\"foo\n\"", 0, 5),
-                // 
                 ("\"bar\r\n\"", 0, 6),
             };
 
             foreach (var (input, expectedPosition, expectedLength) in testConfigurations)
             {
                 // turn off exception throwing for this test so we can test the error annotations
-                var (result, _) = parser.Parse(input, throwExceptionsOnError: false);
+                var result = parser.Tokenize(input, throwExceptions: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);
@@ -107,22 +109,25 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void MixOfValidAndInvalidStrings_Parse_ExpectFunctionIdsMatchExpectations()
         {
-            var parser = new ParserBuilder().From(StringTokenizationText);
-            var stringRule = parser.TokenGraph.FindRule("string");
-            var errEOLN = parser.TokenGraph.FindRule("log_err_string_eoln");
-            var errEOF = parser.TokenGraph.FindRule("err_string_eof");
-
+            var builder = new ParserBuilder().From(StringTokenizationText);
+            
             // modify the root to expect one or more strings
-            parser.TokenGraph.Root = parser.TokenGraph.RegisterRule(
+            builder.TokenGraph.Root = builder.TokenGraph.RegisterRule(
                 new MatchCount<char>(
                     "#string_list",
                     AnnotationPruning.Root,
                     0,
-                    parser.TokenGraph.Root, 
+                    builder.TokenGraph.Root, 
                     min: 1, 
                     max: 0
                 )
             );
+
+            var parser = builder.Build();
+            var stringRule = parser.Tokens["string"];
+            var errEOLN = parser.Tokens["log_err_string_eoln"];
+            var errEOF = parser.Tokens["err_string_eof"];
+
 
             var testConfigurations = new (string input, int[] functionIds) []
             {
@@ -134,7 +139,7 @@ namespace gg.parse.script.tests.parserbuilder
             foreach (var (input, functionIds) in testConfigurations)
             {
                 // turn off exception throwing for this test so we can test the error annotations
-                var (result, _) = parser.Parse(input, throwExceptionsOnError: false);
+                var result = parser.Tokenize(input, throwExceptions: false);
 
                 Assert.IsTrue(result.FoundMatch);
                 Assert.IsTrue(result.Annotations != null);

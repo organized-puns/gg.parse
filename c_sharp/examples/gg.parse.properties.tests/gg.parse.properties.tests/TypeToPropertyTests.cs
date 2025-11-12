@@ -11,8 +11,10 @@ namespace gg.parse.properties.tests
     [TestClass]
     public class TypeToPropertyTests
     {
-        private static readonly ParserBuilder PropertyParser =
-            new ParserBuilder().FromFile("./assets/properties.tokens", "./assets/properties.grammar");
+        private static readonly Parser PropertyParser =
+            new ParserBuilder()
+                .FromFile("./assets/properties.tokens", "./assets/properties.grammar")
+                .Build();
 
         [TestMethod]
         public void SetupEnumAnnotationAsIdentifier_Parse_ExpectValidEnumValue()

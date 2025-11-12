@@ -48,19 +48,20 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchCondition_ScriptExample()
         {
-            var builder = new ParserBuilder();
             var logger = new ScriptLogger()
             {
                 Out = (level, message) => Debug.WriteLine($"[{level}]: {message}")
             };
 
-            var tokenizer = builder.FromFile("assets/condition_example.tokens", logger: logger);
+            var tokenizer = new ParserBuilder()
+                            .FromFile("assets/condition_example.tokens", logger: logger)
+                            .Build();
             
             // will output "foo found" 
-            IsTrue(tokenizer.Tokenize("foo", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("foo", processLogs: true));
 
             // will output "foo not found" 
-            IsTrue(tokenizer.Tokenize("bar", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("bar", processLogs: true));
         }
     }
 }

@@ -43,15 +43,17 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchSimpleDataUsingScript()
         {
-            var parser = new ParserBuilder().From("lower_case_letter = {'a'..'z'};");
+            var parser = new ParserBuilder()
+                .From("lower_case_letter = {'a'..'z'};")
+                .Build();
 
-            IsTrue(parser.Parse("a").tokens);
+            IsTrue(parser.Tokenize("a"));
 
-            IsTrue(parser.Parse("z").tokens);
+            IsTrue(parser.Tokenize("z"));
 
-            IsFalse(parser.Parse("A").tokens);
+            IsFalse(parser.Tokenize("A"));
 
-            IsFalse(parser.Parse("1").tokens);
+            IsFalse(parser.Tokenize("1"));
         }
     }
 }

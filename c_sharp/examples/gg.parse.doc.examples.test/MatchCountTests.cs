@@ -74,29 +74,30 @@ namespace gg.parse.doc.examples.test
         {
             var logger = new ScriptLogger((level, message) => Debug.WriteLine($"[{level}]: {message}"));
             var tokenizer = new ParserBuilder()
-                            .FromFile("assets/match_count_example.tokens", logger: logger);
+                            .FromFile("assets/match_count_example.tokens", logger: logger)
+                            .Build();
 
             // will output "zero or more foos found"
-            IsTrue(tokenizer.Tokenize("foofoo", usingRule: "match_zero_or_more_foos", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("foofoo", usingRule: "match_zero_or_more_foos", processLogs: true));
 
             // will also output "zero or more foos found"
             IsTrue(tokenizer.Tokenize(
                 "barbazqazquad", 
                 usingRule: "match_zero_or_more_foos", 
-                processLogsOnResult: true
+                processLogs: true
             ));
 
             // will output "zero or one foo found"
-            IsTrue(tokenizer.Tokenize("foofoo", usingRule: "match_zero_or_one_foo", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("foofoo", usingRule: "match_zero_or_one_foo", processLogs: true));
 
             // will output "one or more foos found"
-            IsTrue(tokenizer.Tokenize("foo", usingRule: "match_one_or_more_foos", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("foo", usingRule: "match_one_or_more_foos", processLogs: true));
 
             // will output "no foos found :("
-            IsTrue(tokenizer.Tokenize("bar", usingRule: "match_one_or_more_foos", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("bar", usingRule: "match_one_or_more_foos", processLogs: true));
 
             // will output "three foos found"
-            IsTrue(tokenizer.Tokenize("foofoofoo", usingRule: "match_three_foos", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("foofoofoo", usingRule: "match_three_foos", processLogs: true));
         }
     }
 }

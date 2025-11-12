@@ -3,7 +3,6 @@
 
 using gg.parse.core;
 using gg.parse.rules;
-using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.script.pipeline;
 using gg.parse.util;
@@ -80,6 +79,7 @@ namespace gg.parse.script
             return this;
         }
 
+        /*
         public ParseResult Tokenize(
             string input,
             string? usingRule = null,
@@ -158,7 +158,7 @@ namespace gg.parse.script
                 LogHandler?.ProcessException(e);
                 throw;
             }
-        }
+        }*/
 
         /// <summary>
         /// Convenience method to write the received logs during parsing / compilation

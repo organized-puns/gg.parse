@@ -42,7 +42,7 @@ namespace gg.parse.calculator.tests
 
             foreach (var token in expectedTokens)
             {
-                IsNotNull(calculatorParser.TokenGraph.FindRule(token), $"Token '{token}' not found.");
+                IsTrue(calculatorParser.Tokens.TryFindRule(token, out var _), $"Token '{token}' not found.");
             }
         }
 
@@ -71,7 +71,7 @@ namespace gg.parse.calculator.tests
 
             foreach (var ruleName in expectedRules)
             {
-                IsNotNull(calculatorParser.GrammarGraph!.FindRule(ruleName), $"Rule '{ruleName}' not found.");
+                IsTrue(calculatorParser.Grammar.TryFindRule(ruleName, out var _), $"Rule '{ruleName}' not found.");
             }
         }
 
@@ -83,11 +83,11 @@ namespace gg.parse.calculator.tests
         {
             var calculatorParser = CreateParser();
 
-            var tokens = calculatorParser.TokenGraph.Root.Parse("1".ToCharArray(), 0);
+            var tokens = calculatorParser.Tokens.Parse("1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 1);
-            IsTrue(tokens[0].Rule == calculatorParser.TokenGraph.FindRule("number"));
+            IsTrue(tokens[0].Rule == calculatorParser.Tokens["number"]);
 
             var (_, astTree) = calculatorParser.Parse("1");
 
@@ -109,12 +109,12 @@ namespace gg.parse.calculator.tests
         {
             var calculatorParser = CreateParser();
 
-            var tokens = calculatorParser.TokenGraph!.Root!.Parse("-1".ToCharArray(), 0);
+            var tokens = calculatorParser.Tokens.Parse("-1".ToCharArray(), 0);
 
             IsTrue(tokens.FoundMatch);
             IsTrue(tokens.Annotations != null && tokens.Annotations.Count == 2);
-            IsTrue(tokens[0]!.Rule == calculatorParser.TokenGraph.FindRule("minus"));
-            IsTrue(tokens[1]!.Rule == calculatorParser.TokenGraph.FindRule("number"));
+            IsTrue(tokens[0]!.Rule == calculatorParser.Tokens["minus"]);
+            IsTrue(tokens[1]!.Rule == calculatorParser.Tokens["number"]);
 
             var (_, astTree) = calculatorParser.Parse("-1");
 
@@ -342,17 +342,17 @@ namespace gg.parse.calculator.tests
             IsTrue(astResult[0][2].Rule.Name == "number");
         }
 
-        private static ParserBuilder CreateParser()
+        private static Parser CreateParser()
         {
-            var parser = new ParserBuilder();
+            var builder = new ParserBuilder();
             
             try
             {
-                return parser.From(_tokenizerSpec, _grammarSpec);
+                return builder.From(_tokenizerSpec, _grammarSpec).Build();
             }
             catch (Exception)
             {
-                foreach (var message in parser.LogHandler.ReceivedLogs)
+                foreach (var message in builder.LogHandler.ReceivedLogs)
                 {
                     Console.WriteLine(message);
                     Debug.WriteLine(message);

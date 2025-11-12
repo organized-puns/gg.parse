@@ -26,8 +26,8 @@ namespace gg.parse.script.tests.parserbuilder
         public void CreateEmptyRule_Compile_ExpectNopToShowUp()
         {
             // xxx turn this into a more unit-y test
-            var parser = new ParserBuilder().From("token = 't1';", "empty_rule=;");
-            var emptyRule = parser.GrammarGraph.FindRule("empty_rule") as NopRule<int>;
+            var parser = new ParserBuilder().From("token = 't1';", "empty_rule=;").Build();
+            var emptyRule = parser.Grammar["empty_rule"] as NopRule<int>;
 
             IsTrue(emptyRule != null);
 
@@ -56,7 +56,7 @@ namespace gg.parse.script.tests.parserbuilder
         public void SetupTrivalCase_Parse_ExpectAWorkingParser()
         {
             var token = "bar";
-            var parser = new ParserBuilder().From($"foo='{token}';", "root=foo;");
+            var parser = new ParserBuilder().From($"foo='{token}';", "root=foo;").Build();
 
             var (_, barParseResult) = parser.Parse(token);
 
@@ -67,7 +67,9 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void SetupFindBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new ParserBuilder().From($"foo = find lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder()
+                .From($"foo = find lit; lit = 'bar';", "root = foo;")
+                .Build();
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
@@ -94,10 +96,10 @@ namespace gg.parse.script.tests.parserbuilder
             var tokenizer = new ParserBuilder().From(
                 $"{pr}find_all_bars = +( find_bar, '{searchTerm}' );" +
                 $"{pa}find_bar      = find '{searchTerm}';"
-            );
+            ).Build();
 
             var testStringWithBar = "123ba345bar567 bar ";
-            var (result, _) = tokenizer.Parse(testStringWithBar);
+            var result = tokenizer.Tokenize(testStringWithBar);
 
             IsTrue(result);
             IsTrue(result.Count == 2);
@@ -115,7 +117,9 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void SetupStopBeforeBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new ParserBuilder().From($"foo = stop_at lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder()
+                .From($"foo = stop_at lit; lit = 'bar';", "root = foo;")
+                .Build();
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
@@ -143,7 +147,9 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void SetupStopAfterBar_Parse_ExpectBarFoundIfPresentInString()
         {
-            var parser = new ParserBuilder().From($"foo = stop_after lit; lit = 'bar';", "root = foo;");
+            var parser = new ParserBuilder()
+                .From($"foo = stop_after lit; lit = 'bar';", "root = foo;")
+                .Build();
 
             var testStringWithBar = "123ba345bar567";
             var (tokensResult, barParseResult) = parser.Parse(testStringWithBar);
@@ -283,9 +289,10 @@ namespace gg.parse.script.tests.parserbuilder
             var token = "bar";
             var builder = new ParserBuilder().From($"foo='{token}';", "root=foo;");
             var breakPoint = builder.GrammarGraph.AddBreakpoint("foo");
+            var parser = builder.Build();
 
             // this should pause the debugger
-            var (_, barParseResult) = builder.Parse(token);
+            var (_, barParseResult) = parser.Parse(token);
 
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0].Rule.Name == "root");
@@ -293,7 +300,7 @@ namespace gg.parse.script.tests.parserbuilder
             builder.GrammarGraph.RemoveBreakpoint(breakPoint);
 
             // this should not longer pause the debugger
-            (_, barParseResult) = builder.Parse(token);
+            (_, barParseResult) = parser.Parse(token);
 
             IsTrue(barParseResult.FoundMatch);
             IsTrue(barParseResult[0].Rule.Name == "root");
@@ -306,7 +313,7 @@ namespace gg.parse.script.tests.parserbuilder
         public void InsertBreakPointInScript_Parse_ExpectABreakpoint()
         {
             var token = "bar";
-            var builder = new ParserBuilder().From($"foo='{token}';", "root = break foo;");
+            var builder = new ParserBuilder().From($"foo='{token}';", "root = break foo;").Build();
 
             // this should pause the debugger
             var (_, barParseResult) = builder.Parse(token);
@@ -318,18 +325,18 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void CreateRangedCountScript_Parse_ExpectSuccess()
         {          
-            var builder = new ParserBuilder().From($"foo=[2..3]'foo';");
+            var builder = new ParserBuilder().From($"foo=[2..3]'foo';").Build();
 
-            var (tokens, _) = builder.Parse("foo");
+            var tokens = builder.Tokenize("foo");
 
             IsFalse(tokens);
 
-            (tokens, _) = builder.Parse("foofoo");
+            tokens = builder.Tokenize("foofoo");
 
             IsTrue(tokens);
             IsTrue(tokens[0].Children.Count == 2);
 
-            (tokens, _) = builder.Parse("foofoofoo");
+            tokens = builder.Tokenize("foofoofoo");
 
             IsTrue(tokens);
             IsTrue(tokens[0].Children.Count == 3);
@@ -339,18 +346,18 @@ namespace gg.parse.script.tests.parserbuilder
         public void CreateRangedCountScriptWithoutLimit_Parse_ExpectSuccess()
         {
             // set no max
-            var builder = new ParserBuilder().From($"foo=[2..0]'foo';");
+            var builder = new ParserBuilder().From($"foo=[2..0]'foo';").Build();
 
-            var (tokens, _) = builder.Parse("foo");
+            var tokens = builder.Tokenize("foo");
 
             IsFalse(tokens);
 
-            (tokens, _) = builder.Parse("foofoo");
+            tokens = builder.Tokenize("foofoo");
 
             IsTrue(tokens);
             IsTrue(tokens[0].Children.Count == 2);
 
-            (tokens, _) = builder.Parse("foofoofoo");
+            tokens = builder.Tokenize("foofoofoo");
 
             IsTrue(tokens);
             IsTrue(tokens[0].Children.Count == 3);           

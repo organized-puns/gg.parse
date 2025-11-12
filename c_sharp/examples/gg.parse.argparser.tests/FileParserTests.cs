@@ -42,7 +42,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void CreateAbsoluteWindowsDirectory_Parse_ExpectFullPathFound()
         { 
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
 
             var filename = "c:\\my\\path.exe";
             var (tokensResult, syntaxTreeResult) = builder.Parse(filename);
@@ -71,7 +71,7 @@ namespace gg.parse.argparser.tests
         [TestMethod]
         public void CreateRelativeNixFile_Parse_ExpectFullPathFound()
         {
-            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName);
+            var builder = new ParserBuilder().FromFile(TokenFileName, GrammarFileName).Build();
 
             var filename = "../parent/file.txt";
             var (tokensResult, syntaxTreeResult) = builder.Parse(filename);

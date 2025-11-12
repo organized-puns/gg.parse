@@ -71,7 +71,10 @@ namespace gg.parse.doc.examples.test
             // create a tokenizer from script
             var filename = "c:\\users\\text.txt";
             var data = $"find the filename {filename} in this line.";
-            var tokens = new ParserBuilder().From(_filenameScript).Tokenize(data);
+            var tokens = new ParserBuilder()
+                            .From(_filenameScript)
+                            .Build()
+                            .Tokenize(data);
 
             IsTrue(tokens && tokens.Count == 1);
 

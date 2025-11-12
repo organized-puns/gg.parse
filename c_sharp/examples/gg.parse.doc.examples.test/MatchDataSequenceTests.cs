@@ -42,11 +42,13 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void MatchSimpleDataUsingScript()
         {
-            var parser = new ParserBuilder().From("is_foo = 'foo';");
+            var parser = new ParserBuilder()
+                .From("is_foo = 'foo';")
+                .Build();
 
-            IsTrue(parser.Parse("foo").tokens);
+            IsTrue(parser.Tokenize("foo"));
 
-            IsFalse(parser.Parse("bar").tokens);
+            IsFalse(parser.Tokenize("bar"));
         }
     }
 }

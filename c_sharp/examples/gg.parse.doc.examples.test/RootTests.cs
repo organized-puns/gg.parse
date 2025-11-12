@@ -13,12 +13,12 @@ namespace gg.parse.doc.examples.test
         [TestMethod]
         public void CreateTokenizerWithAndWithoutExplicitRoot_Parse_ExpectFirstRuleToPass()
         {
-            var tokenizerWithDefaultRoot = new ParserBuilder().From("foo = 'foo'; bar = 'bar', foo;");
+            var tokenizerWithDefaultRoot = new ParserBuilder().From("foo = 'foo'; bar = 'bar', foo;").Build();
 
             IsTrue(tokenizerWithDefaultRoot.Tokenize("foo"));
             IsFalse(tokenizerWithDefaultRoot.Tokenize("barfoo"));
 
-            var tokenizerWithExplicitRoot = new ParserBuilder().From("foo = 'foo'; root = 'bar', foo;");
+            var tokenizerWithExplicitRoot = new ParserBuilder().From("foo = 'foo'; root = 'bar', foo;").Build();
 
             IsFalse(tokenizerWithExplicitRoot.Tokenize("foo"));
             IsTrue(tokenizerWithExplicitRoot.Tokenize("barfoo"));

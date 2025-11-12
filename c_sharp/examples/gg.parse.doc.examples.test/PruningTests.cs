@@ -19,6 +19,7 @@ namespace gg.parse.doc.examples.test
             var text = "a";
             var tokens = new ParserBuilder()
                             .From("top_level_example = 'a' | 'b' | 'c';")
+                            .Build()
                             .Tokenize(text);
 
             IsTrue(tokens && tokens.Count == 1);
@@ -35,6 +36,7 @@ namespace gg.parse.doc.examples.test
             var text = "ab";
             var tokens = new ParserBuilder()
                             .From("inline_example = ('a', 'b') | ('b', 'c');")
+                            .Build()
                             .Tokenize(text);
 
             IsTrue(tokens && tokens.Count == 1);

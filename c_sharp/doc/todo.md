@@ -11,22 +11,20 @@ config:
 ---
 kanban
   Backlog
-       
-    [ add loop guard ]
-	[ Add linter to workflows ]
+ 
   
   In progress
     
     [ Add rule examples ]
     [ Implement properties file ]                         
-        [ properties files - replace parserbuilder with parser where possible, eg examples ]
         [ properties files - allow for ini files/java properties ]
         [ properties files - redo calculator based on compiler template ]
         [ properties files - redo rule compiler based on compiler template ]
         [ properties files - redo arg parser ]
-        [ clean up, write doc ]
+        [ clean up, write doc, update example docs for new parser / parserbuilder ]
         	
   Done
+    [ properties files - replace parserbuilder with parser where possible, eg examples ]
     [ properties files - improving token/grammar recovery, both fail after just one error and don't recover ]
     [ properties files - move parser graphs to read only, thread safe implementations ]
     [ properties files - test for deliberate errors, adding basic error reporting. ]
@@ -52,6 +50,37 @@ Details
 
 Future backlog
 --------------
+
+ ### add loop guard 
+
+ After parsing a tokenizer / grammar. Create a tree of all rule expansions finding loops
+ 
+ cases:
+
+ ```
+    rule = rule
+    will create:
+        rule
+         |
+         rule <- loop detected
+```
+
+```
+    rule = a | b
+    a = 'foo'
+    b = rule
+
+    will create:
+        rule
+         /\
+        /  \
+       a    b
+       |    |
+      'foo' rule <- loop
+
+      'foo' will be closed and not further expanded
+```
+
 
 
 ### Fix/extend literal

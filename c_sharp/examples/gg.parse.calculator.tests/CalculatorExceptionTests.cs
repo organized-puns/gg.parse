@@ -12,7 +12,7 @@ namespace gg.parse.calculator.tests
         {
             var tokenizerSpec = File.ReadAllText("assets/calculator.tokens");
             var grammarSpec = File.ReadAllText("assets/calculator.grammar");
-            var parser = new ParserBuilder().From(tokenizerSpec, grammarSpec);
+            var parser = new ParserBuilder().From(tokenizerSpec, grammarSpec).Build();
             string[] invalidInputs = [
                 // note the calculator only reads a single expression,
                 // so anything after the first expression is ignored.

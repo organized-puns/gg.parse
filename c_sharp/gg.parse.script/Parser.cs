@@ -11,8 +11,6 @@ namespace gg.parse.script
     {
         public string Text { get; init; }
 
-        public string? UsingRule { get; init; }
-
         public bool FailOnWarning { get; init; }
 
         public bool ThrowExceptionsOnError { get; init; }
@@ -30,30 +28,53 @@ namespace gg.parse.script
 
     public sealed class Parser
     {
-        private readonly RuleGraph<char> _tokens;
-        private readonly RuleGraph<int>? _grammar;
+        private readonly IRuleGraph<char> _tokens;
+        private readonly IRuleGraph<int>? _grammar;
+        public IRuleGraph<int>? Grammar =>
+            _grammar;
+
+        public IRuleGraph<char> Tokens =>
+            _tokens;
+
 
         public Parser(RuleGraph<char> tokens)
         {
             _tokens = tokens;
         }
 
-        public Parser(RuleGraph<char> tokens, RuleGraph<int> grammar)
+        public Parser(IRuleGraph<char> tokens, IRuleGraph<int> grammar)
         {
             _tokens = tokens;
             _grammar = grammar;
         }
 
-        public ParseResult Tokenize(ParseConfiguration config)
+        public ParseResult Tokenize(
+            string input, 
+            bool throwExceptions = true, 
+            bool processLogs = false,
+            string? usingRule = null,
+            ScriptLogger? logger = null
+        ) =>
+            Tokenize(
+                new ParseConfiguration(input)
+                {
+                    ProcessLogsOnResult = processLogs,
+                    ThrowExceptionsOnError = throwExceptions,
+                    LogHandler = logger
+                },
+                usingRule: usingRule
+            );
+
+        public ParseResult Tokenize(ParseConfiguration config, string? usingRule = null)
         {
             if (string.IsNullOrEmpty(config.Text))
             {
                 return ParseResult.Success;
             }
 
-            IRule rule = string.IsNullOrEmpty(config.UsingRule)
-                    ? _tokens.Root
-                    : _tokens[config.UsingRule];
+            IRule rule = string.IsNullOrEmpty(usingRule)
+                    ? _tokens.Root!
+                    : _tokens[usingRule];
 
             var result = rule.Parse(config.Text);
 
@@ -83,10 +104,24 @@ namespace gg.parse.script
             return result;
         }
 
-        public (ParseResult tokens, ParseResult syntaxTree) Parse(string input) =>
-            Parse(new ParseConfiguration(input));   
+        public (ParseResult tokens, ParseResult syntaxTree) Parse(
+            string input, 
+            bool throwExceptions = true, 
+            bool processLogs = false,
+            string? usingRule = null,
+            ScriptLogger? logger = null
+        ) =>
+            Parse(
+                new ParseConfiguration(input)
+                {
+                    ThrowExceptionsOnError = throwExceptions,
+                    ProcessLogsOnResult = processLogs,
+                    LogHandler = logger
+                },
+                usingRule
+            );   
 
-        public (ParseResult tokens, ParseResult syntaxTree) Parse(ParseConfiguration config)
+        public (ParseResult tokens, ParseResult syntaxTree) Parse(ParseConfiguration config, string? usingRule = null)
         {
             Assertions.RequiresNotNull(_grammar, "No grammar defined, did you want to use 'Tokenize' instead?");
 
@@ -101,11 +136,11 @@ namespace gg.parse.script
             {
                 if (tokenizeResult.Annotations != null && tokenizeResult.Annotations.Count > 0)
                 {
-                    IRule? rule = string.IsNullOrEmpty(config.UsingRule)
+                    IRule? rule = string.IsNullOrEmpty(usingRule)
                         ? _grammar.Root
-                        : _grammar[config.UsingRule];
+                        : _grammar[usingRule];
 
-                    var astResult = rule.Parse(tokenizeResult.Annotations, 0);
+                    var astResult = rule!.Parse(tokenizeResult.Annotations, 0);
 
                     if (astResult.FoundMatch)
                     {

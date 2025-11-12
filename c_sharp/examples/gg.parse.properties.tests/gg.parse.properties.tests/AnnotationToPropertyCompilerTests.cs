@@ -32,8 +32,11 @@ namespace gg.parse.properties.tests
         private static readonly IRule arrayStart = new EmptyRule(PropertiesNames.ArrayStart);
         private static readonly IRule arrayEnd = new EmptyRule(PropertiesNames.ArrayEnd);
 
-        private static readonly ParserBuilder PropertyParser = 
-            new ParserBuilder().FromFile("./assets/properties.tokens", "./assets/properties.grammar");
+        private static readonly Parser 
+            PropertyParser =
+                new ParserBuilder()
+                    .FromFile("./assets/properties.tokens", "./assets/properties.grammar")
+                    .Build();
 
         [TestMethod]
         public void SetupIntAnnotation_CallInterpret_ExpectIntValue()

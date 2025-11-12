@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
+
 using gg.parse.core;
 using gg.parse.script;
 
@@ -33,23 +34,22 @@ namespace gg.parse.calculator
             public static readonly string Subtraction = "subtraction";
         }
 
-        private readonly ParserBuilder _builder; 
+        private readonly Parser _parser; 
 
         private readonly Dictionary<IRule, CalculatorFunction> _functionLookup;
 
-        public ParserBuilder Builder => _builder;
+        public Parser Parser => _parser;
 
         public CalculatorInterpreter(string tokenizerSpec, string grammarSpec)
         {
-            _builder = new ParserBuilder();            
-            _builder.From(tokenizerSpec, grammarSpec);
+            _parser = new ParserBuilder().From(tokenizerSpec, grammarSpec).Build();            
 
-            _functionLookup = CreateFunctionLookup(_builder.GrammarGraph!);
+            _functionLookup = CreateFunctionLookup(_parser.Grammar!);
         }
 
         public double Interpret(string text)
         {
-            var (tokensResult, treeResult) = _builder.Parse(text);
+            var (tokensResult, treeResult) = _parser.Parse(text);
 
             if (tokensResult && treeResult)
             {
@@ -65,32 +65,32 @@ namespace gg.parse.calculator
                 : throw new NotImplementedException();
         
 
-        private Dictionary<IRule, CalculatorFunction> CreateFunctionLookup(MutableRuleGraph<int> graph) =>       
+        private Dictionary<IRule, CalculatorFunction> CreateFunctionLookup(IRuleGraph<int> graph) =>       
 #nullable disable
             new()
             {                
-                { graph.FindRule(NodeNames.Group), (text, node, tokens) => 
+                { graph[NodeNames.Group], (text, node, tokens) => 
                     Interpret(text, node.Children[0], tokens) },
 
-                { graph.FindRule(NodeNames.Number), (text, node, tokens) => 
+                { graph[NodeNames.Number], (text, node, tokens) => 
                     double.Parse(node.GetText(text, tokens), CultureInfo.InvariantCulture) },
 
-                { graph.FindRule(NodeNames.Unary), (text, node, tokens) =>
+                { graph[NodeNames.Unary], (text, node, tokens) =>
                     {
-                        var sign = node.Children[0].Rule == graph.FindRule(NodeNames.Plus) ? 1.0 : -1.0;
+                        var sign = node.Children[0].Rule == graph[NodeNames.Plus] ? 1.0 : -1.0;
                         return sign * Interpret(text, node.Children[1], tokens);
                     }
                 },
-                { graph.FindRule(NodeNames.Multiply), (text, node, tokens) =>
+                { graph[NodeNames.Multiply], (text, node, tokens) =>
                         Interpret(text, node.Children[0], tokens) * Interpret(text, node.Children[2], tokens) },
 
-                { graph.FindRule(NodeNames.Addition), (text, node, tokens) =>
+                { graph[NodeNames.Addition], (text, node, tokens) =>
                         Interpret(text, node.Children[0], tokens) + Interpret(text, node.Children[2], tokens) },
 
-                { graph.FindRule(NodeNames.Subtraction), (text, node, tokens) =>
+                { graph[NodeNames.Subtraction], (text, node, tokens) =>
                         Interpret(text, node.Children[0], tokens) - Interpret(text, node.Children[2], tokens) },
 
-                { graph.FindRule(NodeNames.Division), (text, node, tokens) =>
+                { graph[NodeNames.Division], (text, node, tokens) =>
                         Interpret(text, node.Children[0], tokens) / Interpret(text, node.Children[2], tokens) },
             };
 #nullable enable       

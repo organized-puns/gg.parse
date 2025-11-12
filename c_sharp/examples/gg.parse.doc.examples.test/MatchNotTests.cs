@@ -43,13 +43,13 @@ namespace gg.parse.doc.examples.test
         public void MatchNot_ScriptExample()
         {
             var logger = new ScriptLogger(output: (level, message) => Debug.WriteLine($"[{level}]: {message}"));
-            var tokenizer = new ParserBuilder().From("root = if !'foo', info 'not foo';", logger: logger);
+            var tokenizer = new ParserBuilder().From("root = if !'foo', info 'not foo';").Build();
             
             // will output "not foo " 
-            IsTrue(tokenizer.Tokenize("bar", processLogsOnResult: true));
+            IsTrue(tokenizer.Tokenize("bar", processLogs: true, logger: logger));
 
             // will output nothing
-            IsFalse(tokenizer.Tokenize("foo", processLogsOnResult: true));
+            IsFalse(tokenizer.Tokenize("foo", processLogs: true, logger: logger));
         }
     }
 }
