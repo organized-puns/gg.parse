@@ -1,13 +1,15 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+
 using gg.parse.core;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-using System.Collections.Immutable;
 
 namespace gg.parse.script.pipeline
 {
+    // xxx merge with session
     public class PipelineSession<T> where T : IComparable<T>
     {
         // -- config -------------------------------------------------

@@ -3,7 +3,6 @@
 
 using System.Text;
 
-using gg.parse.rules;
 using gg.parse.script;
 using gg.parse.script.parser;
 using gg.parse.util;
@@ -106,9 +105,10 @@ namespace gg.parse.properties
 
                             var result = typeCompiler.Compile<T?>(syntaxTree.Annotations[0][0]!, context);
 
-                            if (context.Exceptions.Count > 0)
+                            if (context.Logs.Contains(LogLevel.Error | LogLevel.Fatal))
                             {
-                                throw new AggregateException("Exception(s) were thrown during the compile stage", context.Exceptions);
+                                throw new AggregateErrorException("Failed compilation, see the 'Errors' for more information", 
+                                    context.Logs.GetEntries(LogLevel.Error | LogLevel.Fatal));
                             }
 
                             return result;
@@ -131,14 +131,17 @@ namespace gg.parse.properties
                     // lot of noise
                     logHandler
                         .ReceivedLogs?
-                        .Where(log => (log.level & LogLevel.Error) > 0)
-                        .ForEach(log => report.AppendLine($"{log.level} {log.message}"));
+                        .GetEntries(LogLevel.Error)
+                        .ForEach(log => report.AppendLine($"{log.Level} {log.Message}"));
                     
-                    //parser.WriteLogs((_, str) => report.Append(str), LogLevel.Error);
                 }
                 else if (ex is AggregateException ae)
                 {
                     ae.InnerExceptions.ForEach(ie => report.AppendLine(ie.Message));
+                }
+                else if (ex is AggregateErrorException aee)
+                {
+                    aee.Errors.ForEach(ie => report.AppendLine(ie.Message));
                 }
                 else
                 {

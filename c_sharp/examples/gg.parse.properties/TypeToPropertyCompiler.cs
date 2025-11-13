@@ -73,8 +73,8 @@ namespace gg.parse.properties
             Register(TypeCategory.String, CompileString);
             Register(TypeCategory.Struct, CompileClass);
 
-            Register(TypeCategory.None, (t, a, c) => {
-                c.ReportException<PropertiesException>($"No backing implementation to parse type {t}.", a);
+            Register(TypeCategory.None, (type, annotation, context) => {
+                context.ReportError($"No backing implementation to parse type {type}.", annotation);
                 return null;
             });
 
@@ -120,14 +120,14 @@ namespace gg.parse.properties
 
             if (arrayType == null)
             {
-                context.ReportException<PropertiesException>(
+                context.ReportError(
                     $"Trying to compile an array but provided target type '{targetType}' element type is null.",
                     annotation
                 );
             }
             else
             {
-                context.ReportException<PropertiesException>(
+                context.ReportError(
                     $"Trying to compile an array<{ arrayType }>, but the annotation is not marked as an array but '{annotation.Rule.Name}'",
                     annotation
                 );
@@ -154,10 +154,7 @@ namespace gg.parse.properties
 
                 if (result == null)
                 {
-                    context.ReportException<PropertiesException>(
-                        $"Can't create an instance of object type <{targetType}>.", 
-                        annotation
-                    );
+                    context.ReportError($"Can't create an instance of object type <{targetType}>.", annotation);
                     return null;
                 }
 
@@ -182,7 +179,7 @@ namespace gg.parse.properties
             }
 
             // don't throw try to find as many errors as possible
-            context.ReportException<PropertiesException>(
+            context.ReportError(
                 $"Trying to compile an object of type '{targetType}' but the annotation is marked as but a '{annotation.Rule.Name}'.",
                 annotation
             );
@@ -226,18 +223,19 @@ namespace gg.parse.properties
                             {
                                 result.Add(key, value);
                             }
-                            catch (Exception)
+                            catch (Exception e)
                             {
-                                context.ReportException<PropertiesException>(
+                                context.ReportError(
                                     $"Can't add '{key}', with value annotation: '{valueNode.Name}'", 
-                                    valueNode
+                                    valueNode,
+                                    e
                                 );
                             }
                         }
                     }
                     else
                     {
-                        context.ReportException<PropertiesException>(
+                        context.ReportError(
                             $"Can't create an instance of dictionary with a null key.", 
                             annotation[i]![0]!
                         );
@@ -252,7 +250,7 @@ namespace gg.parse.properties
             }
 
             // don't throw try to find as many errors as possible
-            context.ReportException<PropertiesException>(
+            context.ReportError(
                 $"Trying to compile Dictionary<{keyType}, {valueType}>, but the annotation is not marked as a dictionary but '{annotation.Rule.Name}'.",
                 annotation
             );
@@ -282,7 +280,7 @@ namespace gg.parse.properties
                 return CompileObjectKeyValuePairs(targetType, annotation, context);
             }
 
-            context.ReportException<PropertiesException>(
+            context.ReportError(
                 $"No backing implementation to CompileKeyValuePairs for target type {targetType}",
                 annotation
             ); 
@@ -371,7 +369,7 @@ namespace gg.parse.properties
                 return null;
             }
 
-            context.ReportException<PropertiesException>(
+            context.ReportError(
                 $"Trying to compile List<{listType}> but the annotation doesn't describe a list.",
                 annotation
             );
@@ -407,7 +405,7 @@ namespace gg.parse.properties
                 return null;
             }
 
-            context.ReportException<PropertiesException>(
+            context.ReportError(
                 $"Trying to compile Set<{setType}> but the annotation does not describe a set (must be defined as an array).",
                 annotation         
             );

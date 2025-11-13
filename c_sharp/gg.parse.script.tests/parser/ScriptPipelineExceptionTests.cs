@@ -1,6 +1,7 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.pipeline;
+using gg.parse.util;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parser
@@ -33,13 +34,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where( entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
         }
@@ -67,13 +68,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -111,13 +112,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(builder
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(builder
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -151,13 +152,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -189,13 +190,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
         }
@@ -226,13 +227,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
         }
@@ -259,13 +260,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                     .LogHandler!
                     .ReceivedLogs!
-                    .Where(entry => entry.level == LogLevel.Fatal)
+                    .GetEntries(LogLevel.Fatal)
                     .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -295,13 +296,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                     .LogHandler!
                     .ReceivedLogs!
-                    .Where(entry => entry.level == LogLevel.Fatal)
+                    .GetEntries(LogLevel.Fatal)
                     .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }           
         }
@@ -357,13 +358,13 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
+                        .GetEntries(LogLevel.Fatal)
                         .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 3);
             }
         }

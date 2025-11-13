@@ -1,14 +1,18 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using gg.parse.core;
-using gg.parse.util;
 using System.Collections.Immutable;
+
+using gg.parse.core;
+using gg.parse.script.common;
+using gg.parse.util;
+
 using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.compiler
 {
-    public class CompileSession
+    // xxx replace with compile context
+    public class CompileSession : ISession
     {       
         public RuleCompiler Compiler { get; init; } 
 
@@ -41,5 +45,9 @@ namespace gg.parse.script.compiler
 
         public string GetText(Range tokenRange) =>
             Text!.Substring(GetTextRange(tokenRange));
+
+        public string GetText(Annotation annotation) =>
+            Text!.Substring(Tokens!.CombinedRange(annotation.Range));
+        
     }
 }

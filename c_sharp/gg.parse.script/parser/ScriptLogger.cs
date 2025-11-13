@@ -1,14 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.util;
-using System.Collections.Immutable;
+
 using static gg.parse.util.Assertions;
-using static System.Net.Mime.MediaTypeNames;
-using Range = gg.parse.util.Range;
 
 namespace gg.parse.script.parser
 {
@@ -17,9 +17,8 @@ namespace gg.parse.script.parser
         private TextPositionMap? _positionMap;
 
         // Note: not thread safe, application will need to deal with this
-        public List<(LogLevel level, string message)>? ReceivedLogs { get; set; }
-
-        public int MaxStoredLogs { get; set; } = -1;
+        // xxx move to LogCollection
+        public LogCollection? ReceivedLogs { get; set; }
 
         /// <summary>
         /// If set to true an exception will be thrown when a warning is encountered
@@ -32,10 +31,8 @@ namespace gg.parse.script.parser
         {
             if (storeLogs)
             {
-                ReceivedLogs = [];
+                ReceivedLogs = new(maxStoredLogs);
             }
-
-            MaxStoredLogs = maxStoredLogs;
 
             Out = output;
         }
@@ -48,16 +45,7 @@ namespace gg.parse.script.parser
 
         public void Log(LogLevel level, string message)
         {
-            if (ReceivedLogs != null)
-            {
-                ReceivedLogs.Add((level, message));
-
-                if (MaxStoredLogs > 0 && ReceivedLogs.Count > MaxStoredLogs)
-                {
-                    ReceivedLogs.RemoveRange(0, ReceivedLogs.Count - MaxStoredLogs);
-                }
-            }
-
+            ReceivedLogs?.Log(level, message);
             Out?.Invoke(level, message);
         }
 

@@ -6,16 +6,7 @@ using gg.parse.util;
 
 namespace gg.parse.rules
 {
-    [Flags]
-    public enum LogLevel
-    {
-        Fatal = 1,
-        Error = 2,
-        Warning = 4,
-        Info = 8,
-        Debug = 16,
-        Any = Fatal | Error | Warning | Info | Debug
-    }
+    
 
     public class FatalConditionException<T> : Exception where T : IComparable<T>
     {
@@ -79,6 +70,5 @@ namespace gg.parse.rules
 
         public override LogRule<T> CloneWithSubject(IRule subject) =>
             new (Name, Prune, subject, Text, Level);
-        
     }
 }

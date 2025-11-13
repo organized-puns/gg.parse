@@ -80,7 +80,7 @@ namespace gg.parse.script.tests.parserbuilder
 
             // should have one include message, despite two includes
             IsTrue(parser.LogHandler!.ReceivedLogs
-                    .Where( log => log.message.Contains("including", StringComparison.CurrentCulture))
+                    .Where( log => log.Message.Contains("including", StringComparison.CurrentCulture))
                     .Count() == 1);
 
             // should have loaded the string rule from the included file

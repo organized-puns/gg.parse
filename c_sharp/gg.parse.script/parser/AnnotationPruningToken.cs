@@ -2,6 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.core;
+using gg.parse.script.common;
 
 namespace gg.parse.script.parser
 {
@@ -38,6 +39,31 @@ namespace gg.parse.script.parser
                 _ => throw new NotImplementedException(),
             };
 
+        /// <summary>
+        /// Checks if the given annotation contains a pruning token. If so reads it.
+        /// </summary>
+        /// <param name="annotation"></param>
+        /// <param name="pruning">Will be AnnotationPruning.None if the given annotation is not a pruning
+        /// token, otherwise AnnotationPruning.Root or AnnotationPruning.All depending on the token</param>
+        /// <returns></returns>
+        public static bool TryReadPruning(this Annotation annotation, out AnnotationPruning pruning)
+        {
+            // annotation prunig is optional, (will default to None)
+            pruning = AnnotationPruning.None;
+
+            if (annotation == CommonTokenNames.PruneRoot)
+            {
+                pruning = AnnotationPruning.Root;
+                return true;
+            }
+            else if (annotation == CommonTokenNames.PruneAll)
+            {
+                pruning = AnnotationPruning.All;
+                return true;
+            }
+
+            return false;
+        }
 
         public static (string token, string name) SplitRuleNameAndPruningTokenText(this string name)
         {

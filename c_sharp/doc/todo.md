@@ -11,19 +11,19 @@ config:
 ---
 kanban
   Backlog
- 
   
   In progress
     
     [ Add rule examples ]
     [ Implement properties file ]                         
-        [ properties files - redo calculator based on compiler template ]
         [ properties files - redo rule compiler based on compiler template ]
         [ properties files - redo arg parser ]
         [ properties files - allow for ini files/java properties ]
         [ clean up, write doc, update example docs for new parser / parserbuilder ]
+        [ write properties main ]
         	
   Done
+    [ properties files - redo calculator based on compiler template ]
     [ properties files - replace parserbuilder with parser where possible, eg examples ]
     [ properties files - improving token/grammar recovery, both fail after just one error and don't recover ]
     [ properties files - move parser graphs to read only, thread safe implementations ]

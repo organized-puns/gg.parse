@@ -5,6 +5,8 @@ using gg.parse.core;
 
 namespace gg.parse.script.compiler
 {
+    
+
     public class CompilationException : Exception 
     {
         public Annotation? Annotation { get; init; }

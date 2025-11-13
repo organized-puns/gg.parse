@@ -6,6 +6,7 @@ using System.Globalization;
 using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.pipeline;
+using gg.parse.util;
 
 namespace gg.parse.calculator
 {

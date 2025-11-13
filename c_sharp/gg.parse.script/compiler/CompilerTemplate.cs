@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics;
 
 using gg.parse.core;
 using gg.parse.util;
@@ -23,13 +24,13 @@ namespace gg.parse.script.compiler
     {
         private readonly Dictionary<TKey, CompileFunc<TContext>> _functionLookup = [];
 
+        [DebuggerStepThrough]
         public CompilerTemplate() 
         { 
         }
 
         public CompilerTemplate(Dictionary<TKey, CompileFunc<TContext>> functions) => 
             functions.ForEach(kvp => _functionLookup.Add(kvp.Key, kvp.Value));
-
 
         public abstract ICompilerTemplate<TContext> RegisterDefaultFunctions();
 
@@ -42,6 +43,7 @@ namespace gg.parse.script.compiler
             _functionLookup[key] = function;
         }
 
+        [DebuggerStepThrough]
         public T? Compile<T>(Annotation annotation, TContext context) =>
             (T?) Compile(typeof(T), annotation, context);
 
@@ -80,13 +82,14 @@ namespace gg.parse.script.compiler
                 catch (Exception ex)
                 {
                     // add the exception and continue with the other rules
-                    context.ReportException<CompilationException>(ex.Message, node);
+                    context.ReportError(ex.Message, node, ex);
                 }
             }
 
-            return context.Exceptions.Count == 0
+            return context.Logs.Contains(LogLevel.Error | LogLevel.Fatal)
                 ? PostCompile(context, container)
-                : throw new AggregateException("Failed compilation, see inner exceptions for more information", context.Exceptions);
+                : throw new AggregateErrorException("Failed compilation, see the 'Errors' for more information.",
+                    context.Logs.GetEntries(LogLevel.Error | LogLevel.Fatal));
         }
 
         
@@ -102,7 +105,7 @@ namespace gg.parse.script.compiler
                 }
                 else
                 {
-                    context.ReportException<CompilationException>(
+                    context.ReportError(
                         $"Can't find a compile function matching '{annotation.Rule.Name}'.",
                         annotation
                     );
@@ -110,10 +113,7 @@ namespace gg.parse.script.compiler
             }
             catch (Exception e)
             {
-                context.ReportException<CompilationException>(
-                    e.Message,
-                    annotation
-                );
+                context.ReportException(e, annotation);
             }
 
             return result;

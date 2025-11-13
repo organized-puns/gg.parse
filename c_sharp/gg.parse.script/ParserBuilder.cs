@@ -172,8 +172,8 @@ namespace gg.parse.script
             {
                 LogHandler
                     .ReceivedLogs
-                    .Where(log => (log.level & includedLevels) > 0)
-                    .ForEach(log => output(log.level, log.message));
+                    .Where(log => (log.Level & includedLevels) > 0)
+                    .ForEach(log => output(log.Level, log.Message));
             }
         }
     }

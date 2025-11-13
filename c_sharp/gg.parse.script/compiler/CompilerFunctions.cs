@@ -378,8 +378,7 @@ namespace gg.parse.script.compiler
             CompileSession session) where T : IComparable<T> =>
 
             CompileUnary<T, BreakPointRule<T>>(header, bodyNode, session);
-
-
+       
         public static RuleBase<T> CompileAny<T>(RuleHeader header, Annotation _, CompileSession __) 
             where T : IComparable<T>
         {

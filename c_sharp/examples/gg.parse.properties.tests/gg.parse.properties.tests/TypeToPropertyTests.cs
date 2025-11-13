@@ -22,7 +22,7 @@ namespace gg.parse.properties.tests
             // setup
             var (enumAnnotation, tokens, text) = PropertyCompilerTestsHelpers.SetupSingleTokenTest("enum.TestEnum.Foo", PropertiesNames.Identifier);
             var allowedTypes = new TypePermissions(typeof(TestEnum));
-            var context = new PropertyContext(text, tokens, null, allowedTypes);
+            var context = new PropertyContext(text, tokens, [enumAnnotation], allowedTypes);
 
             // act
             var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
@@ -38,7 +38,7 @@ namespace gg.parse.properties.tests
             // setup
             var (enumAnnotation, tokens, text) = PropertyCompilerTestsHelpers.SetupSingleTokenTest("\"enum.TestEnum.Foo\"", PropertiesNames.String);
             var allowedTypes = new TypePermissions(typeof(TestEnum));
-            var context = new PropertyContext(text, tokens, null, allowedTypes);
+            var context = new PropertyContext(text, tokens, [enumAnnotation], allowedTypes);
 
             // act
             var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
@@ -57,7 +57,7 @@ namespace gg.parse.properties.tests
 
             // act
             var permissions = new TypePermissions(typeof(TestEnum));
-            var context = new PropertyContext(text, tokens.Annotations, permissions);
+            var context = new PropertyContext(text, tokens.Annotations, syntaxTree.Annotations, permissions);
             var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
                             .Compile<Dictionary<int, TestEnum>>(syntaxTree[0], context);
 
@@ -76,7 +76,7 @@ namespace gg.parse.properties.tests
 
             // act
             var permissions = new TypePermissions(typeof(TestEnum));
-            var context = new PropertyContext(text, tokens.Annotations, permissions);
+            var context = new PropertyContext(text, tokens.Annotations, syntaxTree.Annotations, permissions);
             var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
                             .Compile<Dictionary<int, TestEnum>>(syntaxTree[0], context);
 
@@ -95,7 +95,7 @@ namespace gg.parse.properties.tests
 
             // act
             var permissions = new TypePermissions(typeof(TestEnum));
-            var context = new PropertyContext(text, tokens.Annotations, permissions);
+            var context = new PropertyContext(text, tokens.Annotations, syntaxTree.Annotations, permissions);
             var result = new TypeToPropertyCompiler(new AnnotationToPropertyCompiler())
                             .Compile<object>(syntaxTree[0][0], context) as Array;
 

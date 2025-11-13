@@ -47,6 +47,7 @@ namespace gg.parse.script.parser
             public const string OneOrMore = "one_or_more";
             
             public const string Reference = "ref";
+            public const string Rule = "rule";
 
             public const string Sequence = "sequence";
             public const string StopAfter = "stop_after";
@@ -289,7 +290,7 @@ namespace gg.parse.script.parser
             );
 
             MatchRule = Sequence(
-                "rule",
+                Names.Rule,
                 ruleHeader,
                 OneOf($"{pr}rule_assignment_token", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,

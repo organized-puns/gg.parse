@@ -1,0 +1,116 @@
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) Pointless pun
+
+using gg.parse.core;
+using gg.parse.rules;
+using gg.parse.script.common;
+using gg.parse.script.parser;
+using gg.parse.util;
+
+namespace gg.parse.script.compiler
+{
+    public class TokenizerCompiler : RuleCompilerBase<char>
+    {
+        public TokenizerCompiler()
+        {
+            RegisterDefaultFunctions();
+        }
+
+        public TokenizerCompiler(Dictionary<string, CompileFunc<RuleCompilationContext>> functions) 
+            : base(functions)
+        {
+        } 
+
+        public override ICompilerTemplate<RuleCompilationContext> RegisterDefaultFunctions()
+        {
+            // tokenizer specific rules
+            Register(CommonTokenNames.AnyCharacter, CompileAny);
+            Register(CommonTokenNames.DataRange, CompileCharacterRange);
+            Register(CommonTokenNames.Literal, CompileLiteral);
+            Register(CommonTokenNames.Set, CompileCharacterSet);
+
+            // shared rules
+            Register(ScriptParser.Names.Evaluation, CompileEvaluation);
+            Register(ScriptParser.Names.MatchOneOf, CompileOneOf);
+            Register(ScriptParser.Names.Reference, CompileIdentifier);
+            Register(ScriptParser.Names.Rule, CompileRule);
+            Register(ScriptParser.Names.Sequence, CompileSequence);
+
+            return this;
+        }
+
+        public static RuleBase<char> CompileLiteral(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            var header = context.RuleHeader;
+
+            Assertions.RequiresNotNull(header);
+
+            var literalText = context.GetText(annotation);
+
+            var unescapedLiteralText = literalText[1..^1].SimpleUnescape();
+
+            if (string.IsNullOrEmpty(unescapedLiteralText))
+            {
+                throw new CompilationException("Literal text is empty (somehow...).", annotation: annotation);
+            }
+
+            return new MatchDataSequence<char>(header.Name, unescapedLiteralText.ToCharArray(), header.Prune, header.Precedence);
+        }
+
+        public static RuleBase<char> CompileCharacterSet(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            var header = context.RuleHeader;
+
+            Assertions.RequiresNotNull(header);
+
+            Assertions.Requires(annotation != null);
+            Assertions.Requires(annotation!.Children != null);
+            Assertions.Requires(annotation.Children!.Count == 1);
+
+            var setText = context.GetText(annotation.Children[0]);
+
+            if (string.IsNullOrEmpty(setText) || setText.Length <= 2)
+            {
+                throw new CompilationException("Text defining the MatchDataSet text is null or empty", annotation: annotation);
+            }
+
+            setText = setText[1..^1].SimpleUnescape();
+
+            return new MatchDataSet<char>(header.Name, header.Prune, [.. setText], header.Precedence);
+        }
+
+        public static RuleBase<char> CompileCharacterRange(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            var header = context.RuleHeader;
+
+            Assertions.RequiresNotNull(header);
+
+            Assertions.Requires(annotation != null);
+            Assertions.Requires(annotation!.Children != null);
+
+            var minText = context.GetText(annotation[0]!);
+
+            if (minText.Length != 3)
+            {
+                throw new CompilationException($"CompileCharacterRange: invalid range definition {minText}.",
+                            annotation: annotation);
+            }
+
+            var maxText = context.GetText(annotation[1]!);
+
+            if (maxText.Length != 3)
+            {
+                throw new CompilationException($"CompileCharacterRange: invalid range definition {maxText}.",
+                            annotation: annotation);
+            }
+
+            return new MatchDataRange<char>(
+                header.Name,
+                minText[1],
+                maxText[1],
+                header.Prune,
+                header.Precedence
+            );
+        }
+    }
+}
