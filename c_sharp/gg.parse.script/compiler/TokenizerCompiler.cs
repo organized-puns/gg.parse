@@ -7,8 +7,16 @@ using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
 
+using static gg.parse.util.Assertions;
+
 namespace gg.parse.script.compiler
 {
+    /// <summary>
+    /// Class implementing a compiler parsing tokenizers.
+    /// 
+    /// Covered by: <see cref="gg.parse.script.tests.compiler.TokenizerCompilerTests"/>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TokenizerCompiler : RuleCompilerBase<char>
     {
         public TokenizerCompiler()
@@ -31,10 +39,15 @@ namespace gg.parse.script.compiler
 
             // shared rules
             Register(ScriptParser.Names.Evaluation, CompileEvaluation);
+            Register(ScriptParser.Names.Group, CompileGroup);
             Register(ScriptParser.Names.MatchOneOf, CompileOneOf);
+            Register(ScriptParser.Names.Count, CompileRangedCount);
+            Register(ScriptParser.Names.OneOrMore, CompileOneOrMore);
             Register(ScriptParser.Names.Reference, CompileIdentifier);
             Register(ScriptParser.Names.Rule, CompileRule);
             Register(ScriptParser.Names.Sequence, CompileSequence);
+            Register(ScriptParser.Names.ZeroOrMore, CompileZeroOrMore);
+            Register(ScriptParser.Names.ZeroOrOne, CompileZeroOrOne);
 
             return this;
         }
@@ -43,7 +56,7 @@ namespace gg.parse.script.compiler
         {
             var header = context.RuleHeader;
 
-            Assertions.RequiresNotNull(header);
+            RequiresNotNull(header);
 
             var literalText = context.GetText(annotation);
 
@@ -61,11 +74,11 @@ namespace gg.parse.script.compiler
         {
             var header = context.RuleHeader;
 
-            Assertions.RequiresNotNull(header);
+            RequiresNotNull(header);
 
-            Assertions.Requires(annotation != null);
-            Assertions.Requires(annotation!.Children != null);
-            Assertions.Requires(annotation.Children!.Count == 1);
+            Requires(annotation != null);
+            Requires(annotation!.Children != null);
+            Requires(annotation.Children!.Count == 1);
 
             var setText = context.GetText(annotation.Children[0]);
 
@@ -83,10 +96,11 @@ namespace gg.parse.script.compiler
         {
             var header = context.RuleHeader;
 
-            Assertions.RequiresNotNull(header);
+            RequiresNotNull(header);
 
-            Assertions.Requires(annotation != null);
-            Assertions.Requires(annotation!.Children != null);
+            Requires(annotation != null);
+            Requires(annotation!.Children != null);
+            Requires(annotation == CommonTokenNames.DataRange);
 
             var minText = context.GetText(annotation[0]!);
 

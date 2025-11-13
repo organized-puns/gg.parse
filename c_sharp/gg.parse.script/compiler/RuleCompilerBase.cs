@@ -1,14 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections.Immutable;
-using System.Diagnostics;
-
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using static gg.parse.util.Assertions;
 
 namespace gg.parse.script.compiler
 {
@@ -34,6 +34,12 @@ namespace gg.parse.script.compiler
         }
     }
 
+    /// <summary>
+    /// Abstract class implementing a compiler base for compiling rules.
+    /// 
+    /// Covered by: <see cref="gg.parse.script.tests.compiler.TokenizerCompilerTests"/>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class RuleCompilerBase<T> : CompilerTemplate<string, RuleCompilationContext>
         where T : IComparable<T>
     {
@@ -51,7 +57,6 @@ namespace gg.parse.script.compiler
         protected override string SelectKey(Type? targetType, Annotation annotation, RuleCompilationContext context) =>
             annotation.Name;
 
-        // -- Generic functions ---------------------------------------------------------------------------------------
 
         public object? CompileRule(Type? _, Annotation annotation, RuleCompilationContext context)
         {
@@ -63,16 +68,24 @@ namespace gg.parse.script.compiler
         {
             var header = context.RuleHeader;
 
-            Assertions.RequiresNotNull(header);
+            RequiresNotNull(header);
 
             return new MatchAnyData<T>(header.Name, header.Prune, precedence: header.Precedence);
         }        
 
+        /// <summary>
+        /// Used for indentifiers and rule references
+        /// </summary>
+        /// <param name="_"></param>
+        /// <param name="annotation"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="CompilationException"></exception>
         public static object? CompileIdentifier(Type? _, Annotation annotation, RuleCompilationContext context)
         {
             var header = context.RuleHeader;
 
-            Assertions.RequiresNotNull(header);
+            RequiresNotNull(header);
 
             var hasOutputModifier = (annotation.Count > 1);
             var referenceName = hasOutputModifier
@@ -101,11 +114,11 @@ namespace gg.parse.script.compiler
 
         public object? CompileBinaryOperator(Type? type, Annotation annotation, RuleCompilationContext context)
         {
-            Assertions.RequiresNotNull(type);
+            RequiresNotNull(type);
 
             var header = context.RuleHeader;
 
-            Assertions.RequiresNotNull(header);
+            RequiresNotNull(header);
 
             IRule[]? elementArray = null;
 
@@ -151,6 +164,116 @@ namespace gg.parse.script.compiler
             CompileBinaryOperator(typeof(MatchEvaluation<T>), annotation, context);
 
 
+        public object? CompileGroup(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            RequiresNotNull(annotation);
+            Requires(annotation.Count == 1);
+            Requires(annotation == ScriptParser.Names.Group);
+
+            return Compile(null, annotation[0]!, context)
+                ?? throw new CompilationException("Cannot compile group.", annotation: annotation[0]);
+        }
+
+        /// <summary>
+        /// Parses a finite number of terms, expressed in script by for instance [3..4]'foo'
+        /// </summary>
+        /// <param name="_"></param>
+        /// <param name="annotation"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="CompilationException"></exception>
+        public object? CompileRangedCount(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            RequiresNotNull(annotation);
+            Requires(annotation.Count == 3);
+            
+            var header = context.RuleHeader;
+
+            RequiresNotNull(header);
+
+            var min = int.Parse(context.GetText(annotation[0]!));
+            var max = int.Parse(context.GetText(annotation[1]!));
+
+            if (min > max && max > 0)
+            {
+                throw new CompilationException($"min ({min}) should be equal or larger than max ({max}).");
+            }
+
+            var subjectAnnotation = annotation[2]!;
+            var subjectName = subjectAnnotation.GenerateUnnamedRuleName(context, header.Name, 0);
+            var subjectHeader = new RuleHeader(AnnotationPruning.None, subjectName, 0, 0, false);
+
+            var subject = 
+                Compile(
+                    _, 
+                    annotation[2]!, 
+                    new RuleCompilationContext(context, subjectHeader)
+                ) as IRule
+                ?? throw new CompilationException("Cannot compile subject for MatchCountRange.", subjectAnnotation);
+
+            // By default unary (and binary) operators pass the result of the children because
+            // in most cases we're interested in the values in the operation not the fact that there is an binary
+            // operation.
+            // The latter would result in much more overhead in specifying the parsers. Only when the rule is a 
+            // toplevel rule (ie rule = a, b, c) we use the user specified output.
+            var pruning =
+                header.IsTopLevel
+                    ? header.Prune
+                    : AnnotationPruning.Root;
+
+            return new MatchCount<T>(header.Name, pruning, header.Precedence, subject, min, max);
+        }
+
+        public MatchCount<T> CompileMatchCount(
+            Type? _, 
+            Annotation annotation, 
+            RuleCompilationContext context,
+            int min,
+            int max
+        ) 
+        {
+            RequiresNotNull(annotation);
+            Requires(annotation.Count == 1);
+
+            var header = context.RuleHeader;
+
+            RequiresNotNull(header);
+
+            var subjectAnnotation = annotation[0]!;
+            var subjectName = subjectAnnotation.GenerateUnnamedRuleName(context, header.Name, 0);
+
+            var subjectHeader = new RuleHeader(AnnotationPruning.None, subjectName, 0, 0, false);
+
+            var subject =
+                Compile(
+                    _,
+                    annotation[0]!,
+                    new RuleCompilationContext(context, subjectHeader)
+                ) as IRule
+                ?? throw new CompilationException("Cannot compile subject for MatchCount.", subjectAnnotation);
+
+            // by default unary (and binary) operators pass the result of the children because
+            // in most cases we're interested in the values in the operation not the fact that there is an binary operation.
+            // The latter would result in much more overhead in specifying the parsers. Only when the rule is a 
+            // toplevel rule (ie rule = a, b, c) we use the user specified output.
+            var pruning =
+                header.IsTopLevel
+                    ? header.Prune
+                    : AnnotationPruning.Root;
+
+            return new MatchCount<T>(header.Name, pruning, header.Precedence, subject, min, max);
+        }
+
+        public MatchCount<T> CompileZeroOrMore(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            CompileMatchCount(_, annotation, context, 0, 0);
+
+        public MatchCount<T> CompileZeroOrOne(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            CompileMatchCount(_, annotation, context, 0, 1);
+
+        public MatchCount<T> CompileOneOrMore(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            CompileMatchCount(_, annotation, context, 1, 0);
+
+
         // -- Private methods -----------------------------------------------------------------------------------------
 
         /// <summary>
@@ -162,9 +285,9 @@ namespace gg.parse.script.compiler
         /// <returns></returns>
         private static RuleHeader ReadRuleHeader(Annotation annotation, CompileContext context)
         {
-            Assertions.RequiresNotNull(annotation);
-            Assertions.RequiresNotNull(context);
-            Assertions.RequiresNotNull(annotation.Count >= 1);
+            RequiresNotNull(annotation);
+            RequiresNotNull(context);
+            RequiresNotNull(annotation.Count >= 1);
 
             var idx = 0;
 

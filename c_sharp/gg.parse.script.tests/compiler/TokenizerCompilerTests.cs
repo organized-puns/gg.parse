@@ -9,17 +9,18 @@ using gg.parse.script.parser;
 using gg.parse.util;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+
 using static gg.parse.tests.TestAnnotation;
 
 namespace gg.parse.script.tests.compiler
 {
     [TestClass]
-    public class TokenCompilerTests
+    public class TokenizerCompilerTests
     {
         [TestMethod]
         public void CreateAnyRuleAnnotation_Compile_ExpectRuleCreated()
         {
-            DataRuleTest<MatchAnyData<char>>(
+            CompileRuleTest<MatchAnyData<char>>(
                 CreateAnnotationTree(CommonTokenNames.AnyCharacter, "."),
                 ".", 
                 ["x", "1", "_" ],
@@ -34,7 +35,7 @@ namespace gg.parse.script.tests.compiler
             var script = $"'{literal}'";
             var tree = CreateAnnotationTree(CommonTokenNames.Literal, script);
 
-            DataRuleTest<MatchDataSequence<char>>(
+            CompileRuleTest<MatchDataSequence<char>>(
                 tree, 
                 script,
                 [literal],
@@ -54,7 +55,7 @@ namespace gg.parse.script.tests.compiler
                     NewAnnotation(CommonTokenNames.Literal, 5, set.Length)
                 );
 
-            DataRuleTest<MatchDataSet<char>>(
+            CompileRuleTest<MatchDataSet<char>>(
                 tree,
                 script,
                 ["a", "b", "c"],
@@ -77,7 +78,7 @@ namespace gg.parse.script.tests.compiler
                     NewAnnotation(CommonTokenNames.Literal, 10, max.Length)
                 );
 
-            DataRuleTest<MatchDataRange<char>>(
+            CompileRuleTest<MatchDataRange<char>>(
                 tree,
                 script,
                 ["a", "k", "z"],
@@ -132,6 +133,119 @@ namespace gg.parse.script.tests.compiler
             );
         }
 
+        [TestMethod]
+        public void CreateGroupAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            var literal = "'foo'";
+            var script = $"({literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Group,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                );
+
+            CompileRuleTest<MatchDataSequence<char>>(
+                tree,
+                script,
+                ["foo"],
+                ["", "Foo",  ""]
+            );
+        }
+
+        [TestMethod]
+        public void CreateRangedCountAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            var literal = "'foo'";
+            var script = $"[2..3]{literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Count,
+                    script,
+                    NewAnnotation(CommonTokenNames.Integer, 5, 1),
+                    NewAnnotation(CommonTokenNames.Integer, 8, 1),
+                    NewAnnotation(CommonTokenNames.Literal, 10, literal.Length)
+                );
+
+            CompileRuleTest<MatchCount<char>>(
+                tree,
+                script,
+                ["foofoo", "foofoofoo"],
+                ["", "foo", "foofo", "fooFoo"]
+            );
+        }
+
+        [TestMethod]
+        public void CreateZeroOrMoreAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            var literal = "'foo'";
+            var script = $"*{literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.ZeroOrMore,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                );
+
+            var countRule = CompileRuleTest<MatchCount<char>>(
+                tree,
+                script,
+                ["foofoo", "foofoofoo"],
+                null
+            );
+
+            IsTrue(countRule.Min == 0);
+            IsTrue(countRule.Max == 0);
+        }
+
+        [TestMethod]
+        public void CreateOneOrMoreAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            var literal = "'foo'";
+            var script = $"+{literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.OneOrMore,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                );
+
+            var countRule = CompileRuleTest<MatchCount<char>>(
+                tree,
+                script,
+                ["foofoo", "foofoofoo"],
+                ["fo", ""]
+            );
+
+            IsTrue(countRule.Min == 1);
+            IsTrue(countRule.Max == 0);
+        }
+
+        [TestMethod]
+        public void CreateZeroOrOneAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            var literal = "'foo'";
+            var script = $"?{literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.ZeroOrOne,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                );
+
+            var countRule = CompileRuleTest<MatchCount<char>>(
+                tree,
+                script,
+                ["foo", "", "xxx"],
+                null
+            );
+
+            IsTrue(countRule.Min == 0);
+            IsTrue(countRule.Max == 1);
+            IsTrue(countRule.Parse("foofoo").MatchLength == 3);
+            IsTrue(countRule.Parse("xxx").MatchLength == 0);
+        }
+
         // -- Private methods -----------------------------------------------------------------------------------------
 
         private static void BinaryOperatorTest<T>(
@@ -154,7 +268,7 @@ namespace gg.parse.script.tests.compiler
                     NewAnnotation(CommonTokenNames.Literal, 4 + 2 * separator.Length + a.Length + b.Length, c.Length)
                 );
 
-            DataRuleTest<T>(tree, script, validCases, invalidCases);
+            CompileRuleTest<T>(tree, script, validCases, invalidCases);
         }
 
         private static Annotation CreateAnnotationTree(
@@ -170,22 +284,28 @@ namespace gg.parse.script.tests.compiler
                 );
         }
 
-        private static void DataRuleTest<T>(
+        private static T CompileRuleTest<T>(
             Annotation root,
             string dataRuleScript, 
             string[] validCases,
             string[] invalidCases) where T : IRule
         {
             var session = new RuleCompilationContext($"foo={dataRuleScript};", [root]);
-
-            var compiledRule = new TokenizerCompiler().Compile<T>(root, session);
+            var compiler = new TokenizerCompiler();
+            var compiledRule = compiler.Compile<T>(root, session);
 
             IsFalse(session.Logs.Contains(LogLevel.Error | LogLevel.Fatal));
             IsNotNull(compiledRule);
             IsTrue(compiledRule.Name == "foo");
 
             validCases.ForEach(input => IsTrue(compiledRule.Parse(input)));
-            invalidCases.ForEach(input => IsFalse(compiledRule.Parse(input)));
+
+            if (invalidCases != null)
+            {
+                invalidCases.ForEach(input => IsFalse(compiledRule.Parse(input)));
+            }
+
+            return compiledRule;
         }
     }
 }
