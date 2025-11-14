@@ -32,10 +32,10 @@ namespace gg.parse.script.compiler
         public override ICompilerTemplate<RuleCompilationContext> RegisterDefaultFunctions()
         {
             // tokenizer specific rules
-            Register(CommonTokenNames.AnyCharacter, CompileAny);
-            Register(CommonTokenNames.DataRange, CompileCharacterRange);
-            Register(CommonTokenNames.Literal, CompileLiteral);
-            Register(CommonTokenNames.Set, CompileCharacterSet);
+            Register(ScriptParser.Names.Any, CompileAny);
+            Register(ScriptParser.Names.CharacterRange, CompileCharacterRange);
+            Register(ScriptParser.Names.Literal, CompileLiteral);
+            Register(ScriptParser.Names.CharacterSet, CompileCharacterSet);
 
             // shared rules
             Register(ScriptParser.Names.Break, CompileBreak);
@@ -107,7 +107,7 @@ namespace gg.parse.script.compiler
 
             Requires(annotation != null);
             Requires(annotation!.Children != null);
-            Requires(annotation == CommonTokenNames.DataRange);
+            Requires(annotation == ScriptParser.Names.CharacterRange);
 
             var minText = context.GetText(annotation[0]!);
 

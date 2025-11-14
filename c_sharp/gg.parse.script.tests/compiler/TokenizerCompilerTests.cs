@@ -21,7 +21,7 @@ namespace gg.parse.script.tests.compiler
         public void CreateAnyRuleAnnotation_Compile_ExpectRuleCreated()
         {
             CompileRuleTest<MatchAnyData<char>>(
-                CreateAnnotationTree(CommonTokenNames.AnyCharacter, "."),
+                CreateAnnotationTree(ScriptParser.Names.Any, "."),
                 ".", 
                 ["x", "1", "_" ],
                 [""]
@@ -33,7 +33,7 @@ namespace gg.parse.script.tests.compiler
         {
             var literal = "literal";
             var script = $"'{literal}'";
-            var tree = CreateAnnotationTree(CommonTokenNames.Literal, script);
+            var tree = CreateAnnotationTree(ScriptParser.Names.Literal, script);
 
             CompileRuleTest<MatchDataSequence<char>>(
                 tree, 
@@ -50,9 +50,9 @@ namespace gg.parse.script.tests.compiler
             var script = $"{{{set}}}";
             var tree =
                 CreateAnnotationTree(
-                    CommonTokenNames.Set,
+                    ScriptParser.Names.CharacterSet,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, set.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, set.Length)
                 );
 
             CompileRuleTest<MatchDataSet<char>>(
@@ -72,10 +72,10 @@ namespace gg.parse.script.tests.compiler
             var script = $"{{{range}}}";
             var tree =
                 CreateAnnotationTree(
-                    CommonTokenNames.DataRange,
+                    ScriptParser.Names.CharacterRange,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, min.Length),
-                    NewAnnotation(CommonTokenNames.Literal, 10, max.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, min.Length),
+                    NewAnnotation(ScriptParser.Names.Literal, 10, max.Length)
                 );
 
             CompileRuleTest<MatchDataRange<char>>(
@@ -142,7 +142,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.Group,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, literal.Length)
                 );
 
             CompileRuleTest<MatchDataSequence<char>>(
@@ -164,7 +164,7 @@ namespace gg.parse.script.tests.compiler
                     script,
                     NewAnnotation(CommonTokenNames.Integer, 5, 1),
                     NewAnnotation(CommonTokenNames.Integer, 8, 1),
-                    NewAnnotation(CommonTokenNames.Literal, 10, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 10, literal.Length)
                 );
 
             CompileRuleTest<MatchCount<char>>(
@@ -184,7 +184,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.ZeroOrMore,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, literal.Length)
                 );
 
             var countRule = CompileRuleTest<MatchCount<char>>(
@@ -207,7 +207,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.OneOrMore,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, literal.Length)
                 );
 
             var countRule = CompileRuleTest<MatchCount<char>>(
@@ -230,7 +230,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.ZeroOrOne,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, literal.Length)
                 );
 
             var countRule = CompileRuleTest<MatchCount<char>>(
@@ -255,7 +255,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.Not,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 5, literal.Length)
                 );
 
             var notRule = CompileRuleTest<MatchNot<char>>(
@@ -280,7 +280,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.StopAt,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + token.Length + 1, literal.Length)
                 );
 
             var stopAtRule = CompileRuleTest<SkipRule<char>>(
@@ -307,7 +307,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.StopAfter,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + token.Length + 1, literal.Length)
                 );
 
             var stopAfterRule = CompileRuleTest<SkipRule<char>>(
@@ -335,7 +335,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.Find,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + token.Length + 1, literal.Length)
                 );
 
             var findRule = CompileRuleTest<SkipRule<char>>(
@@ -362,7 +362,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.If,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + token.Length + 1, literal.Length)
                 );
 
             var ifRule = CompileRuleTest<MatchCondition<char>>(
@@ -411,9 +411,9 @@ namespace gg.parse.script.tests.compiler
                     // loglevel
                     NewAnnotation(CommonTokenNames.LogInfo, 4, message.Length),
                     // message
-                    NewAnnotation(CommonTokenNames.Literal, 4 + logLevel.Length + 1, message.Length),
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + logLevel.Length + 1, message.Length),
                     // conditional
-                    NewAnnotation(CommonTokenNames.Literal, 4 + logLevel.Length + 1 + message.Length + 4, message.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + logLevel.Length + 1 + message.Length + 4, message.Length)
                 );
 
             var logRule = CompileRuleTest<LogRule<char>>(
@@ -441,7 +441,7 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     ScriptParser.Names.Break,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + token.Length + 1, literal.Length)
                 );
 
             // can not really test this - but in debug this will stop the debugger
@@ -465,7 +465,7 @@ namespace gg.parse.script.tests.compiler
                     ScriptParser.Names.Log,
                     script,
                     NewAnnotation(CommonTokenNames.LogInfo, 4, levelString.Length),
-                    NewAnnotation(CommonTokenNames.Literal, 4 + levelString.Length + 1, message.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + levelString.Length + 1, message.Length)
                 );
 
             var logRule = CompileRuleTest<LogRule<char>>(
@@ -499,9 +499,9 @@ namespace gg.parse.script.tests.compiler
                 CreateAnnotationTree(
                     operatorName,
                     script,
-                    NewAnnotation(CommonTokenNames.Literal, 4, a.Length),
-                    NewAnnotation(CommonTokenNames.Literal, 4 + separator.Length + a.Length, b.Length),
-                    NewAnnotation(CommonTokenNames.Literal, 4 + 2 * separator.Length + a.Length + b.Length, c.Length)
+                    NewAnnotation(ScriptParser.Names.Literal, 4, a.Length),
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + separator.Length + a.Length, b.Length),
+                    NewAnnotation(ScriptParser.Names.Literal, 4 + 2 * separator.Length + a.Length + b.Length, c.Length)
                 );
 
             CompileRuleTest<T>(tree, script, validCases, invalidCases);

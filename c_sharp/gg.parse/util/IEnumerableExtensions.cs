@@ -30,5 +30,15 @@ namespace gg.parse.util
 
             return array;
         }
+
+        public static List<T> Fill<T>(this List<T> values, T value, int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                values.Add(value);
+            }
+
+            return values;
+        }
     }
 }

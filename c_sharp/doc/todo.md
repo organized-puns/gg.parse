@@ -16,7 +16,8 @@ kanban
     
     [ Add rule examples ]
     [ Implement properties file ]                         
-        [ properties files - redo rule compiler based on compiler template ]
+        [ properties files - redo rule compiler based on compiler template, implement grammarcompiler ]
+        [ properties files - create cli to export token/grammar names and tokens, update names in parser ]
         [ properties files - redo arg parser ]
         [ properties files - allow for ini files/java properties ]
         [ clean up, write doc, update example docs for new parser / parserbuilder ]
