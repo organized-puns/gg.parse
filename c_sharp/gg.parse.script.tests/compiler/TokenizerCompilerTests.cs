@@ -246,7 +246,243 @@ namespace gg.parse.script.tests.compiler
             IsTrue(countRule.Parse("xxx").MatchLength == 0);
         }
 
+        [TestMethod]
+        public void CreateNotAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            var literal = "'foo'";
+            var script = $"!{literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Not,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 5, literal.Length)
+                );
+
+            var notRule = CompileRuleTest<MatchNot<char>>(
+                tree,
+                script,
+                ["bar", "", "xxx"],
+                ["foo"]
+            );
+
+            IsTrue(notRule.Parse("foo").MatchLength == 0);
+            IsTrue(notRule.Parse("xxx").MatchLength == 0);
+        }
+
+        [TestMethod]
+        public void CreateStopAtAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            // xxx we need tokens for this
+            var token = "stop_at";
+            var literal = "'foo'";
+            var script = $"{token} {literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.StopAt,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                );
+
+            var stopAtRule = CompileRuleTest<SkipRule<char>>(
+                tree,
+                script,
+                // stop at always succeeds
+                ["bar", "", "xxx", "foo"],
+                null
+            );
+
+            IsTrue(stopAtRule.Parse("foo").MatchLength == 0);
+            IsTrue(stopAtRule.Parse("xxxfoo").MatchLength == 3);
+            IsTrue(stopAtRule.Parse("xxxfo").MatchLength == 5);
+        }
+
+        [TestMethod]
+        public void CreateStopAfterAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            // xxx we need tokens for this
+            var token = "stop_after";
+            var literal = "'foo'";
+            var script = $"{token} {literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.StopAfter,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                );
+
+            var stopAfterRule = CompileRuleTest<SkipRule<char>>(
+                tree,
+                script,
+                // stop after always succeeds
+                ["bar", "", "xxx", "foo"],
+                null
+            );
+
+            IsTrue(stopAfterRule.Parse("foo").MatchLength == 3);
+            IsTrue(stopAfterRule.Parse("xxxfoo").MatchLength == 6);
+            IsTrue(stopAfterRule.Parse("xxxfoobar").MatchLength == 6);
+            IsTrue(stopAfterRule.Parse("xxxfo").MatchLength == 5);
+        }
+
+        [TestMethod]
+        public void CreateFindAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            // xxx we need tokens for this
+            var token = "find";
+            var literal = "'foo'";
+            var script = $"{token} {literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Find,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                );
+
+            var findRule = CompileRuleTest<SkipRule<char>>(
+                tree,
+                script,
+                // find only succeeds if the subject is found
+                ["foo", "123foo", "xfoox"],
+                ["", "123fo", "xx"]
+            );
+
+            IsTrue(findRule.Parse("xfoox").MatchLength == 1);
+            IsTrue(findRule.Parse("xxxfoo").MatchLength == 3);
+            IsTrue(findRule.Parse("xxxfoobar").MatchLength == 3);
+        }
+
+        [TestMethod]
+        public void CreateIfAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            // xxx we need tokens for this
+            var token = "if";
+            var literal = "'foo'";
+            var script = $"{token} {literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.If,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                );
+
+            var ifRule = CompileRuleTest<MatchCondition<char>>(
+                tree,
+                script,
+                ["foo" ],
+                ["", "123foo", "xfoo"]
+            );
+
+            IsTrue(ifRule.Parse("xfoox", 1));
+            IsTrue(ifRule.Parse("xfoox", 1).MatchLength == 0);
+
+            IsTrue(ifRule.Parse("xxxfoo", 3));
+            IsTrue(ifRule.Parse("xxxfoo", 3).MatchLength == 0);
+        }
+
+        [TestMethod]
+        public void CreateLogAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            LogTest(LogLevel.Info);
+            LogTest(LogLevel.Debug);
+            LogTest(LogLevel.Warning);
+            LogTest(LogLevel.Error);
+
+            try
+            {
+                LogTest(LogLevel.Fatal);
+                Fail();
+            }
+            catch (FatalConditionException<char>)
+            {
+
+            }
+        }
+
+        [TestMethod]
+        public void CreateConditionalLogAnnotationTree_Compile_ExpectRuleCreated()
+        {            
+            var logLevel = "info";
+            var message = "'foo'";
+            var script = $"{logLevel} {message} if {message}";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Log,
+                    script,
+                    // loglevel
+                    NewAnnotation(CommonTokenNames.LogInfo, 4, message.Length),
+                    // message
+                    NewAnnotation(CommonTokenNames.Literal, 4 + logLevel.Length + 1, message.Length),
+                    // conditional
+                    NewAnnotation(CommonTokenNames.Literal, 4 + logLevel.Length + 1 + message.Length + 4, message.Length)
+                );
+
+            var logRule = CompileRuleTest<LogRule<char>>(
+                tree,
+                script,
+                ["foo"],
+                ["", "bar"]
+            );
+
+            var result = logRule.Parse("foo");
+            IsTrue(result);
+            IsNotNull(result.Annotations);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].Rule is LogRule<char>);
+        }
+
+        [TestMethod]
+        public void CreateBreakAnnotationTree_Compile_ExpectRuleCreated()
+        {
+            // xxx we need tokens for this
+            var token = "break";
+            var literal = "'foo'";
+            var script = $"{token} {literal})";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Break,
+                    script,
+                    NewAnnotation(CommonTokenNames.Literal, 4 + token.Length + 1, literal.Length)
+                );
+
+            // can not really test this - but in debug this will stop the debugger
+            CompileRuleTest<BreakPointRule<char>>(
+                tree,
+                script,
+                ["foo"],
+                null
+            );
+        }
+
         // -- Private methods -----------------------------------------------------------------------------------------
+
+        private static void LogTest(LogLevel level)
+        {
+            var levelString = level.ToString().ToLower();
+            var message = "'foo'";
+            var script = $"{levelString} {message}";
+            var tree =
+                CreateAnnotationTree(
+                    ScriptParser.Names.Log,
+                    script,
+                    NewAnnotation(CommonTokenNames.LogInfo, 4, levelString.Length),
+                    NewAnnotation(CommonTokenNames.Literal, 4 + levelString.Length + 1, message.Length)
+                );
+
+            var logRule = CompileRuleTest<LogRule<char>>(
+                tree,
+                script,
+                // log rule without condition always succeeds
+                ["", "foo"],
+                null
+            );
+
+            var result = logRule.Parse("");
+            IsTrue(result);
+            IsNotNull(result.Annotations);
+            IsTrue(result.Annotations.Count == 1);
+            IsTrue(result.Annotations[0].Rule is LogRule<char>);
+            IsTrue(((LogRule<char>)result.Annotations[0].Rule).Level == level);
+        }
 
         private static void BinaryOperatorTest<T>(
             string operatorName, 

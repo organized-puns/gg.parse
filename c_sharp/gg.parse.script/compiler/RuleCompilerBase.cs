@@ -58,12 +58,6 @@ namespace gg.parse.script.compiler
             annotation.Name;
 
 
-        public object? CompileRule(Type? _, Annotation annotation, RuleCompilationContext context)
-        {
-            var header = RuleCompilerBase<T>.ReadRuleHeader(annotation, context);
-            return Compile(_, annotation[header.Length]!, new RuleCompilationContext(context, header));
-        }
-
         public object? CompileAny(Type? _, Annotation annotation, RuleCompilationContext context)
         {
             var header = context.RuleHeader;
@@ -71,7 +65,16 @@ namespace gg.parse.script.compiler
             RequiresNotNull(header);
 
             return new MatchAnyData<T>(header.Name, header.Prune, precedence: header.Precedence);
-        }        
+        }
+
+        
+        public object? CompileRule(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            var header = RuleCompilerBase<T>.ReadRuleHeader(annotation, context);
+            return Compile(_, annotation[header.Length]!, new RuleCompilationContext(context, header));
+        }
+
+        
 
         /// <summary>
         /// Used for indentifiers and rule references
@@ -182,7 +185,7 @@ namespace gg.parse.script.compiler
         /// <param name="context"></param>
         /// <returns></returns>
         /// <exception cref="CompilationException"></exception>
-        public object? CompileRangedCount(Type? _, Annotation annotation, RuleCompilationContext context)
+        public MatchCount<T> CompileRangedCount(Type? _, Annotation annotation, RuleCompilationContext context)
         {
             RequiresNotNull(annotation);
             Requires(annotation.Count == 3);
@@ -247,7 +250,7 @@ namespace gg.parse.script.compiler
             var subject =
                 Compile(
                     _,
-                    annotation[0]!,
+                    subjectAnnotation,
                     new RuleCompilationContext(context, subjectHeader)
                 ) as IRule
                 ?? throw new CompilationException("Cannot compile subject for MatchCount.", subjectAnnotation);
@@ -273,6 +276,116 @@ namespace gg.parse.script.compiler
         public MatchCount<T> CompileOneOrMore(Type? _, Annotation annotation, RuleCompilationContext context) =>
             CompileMatchCount(_, annotation, context, 1, 0);
 
+
+        public IMetaRule CompileUnary(
+            Type type, 
+            Annotation annotation, 
+            RuleCompilationContext context,
+            params object[] creationParams
+        )
+        {
+            RequiresNotNull(annotation);
+            Requires(annotation.Count == 1);
+
+            var header = context.RuleHeader;
+
+            RequiresNotNull(header);
+
+            // prune all if this is an inline rule as lookaheads never have a size
+            // if it's a toplevel, it is up to the user 
+            // UNLESS it's a rule reference which will override the pruning anyway
+            var subjectAnnotation = annotation[0]!;
+            var subjectName = subjectAnnotation.GenerateUnnamedRuleName(context, header.Name, 0);
+
+            var subjectHeader = new RuleHeader(AnnotationPruning.None, subjectName, 0, 0, false);
+            var pruning = header.IsTopLevel ? header.Prune : AnnotationPruning.All;
+
+            var subject =
+                Compile(
+                    type,
+                    subjectAnnotation,
+                    new RuleCompilationContext(context, subjectHeader)
+                ) as IRule
+                ?? throw new CompilationException($"Cannot compile subject for {type}.", subjectAnnotation);
+
+            IMetaRule? result;
+            if (creationParams == null || creationParams.Length == 0)
+            {
+                result = (IMetaRule?)Activator.CreateInstance(type, header.Name, pruning, header.Precedence, subject);
+            }
+            else
+            {
+                result = (IMetaRule?)Activator.CreateInstance(type, [header.Name, pruning, header.Precedence, subject, .. creationParams]);
+            }
+
+
+            if (result == null)
+            {
+                throw new CompilationException($"Unable to create a rule of type {type} with the provided parameters.");
+            }
+
+            return result;
+        }
+
+        public MatchNot<T> CompileNot(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            (MatchNot<T>) CompileUnary(typeof(MatchNot<T>), annotation, context);
+        
+        public SkipRule<T> CompileStopAt(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            (SkipRule<T>)CompileUnary(typeof(SkipRule<T>), annotation, context, false, true);
+
+        public SkipRule<T> CompileStopAfter(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            (SkipRule<T>)CompileUnary(typeof(SkipRule<T>), annotation, context, false, false);
+
+        public SkipRule<T> CompileFind(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            (SkipRule<T>)CompileUnary(typeof(SkipRule<T>), annotation, context, true, true);
+
+        public MatchCondition<T> CompileIf(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            (MatchCondition<T>)CompileUnary(typeof(MatchCondition<T>), annotation, context);
+
+        public BreakPointRule<T> CompileBreak(Type? _, Annotation annotation, RuleCompilationContext context) =>
+            (BreakPointRule<T>)CompileUnary(typeof(BreakPointRule<T>), annotation, context);
+
+        public LogRule<T> CompileLog(Type? _, Annotation annotation, RuleCompilationContext context)
+        {
+            RequiresNotNull(annotation);
+            Requires(annotation.Count >= 2);
+
+            var header = context.RuleHeader;
+
+            RequiresNotNull(header);
+
+            var logLevelText = context.GetText(annotation[0]!);
+            var logLevel = Enum.Parse<LogLevel>(logLevelText, ignoreCase: true);
+
+            var message = context.GetText(annotation[1]!);
+
+            if (string.IsNullOrEmpty(message) || message.Length < 2)
+            {
+                throw new CompilationException("LogText is missing (quotes).", annotation);
+            }
+
+            message = message[1..^1];
+
+            IRule? condition = null;
+
+            if (annotation.Count == 3)
+            {
+                var subjectAnnotation = annotation[2]!;
+                var subjectName = subjectAnnotation.GenerateUnnamedRuleName(context, header.Name, 0);
+
+                var subjectHeader = new RuleHeader(AnnotationPruning.None, subjectName, 0, 0, false);
+
+                condition =
+                    Compile(
+                        _,
+                        subjectAnnotation,
+                        new RuleCompilationContext(context, subjectHeader)
+                    ) as IRule
+                    ?? throw new CompilationException($"Cannot compile subject for LogRule.", subjectAnnotation);
+            }
+
+            return new LogRule<T>(header.Name, header.Prune, condition, message, logLevel);
+        }
 
         // -- Private methods -----------------------------------------------------------------------------------------
 

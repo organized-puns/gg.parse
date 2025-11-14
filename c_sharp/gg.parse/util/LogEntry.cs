@@ -13,7 +13,6 @@ namespace gg.parse.util
         Debug = 16,
         Any = Fatal | Error | Warning | Info | Debug
     }
-
     public sealed class LogEntry
     {
         public LogLevel Level { get; init; }
