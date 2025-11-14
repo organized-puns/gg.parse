@@ -3,14 +3,11 @@
 
 using gg.parse.core;
 using gg.parse.rules;
-using gg.parse.script.common;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
 using gg.parse.util;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-
-using static gg.parse.tests.TestAnnotation;
 
 namespace gg.parse.script.tests.compiler
 {
@@ -102,6 +99,74 @@ namespace gg.parse.script.tests.compiler
             // test
             ExpectTrue(grammarRule, [fooToken], [43, fooToken]);
             ExpectFalse(grammarRule, [], [43]);
+        }
+
+        [TestMethod]
+        public void CreateGroupRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchAnyData<int>>("root = (.);");
+
+            // test
+            ExpectTrue(grammarRule, [43]);
+            ExpectFalse(grammarRule, []);
+        }
+
+        [TestMethod]
+        public void CreateIfRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchCondition<int>>("root = if foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [fooToken]);
+            ExpectFalse(grammarRule, [], [43]);
+
+            IsTrue(grammarRule.Parse([42], 0));
+            IsTrue(grammarRule.Parse([42], 0).MatchLength == 0);
+            IsTrue(grammarRule.Parse([43], 0).MatchLength == 0);
+        }
+
+        [TestMethod]
+        public void CreateLogRuleScript_Compile_ExpectRuleCreated()
+        {
+            TestLogRule(LogLevel.Info);
+            TestLogRule(LogLevel.Debug);
+            TestLogRule(LogLevel.Error);
+            TestLogRule(LogLevel.Warning);
+
+            try
+            {
+                TestLogRule(LogLevel.Fatal);
+                Fail();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private void TestLogRule(LogLevel level)
+        { 
+            // setup
+            var grammarRule = SetupRule<LogRule<int>>($"root = {level.ToString().ToLower()} 'foo';");
+           
+            // test
+            ExpectTrue(grammarRule, [-1]);
+
+            var result = grammarRule.Parse([42], 0);
+            
+            IsTrue(result);
+            IsTrue(result.MatchLength == 0);
+
+            var logRule = result[0].Rule as LogRule<int>;
+
+            IsNotNull(logRule);
+            IsTrue(logRule.Text == "foo");
+            IsTrue(logRule.Level == level);
         }
 
         // -- Private methods -----------------------------------------------------------------------------------------
