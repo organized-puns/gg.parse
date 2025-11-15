@@ -127,7 +127,7 @@ namespace gg.parse.script.pipeline
                 Parser = parser,
                 LogHandler = pipelineLogger,
                 Text = script,
-                RuleGraph = new RuleGraph<T>(),
+                RuleGraph = new MutableRuleGraph<T>(),
                 IncludePaths = sessionIncludePaths
             };
 
@@ -327,7 +327,7 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        private static void RegisterTokens(this RuleGraph<int> target, RuleGraph<char> tokenSource)
+        private static void RegisterTokens(this MutableRuleGraph<int> target, MutableRuleGraph<char> tokenSource)
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             tokenSource

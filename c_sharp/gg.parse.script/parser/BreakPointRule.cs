@@ -37,7 +37,7 @@ namespace gg.parse.script.parser
 
     public static class BreakPointRuleExtensions
     {
-        public static BreakPointRule<T> AddBreakpoint<T>(this RuleGraph<T> graph, string ruleName) 
+        public static BreakPointRule<T> AddBreakpoint<T>(this MutableRuleGraph<T> graph, string ruleName) 
             where T : IComparable<T>
         {
             var original = graph[ruleName];
@@ -53,7 +53,7 @@ namespace gg.parse.script.parser
         /// <typeparam name="T"></typeparam>
         /// <param name="graph"></param>
         /// <param name="breakPoint"></param>
-        public static void RemoveBreakpoint<T>(this RuleGraph<T> graph, BreakPointRule<T> breakPoint)
+        public static void RemoveBreakpoint<T>(this MutableRuleGraph<T> graph, BreakPointRule<T> breakPoint)
             where T : IComparable<T>
         {
             Assertions.RequiresNotNull(breakPoint.Subject, 

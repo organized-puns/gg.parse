@@ -4,6 +4,7 @@
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.parser;
+using gg.parse.util;
 
 namespace gg.parse.script.common
 {
@@ -11,7 +12,7 @@ namespace gg.parse.script.common
     /// Convenience base class to make the rule declarations shorter / easier to read.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CommonGraphWrapper<T> : RuleGraph<T> where T : IComparable<T>
+    public class CommonGraphWrapper<T> : MutableRuleGraph<T> where T : IComparable<T>
     {
         // -- Utility methods -----------------------------------------------------------------------------------------
 
@@ -31,8 +32,8 @@ namespace gg.parse.script.common
             where TRule : RuleBase<T>
         {
             var (ruleName, product) = CreateRuleNameAndpruning(name, fallback);
-            return TryFindRule(ruleName, out TRule? existingRule)
-                     ? existingRule!
+            return TryFindRule(ruleName, out IRule? existingRule)
+                     ? (TRule) existingRule!
                      : factoryMethod(ruleName, product);
         }
 

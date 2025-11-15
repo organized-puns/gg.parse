@@ -2,7 +2,7 @@
 using gg.parse.rules;
 using gg.parse.script.common;
 using gg.parse.script.parser;
-
+using gg.parse.util;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 using Range = gg.parse.util.Range;

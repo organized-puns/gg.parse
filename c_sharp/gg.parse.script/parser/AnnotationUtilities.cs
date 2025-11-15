@@ -3,6 +3,7 @@
 
 using gg.parse.core;
 using gg.parse.rules;
+using gg.parse.util;
 using System.Collections.Immutable;
 
 namespace gg.parse.script.parser
