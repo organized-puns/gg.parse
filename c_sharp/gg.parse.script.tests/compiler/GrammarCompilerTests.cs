@@ -79,7 +79,7 @@ namespace gg.parse.script.tests.compiler
 
             // act - grammar 
             var fooToken = 42;
-            ReplaceSubject(grammarRule, 3, fooToken);
+            ReplaceRules(grammarRule, 3, fooToken);
 
             // test
             ExpectTrue(grammarRule, [fooToken]);
@@ -149,24 +149,159 @@ namespace gg.parse.script.tests.compiler
             }
         }
 
-        private void TestLogRule(LogLevel level)
-        { 
+        [TestMethod]
+        public void CreateMatchOneOfRuleScript_Compile_ExpectRuleCreated()
+        {
             // setup
-            var grammarRule = SetupRule<LogRule<int>>($"root = {level.ToString().ToLower()} 'foo';");
-           
+            var grammarRule = SetupRule<MatchOneOf<int>>("root = a | b | c;");
+
+            // act - grammar 
+            var tokens = new int[] { 42, 43, 44 };
+            ReplaceRules(grammarRule, tokens);
+
             // test
-            ExpectTrue(grammarRule, [-1]);
+            ExpectTrue(grammarRule, [tokens[0]], [tokens[1]], [tokens[2]]);
+            ExpectFalse(grammarRule, [], [40], [45]);
+        }
 
-            var result = grammarRule.Parse([42], 0);
-            
-            IsTrue(result);
-            IsTrue(result.MatchLength == 0);
+        [TestMethod]
+        public void CreateNotRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchNot<int>>("root = !foo;");
 
-            var logRule = result[0].Rule as LogRule<int>;
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
 
-            IsNotNull(logRule);
-            IsTrue(logRule.Text == "foo");
-            IsTrue(logRule.Level == level);
+            // test
+            ExpectTrue(grammarRule, [], [fooToken+1]);
+            ExpectFalse(grammarRule, [fooToken]);
+
+            IsTrue(grammarRule.Parse([43], 0).MatchLength == 0);
+        }
+
+        [TestMethod]
+        public void CreateOneOrMoreRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchCount<int>>("root = +foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [fooToken], [fooToken, fooToken]);
+            ExpectFalse(grammarRule, [fooToken + 1], []);
+
+            IsTrue(grammarRule.Parse([fooToken], 0).MatchLength == 1);
+            IsTrue(grammarRule.Parse([fooToken, fooToken], 0).MatchLength == 2);
+        }
+
+        [TestMethod]
+        public void CreateReferenceRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<RuleReference<int>>("root = foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [fooToken]);
+            ExpectFalse(grammarRule, [fooToken + 1], []);
+        }
+
+        [TestMethod]
+        public void CreateStopAfterRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<SkipRule<int>>("root = stop_after foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [fooToken], [], [fooToken + 1]);
+
+            IsTrue(grammarRule.Parse([fooToken, 1], 0).MatchLength == 1);
+            IsTrue(grammarRule.Parse([43, fooToken], 0).MatchLength == 2);
+            IsTrue(grammarRule.Parse([41, 43, 44], 0).MatchLength == 3);
+        }
+
+        [TestMethod]
+        public void CreateStopAtRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<SkipRule<int>>("root = stop_at foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [fooToken], [], [fooToken + 1]);
+
+            IsTrue(grammarRule.Parse([fooToken, 1], 0).MatchLength == 0);
+            IsTrue(grammarRule.Parse([43, fooToken], 0).MatchLength == 1);
+            IsTrue(grammarRule.Parse([43, 44, fooToken], 0).MatchLength == 2);
+            IsTrue(grammarRule.Parse([41, 43, 44], 0).MatchLength == 3);
+        }
+
+        [TestMethod]
+        public void CreateSequenceAtRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchRuleSequence<int>>("root = a, b, c;");
+
+            // act - grammar 
+            var a = 42;
+            var b = 43;
+            var c = 44;
+            ReplaceRules(grammarRule, [a, b, c]);
+
+            // test
+            ExpectTrue(grammarRule, [a, b, c]);
+            ExpectFalse(grammarRule, [a, b], [], [a,c]);
+        }
+
+        [TestMethod]
+        public void CreateZeroOrMoreRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchCount<int>>("root = *foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [], [fooToken, fooToken], [fooToken + 1]);
+
+            IsTrue(grammarRule.Parse([], 0).MatchLength == 0);
+            IsTrue(grammarRule.Parse([fooToken], 0).MatchLength == 1);
+            IsTrue(grammarRule.Parse([fooToken, fooToken], 0).MatchLength == 2);
+        }
+
+        [TestMethod]
+        public void CreateZeroOrOneRuleScript_Compile_ExpectRuleCreated()
+        {
+            // setup
+            var grammarRule = SetupRule<MatchCount<int>>("root = ?foo;");
+
+            // act - grammar 
+            var fooToken = 42;
+            ReplaceSubject(grammarRule, fooToken);
+
+            // test
+            ExpectTrue(grammarRule, [], [fooToken, fooToken], [fooToken + 1]);
+
+            IsTrue(grammarRule.Parse([], 0).MatchLength == 0);
+            IsTrue(grammarRule.Parse([fooToken], 0).MatchLength == 1);
+            IsTrue(grammarRule.Parse([fooToken, fooToken], 0).MatchLength == 1);
         }
 
         // -- Private methods -----------------------------------------------------------------------------------------
@@ -215,13 +350,52 @@ namespace gg.parse.script.tests.compiler
         /// the rule may be pointing to a rule that doesn't exist, as we don't resolve
         /// references so set the subject manually
         /// otherwise this will fail with an exception.
-        private static IRule ReplaceSubject(IRuleComposition rule, int count, int tokenId = 42, IRule subject = null)
+        private static IEnumerable<IRule> ReplaceRules(
+            IRuleComposition rule, 
+            params int[] tokenIds
+        )
         {
-            var replacement = subject ?? new MatchSingleData<int>("foo", tokenId);
+            rule.MutateComposition(
+                new List<IRule>().Fill(
+                    idx => new MatchSingleData<int>("foo", tokenIds[idx]), 
+                    tokenIds.Length
+                )
+            );
 
-            rule.MutateComposition(new List<IRule>().Fill(replacement, count));
+            return rule.Rules;
+        }
 
-            return replacement;
+        private static IEnumerable<IRule> ReplaceRules(
+            IRuleComposition rule,
+            int count,
+            int tokenId
+        )
+        {
+            rule.MutateComposition(
+                new List<IRule>()
+                    .Fill(new MatchSingleData<int>("foo", tokenId), count));
+
+            return rule.Rules;
+        }
+
+        private static void TestLogRule(LogLevel level)
+        {
+            // setup
+            var grammarRule = SetupRule<LogRule<int>>($"root = {level.ToString().ToLower()} 'foo';");
+
+            // test
+            ExpectTrue(grammarRule, [-1]);
+
+            var result = grammarRule.Parse([42], 0);
+
+            IsTrue(result);
+            IsTrue(result.MatchLength == 0);
+
+            var logRule = result[0].Rule as LogRule<int>;
+
+            IsNotNull(logRule);
+            IsTrue(logRule.Text == "foo");
+            IsTrue(logRule.Level == level);
         }
     }
 }
