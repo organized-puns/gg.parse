@@ -33,7 +33,7 @@ namespace gg.parse.util
             LogLevel level,
             string message,
             (int line, int column)? position = null,
-            Exception? ex = null
+            Exception? exception = null
         )
         {
             _logMask |= level;
@@ -60,7 +60,7 @@ namespace gg.parse.util
                 }
             }
             
-            _logEntries.Enqueue(new LogEntry(level, message, position, ex));
+            _logEntries.Enqueue(new LogEntry(level, message, position, exception));
         }
 
 

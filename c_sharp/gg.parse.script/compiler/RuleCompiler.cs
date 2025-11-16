@@ -58,7 +58,7 @@ namespace gg.parse.script.compiler
             Assertions.RequiresNotNull(tokens);
             Assertions.RequiresNotNull(syntaxTree);
 
-            return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? new MutableRuleGraph<T>());
+            return Compile(new CompileSession(this, text, tokens, syntaxTree), resultGraph ?? []);
         }
 
         private MutableRuleGraph<T> Compile<T>(CompileSession session, MutableRuleGraph<T> resultGraph) where T : IComparable<T>
@@ -214,7 +214,7 @@ namespace gg.parse.script.compiler
         }
 
         /// <summary>
-        /// In all RuleReference rules in the graph find and set the actual rule they refer to.
+        /// For all RuleReference rules in the graph find and set the actual rule they refer to.
         /// </summary>
         /// <param name="graph"></param>
         private static void ResolveReferences<T>(MutableRuleGraph<T> graph) where T : IComparable<T>

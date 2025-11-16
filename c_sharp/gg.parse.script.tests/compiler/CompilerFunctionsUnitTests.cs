@@ -245,7 +245,7 @@ namespace gg.parse.script.tests.compiler
 
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar
-            table.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
+            table.Register(new MatchDataSequence<char>("foo", [.. "bar"]));
 
             var context = compiler.Compile(
                 text: "rule=foo",
@@ -317,7 +317,7 @@ namespace gg.parse.script.tests.compiler
 
             // insert a foo rule for reference to which the compiled rule refers
             // this foo parses a literal bar
-            table.RegisterRule(new MatchDataSequence<char>("foo", [.. "bar"]));
+            table.Register(new MatchDataSequence<char>("foo", [.. "bar"]));
 
             var context = compiler.Compile(
                 text: "rule=-a foo",

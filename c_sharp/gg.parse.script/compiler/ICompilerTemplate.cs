@@ -8,11 +8,11 @@ namespace gg.parse.script.compiler
 {
     public interface ICompilerTemplate<TContext> where TContext: CompileContext
     {
-        ICompileOutputCollection Compile(
+        ICollection<T> Compile<T>(
             Type targetType,
             ImmutableList<Annotation> annotations,
             TContext context,
-            ICompileOutputCollection container
+            ICollection<T> container
         );
 
         ICompilerTemplate<TContext> RegisterDefaultFunctions();

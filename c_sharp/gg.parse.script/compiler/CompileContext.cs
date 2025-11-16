@@ -1,12 +1,11 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections.Immutable;
-
 using gg.parse.core;
 using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
+using System.Collections.Immutable;
 
 namespace gg.parse.script.compiler
 {
@@ -72,6 +71,11 @@ namespace gg.parse.script.compiler
         public void ReportError(string message, Annotation annotation, Exception? ex = null)
         {
             Log(LogLevel.Error, message, annotation, ex);
+        }
+
+        public void ReportError(string message, Exception? ex = null)
+        {
+            _logCollection.Log(LogLevel.Error, $"{LogLevel.Error}: {message}", exception: ex);
         }
     }
 }

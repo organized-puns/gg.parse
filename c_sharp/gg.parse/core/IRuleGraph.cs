@@ -4,11 +4,9 @@
 
 namespace gg.parse.core
 {
-    public interface IRuleGraph<TData> : IEnumerable<IRule>
+    public interface IRuleGraph<TData> : IEnumerable<IRule> 
     {
         IRule this[string name] { get; }
-
-        int Count { get; }
 
         IRule? Root { get; }
 

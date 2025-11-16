@@ -1,13 +1,15 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+using System.Diagnostics;
+
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
-using System.Collections.Immutable;
-using System.Diagnostics;
+
 using static gg.parse.util.Assertions;
 
 namespace gg.parse.script.compiler
@@ -54,11 +56,16 @@ namespace gg.parse.script.compiler
         {
         }
 
-        protected override string SelectKey(Type? targetType, Annotation annotation, RuleCompilationContext context) =>
+
+        protected override string SelectKey(
+            Type? targetType, 
+            Annotation annotation, 
+            RuleCompilationContext context) =>
             annotation.Name;
 
+        #region -- Compilation methods --------------------------------------------------------------------------------
 
-        public object? CompileAny(Type? _, Annotation annotation, RuleCompilationContext context)
+        public object? CompileAny(Type? _, Annotation __, RuleCompilationContext context)
         {
             var header = context.RuleHeader;
 
@@ -66,15 +73,12 @@ namespace gg.parse.script.compiler
 
             return new MatchAnyData<T>(header.Name, header.Prune, precedence: header.Precedence);
         }
-
         
         public object? CompileRule(Type? _, Annotation annotation, RuleCompilationContext context)
         {
             var header = RuleCompilerBase<T>.ReadRuleHeader(annotation, context);
             return Compile(_, annotation[header.Length]!, new RuleCompilationContext(context, header));
-        }
-
-        
+        }        
 
         /// <summary>
         /// Used for indentifiers and rule references
@@ -157,13 +161,13 @@ namespace gg.parse.script.compiler
             )!;
         }
 
-        public object? CompileSequence(Type? type, Annotation annotation, RuleCompilationContext context) =>
+        public object? CompileSequence(Type? _, Annotation annotation, RuleCompilationContext context) =>
             CompileBinaryOperator(typeof(MatchRuleSequence<T>), annotation, context);
 
-        public object? CompileOneOf(Type? type, Annotation annotation, RuleCompilationContext context) =>
+        public object? CompileOneOf(Type? _, Annotation annotation, RuleCompilationContext context) =>
             CompileBinaryOperator(typeof(MatchOneOf<T>), annotation, context);
 
-        public object? CompileEvaluation(Type? type, Annotation annotation, RuleCompilationContext context) =>
+        public object? CompileEvaluation(Type? _, Annotation annotation, RuleCompilationContext context) =>
             CompileBinaryOperator(typeof(MatchEvaluation<T>), annotation, context);
 
 
@@ -387,7 +391,9 @@ namespace gg.parse.script.compiler
             return new LogRule<T>(header.Name, header.Prune, condition, message, logLevel);
         }
 
-        // -- Private methods -----------------------------------------------------------------------------------------
+        #endregion
+
+        #region -- Private methods ------------------------------------------------------------------------------------
 
         /// <summary>
         /// Captures the rule header properties and body node
@@ -426,5 +432,7 @@ namespace gg.parse.script.compiler
 
             return new(pruning, name, precedence, idx);
         }
+ 
+        #endregion
     }
 }

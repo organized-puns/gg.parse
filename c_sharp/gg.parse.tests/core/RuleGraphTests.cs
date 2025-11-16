@@ -119,7 +119,7 @@ namespace gg.parse.tests.core
             var graph = new MutableRuleGraph<char>();
             var originalRule = new MatchDataSequence<char>("original", ['a', 'b', 'c']);
             
-            graph.RegisterRule(originalRule);
+            graph.Register(originalRule);
             
             var replacementRule = new MatchDataSequence<char>("original", ['a', 'b', 'c']);;
             graph.ReplaceRule(originalRule, replacementRule);
@@ -136,8 +136,8 @@ namespace gg.parse.tests.core
             var originalRule = new MatchDataSequence<char>("original", ['a', 'b', 'c']);
             var composition = new MatchRuleSequence<char>("composition", AnnotationPruning.None, 0, originalRule);
 
-            graph.RegisterRule(originalRule);
-            graph.RegisterRule(composition);
+            graph.Register(originalRule);
+            graph.Register(composition);
 
             var replacementRule = new MatchDataSequence<char>("original", ['a', 'b', 'c']); 
             graph.ReplaceRule(originalRule, replacementRule);
@@ -162,8 +162,8 @@ namespace gg.parse.tests.core
 
             composition1.MutateComposition([composition2]);
 
-            graph.RegisterRule(composition1);
-            graph.RegisterRule(composition2);
+            graph.Register(composition1);
+            graph.Register(composition2);
 
             var replacementRule = new MatchRuleSequence<char>("original", AnnotationPruning.None, 0, composition2); 
             graph.ReplaceRule(composition1, replacementRule);
@@ -185,7 +185,7 @@ namespace gg.parse.tests.core
             
             composition1.MutateComposition([composition1]);
 
-            graph.RegisterRule(composition1);          
+            graph.Register(composition1);          
 
             var replacementRule = new MatchRuleSequence<char>("original", AnnotationPruning.None, 0, composition1);
             graph.ReplaceRule(composition1, replacementRule);

@@ -109,12 +109,12 @@ namespace gg.parse.doc.examples.test
 
             var tokenizer = new MutableRuleGraph<char>();
 
-            tokenizer.RegisterRule(whitespace);
-            tokenizer.RegisterRule(digit);
-            tokenizer.RegisterRule(plus);
-            tokenizer.RegisterRule(mult);
-            tokenizer.RegisterRule(tokenEnumeration);
-            tokenizer.RegisterRule(tokenStream);
+            tokenizer.Register(whitespace);
+            tokenizer.Register(digit);
+            tokenizer.Register(plus);
+            tokenizer.Register(mult);
+            tokenizer.Register(tokenEnumeration);
+            tokenizer.Register(tokenStream);
 
             tokenizer.Root = tokenStream;
 
@@ -130,12 +130,12 @@ namespace gg.parse.doc.examples.test
 
             var parser = new MutableRuleGraph<int>();
 
-            parser.RegisterRule(numberToken);
-            parser.RegisterRule(plusToken);
-            parser.RegisterRule(multToken);
-            parser.RegisterRule(addOperation);
-            parser.RegisterRule(multOperation);
-            parser.RegisterRule(evaluation);
+            parser.Register(numberToken);
+            parser.Register(plusToken);
+            parser.Register(multToken);
+            parser.Register(addOperation);
+            parser.Register(multOperation);
+            parser.Register(evaluation);
 
             parser.Root = evaluation;
 

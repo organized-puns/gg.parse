@@ -112,7 +112,7 @@ namespace gg.parse.script.tests.parserbuilder
             var builder = new ParserBuilder().From(StringTokenizationText);
             
             // modify the root to expect one or more strings
-            builder.TokenGraph.Root = builder.TokenGraph.RegisterRule(
+            builder.TokenGraph.Root = builder.TokenGraph.Register(
                 new MatchCount<char>(
                     "#string_list",
                     AnnotationPruning.Root,

@@ -10,11 +10,6 @@ using gg.parse.util;
 
 namespace gg.parse.script.compiler
 {    
-    public interface ICompileOutputCollection : IEnumerable
-    {
-        void AddOutput(object output);
-    }
-
     public delegate object? CompileFunc<TContext>(Type? targetType, Annotation annotation, TContext context)
         where TContext : CompileContext;
 
@@ -53,20 +48,22 @@ namespace gg.parse.script.compiler
         /// </summary>
         /// <param name="targetType"></param>
         /// <param name="context"></param>
-        /// <param name="result"></param>
+        /// <param name="collection"></param>
         /// <returns></returns>
-        public ICompileOutputCollection Compile(Type targetType, TContext context, ICompileOutputCollection result) =>
+        public ICollection<T> Compile<T>(Type targetType, TContext context, ICollection<T> collection) =>
         
             context.SyntaxTree == null
-                ? Compile(targetType, context.Tokens, context, result)
-                : Compile(targetType, context.SyntaxTree, context, result);
+                ? Compile(targetType, context.Tokens, context, collection)
+                : Compile(targetType, context.SyntaxTree, context, collection);
 
-        public ICompileOutputCollection Compile(
+
+
+        public ICollection<T> Compile<T>(
             Type targetType,
             ImmutableList<Annotation> annotations,
-            TContext context, 
-            ICompileOutputCollection container
-        )
+            TContext context,
+            ICollection<T> container
+        ) 
         {
             foreach (var node in annotations)
             {
@@ -74,9 +71,27 @@ namespace gg.parse.script.compiler
                 {
                     var output = Compile(targetType, node, context);
 
-                    if (output != null)
+                    if (output != null )
                     {
-                        container.AddOutput(output);
+                        if (output is T typedOutput)
+                        {
+                            container.Add(typedOutput);
+                        }
+                        else
+                        {
+                            context.ReportError(
+                                $"Mismatched type, expecing {typeof(T)}, the result was of type '{output.GetType()}'.",
+                                node
+                            );
+                        }
+                    }
+                    else
+                    {
+                        context.Log(
+                            LogLevel.Warning,
+                            $"The result of compiling '{node.Name}' was null. It's not included in the result.",
+                            node
+                        );
                     }
                 }
                 catch (Exception ex)
@@ -86,10 +101,10 @@ namespace gg.parse.script.compiler
                 }
             }
 
-            return context.Logs.Contains(LogLevel.Error | LogLevel.Fatal)
-                ? PostCompile(context, container)
-                : throw new AggregateErrorException("Failed compilation, see the 'Errors' for more information.",
-                    context.Logs.GetEntries(LogLevel.Error | LogLevel.Fatal));
+            return !context.Logs.Contains(LogLevel.Error | LogLevel.Fatal)
+                    ? container
+                    : throw new AggregateErrorException("Failed compilation, see the 'Errors' for more information.",
+                        context.Logs.GetEntries(LogLevel.Error | LogLevel.Fatal));
         }
 
         
@@ -116,11 +131,6 @@ namespace gg.parse.script.compiler
                 context.ReportException(e, annotation);
             }
 
-            return result;
-        }
-
-        public virtual ICompileOutputCollection PostCompile(TContext context, ICompileOutputCollection result)
-        {
             return result;
         }
 

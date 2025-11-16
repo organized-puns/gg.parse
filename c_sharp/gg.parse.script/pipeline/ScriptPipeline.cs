@@ -127,7 +127,7 @@ namespace gg.parse.script.pipeline
                 Parser = parser,
                 LogHandler = pipelineLogger,
                 Text = script,
-                RuleGraph = new MutableRuleGraph<T>(),
+                RuleGraph = [],
                 IncludePaths = sessionIncludePaths
             };
 
@@ -334,7 +334,7 @@ namespace gg.parse.script.pipeline
                 .Where( f => f.Prune == AnnotationPruning.None
                     && !f.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 .ForEach( f =>
-                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
+                    target.Register(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
         }
     }
 }

@@ -41,9 +41,7 @@ namespace gg.parse.core
         public bool TryFindRule(string name, out IRule? result) =>
             _rules.TryGetValue(name, out result);
 
-        IEnumerator IEnumerable.GetEnumerator() =>
-        
-            GetEnumerator();
-        
+        IEnumerator IEnumerable.GetEnumerator() =>        
+            GetEnumerator();        
     }
 }

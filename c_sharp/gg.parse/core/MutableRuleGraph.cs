@@ -11,7 +11,7 @@ namespace gg.parse.core
     /// Graph of Rules. Has one rule which is designated as a Root
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class MutableRuleGraph<T> : IRuleGraph<T>
+    public class MutableRuleGraph<T> : IRuleGraph<T>, ICollection<IRule>
     {
         private readonly Dictionary<string, IRule> _registeredRules = [];
 
@@ -30,6 +30,8 @@ namespace gg.parse.core
         /// </summary>
         public int Count => _registeredRules.Count;
 
+        public bool IsReadOnly => throw new NotImplementedException();
+
         /// <summary>
         /// Find a rule by name. Rule must exist in the graph.
         /// </summary>
@@ -43,7 +45,12 @@ namespace gg.parse.core
             return new(Root, ImmutableDictionary<string, IRule>.Empty.AddRange(_registeredRules));
         }
 
-        public TRule RegisterRule<TRule>(TRule rule) where TRule : IRule
+        public void Add(IRule rule) 
+        {
+            Register(rule);
+        }
+
+        public TRule Register<TRule>(TRule rule) where TRule : IRule
         {
             Assertions.RequiresNotNull(rule);
             Assertions.RequiresNotNullOrEmpty(rule.Name);
@@ -85,7 +92,7 @@ namespace gg.parse.core
                 }
                 else
                 {
-                    return RegisterRule(rule);
+                    return Register(rule);
                 }
             }
 
@@ -113,7 +120,7 @@ namespace gg.parse.core
                 }
             }
 
-            return RegisterRule(isChanged ? ruleComposition.CloneWithComposition(composition) : ruleComposition);
+            return Register(isChanged ? ruleComposition.CloneWithComposition(composition) : ruleComposition);
         }
 
         private IMetaRule FindOrRegisterMetaRuleAndSubject(IMetaRule metaRule)
@@ -129,11 +136,11 @@ namespace gg.parse.core
                 // clone since this subject was already registered unlike this meta rule 
                 if (registeredSubject != metaRule.Subject)
                 {
-                    return RegisterRule(metaRule.CloneWithSubject(registeredSubject));
+                    return Register(metaRule.CloneWithSubject(registeredSubject));
                 }
             }
 
-            return RegisterRule(metaRule);
+            return Register(metaRule);
         }
 
         public IEnumerator<IRule> GetEnumerator()
@@ -196,6 +203,57 @@ namespace gg.parse.core
             }
 
             return (TRule)replacement;
+        }
+
+        public void Clear()
+        {
+            _registeredRules.Clear();
+            Root = null;
+        }
+
+        public bool Contains(IRule item) =>
+            TryFindRule(item.Name, out var rule) && rule == item;
+        
+
+        public void CopyTo(IRule[] array, int arrayIndex)
+        {
+            var idx = arrayIndex;
+            foreach (IRule rule in _registeredRules.Values)
+            {
+                array[idx++] = rule;
+            }
+        }
+
+        public bool Remove(IRule item)
+        {
+            Assertions.RequiresNotNull(item);
+            Assertions.RequiresNotNullOrEmpty(item.Name);
+
+            if (_registeredRules.ContainsKey(item.Name))
+            {
+                // cannot cascade, so return false if another rule uses the given item
+                if (_registeredRules
+                    .Values
+                    .Any(r => r is IRuleComposition composition
+                    && composition.Rules != null
+                    && composition.Rules.Any(r => r == item)))
+                {
+                    return false;
+                }
+
+                if (_registeredRules
+                    .Values
+                    .Any(r => r is IMetaRule metaRule
+                    && metaRule.Subject == item))
+                {
+                    return false;
+                }
+
+                _registeredRules.Remove(item.Name);
+                return true;
+            }
+
+            return false;
         }
     }
 }
