@@ -157,7 +157,7 @@ namespace gg.parse.script
                                     tokenizeResult.Annotations
                             );
 
-                            config.LogHandler?.ProcessException(exception);
+                            config.LogHandler?.ProcessScriptException(exception);
                             throw exception;
                         }
                     }

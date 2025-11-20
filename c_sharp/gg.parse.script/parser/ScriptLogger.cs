@@ -1,14 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections.Immutable;
-
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.util;
-
+using System.Collections.Immutable;
 using static gg.parse.util.Assertions;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace gg.parse.script.parser
 {
@@ -16,8 +16,6 @@ namespace gg.parse.script.parser
     {
         private TextPositionMap? _positionMap;
 
-        // Note: not thread safe, application will need to deal with this
-        // xxx move to LogCollection
         public LogCollection? ReceivedLogs { get; set; }
 
         /// <summary>
@@ -83,22 +81,37 @@ namespace gg.parse.script.parser
             }
         }
 
-        public void ProcessException(Exception exception, bool logException = true)
+
+        public void ProcessException(Exception exception, string? text, ImmutableList<Annotation>? tokens)
         {
-            if (logException)
+            if (exception is AggregateErrorException ae)
+            {
+                ProcessAggregateErrorException(ae);
+            }
+            else if (exception is CompilationException ce)
+            {
+                ProcessCompilationException(ce, text, tokens);
+            }
+            else if (exception is ScriptException se)
+            {
+                ProcessScriptException(se);
+            }
+            else
             {
                 Log(LogLevel.Fatal, $"Exception: {exception}");
             }
+        }
 
-            if (exception is ScriptException se)
+        public void ProcessAggregateErrorException(AggregateErrorException exception)
+        {
+            if (ReceivedLogs != null)
             {
-                ProcessScriptException(se);
+                exception.Errors.ForEach( e => ReceivedLogs.Add(e));
             }
         }
 
         public void ProcessScriptException(ScriptException exception)
         {
-            
             if (exception.Errors != null && exception.Text != null)
             {
                 if (exception.Tokens == null)
@@ -132,32 +145,18 @@ namespace gg.parse.script.parser
 
         public void ProcessExceptions(
             IEnumerable<Exception> exceptions, 
-            string text,
-            ImmutableList<Annotation> tokens)
+            string? text,
+            ImmutableList<Annotation> ?tokens)
         {
-            _positionMap = TextPositionMap.CreateOrUpdate(_positionMap, text);
-                
-            foreach (var ex in exceptions)
-            {
-                if (ex is ScriptException scriptEx)
-                {
-                    ProcessException(scriptEx, logException: false);
-                }
-                else if (ex is CompilationException ce)
-                {
-                    ProcessException(ce, tokens);
-                }
-                else
-                {
-                    Log(LogLevel.Error, $"Exception: {ex}");
-                }
-            }
+            exceptions.ForEach(e => ProcessException(e, text, tokens));
         }
 
-        public void ProcessException(CompilationException exception, ImmutableList<Annotation> tokens/*, List<Range> lineRanges*/)
+        public void ProcessCompilationException(CompilationException exception, string? text, ImmutableList<Annotation>? tokens)
         {
-            if (exception.Annotation != null)
-            {
+            if (text != null && tokens != null && exception.Annotation != null)
+            { 
+                _positionMap = TextPositionMap.CreateOrUpdate(_positionMap, text);
+
                 RequiresNotNull(_positionMap);
 
                 var (line, column) = _positionMap.GetGrammarPosition(exception.Annotation, tokens);

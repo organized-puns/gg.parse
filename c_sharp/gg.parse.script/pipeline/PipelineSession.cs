@@ -28,7 +28,8 @@ namespace gg.parse.script.pipeline
 
         public ScriptLogger? LogHandler { get; set; }
 
-        public RuleCompiler? Compiler { get; set; }
+        // xxx left off here
+        public ICompilerTemplate<RuleCompilationContext>? Compiler { get; set; }
 
         // -- output -------------------------------------------------
         

@@ -37,6 +37,7 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(outcome.FoundMatch && outcome.MatchLength == 0);
         }
 
+        // xxx covered by other test
         [TestMethod]
         public void CreateRulesWithMissingReferences_Compile_ExpectCompliationErrorPerRule()
         {
@@ -48,7 +49,7 @@ namespace gg.parse.script.tests.parserbuilder
             }
             catch (ScriptPipelineException ex)
             {
-                IsTrue(ex.InnerException is AggregateException aex && aex.InnerExceptions.Count == 3);
+                IsTrue(ex.InnerException is AggregateErrorException aex && aex.Errors.Count() == 3);
             }
         }
 

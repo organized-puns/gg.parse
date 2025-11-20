@@ -255,13 +255,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count == 1);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
-                IsTrue(e.Errors.ElementAt(0).Length == 0);
-
-                IsTrue(parser
-                    .LogHandler!
-                    .ReceivedLogs!
-                    .GetEntries(LogLevel.Fatal)
-                    .Count() == 1);
+                IsTrue(e.Errors.ElementAt(0).Length == 0); 
 
                 IsTrue(parser
                         .LogHandler!

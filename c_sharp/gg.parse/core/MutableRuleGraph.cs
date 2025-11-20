@@ -11,7 +11,7 @@ namespace gg.parse.core
     /// Graph of Rules. Has one rule which is designated as a Root
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class MutableRuleGraph<T> : IRuleGraph<T>, ICollection<IRule>
+    public class MutableRuleGraph<T> : IMutableRuleGraph<T>
     {
         private readonly Dictionary<string, IRule> _registeredRules = [];
 
@@ -30,7 +30,7 @@ namespace gg.parse.core
         /// </summary>
         public int Count => _registeredRules.Count;
 
-        public bool IsReadOnly => throw new NotImplementedException();
+        public bool IsReadOnly => false;
 
         /// <summary>
         /// Find a rule by name. Rule must exist in the graph.
@@ -45,11 +45,22 @@ namespace gg.parse.core
             return new(Root, ImmutableDictionary<string, IRule>.Empty.AddRange(_registeredRules));
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="rule"></param>
         public void Add(IRule rule) 
         {
+            Assertions.RequiresNotNull(rule);
+            
             Register(rule);
         }
 
+        /// <summary>
+        /// Registers a the given rule 
+        /// </summary>
+        /// <typeparam name="TRule"></typeparam>
+        /// <param name="rule"></param>
+        /// <returns></returns>
         public TRule Register<TRule>(TRule rule) where TRule : IRule
         {
             Assertions.RequiresNotNull(rule);
@@ -65,6 +76,7 @@ namespace gg.parse.core
         public bool TryFindRule(string name, out IRule? result) =>
             _registeredRules.TryGetValue(name, out result);
 
+        // xxx move to extensions
         public ParseResult Parse(T[] data, int start = 0)
         {
             Assertions.RequiresNotNull(Root, "Root rule must be set before parsing.");
@@ -153,7 +165,7 @@ namespace gg.parse.core
             return _registeredRules.Values.GetEnumerator();
         }
 
-        public TRule FindOrRegister<TRule>(
+        /*public TRule FindOrRegister<TRule>(
             string ruleName,
             AnnotationPruning product,
             Func<string, AnnotationPruning, TRule> factoryMethod)
@@ -161,7 +173,7 @@ namespace gg.parse.core
 
             TryFindRule(ruleName, out IRule? existingRule)
                      ? (TRule) existingRule!
-                     : factoryMethod(ruleName, product);
+                     : factoryMethod(ruleName, product);*/
 
         public TRule ReplaceRule<TRule>(IRule original, TRule replacement) where TRule : IRule
         {
@@ -255,5 +267,7 @@ namespace gg.parse.core
 
             return false;
         }
+
+
     }
 }

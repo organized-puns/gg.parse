@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 using gg.parse.core;
 using gg.parse.rules;
-using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
 
@@ -23,7 +22,11 @@ namespace gg.parse.script.compiler
         {
         }
 
-        public RuleCompilationContext(string text, ImmutableList<Annotation> tokens, ImmutableList<Annotation> grammar)
+        public RuleCompilationContext(
+            string text, 
+            ImmutableList<Annotation> tokens, 
+            ImmutableList<Annotation> grammar
+            )
             : base(text, tokens, grammar)
         {
         }
@@ -45,23 +48,70 @@ namespace gg.parse.script.compiler
     public abstract class RuleCompilerBase<T> : CompilerTemplate<string, RuleCompilationContext>
         where T : IComparable<T>
     {
+        public const string DefaultRootName = "root";
+
+        public string RootName { get; init; }
+
 
         [DebuggerStepThrough]
-        public RuleCompilerBase()
+        public RuleCompilerBase(string rootName = DefaultRootName)
         {
+            RootName = rootName;
         }
 
-        public RuleCompilerBase(Dictionary<string, CompileFunc<RuleCompilationContext>> functions)
+        public RuleCompilerBase(
+            Dictionary<string, CompileFunc<RuleCompilationContext>> functions,
+            string rootName = DefaultRootName
+        )
             : base(functions)
         {
+            RootName = rootName;
         }
 
+        public override ICollection<TOutput> Compile<TOutput>(
+            Type? targetType, 
+            ImmutableList<Annotation> annotations, 
+            RuleCompilationContext context, 
+            ICollection<TOutput> container)
+        {
+            var graph = container as MutableRuleGraph<T>;
+
+            RequiresNotNull(graph);
+
+            // reset the root. Included files may have set a root but the root needs to be the 
+            // one of the topmost file included. 
+            graph.Root = null;
+
+            return base.Compile(targetType, annotations, context, container);
+        }
 
         protected override string SelectKey(
             Type? targetType, 
             Annotation annotation, 
             RuleCompilationContext context) =>
             annotation.Name;
+
+
+        protected override void AddOutput<TOutput>(
+            TOutput output, 
+            ICollection<TOutput> targetCollection,
+            RuleCompilationContext context
+        )
+        {
+            // xxx add output type
+            var rule = output as IRule;
+            var graph = targetCollection as MutableRuleGraph<T>;
+            
+            RequiresNotNull(rule);
+            RequiresNotNull(graph);
+
+            var registeredRule = graph.FindOrRegisterRuleAndSubRules(rule);
+
+            if (graph.Root == null || rule.Name == RootName)
+            {
+                graph.Root = registeredRule;
+            }
+        }
 
         #region -- Compilation methods --------------------------------------------------------------------------------
 
@@ -77,6 +127,14 @@ namespace gg.parse.script.compiler
         public object? CompileRule(Type? _, Annotation annotation, RuleCompilationContext context)
         {
             var header = RuleCompilerBase<T>.ReadRuleHeader(annotation, context);
+
+            // verify if there is any content, if not return a NoP and add a warning
+            if (annotation.Count <= header.Length)
+            {
+                context.Log(LogLevel.Warning, $"No rule body defined for rule {header.Name}.", annotation);
+                return new NopRule<T>(header.Name);
+            }
+                 
             return Compile(_, annotation[header.Length]!, new RuleCompilationContext(context, header));
         }        
 
@@ -424,7 +482,8 @@ namespace gg.parse.script.compiler
             var precedence = 0;
 
             if (annotation.Count > idx 
-                && annotation[idx]! == CommonTokenNames.Integer
+                // xxx give good name
+                && annotation[idx]! == "rule_precedence"
                 && int.TryParse(context.GetText(annotation[idx]!), out precedence))
             {
                 idx++;

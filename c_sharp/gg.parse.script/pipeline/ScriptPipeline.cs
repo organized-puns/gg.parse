@@ -26,8 +26,8 @@ namespace gg.parse.script.pipeline
                 tokenizerDefinition, 
                 logger,
                 includedPaths == null ? [] : [.. includedPaths!]);
-            
-            session.Compiler = CreateTokenizerCompiler(session.Parser!);
+
+            session.Compiler = new TokenizerCompiler();//CreateTokenizerCompiler(session.Parser!);
 
             return RunPipeline(session);
         }
@@ -47,7 +47,7 @@ namespace gg.parse.script.pipeline
                 includedPaths == null ? [] : [..includedPaths!]);
 
             session.RuleGraph!.RegisterTokens(tokenSession.RuleGraph!);
-            session.Compiler = CreateParserCompiler(session.Parser!);
+            session.Compiler = new GrammarCompiler();//CreateParserCompiler(session.Parser!);
 
             return RunPipeline(session);
         }
@@ -79,21 +79,42 @@ namespace gg.parse.script.pipeline
             // parse results
             try
             {
+                var context = new RuleCompilationContext(session.Text, session.Tokens, session.SyntaxTree);
+                var graph = session.RuleGraph;
+
                 // reset the root. Included files may have set a root but the root needs to be the 
                 // one of the topmost file included. The compiler will set it for us
-                session.RuleGraph.Root = null;
+                //graph.Root = null;
 
-                session.RuleGraph =
-                    session
-                        .Compiler!
-                        .Compile(
+                session.Compiler!.Compile(null, session.SyntaxTree, context, graph);
+
+                graph.ResolveReferences(context);
+
+                /*session.RuleGraph =
+                        /*.Compile(
                             session.Text!,
                             session.Tokens,
                             session.SyntaxTree,
                             session.RuleGraph
-                        );
+                        );*/
+
+                var errorLevel = session.LogHandler.FailOnWarning
+                                ? LogLevel.Error | LogLevel.Fatal | LogLevel.Warning
+                                : LogLevel.Error | LogLevel.Fatal;
+
+                if (context.Logs.Contains(errorLevel))
+                {
+                    throw new AggregateErrorException("Errors encountered while compiling", 
+                        context.Logs.GetEntries(errorLevel));
+                }
             }
-            catch (AggregateException ae)
+            catch (Exception e)
+            {
+                session.LogHandler?.ProcessException(e, session.Text, session.Tokens);
+
+                throw new ScriptPipelineException("Exception(s) raised during compliation.", e);
+            }
+            /*catch (AggregateException ae)
             {
                 session.LogHandler?.ProcessExceptions(
                         ae.InnerExceptions,
@@ -102,8 +123,10 @@ namespace gg.parse.script.pipeline
                     );
 
                 throw new ScriptPipelineException("Compliation exception(s) raised", ae);
-            }
-            
+            }*/
+
+
+
             return session;
         }
         
@@ -256,7 +279,7 @@ namespace gg.parse.script.pipeline
             }
             catch (ScriptException pe)
             {
-                session.LogHandler!.ProcessException(pe);
+                session.LogHandler!.ProcessScriptException(pe);
                 throw new ScriptPipelineException("Exception in grammar while parsing tokens.", pe);
             } 
         }

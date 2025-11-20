@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics;
 
@@ -50,16 +49,14 @@ namespace gg.parse.script.compiler
         /// <param name="context"></param>
         /// <param name="collection"></param>
         /// <returns></returns>
-        public ICollection<T> Compile<T>(Type targetType, TContext context, ICollection<T> collection) =>
+        public ICollection<T> Compile<T>(Type? targetType, TContext context, ICollection<T> collection) =>
         
             context.SyntaxTree == null
                 ? Compile(targetType, context.Tokens, context, collection)
                 : Compile(targetType, context.SyntaxTree, context, collection);
 
-
-
-        public ICollection<T> Compile<T>(
-            Type targetType,
+        public virtual ICollection<T> Compile<T>(
+            Type? targetType,
             ImmutableList<Annotation> annotations,
             TContext context,
             ICollection<T> container
@@ -75,7 +72,7 @@ namespace gg.parse.script.compiler
                     {
                         if (output is T typedOutput)
                         {
-                            container.Add(typedOutput);
+                            AddOutput(typedOutput, container, context);
                         }
                         else
                         {
@@ -105,6 +102,14 @@ namespace gg.parse.script.compiler
                     ? container
                     : throw new AggregateErrorException("Failed compilation, see the 'Errors' for more information.",
                         context.Logs.GetEntries(LogLevel.Error | LogLevel.Fatal));
+        }
+
+        protected virtual void AddOutput<T>(
+            T output, 
+            ICollection<T> targetCollection,
+            TContext context)
+        {
+            targetCollection.Add(output);
         }
 
         

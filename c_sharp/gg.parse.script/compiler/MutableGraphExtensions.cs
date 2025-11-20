@@ -32,7 +32,7 @@ namespace gg.parse.script.compiler
                     }
                     else
                     {
-                        context.ReportError("Error while resolving references", ex);
+                        context.ReportError("Exception thrown while resolving references", ex);
                     }
                 }
             }

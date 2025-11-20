@@ -7,10 +7,9 @@ using gg.parse.script.common;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
 using gg.parse.util;
-
-using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
-
+using Newtonsoft.Json.Linq;
 using static gg.parse.tests.TestAnnotation;
+using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.compiler
 {
@@ -451,6 +450,25 @@ namespace gg.parse.script.tests.compiler
                 ["foo"],
                 null
             );
+        }
+
+
+        [TestMethod]
+        public void CreateNopRuleAnnotationTree_Compile_ExpectWarnings()
+        {
+            var ruleName = "rule";
+            var tree = NewAnnotation(ScriptParser.Names.Rule, 0, 5, NewAnnotation(CommonTokenNames.Identifier, 0, 4));
+            var script = $"{ruleName} = ;";
+
+            var session = new RuleCompilationContext(script, [tree]);
+            var compiler = new TokenizerCompiler();
+            var compiledRule = (IRule) compiler.Compile(null, tree, session);
+
+            IsNotNull(compiledRule);
+            IsTrue(compiledRule is NopRule<char>);
+            IsTrue(compiledRule.Name == ruleName);
+            IsTrue(session.Logs.Count == 1);
+            IsTrue(session.Logs[0].Level == LogLevel.Warning);
         }
 
         // -- Private methods -----------------------------------------------------------------------------------------

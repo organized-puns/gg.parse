@@ -61,6 +61,11 @@ namespace gg.parse.script.parser
                 pruning = AnnotationPruning.All;
                 return true;
             }
+            else if (annotation == CommonTokenNames.PruneChildren)
+            {
+                pruning = AnnotationPruning.Children;
+                return true;
+            }
 
             return false;
         }

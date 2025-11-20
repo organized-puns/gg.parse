@@ -1,11 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Reflection.Emit;
 
 namespace gg.parse.util
 {
+    // xxx implement icollection
     public class LogCollection : IEnumerable<LogEntry>
     {
         private readonly ConcurrentQueue<LogEntry> _logEntries = [];
@@ -14,6 +17,10 @@ namespace gg.parse.util
         private readonly Lock _drainLock = new();
 
         private LogLevel _logMask = 0;
+
+        public int Count => _logEntries.Count;  
+
+        public LogEntry this[int index] => _logEntries.ElementAt(index);
 
         public IEnumerable<LogEntry> GetEntries(LogLevel level = LogLevel.Any) =>
             _logEntries.Where(entry => (entry.Level & level) > 0);
@@ -29,14 +36,9 @@ namespace gg.parse.util
             _minRemoval = minRemoval;
         }
 
-        public void Log(
-            LogLevel level,
-            string message,
-            (int line, int column)? position = null,
-            Exception? exception = null
-        )
+        public void Add(LogEntry entry)
         {
-            _logMask |= level;
+            _logMask |= entry.Level;
 
             // create new space for logs. 
             // this is heuristic as new entries may come in
@@ -59,8 +61,23 @@ namespace gg.parse.util
                     }
                 }
             }
-            
-            _logEntries.Enqueue(new LogEntry(level, message, position, exception));
+
+            _logEntries.Enqueue(entry);
+        }
+
+        public void Log(
+            LogLevel level,
+            string message,
+            (int line, int column)? position = null,
+            Exception? exception = null
+        )
+        {
+            Add(new LogEntry(level, message, position, exception));
+        }
+
+        public void Clear()
+        {
+            RemoveLogs();
         }
 
 

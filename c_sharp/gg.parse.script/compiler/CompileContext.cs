@@ -34,7 +34,7 @@ namespace gg.parse.script.compiler
             Text = text;
             Tokens = tokens;
             SyntaxTree = null;
-            _logCollection = collection ?? new();
+            _logCollection = collection ?? [];
         }
 
         public CompileContext(
@@ -47,7 +47,7 @@ namespace gg.parse.script.compiler
             Text = text;
             Tokens = tokens;
             SyntaxTree = syntaxTree;
-            _logCollection = collection ?? new();
+            _logCollection = collection ?? [];
         }
         
         public string GetText(Annotation annotation) =>
