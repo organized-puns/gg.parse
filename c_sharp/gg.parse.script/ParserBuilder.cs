@@ -3,7 +3,7 @@
 
 using gg.parse.core;
 using gg.parse.rules;
-using gg.parse.script.common;
+using gg.parse.script.parser;
 using gg.parse.script.pipeline;
 using gg.parse.util;
 
@@ -11,9 +11,9 @@ namespace gg.parse.script
 {
     public class ParserBuilder
     {
-        public RuleGraph<char>? TokenGraph {get;set;}
+        public MutableRuleGraph<char>? TokenGraph {get;set;}
 
-        public RuleGraph<int>? GrammarGraph { get; set; }
+        public MutableRuleGraph<int>? GrammarGraph { get; set; }
 
         public ScriptLogger? LogHandler { get; set; }
 
@@ -21,6 +21,14 @@ namespace gg.parse.script
 
         public PipelineSession<int>? GrammarSession { get; private set; }
 
+        public Parser Build()
+        {
+            Assertions.RequiresNotNull(TokenGraph);
+
+            return GrammarGraph != null
+                ? new Parser(TokenGraph.ToImmutable(), GrammarGraph.ToImmutable())
+                : new Parser(TokenGraph.ToImmutable());
+        }
 
         public ParserBuilder FromFile(
             string tokensFilename, 
@@ -71,6 +79,7 @@ namespace gg.parse.script
             return this;
         }
 
+        /*
         public ParseResult Tokenize(
             string input,
             string? usingRule = null,
@@ -80,6 +89,7 @@ namespace gg.parse.script
         {
             Assertions.RequiresNotNull(TokenGraph!);
             Assertions.RequiresNotNull(TokenGraph!.Root!);
+
 
             try
             {
@@ -148,7 +158,7 @@ namespace gg.parse.script
                 LogHandler?.ProcessException(e);
                 throw;
             }
-        }
+        }*/
 
         /// <summary>
         /// Convenience method to write the received logs during parsing / compilation
@@ -162,8 +172,8 @@ namespace gg.parse.script
             {
                 LogHandler
                     .ReceivedLogs
-                    .Where(log => (log.level & includedLevels) > 0)
-                    .ForEach(log => output(log.level, log.message));
+                    .Where(log => (log.Level & includedLevels) > 0)
+                    .ForEach(log => output(log.Level, log.Message));
             }
         }
     }

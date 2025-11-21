@@ -99,6 +99,8 @@ namespace gg.parse.script.common
 
         public const string           OptionWithPrecedence = "option_with_precedence";
 
+        public const string           Rule = "rule";
+
         public static readonly string ScopeStart = "scope_start";
 
         public static readonly string ScopeEnd = "scope_end";

@@ -30,5 +30,42 @@ namespace gg.parse.util
 
             return array;
         }
+
+        /// <summary>
+        /// Fill the given list with count copies of value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="value"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static List<T> Fill<T>(this List<T> values, T value, int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                values.Add(value);
+            }
+
+            return values;
+        }
+
+        /// <summary>
+        /// Fill the given list with the result of invoking the factory method
+        /// with the current index.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <param name="factoryMethod"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static List<T> Fill<T>(this List<T> values, Func<int, T> factoryMethod, int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                values.Add(factoryMethod(i));
+            }
+
+            return values;
+        }
     }
 }

@@ -4,6 +4,7 @@
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.parser;
+using gg.parse.util;
 
 namespace gg.parse.script.common
 {
@@ -11,7 +12,7 @@ namespace gg.parse.script.common
     /// Convenience base class to make the rule declarations shorter / easier to read.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CommonGraphWrapper<T> : RuleGraph<T> where T : IComparable<T>
+    public class CommonGraphWrapper<T> : MutableRuleGraph<T> where T : IComparable<T>
     {
         // -- Utility methods -----------------------------------------------------------------------------------------
 
@@ -31,8 +32,8 @@ namespace gg.parse.script.common
             where TRule : RuleBase<T>
         {
             var (ruleName, product) = CreateRuleNameAndpruning(name, fallback);
-            return TryFindRule(ruleName, out TRule? existingRule)
-                     ? existingRule!
+            return TryFindRule(ruleName, out IRule? existingRule)
+                     ? (TRule) existingRule!
                      : factoryMethod(ruleName, product);
         }
 
@@ -44,12 +45,11 @@ namespace gg.parse.script.common
 
         public MatchAnyData<T> Any(string? name) =>
             FindOrRegister(name, $"{CommonTokenNames.AnyCharacter}",
-                        (ruleName, product) => RegisterRule(
-                            new MatchAnyData<T>(ruleName, product)));
+                        (ruleName, product) => Register(new MatchAnyData<T>(ruleName, product)));
 
         public LogRule<T> Error(string name, string message, RuleBase<T>? condition = null) =>
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new LogRule<T>(ruleName, pruning, condition, message, LogLevel.Error)));
 
         public MatchDataSet<T> InSet(params T[] set) =>
@@ -57,7 +57,7 @@ namespace gg.parse.script.common
 
         public MatchDataSet<T> InSet(string? name, params T[] set) =>
             FindOrRegister(name, $"{CommonTokenNames.Set}({JoinDataArray(set)})",
-                        (ruleName, product) => RegisterRule(
+                        (ruleName, product) => Register(
                             new MatchDataSet<T>(ruleName, product, set)));
 
         public MatchDataRange<T> InRange(T from, T to) =>
@@ -65,7 +65,7 @@ namespace gg.parse.script.common
 
         public MatchDataRange<T> InRange(string? name, T from, T to) =>
             FindOrRegister(name, $"{CommonTokenNames.DataRange}({from}..{to})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchDataRange<T>(ruleName, from, to, pruning)));
 
         public MatchCondition<T> IfMatch(RuleBase<T> condition) =>
@@ -73,7 +73,7 @@ namespace gg.parse.script.common
 
         public MatchCondition<T> IfMatch(string? name, RuleBase<T> condition) =>
             FindOrRegister(name, $"{CommonTokenNames.If}({condition.Name})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchCondition<T>(ruleName, pruning, 0, condition)));
         
         public MatchDataSequence<T> Literal(T[] sequence) =>
@@ -81,12 +81,12 @@ namespace gg.parse.script.common
 
         public MatchDataSequence<T> Literal(string? name, T[] sequence) =>
             FindOrRegister(name, $"{CommonTokenNames.Literal}({JoinDataArray(sequence)})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchDataSequence<T>(ruleName, sequence, pruning)));
 
         public MatchNot<T> Not(string? name, RuleBase<T> rule) =>
             FindOrRegister(name, $"{CommonTokenNames.Literal}({rule.Name})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchNot<T>(ruleName, pruning, 0, rule)));
 
         public MatchNot<T> Not(RuleBase<T> rule) =>
@@ -94,7 +94,7 @@ namespace gg.parse.script.common
 
         public MatchOneOf<T> OneOf(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.OneOf}({string.Join(", ", rules.Select(r => r.Name))})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchOneOf<T>(ruleName, pruning, 0, rules)));
 
         public MatchOneOf<T> OneOf(params RuleBase<T>[] rules) =>
@@ -103,7 +103,7 @@ namespace gg.parse.script.common
         public MatchCount<T> OneOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.OneOrMore}({rule.Name})",
-                (ruleName, pruning) => RegisterRule(
+                (ruleName, pruning) => Register(
                     new MatchCount<T>(ruleName, pruning, 0, rule, 1, 0)
                 )
             );
@@ -113,7 +113,7 @@ namespace gg.parse.script.common
 
         public MatchRuleSequence<T> Sequence(string? name, params RuleBase<T>[] rules) =>
             FindOrRegister(name, $"{CommonTokenNames.FunctionSequence}({string.Join(", ", rules.Select(r => r.Name))})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchRuleSequence<T>(ruleName, pruning, 0, rules)));
 
         public MatchRuleSequence<T> Sequence(params RuleBase<T>[] rules) =>
@@ -124,11 +124,11 @@ namespace gg.parse.script.common
 
         public MatchSingleData<T> MatchSingle(string? name, T data) =>
             FindOrRegister(name, $"{CommonTokenNames.SingleData}({data})",
-                        (ruleName, pruning) => RegisterRule(new MatchSingleData<T>(ruleName, data, pruning)));
+                        (ruleName, pruning) => Register(new MatchSingleData<T>(ruleName, data, pruning)));
 
         public SkipRule<T> Skip(string? name, RuleBase<T> stopCondition, bool failOnEoF = true) =>
             FindOrRegister(name, $"{CommonTokenNames.StopAt}({stopCondition}, {failOnEoF})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new SkipRule<T>(ruleName, pruning, 0, stopCondition, failOnEoF)));
 
         public SkipRule<T> Skip(RuleBase<T> stopCondition, bool failOnEoF = true) =>
@@ -136,13 +136,13 @@ namespace gg.parse.script.common
 
         public LogRule<T> Warning(string name, string message, RuleBase<T>? condition = null) =>
             FindOrRegister(name, $"{CommonTokenNames.LogError}({name})",
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new LogRule<T>(ruleName, pruning, condition, message, LogLevel.Warning)));
 
         public MatchCount<T> ZeroOrOne(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrOne}({rule.Name})",
-                (ruleName, pruning) => RegisterRule(
+                (ruleName, pruning) => Register(
                     new MatchCount<T>(ruleName, pruning, 0, rule, 0, 1)
                 )
             );
@@ -153,7 +153,7 @@ namespace gg.parse.script.common
         public MatchCount<T> ZeroOrMore(string? name, RuleBase<T> rule) =>
             FindOrRegister(name,
                 $"{CommonTokenNames.ZeroOrMore}({rule.Name})",
-                (ruleName, pruning) => RegisterRule(
+                (ruleName, pruning) => Register(
                     new MatchCount<T>(ruleName, pruning, 0, rule, 0, 0)
                 )
             );

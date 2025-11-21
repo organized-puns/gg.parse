@@ -20,9 +20,9 @@ namespace gg.parse.script.tests.parserbuilder
             var parser = new ParserBuilder().From(
                 $"root = foo, {pr}foo, {pa}foo, {pc}foo;" +
                 "foo = 'foo';"
-            );
+            ).Build();
 
-            var root = parser.TokenGraph.FindRule("root") as MatchRuleSequence<char>;
+            var root = parser.Tokens["root"] as MatchRuleSequence<char>;
 
             // validate the run and its outputs
             IsTrue(root != null);
@@ -47,7 +47,7 @@ namespace gg.parse.script.tests.parserbuilder
             IsTrue(foo4.Prune == AnnotationPruning.None);
             IsTrue(foo4.ReferencePrune == AnnotationPruning.Children);
 
-            var (result, _) = parser.Parse("foofoofoofoo");
+            var result = parser.Tokenize("foofoofoofoo");
 
             IsTrue(result);
             IsTrue(result.MatchLength == 12);
@@ -60,9 +60,11 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void SetupReferencesWithDifferentRuleOutputs_ParseInput_ExpectRulesToMatchSpecifiedOutput()
         {
-            var parser = new ParserBuilder().From($"{pr}tokens=*(foo|bar);foo='foo';bar='bar';", $"root=foo, {pr}bar, {pa}foo;");
+            var parser = new ParserBuilder()
+                .From($"{pr}tokens=*(foo|bar);foo='foo';bar='bar';", $"root=foo, {pr}bar, {pa}foo;")
+                .Build();
 
-            var root = parser.GrammarGraph.FindRule("root") as MatchRuleSequence<int>;
+            var root = parser.Grammar["root"] as MatchRuleSequence<int>;
 
             // validate the run and its outputs
             IsTrue(root != null);
@@ -97,8 +99,8 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void CreateCountDataRuleInsideBinaryRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
         {
-            var builder = new ParserBuilder().From("sequence = +'foo', +'bar';");
-            var (result, _) = builder.Parse("foobar");
+            var builder = new ParserBuilder().From("sequence = +'foo', +'bar';").Build();
+            var result = builder.Tokenize("foobar");
 
             IsTrue(result);
 
@@ -119,8 +121,10 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void CreateCountBinaryRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
         {
-            var builder = new ParserBuilder().From("sequence = +('fooz' | 'foo'), +('barz' | 'bar');");
-            var (result, _) = builder.Parse("foozbarz");
+            var builder = new ParserBuilder()
+                .From("sequence = +('fooz' | 'foo'), +('barz' | 'bar');")
+                .Build();
+            var result = builder.Tokenize("foozbarz");
 
             IsTrue(result);
 
@@ -139,8 +143,8 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void CreateInlineLookaheadRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
         {
-            var builder = new ParserBuilder().From("sequence = !'bar', 'foo';");
-            var (result, _) = builder.Parse("foo");
+            var builder = new ParserBuilder().From("sequence = !'bar', 'foo';").Build();
+            var result = builder.Tokenize("foo");
 
             IsTrue(result);
 
@@ -158,8 +162,8 @@ namespace gg.parse.script.tests.parserbuilder
         [TestMethod]
         public void CreateTopLevelLookaheadRule_ParseWithMatchingInput_ExpectCorrectProductionModifiers()
         {
-            var builder = new ParserBuilder().From("sequence = not_bar, 'foo'; not_bar = !'bar';");
-            var (result, _) = builder.Parse("foo");
+            var builder = new ParserBuilder().From("sequence = not_bar, 'foo'; not_bar = !'bar';").Build();
+            var result = builder.Tokenize("foo");
 
             IsTrue(result);
 
@@ -300,8 +304,10 @@ namespace gg.parse.script.tests.parserbuilder
             for (var i = 0; i < modifiers.Length; i++)
             {
                 var (pruneRoot, pruneOptions) = modifiers[i];
-                var builder = new ParserBuilder().From($"{pruneRoot} root = {pruneOptions} options; options = 'a' | 'b';");
-                var (result, _) = builder.Parse("a");
+                var parser = new ParserBuilder()
+                    .From($"{pruneRoot} root = {pruneOptions} options; options = 'a' | 'b';")
+                    .Build();
+                var result = parser.Tokenize("a");
 
                 IsTrue(result);
 

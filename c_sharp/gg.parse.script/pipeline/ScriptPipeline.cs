@@ -26,8 +26,8 @@ namespace gg.parse.script.pipeline
                 tokenizerDefinition, 
                 logger,
                 includedPaths == null ? [] : [.. includedPaths!]);
-            
-            session.Compiler = CreateTokenizerCompiler(session.Parser!);
+
+            session.Compiler = new TokenizerCompiler();//CreateTokenizerCompiler(session.Parser!);
 
             return RunPipeline(session);
         }
@@ -47,7 +47,7 @@ namespace gg.parse.script.pipeline
                 includedPaths == null ? [] : [..includedPaths!]);
 
             session.RuleGraph!.RegisterTokens(tokenSession.RuleGraph!);
-            session.Compiler = CreateParserCompiler(session.Parser!);
+            session.Compiler = new GrammarCompiler();//CreateParserCompiler(session.Parser!);
 
             return RunPipeline(session);
         }
@@ -79,21 +79,49 @@ namespace gg.parse.script.pipeline
             // parse results
             try
             {
+                var context = new RuleCompilationContext(
+                    session.Text, 
+                    session.Tokens, 
+                    session.SyntaxTree, 
+                    session.LogHandler.ReceivedLogs
+                );
+                var graph = session.RuleGraph;
+
                 // reset the root. Included files may have set a root but the root needs to be the 
                 // one of the topmost file included. The compiler will set it for us
-                session.RuleGraph.Root = null;
+                //graph.Root = null;
 
-                session.RuleGraph =
-                    session
-                        .Compiler!
-                        .Compile(
+                session.Compiler!.Compile(null, session.SyntaxTree, context, graph);
+
+                graph.ResolveReferences(context);
+
+                /*session.RuleGraph =
+                        /*.Compile(
                             session.Text!,
                             session.Tokens,
                             session.SyntaxTree,
                             session.RuleGraph
-                        );
+                        );*/
             }
-            catch (AggregateException ae)
+            catch (Exception e)
+            {
+                session.LogHandler?.ProcessException(e, session.Text, session.Tokens);
+
+                throw new ScriptPipelineException("Exception(s) raised during compliation.", e);
+            }
+
+            var errorLevel = session.LogHandler.FailOnWarning
+                                ? LogLevel.Error | LogLevel.Fatal | LogLevel.Warning
+                                : LogLevel.Error | LogLevel.Fatal;
+
+            if (session.LogHandler.ReceivedLogs!.Contains(errorLevel))
+            {
+                throw new ScriptPipelineException("Exception(s) raised during compliation.",
+                    new AggregateErrorException("Errors encountered while compiling",
+                        session.LogHandler.ReceivedLogs.GetEntries(errorLevel)));
+            }
+
+            /*catch (AggregateException ae)
             {
                 session.LogHandler?.ProcessExceptions(
                         ae.InnerExceptions,
@@ -102,8 +130,10 @@ namespace gg.parse.script.pipeline
                     );
 
                 throw new ScriptPipelineException("Compliation exception(s) raised", ae);
-            }
-            
+            }*/
+
+
+
             return session;
         }
         
@@ -127,7 +157,7 @@ namespace gg.parse.script.pipeline
                 Parser = parser,
                 LogHandler = pipelineLogger,
                 Text = script,
-                RuleGraph = new RuleGraph<T>(),
+                RuleGraph = [],
                 IncludePaths = sessionIncludePaths
             };
 
@@ -256,7 +286,7 @@ namespace gg.parse.script.pipeline
             }
             catch (ScriptException pe)
             {
-                session.LogHandler!.ProcessException(pe);
+                session.LogHandler!.ProcessScriptException(pe);
                 throw new ScriptPipelineException("Exception in grammar while parsing tokens.", pe);
             } 
         }
@@ -327,14 +357,14 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        private static void RegisterTokens(this RuleGraph<int> target, RuleGraph<char> tokenSource)
+        private static void RegisterTokens(this MutableRuleGraph<int> target, MutableRuleGraph<char> tokenSource)
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             tokenSource
                 .Where( f => f.Prune == AnnotationPruning.None
                     && !f.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 .ForEach( f =>
-                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
+                    target.Register(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
         }
     }
 }

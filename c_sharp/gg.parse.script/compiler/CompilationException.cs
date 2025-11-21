@@ -5,11 +5,17 @@ using gg.parse.core;
 
 namespace gg.parse.script.compiler
 {
+    
+
     public class CompilationException : Exception 
     {
         public Annotation? Annotation { get; init; }
 
         public IRule? Rule { get; init; }
+
+        public CompilationException(string message) : base(message) 
+        {
+        }
 
         public CompilationException(
             string message,
