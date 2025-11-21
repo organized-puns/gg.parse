@@ -17,17 +17,18 @@ namespace gg.parse.script.compiler
     {
         public RuleHeader? RuleHeader { get; init; }
 
-        public RuleCompilationContext(string text, ImmutableList<Annotation> tokens) 
-            : base(text, tokens)
+        public RuleCompilationContext(string text, ImmutableList<Annotation> tokens, LogCollection? logs = null) 
+            : base(text, tokens, logs)
         {
         }
 
         public RuleCompilationContext(
             string text, 
             ImmutableList<Annotation> tokens, 
-            ImmutableList<Annotation> grammar
+            ImmutableList<Annotation> grammar,
+            LogCollection? logs = null
             )
-            : base(text, tokens, grammar)
+            : base(text, tokens, grammar, logs)
         {
         }
 

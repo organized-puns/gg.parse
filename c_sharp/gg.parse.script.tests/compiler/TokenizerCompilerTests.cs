@@ -554,10 +554,7 @@ namespace gg.parse.script.tests.compiler
 
             validCases.ForEach(input => IsTrue(compiledRule.Parse(input)));
 
-            if (invalidCases != null)
-            {
-                invalidCases.ForEach(input => IsFalse(compiledRule.Parse(input)));
-            }
+            invalidCases?.ForEach(input => IsFalse(compiledRule.Parse(input)));
 
             return compiledRule;
         }

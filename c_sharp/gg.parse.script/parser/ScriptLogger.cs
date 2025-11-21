@@ -21,11 +21,16 @@ namespace gg.parse.script.parser
         /// <summary>
         /// If set to true an exception will be thrown when a warning is encountered
         /// </summary>
+        // xxx replace with loglevel
         public bool FailOnWarning { get; set; } = false;
 
         public Action<LogLevel, string>? Out { get; set; } = null;
 
-        public ScriptLogger(bool storeLogs = true, int maxStoredLogs = -1, Action<LogLevel, string>? output = null)
+        public ScriptLogger(
+            bool storeLogs = true, 
+            int maxStoredLogs = -1, 
+            Action<LogLevel, string>? output = null,
+            bool failOnWarning = false)
         {
             if (storeLogs)
             {
@@ -33,6 +38,8 @@ namespace gg.parse.script.parser
             }
 
             Out = output;
+
+            FailOnWarning = failOnWarning;
         }
 
         public ScriptLogger(Action<LogLevel, string> outputAction, bool storeLogs = true, int maxStoredLogs = -1)

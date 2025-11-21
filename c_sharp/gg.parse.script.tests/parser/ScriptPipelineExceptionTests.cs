@@ -30,13 +30,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors.ElementAt(0).Length == 2);
                 IsTrue(e.Errors.ElementAt(1).Start == 6);
                 IsTrue(e.Errors.ElementAt(1).Length == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
-
+      
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
@@ -63,13 +57,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count == 1);
                 IsTrue(e.Errors.ElementAt(0).Start == 2);
-                IsTrue(e.Errors.ElementAt(0).Length == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
+                IsTrue(e.Errors.ElementAt(0).Length == 1);       
 
                 IsTrue(parser
                         .LogHandler!
@@ -112,12 +100,6 @@ namespace gg.parse.script.tests.parser
                 IsTrue(builder
                         .LogHandler!
                         .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(builder
-                        .LogHandler!
-                        .ReceivedLogs!
                         .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
@@ -148,13 +130,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(error.Start == 1);
                 IsTrue(error.Length == 1);
                 IsTrue(error.Rule.Id == scriptParser.InvalidPrecedenceError.Id);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
-
+                
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
@@ -190,12 +166,6 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
                         .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
@@ -223,12 +193,6 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors.ElementAt(0).Length == 2);
                 IsTrue(e.Errors.ElementAt(1).Start == 11);
                 IsTrue(e.Errors.ElementAt(1).Length == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
@@ -288,12 +252,6 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors.ElementAt(1).Length == 0);
 
                 IsTrue(parser
-                    .LogHandler!
-                    .ReceivedLogs!
-                    .GetEntries(LogLevel.Fatal)
-                    .Count() == 1);
-
-                IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
                         .GetEntries(LogLevel.Error)
@@ -349,11 +307,6 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors.ElementAt(1).Start == 11);
                 IsTrue(e.Errors.ElementAt(1).Length == 0);
 
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .GetEntries(LogLevel.Fatal)
-                        .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!

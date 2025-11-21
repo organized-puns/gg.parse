@@ -79,7 +79,12 @@ namespace gg.parse.script.pipeline
             // parse results
             try
             {
-                var context = new RuleCompilationContext(session.Text, session.Tokens, session.SyntaxTree);
+                var context = new RuleCompilationContext(
+                    session.Text, 
+                    session.Tokens, 
+                    session.SyntaxTree, 
+                    session.LogHandler.ReceivedLogs
+                );
                 var graph = session.RuleGraph;
 
                 // reset the root. Included files may have set a root but the root needs to be the 
@@ -97,16 +102,6 @@ namespace gg.parse.script.pipeline
                             session.SyntaxTree,
                             session.RuleGraph
                         );*/
-
-                var errorLevel = session.LogHandler.FailOnWarning
-                                ? LogLevel.Error | LogLevel.Fatal | LogLevel.Warning
-                                : LogLevel.Error | LogLevel.Fatal;
-
-                if (context.Logs.Contains(errorLevel))
-                {
-                    throw new AggregateErrorException("Errors encountered while compiling", 
-                        context.Logs.GetEntries(errorLevel));
-                }
             }
             catch (Exception e)
             {
@@ -114,6 +109,18 @@ namespace gg.parse.script.pipeline
 
                 throw new ScriptPipelineException("Exception(s) raised during compliation.", e);
             }
+
+            var errorLevel = session.LogHandler.FailOnWarning
+                                ? LogLevel.Error | LogLevel.Fatal | LogLevel.Warning
+                                : LogLevel.Error | LogLevel.Fatal;
+
+            if (session.LogHandler.ReceivedLogs!.Contains(errorLevel))
+            {
+                throw new ScriptPipelineException("Exception(s) raised during compliation.",
+                    new AggregateErrorException("Errors encountered while compiling",
+                        session.LogHandler.ReceivedLogs.GetEntries(errorLevel)));
+            }
+
             /*catch (AggregateException ae)
             {
                 session.LogHandler?.ProcessExceptions(

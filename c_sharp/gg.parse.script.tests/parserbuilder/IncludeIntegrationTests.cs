@@ -8,6 +8,7 @@ using gg.parse.script.pipeline;
 using gg.parse.core;
 
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using gg.parse.script.parser;
 
 
 namespace gg.parse.script.tests.parserbuilder
@@ -96,7 +97,8 @@ namespace gg.parse.script.tests.parserbuilder
         }
 
         /// <summary>
-        /// Include a file which holds a circular dependency. This should cause an exception.
+        /// Include a file which holds a circular dependency. This should cause an exception
+        /// if fail on warning is set to true
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ScriptPipelineException))]
@@ -104,7 +106,7 @@ namespace gg.parse.script.tests.parserbuilder
         {
             var includeCommand = "include 'assets/include_circular_1.tokens';";
             // this should throw and exception
-            new ParserBuilder().From(includeCommand);
+            new ParserBuilder().From(includeCommand, logger: new ScriptLogger(failOnWarning: true));
         }
 
         
