@@ -1,0 +1,52 @@
+/* 
+ * Script for the tokens of input arguments
+ */
+
+include "common.tokens";
+
+// in case of tokens read as stand alone properties
+-r property_tokens = *(property_token_list | -a white_space | unknown_property_error);
+
+// in case properties are used as arguments where whitespace matters
+-r property_token	= property_token_list | white_space | unknown_property_error;
+
+-r property_token_list = float | int 
+					| boolean | null 
+					| string  
+					| scope_start | scope_end 
+					| array_start | array_end 
+					| kv_separator | item_separator
+					| qualified_identifier | identifier
+					| single_line_comment | multi_line_comment;
+
+bool_true		= 'true';
+bool_false		= 'false';
+boolean         = bool_true | bool_false;
+
+null			= 'null';
+
+underscore		= '_';
+
+scope_start		= '{';
+scope_end		= '}';
+
+array_start		= '[';
+array_end		= ']';
+
+qualified_identifier = identifier, +('.', identifier);
+identifier		= (underscore | letter ), *(underscore | letter | digit);
+
+kv_separator_colon   = ':';
+kv_separator_equals  = '=';
+kv_separator		 = kv_separator_equals | kv_separator_colon;
+
+item_separator			  = ',';
+
+single_line_comment_start = '//';
+-a single_line_comment	  = single_line_comment_start, stop_after '\n';
+
+multi_line_comment_start = '/*';
+multi_line_comment_end	 = '*/';
+-a multi_line_comment    = multi_line_comment_start, stop_after multi_line_comment_end;
+
+unknown_property_error	= error "no match for token(s)." if +(!property_token_list, .);

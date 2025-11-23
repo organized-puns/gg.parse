@@ -1,13 +1,15 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+
 using gg.parse.core;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
-using System.Collections.Immutable;
 
 namespace gg.parse.script.pipeline
 {
+    // xxx merge with session
     public class PipelineSession<T> where T : IComparable<T>
     {
         // -- config -------------------------------------------------
@@ -17,7 +19,7 @@ namespace gg.parse.script.pipeline
 
         public HashSet<string> IncludePaths { get; set; } = [];
 
-        public Dictionary<string, RuleGraph<T>?> IncludedFiles { get; set; } = [];
+        public Dictionary<string, MutableRuleGraph<T>?> IncludedFiles { get; set; } = [];
 
         // -- services -----------------------------------------------
         public ScriptTokenizer? Tokenizer { get; set; }
@@ -26,11 +28,12 @@ namespace gg.parse.script.pipeline
 
         public ScriptLogger? LogHandler { get; set; }
 
-        public RuleCompiler? Compiler { get; set; }
+        // xxx left off here
+        public ICompilerTemplate<RuleCompilationContext>? Compiler { get; set; }
 
         // -- output -------------------------------------------------
         
-        public RuleGraph<T>? RuleGraph { get; set; }
+        public MutableRuleGraph<T>? RuleGraph { get; set; }
 
         public ImmutableList<Annotation>? Tokens { get; set; }
 

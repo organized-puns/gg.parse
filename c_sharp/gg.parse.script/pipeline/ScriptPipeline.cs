@@ -1,14 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+
 using gg.parse.core;
 using gg.parse.rules;
 using gg.parse.script.compiler;
 using gg.parse.script.parser;
 using gg.parse.util;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using static gg.parse.script.compiler.CompilerFunctions;
+
 using static gg.parse.util.Assertions;
 
 namespace gg.parse.script.pipeline
@@ -26,8 +26,8 @@ namespace gg.parse.script.pipeline
                 tokenizerDefinition, 
                 logger,
                 includedPaths == null ? [] : [.. includedPaths!]);
-            
-            session.Compiler = CreateTokenizerCompiler(session.Parser!);
+
+            session.Compiler = new TokenizerCompiler();
 
             return RunPipeline(session);
         }
@@ -47,7 +47,7 @@ namespace gg.parse.script.pipeline
                 includedPaths == null ? [] : [..includedPaths!]);
 
             session.RuleGraph!.RegisterTokens(tokenSession.RuleGraph!);
-            session.Compiler = CreateParserCompiler(session.Parser!);
+            session.Compiler = new GrammarCompiler();
 
             return RunPipeline(session);
         }
@@ -79,31 +79,37 @@ namespace gg.parse.script.pipeline
             // parse results
             try
             {
-                // reset the root. Included files may have set a root but the root needs to be the 
-                // one of the topmost file included. The compiler will set it for us
-                session.RuleGraph.Root = null;
+                var context = new RuleCompilationContext(
+                    session.Text, 
+                    session.Tokens, 
+                    session.SyntaxTree, 
+                    session.LogHandler.ReceivedLogs
+                );
 
-                session.RuleGraph =
-                    session
-                        .Compiler!
-                        .Compile(
-                            session.Text!,
-                            session.Tokens,
-                            session.SyntaxTree,
-                            session.RuleGraph
-                        );
+                var graph = session.RuleGraph;
+
+                session.Compiler!.Compile(null, session.SyntaxTree, context, graph);
+
+                graph.ResolveReferences(context);
             }
-            catch (AggregateException ae)
+            catch (Exception e)
             {
-                session.LogHandler?.ProcessExceptions(
-                        ae.InnerExceptions,
-                        session.Text!,
-                        session.Tokens
-                    );
+                session.LogHandler?.ProcessException(e, session.Text, session.Tokens);
 
-                throw new ScriptPipelineException("Compliation exception(s) raised", ae);
+                throw new ScriptPipelineException("Exception(s) raised during compliation.", e);
             }
-            
+
+            var errorLevel = session.LogHandler.FailOnWarning
+                                ? LogLevel.Error | LogLevel.Fatal | LogLevel.Warning
+                                : LogLevel.Error | LogLevel.Fatal;
+
+            if (session.LogHandler.ReceivedLogs!.Contains(errorLevel))
+            {
+                throw new ScriptPipelineException("Exception(s) raised during compliation.",
+                    new AggregateErrorException("Errors encountered while compiling",
+                        session.LogHandler.ReceivedLogs.GetEntries(errorLevel)));
+            }
+
             return session;
         }
         
@@ -127,118 +133,11 @@ namespace gg.parse.script.pipeline
                 Parser = parser,
                 LogHandler = pipelineLogger,
                 Text = script,
-                RuleGraph = new RuleGraph<T>(),
+                RuleGraph = [],
                 IncludePaths = sessionIncludePaths
             };
 
             return session;
-        }
-
-        public static RuleCompiler CreateTokenizerCompiler(ScriptParser parser)
-        {
-            try
-            {
-                return new RuleCompiler(CreateRuleOutputMapping(parser))
-                        .RegisterTokenizerCompilerFunctions(parser);
-            }
-            catch (CompilationException ce)
-            {
-                if (ce.Rule == null)
-                {
-                    throw new ScriptPipelineException($"Unknown compiler exception while registering compiler functions for the tokens.", ce);
-                }
-                else
-                {
-                    throw new ScriptPipelineException($"Compiler is missing a function for token rule '{ce.Rule.Name}'.", ce);
-                }
-            }
-        }
-
-        public static (int functionId, AnnotationPruning product)[] CreateRuleOutputMapping(ScriptParser parser) =>
-        [
-            // xxx Ids can be replaced with names
-            (parser.MatchPruneAllToken.Id, AnnotationPruning.All),
-            (parser.MatchPruneChildrenToken.Id, AnnotationPruning.Children),
-            (parser.MatchPruneRootToken.Id, AnnotationPruning.Root)
-        ];
-
-        public static RuleCompiler CreateParserCompiler(ScriptParser parser)
-        {
-            try
-            {
-                return new RuleCompiler(CreateRuleOutputMapping(parser))
-                    .RegisterGrammarCompilerFunctions(parser);
-            }
-            catch (CompilationException ce)
-            {
-                if (ce.Rule == null)
-                {
-                    throw new ScriptPipelineException($"Unknown compiler exception while registering compiler functions for the grammar.", ce);
-                }
-                else
-                {
-                    throw new ScriptPipelineException($"Compiler is missing a function for grammar rule '{ce.Rule.Name}'.", ce);
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Registers all the compiler functions needed to compile a tokenizer script.
-        /// </summary>
-        /// <param name="compiler"></param>
-        /// <param name="parser"></param>
-        /// <returns></returns>
-        public static RuleCompiler RegisterTokenizerCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
-        {
-            return compiler
-                    .MapRuleToCompilerFunction(parser.MatchAnyToken, CompileAny<char>)
-                    .MapRuleToCompilerFunction(parser.MatchCharacterRange, CompileCharacterRange)
-                    .MapRuleToCompilerFunction(parser.MatchCharacterSet, CompileCharacterSet)
-                    .MapRuleToCompilerFunction(parser.MatchLog, CompileLog<char>)
-                    .MapRuleToCompilerFunction(parser.MatchGroup, CompileGroup<char>)
-                    .MapRuleToCompilerFunction(parser.MatchReference, CompileIdentifier<char>)
-                    .MapRuleToCompilerFunction(parser.MatchLiteral, CompileLiteral)
-                    .MapRuleToCompilerFunction(parser.MatchNotOperator, CompileNot<char>)
-                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileMatchCondition<char>)
-                    .MapRuleToCompilerFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<char>)
-                    .MapRuleToCompilerFunction(parser.MatchOneOf, CompileOption<char>)
-                    .MapRuleToCompilerFunction(parser.MatchSequence, CompileSequence<char>)
-                    .MapRuleToCompilerFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<char>)
-                    .MapRuleToCompilerFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<char>)
-                    .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<char>)
-                    .MapRuleToCompilerFunction(parser.MatchStopAfterOperator, CompileStopAfter<char>)
-                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<char>)
-                    .MapRuleToCompilerFunction(parser.MatchBreakOperator, CompileBreakPoint<char>)
-                    .MapRuleToCompilerFunction(parser.MatchCountOperator, CompileRangedCount<char>);
-        }
-
-        /// <summary>
-        /// Registers all the compiler functions needed to compile a grammar script.
-        /// </summary>
-        /// <param name="compiler"></param>
-        /// <param name="parser"></param>
-        /// <returns></returns>
-        public static RuleCompiler RegisterGrammarCompilerFunctions(this RuleCompiler compiler, ScriptParser parser)
-        {
-            return compiler
-                    .MapRuleToCompilerFunction(parser.MatchAnyToken, CompileAny<int>)
-                    .MapRuleToCompilerFunction(parser.MatchGroup, CompileGroup<int>)
-                    .MapRuleToCompilerFunction(parser.MatchReference, CompileIdentifier<int>)
-                    .MapRuleToCompilerFunction(parser.MatchNotOperator, CompileNot<int>)
-                    .MapRuleToCompilerFunction(parser.IfMatchOperator, CompileMatchCondition<int>)
-                    .MapRuleToCompilerFunction(parser.MatchOneOrMoreOperator, CompileOneOrMore<int>)
-                    .MapRuleToCompilerFunction(parser.MatchOneOf, CompileOption<int>)
-                    .MapRuleToCompilerFunction(parser.MatchSequence, CompileSequence<int>)
-                    .MapRuleToCompilerFunction(parser.MatchZeroOrMoreOperator, CompileZeroOrMore<int>)
-                    .MapRuleToCompilerFunction(parser.MatchZeroOrOneOperator, CompileZeroOrOne<int>)
-                    .MapRuleToCompilerFunction(parser.MatchEval, CompileEvaluation<int>)
-                    .MapRuleToCompilerFunction(parser.MatchLog, CompileLog<int>)
-                    .MapRuleToCompilerFunction(parser.MatchFindOperator, CompileFind<int>)
-                    .MapRuleToCompilerFunction(parser.MatchStopAfterOperator, CompileStopAfter<int>)
-                    .MapRuleToCompilerFunction(parser.MatchStopBeforeOperator, CompileStopBefore<int>)
-                    .MapRuleToCompilerFunction(parser.MatchBreakOperator, CompileBreakPoint<int>)
-                    .MapRuleToCompilerFunction(parser.MatchCountOperator, CompileRangedCount<int>);
         }
 
         private static (ImmutableList<Annotation>? tokens, ImmutableList<Annotation>? syntaxTree) ParseSessionText<T>(PipelineSession<T> session)
@@ -256,7 +155,7 @@ namespace gg.parse.script.pipeline
             }
             catch (ScriptException pe)
             {
-                session.LogHandler!.ProcessException(pe);
+                session.LogHandler!.ProcessScriptException(pe);
                 throw new ScriptPipelineException("Exception in grammar while parsing tokens.", pe);
             } 
         }
@@ -327,14 +226,14 @@ namespace gg.parse.script.pipeline
             }
         }
 
-        private static void RegisterTokens(this RuleGraph<int> target, RuleGraph<char> tokenSource)
+        private static void RegisterTokens(this MutableRuleGraph<int> target, MutableRuleGraph<char> tokenSource)
         {
             // register the tokens found in the interpreted ebnf tokenizer with the grammar compiler
             tokenSource
                 .Where( f => f.Prune == AnnotationPruning.None
                     && !f.Name.StartsWith(CompilerFunctionNameGenerator.UnnamedRulePrefix))
                 .ForEach( f =>
-                    target.RegisterRule(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
+                    target.Register(new MatchSingleData<int>($"{f.Name}", f.Id, AnnotationPruning.None)));
         }
     }
 }

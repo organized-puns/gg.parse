@@ -154,8 +154,21 @@ namespace gg.parse.core
         /// <param name="annotations"></param>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public static Annotation? FirstOrDefaultDfs(this IEnumerable<Annotation> annotations, Func<Annotation, bool> predicate) =>
-            annotations.FirstOrDefault(a => a.FirstOrDefaultDfs(predicate) != null);
+        public static Annotation? FirstOrDefaultDfs(this IEnumerable<Annotation> annotations, Func<Annotation, bool> predicate) 
+        {
+            foreach (var annotation in annotations)
+            {
+                var result = annotation.FirstOrDefaultDfs(predicate);
+                
+                if (result != null)
+                {
+                    return result;
+                }
+
+            }
+
+            return null;
+        }
         
 
         /// <summary>

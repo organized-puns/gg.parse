@@ -1,0 +1,30 @@
+<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <UseVSTest>true</UseVSTest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\condition_example.tokens" />
+    <None Remove="assets\match_count_example.tokens" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="assets\condition_example.tokens">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\match_count_example.tokens">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\gg.parse.script\gg.parse.script.csproj" />
+    <ProjectReference Include="..\..\gg.parse\gg.parse.csproj" />
+  </ItemGroup>
+
+</Project>

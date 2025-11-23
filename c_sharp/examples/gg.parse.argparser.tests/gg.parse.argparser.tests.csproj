@@ -1,0 +1,21 @@
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <UseVSTest>true</UseVSTest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\gg.parse.script\gg.parse.script.csproj" />
+    <ProjectReference Include="..\..\gg.parse.tests\gg.parse.tests.csproj" />
+    <ProjectReference Include="..\gg.parse.argparser\gg.parse.argparser.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="assets\" />
+  </ItemGroup>
+
+</Project>

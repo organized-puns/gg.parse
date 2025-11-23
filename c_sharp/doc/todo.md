@@ -11,15 +11,37 @@ config:
 ---
 kanban
   Backlog
-    
-    [ Implement properties file ]
-	[ Add linter to workflows ]
   
   In progress
     
     [ Add rule examples ]
-    	
+    [ Implement properties file ]                         
+        [ yield error if tokens and grammar share name ]
+        [ when using literals in grammar yield an error ]
+        [ properties files - create cli to export token/grammar names and tokens, update names in parser ]
+        [ add file not found in error log when loading a token set / grammar set which can't be found ]
+        [ properties files - redo arg parser ]
+        [ properties files - allow for ini files/java properties ]
+        [ clean up, write doc, update example docs for new parser / parserbuilder ]
+        [ write properties main ]
+        	
   Done
+    [ properties files - redo rule compiler based on compiler template, implement grammarcompiler ]
+    [ properties files - redo calculator based on compiler template ]
+    [ properties files - replace parserbuilder with parser where possible, eg examples ]
+    [ properties files - improving token/grammar recovery, both fail after just one error and don't recover ]
+    [ properties files - move parser graphs to read only, thread safe implementations ]
+    [ properties files - test for deliberate errors, adding basic error reporting. ]
+    [ properties files - adding precision: double, float to compile options ]
+    [ properties files - simplify meta information to '_type': 'str' ]
+    [ properties files - test read<obj> behavior (should default to annotation based)]
+    [ properties files - allow for reading of array<obj> list<obj> and set<obj> ]
+    [ properties files - enums ]
+    [ properties files - safe instantiation, allow for simpler meta information types ]
+    [ properties files - move properties to its own project ]
+    [ properties files - moving examples to subdirectory ]
+    [ properties files - split interpreter from reader ]    
+    [ properties files - compiler base ]
     [ Add repeat count to script ]
     [ Replace skip tokens and find tokens with 'stop_at' 'stop_after' and 'find' ]
 	[ Add meta rule vs data rule vs rule composition ]
@@ -33,23 +55,48 @@ Details
 Future backlog
 --------------
 
-### Add annotation example
+ ### add loop guard 
 
-### Implement (json) annotations in its main program
+ After parsing a tokenizer / grammar. Create a tree of all rule expansions finding loops
+ 
+ cases:
+
+ ```
+    rule = rule
+    will create:
+        rule
+         |
+         rule <- loop detected
+```
+
+```
+    rule = a | b
+    a = 'foo'
+    b = rule
+
+    will create:
+        rule
+         /\
+        /  \
+       a    b
+       |    |
+      'foo' rule <- loop
+
+      'foo' will be closed and not further expanded
+```
+
+
 
 ### Fix/extend literal
 
 Having a literal in a grammar leads to very confusing errors. Should be handled better.
 Add literalRule which allows for case senstive matching or not
 
-### Namespaces
-Add optional namespaces to avoid grammar / token name clash 
-
-### Example, small function console
-Implement a function console
-
 ### Add transpiling
 Transpile / build c# from rule table output, so there can be a compiled version so we can start building more forgiving ebnf parsers
+
+### Deal with endless loop, ie loop = loop;
+? can set the out come to fail or throw exception ?
 
 ### Add extend to parser
 Add Extend() to existing parser, similar to merge
@@ -103,7 +150,20 @@ jobs:
       - name: Check formatting
         run: dotnet format --verify-no-changes
 
+### Add annotation example
+
+### Implement (json) annotations in its main program
+
+
+### Namespaces
+Add optional namespaces to avoid grammar / token name clash 
+
+### Example, small function console
+Implement a function console
+
+
 ???
 ---
 - Figure out a way to capture the annotation associated with a reference, so in case of errors we can report the correct line/column
   (probably by adding a property to ReferenceRule which is set during compilation)
+

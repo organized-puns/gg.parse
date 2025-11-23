@@ -2,8 +2,7 @@
 // Copyright (c) Pointless pun
 
 using gg.parse.core;
-using gg.parse.rules;
-using gg.parse.script.common;
+using gg.parse.script.parser;
 using gg.parse.script.pipeline;
 using gg.parse.util;
 
@@ -11,9 +10,9 @@ namespace gg.parse.script
 {
     public class ParserBuilder
     {
-        public RuleGraph<char>? TokenGraph {get;set;}
+        public MutableRuleGraph<char>? TokenGraph {get;set;}
 
-        public RuleGraph<int>? GrammarGraph { get; set; }
+        public MutableRuleGraph<int>? GrammarGraph { get; set; }
 
         public ScriptLogger? LogHandler { get; set; }
 
@@ -21,6 +20,14 @@ namespace gg.parse.script
 
         public PipelineSession<int>? GrammarSession { get; private set; }
 
+        public Parser Build()
+        {
+            Assertions.RequiresNotNull(TokenGraph);
+
+            return GrammarGraph != null
+                ? new Parser(TokenGraph.ToImmutable(), GrammarGraph.ToImmutable())
+                : new Parser(TokenGraph.ToImmutable());
+        }
 
         public ParserBuilder FromFile(
             string tokensFilename, 
@@ -69,102 +76,6 @@ namespace gg.parse.script
             }
 
             return this;
-        }
-
-        public ParseResult Tokenize(
-            string input,
-            string? usingRule = null,
-            bool failOnWarning = false,
-            bool throwExceptionsOnError = true,
-            bool processLogsOnResult = false)
-        {
-            Assertions.RequiresNotNull(TokenGraph!);
-            Assertions.RequiresNotNull(TokenGraph!.Root!);
-
-            try
-            {
-                ParseResult result;
-
-                if (string.IsNullOrEmpty(usingRule))
-                {
-                    result = TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError);
-                }
-                else
-                {
-                    var rule = TokenGraph.FindRule(usingRule);
-
-                    result = rule != null
-                        ? rule.Parse(input)
-                        : throw new ArgumentException($"No rule {usingRule} defined in the token graph");
-                }
-
-                if (processLogsOnResult && LogHandler != null && result.Annotations != null)
-                {
-                    LogHandler.ProcessTokens(input, result.Annotations);
-                }
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                LogHandler?.ProcessException(e);
-                throw;
-            }
-        }
-
-        public (ParseResult tokens, ParseResult syntaxTree) Parse(
-            string input,
-            string? usingRule = null,
-            bool failOnWarning = false,
-            bool throwExceptionsOnError = true,
-            bool processLogsOnResult = false)
-        {
-            Assertions.RequiresNotNull(TokenGraph!);
-            Assertions.RequiresNotNull(TokenGraph!.Root!);
-
-            try
-            {
-                var (tokens, syntaxTree) = GrammarGraph == null
-                        ? (TokenGraph.Tokenize(input, failOnWarning, throwExceptionsOnError), ParseResult.Unknown)
-                        : GrammarGraph.Parse(TokenGraph, input, usingRule, failOnWarning, throwExceptionsOnError);
-
-                if (processLogsOnResult && LogHandler != null)
-                {
-                    if (tokens.Annotations != null)
-                    {
-                        LogHandler.ProcessTokens(input, tokens.Annotations);
-
-                        if (syntaxTree.Annotations != null)
-                        {
-                            LogHandler.ProcessSyntaxTree(input, tokens.Annotations, syntaxTree.Annotations);
-                        }
-                    }
-                }
-
-                return (tokens, syntaxTree);
-            }
-            catch (Exception e)
-            {
-                LogHandler?.ProcessException(e);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Convenience method to write the received logs during parsing / compilation
-        /// to the given output action
-        /// </summary>
-        /// <param name="output"></param>
-        /// <param name="includedLevels"></param>
-        public void WriteLogs(Action<LogLevel,string> output, LogLevel includedLevels = LogLevel.Any)
-        {
-            if (LogHandler != null && LogHandler.ReceivedLogs != null)
-            {
-                LogHandler
-                    .ReceivedLogs
-                    .Where(log => (log.level & includedLevels) > 0)
-                    .ForEach(log => output(log.level, log.message));
-            }
         }
     }
 }

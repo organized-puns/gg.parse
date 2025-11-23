@@ -1,0 +1,31 @@
+// To run the cli select any of the following commands
+-r cli_command	= export | validate; 
+
+-r export		= export_token_names | export_grammar_names;
+-r validate		= validate_tokens | validate_grammar;
+
+// Export the token's or  grammar file to the given class name.
+// eg:
+//   parse_cli export -t "../assets/json.tokens" -g "../src/my.namespace.TokenNames.cs"
+export_token_names = export_command, token_file, class_name;
+
+//   parse_cli export -t "../assets/json.tokens" -g "../assets/json.grammar" "../src/my.namespace.GrammarNames.cs"
+export_grammar_names = export_command, token_file, grammar_file, class_name;
+
+// Validate the given token file. The result is either an "all-good" equivalent or a list of errors and / or warnings.
+validate_tokens	= validate_command, token_file;
+
+// Validate the given grammar file. The result is either an "all-good" equivalent or a list of errors and / or warnings.
+validate_grammar = validate_command, token_file, grammar_file;
+
+// end_help, hide all the following from the help
+
+-r root = cli_command | unrecognized_command;
+
+
+token_file		= string;
+grammar_file	= string;
+class_name		= qualified_identifier;
+
+unrecognized_command = error "Input is not recognized as a cli command, type 'parse_cli help' for more information.";
+

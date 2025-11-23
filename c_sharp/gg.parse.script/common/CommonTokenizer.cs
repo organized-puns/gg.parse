@@ -14,7 +14,7 @@ namespace gg.parse.script.common
         public RuleBase<char> Boolean(string? name) =>
                 FindOrRegister(name, CommonTokenNames.Boolean,
                         (ruleName, pruning) =>
-                            RegisterRule(
+                            Register(
                                 new MatchOneOf<char>(
                                     ruleName,
                                     pruning,
@@ -27,13 +27,13 @@ namespace gg.parse.script.common
 
         public MatchDataRange<char> Digit(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.Digit,
-                        (ruleName, pruning) => RegisterRule(new MatchDataRange<char>(ruleName, '0', '9', pruning)));
+                        (ruleName, pruning) => Register(new MatchDataRange<char>(ruleName, '0', '9', pruning)));
 
         public MatchCount<char> DigitSequence(string? name = null) =>
             FindOrRegister(name, 
                 CommonTokenNames.DigitSequence,
                 (ruleName, pruning) => 
-                    RegisterRule(new MatchCount<char>(ruleName, pruning, 0, Digit(), min: 1, max: 0)));
+                    Register(new MatchCount<char>(ruleName, pruning, 0, Digit(), min: 1, max: 0)));
 
         public MatchRuleSequence<char> Float() =>
             Float(null);
@@ -48,7 +48,7 @@ namespace gg.parse.script.common
             return FindOrRegister(name,
                 CommonTokenNames.Float,
                 (ruleName, pruning) =>
-                    RegisterRule(new MatchRuleSequence<char>(
+                    Register(new MatchRuleSequence<char>(
                         ruleName,
                         pruning,
                         precedence: 0,
@@ -74,7 +74,7 @@ namespace gg.parse.script.common
         public MatchRuleSequence<char> Identifier(string? name = null) =>
             FindOrRegister(name, 
                 CommonTokenNames.Identifier,
-                (ruleName, pruning) => RegisterRule(
+                (ruleName, pruning) => Register(
                     new MatchRuleSequence<char>(
                         ruleName,
                         pruning,
@@ -87,19 +87,19 @@ namespace gg.parse.script.common
 
         public MatchOneOf<char> IdentifierCharacter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.IdentifierCharacter,
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchOneOf<char>(ruleName, pruning, 0, IdentifierStartingCharacter(), Digit())));
 
         public MatchOneOf<char> IdentifierStartingCharacter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.IdentifierStartingCharacter,
-                        (ruleName, pruning) => RegisterRule(
+                        (ruleName, pruning) => Register(
                             new MatchOneOf<char>(ruleName, pruning, 0, LowerCaseLetter(), UpperCaseLetter(), UnderscoreCharacter())));
 
         public MatchRuleSequence<char> Integer(string? name = null) =>
             FindOrRegister(
                 name,
                 CommonTokenNames.Integer,
-                (ruleName, pruning) => RegisterRule(
+                (ruleName, pruning) => Register(
                     new MatchRuleSequence<char>(
                         ruleName,
                         pruning,
@@ -116,7 +116,7 @@ namespace gg.parse.script.common
         public MatchRuleSequence<char> Keyword(string? name, string keyword) =>
             FindOrRegister(name, $"{CommonTokenNames.Keyword}({keyword})",
                         (ruleName, pruning) => 
-                            RegisterRule(
+                            Register(
                                 new MatchRuleSequence<char>(
                                     ruleName,
                                     pruning,
@@ -135,12 +135,12 @@ namespace gg.parse.script.common
 
         public MatchDataRange<char> LowerCaseLetter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.LowerCaseLetter, 
-                        (ruleName, pruning) => RegisterRule(new MatchDataRange<char>(ruleName, 'a', 'z', pruning)));
+                        (ruleName, pruning) => Register(new MatchDataRange<char>(ruleName, 'a', 'z', pruning)));
 
         public MatchRuleSequence<char> MatchString(string? name = null, char delimiter = '"') =>
             FindOrRegister(name, CommonTokenNames.String,
                         (ruleName, pruning) =>
-                            RegisterRule(new MatchRuleSequence<char>(
+                            Register(new MatchRuleSequence<char>(
                                 ruleName,
                                 pruning,
                                 precedence: 0,
@@ -164,7 +164,7 @@ namespace gg.parse.script.common
         public RuleBase<char> MultiLineComment(string? name = null, string startComment = "/*", string endComment = "*/") =>
             FindOrRegister(name, CommonTokenNames.MultiLineComment,
                         (ruleName, pruning) =>
-                            RegisterRule(
+                            Register(
                                 new MatchRuleSequence<char>(
                                     ruleName,
                                     pruning,
@@ -178,12 +178,12 @@ namespace gg.parse.script.common
 
         public MatchDataSet<char> Sign(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.Sign,
-                        (ruleName, pruning) => RegisterRule(new MatchDataSet<char>(ruleName, pruning, ['+', '-'])));
+                        (ruleName, pruning) => Register(new MatchDataSet<char>(ruleName, pruning, ['+', '-'])));
 
         public MatchRuleSequence<char> SingleLineComment(string? name = null, string startComment = "//") =>
         FindOrRegister(name, CommonTokenNames.SingleLineComment,
                 (ruleName, pruning) =>
-                    RegisterRule(
+                    Register(
                         new MatchRuleSequence<char>(
                             ruleName,
                             pruning,
@@ -196,15 +196,15 @@ namespace gg.parse.script.common
 
         public MatchSingleData<char> UnderscoreCharacter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.Underscore,
-                        (ruleName, pruning) => RegisterRule(new MatchSingleData<char>(ruleName, '_', pruning)));
+                        (ruleName, pruning) => Register(new MatchSingleData<char>(ruleName, '_', pruning)));
 
         public MatchDataRange<char> UpperCaseLetter(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.UpperCaseLetter,
-                        (ruleName, pruning) => RegisterRule(new MatchDataRange<char>(ruleName, 'A', 'Z', pruning)));
+                        (ruleName, pruning) => Register(new MatchDataRange<char>(ruleName, 'A', 'Z', pruning)));
 
         public MatchDataSet<char> Whitespace(string? name = null) =>
             FindOrRegister(name, CommonTokenNames.Whitespace,
                         (ruleName, pruning) =>
-                            RegisterRule(new MatchDataSet<char>(ruleName, pruning, [' ', '\r', '\n', '\t'])));
+                            Register(new MatchDataSet<char>(ruleName, pruning, [' ', '\r', '\n', '\t'])));
     }
 }

@@ -16,8 +16,8 @@ namespace gg.parse.script.common
         // -- Common Methods -----------------------------------------------------------------------------------------
 
         public static ParseOutput Parse(
-                this RuleGraph<int> parser, 
-                RuleGraph<char> tokenizer, 
+                this MutableRuleGraph<int> parser, 
+                MutableRuleGraph<char> tokenizer, 
                 string text, 
                 string? usingRule = null,
                 bool failOnWarning = false,
@@ -46,7 +46,7 @@ namespace gg.parse.script.common
         }
 
         public static ParseResult Tokenize(
-            this RuleGraph<char> tokenizer, 
+            this MutableRuleGraph<char> tokenizer, 
             string text, 
             bool failOnWarning = false,
             bool throwExceptionOnErrors = true)
@@ -74,7 +74,7 @@ namespace gg.parse.script.common
         }
 
         public static ParseResult ParseGrammar(
-            this RuleGraph<int> parser, 
+            this MutableRuleGraph<int> parser, 
             string text, 
             ImmutableList<Annotation> tokens,
             string? usingRule = null,

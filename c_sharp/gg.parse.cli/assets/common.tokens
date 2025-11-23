@@ -1,0 +1,27 @@
+letter			= {'a' .. 'z'} | {'A' .. 'Z'};	
+digit           = { '0'..'9' };
+
+minus			= '-';
+plus			= '+';
+-a sign         = plus | minus;
+float           = int, '.', +digit, ?(('e' | 'E'), int);
+int             = ?sign, +digit;
+
+// allow for both single - and double quoted strings
+-a sq_string_char = !'"', .;
+-a sq_string      = '"', *sq_string_char, '"';
+
+-a dq_string_char = !"'", .;
+-a dq_string      = "'", *dq_string_char, "'";
+
+string			= sq_string | dq_string;
+
+eof				= !.;
+
+space			= " ";
+
+qualified_identifier = identifier, +('.', identifier);
+underscore		= "_";
+identifier		= (underscore | letter ), *(underscore | letter | digit);
+
+white_space		= {" \t\r\n "};

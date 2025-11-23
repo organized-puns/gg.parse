@@ -1,6 +1,7 @@
 ﻿using gg.parse.rules;
 using gg.parse.script.parser;
 using gg.parse.script.pipeline;
+using gg.parse.util;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.script.tests.parser
@@ -29,17 +30,11 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors.ElementAt(0).Length == 2);
                 IsTrue(e.Errors.ElementAt(1).Start == 6);
                 IsTrue(e.Errors.ElementAt(1).Length == 1);
-
+      
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where( entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
         }
@@ -62,18 +57,12 @@ namespace gg.parse.script.tests.parser
                 IsTrue(e.Errors != null);
                 IsTrue(e.Errors.Count == 1);
                 IsTrue(e.Errors.ElementAt(0).Start == 2);
-                IsTrue(e.Errors.ElementAt(0).Length == 1);
+                IsTrue(e.Errors.ElementAt(0).Length == 1);       
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -100,7 +89,7 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 1);
+                IsTrue(e.Errors.Count == 1);
 
                 var error = e.Errors.ElementAt(0);
 
@@ -111,13 +100,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(builder
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(builder
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -147,17 +130,11 @@ namespace gg.parse.script.tests.parser
                 IsTrue(error.Start == 1);
                 IsTrue(error.Length == 1);
                 IsTrue(error.Rule.Id == scriptParser.InvalidPrecedenceError.Id);
-
+                
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -180,7 +157,7 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 2);
+                IsTrue(e.Errors.Count == 2);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
                 IsTrue(e.Errors.ElementAt(0).Length == 0);
                 IsTrue(e.Errors.ElementAt(1).Start == 8);
@@ -189,13 +166,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
         }
@@ -217,7 +188,7 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 2);
+                IsTrue(e.Errors.Count == 2);
                 IsTrue(e.Errors.ElementAt(0).Start == 0);
                 IsTrue(e.Errors.ElementAt(0).Length == 2);
                 IsTrue(e.Errors.ElementAt(1).Start == 11);
@@ -226,13 +197,7 @@ namespace gg.parse.script.tests.parser
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
-
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }
         }
@@ -252,20 +217,14 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 1);
+                IsTrue(e.Errors.Count == 1);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
-                IsTrue(e.Errors.ElementAt(0).Length == 0);
-
-                IsTrue(parser
-                    .LogHandler!
-                    .ReceivedLogs!
-                    .Where(entry => entry.level == LogLevel.Fatal)
-                    .Count() == 1);
+                IsTrue(e.Errors.ElementAt(0).Length == 0); 
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 1);
             }
         }
@@ -286,22 +245,16 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 2);
+                IsTrue(e.Errors.Count == 2);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
                 IsTrue(e.Errors.ElementAt(0).Length == 0);
                 IsTrue(e.Errors.ElementAt(1).Start == 8);
                 IsTrue(e.Errors.ElementAt(1).Length == 0);
 
                 IsTrue(parser
-                    .LogHandler!
-                    .ReceivedLogs!
-                    .Where(entry => entry.level == LogLevel.Fatal)
-                    .Count() == 1);
-
-                IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 2);
             }           
         }
@@ -311,7 +264,8 @@ namespace gg.parse.script.tests.parser
         public void SetupRuleWithFatalWithCondition_CreateParserAndParseRule_ExpectException()
         {
             var parser = new ParserBuilder()
-                .From("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;");
+                .From("foo='trigger fatal';", "bar = fatal 'triggered a fatal condition' if foo;")
+                .Build();
 
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");
@@ -322,7 +276,8 @@ namespace gg.parse.script.tests.parser
         public void SetupRuleWithFatalWithoutCondition_CreateParserAndParseRule_ExpectException()
         {
             var parser = new ParserBuilder()
-                .From("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';");
+                .From("foo='trigger fatal';", "bar = foo, fatal 'triggered a fatal condition';")
+                .Build();
 
             // should trigger the fatal exception 
             parser.Parse("trigger fatal");
@@ -346,22 +301,17 @@ namespace gg.parse.script.tests.parser
                 var e = pipelineException.InnerException as ScriptException;
 
                 IsTrue(e.Errors != null);
-                IsTrue(e.Errors.Count() == 3);
+                IsTrue(e.Errors.Count == 3);
                 IsTrue(e.Errors.ElementAt(0).Start == 3);
                 IsTrue(e.Errors.ElementAt(0).Length == 0);
                 IsTrue(e.Errors.ElementAt(1).Start == 11);
                 IsTrue(e.Errors.ElementAt(1).Length == 0);
 
-                IsTrue(parser
-                        .LogHandler!
-                        .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Fatal)
-                        .Count() == 1);
 
                 IsTrue(parser
                         .LogHandler!
                         .ReceivedLogs!
-                        .Where(entry => entry.level == LogLevel.Error)
+                        .GetEntries(LogLevel.Error)
                         .Count() == 3);
             }
         }

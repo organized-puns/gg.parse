@@ -24,9 +24,11 @@ namespace gg.parse.script.parser
             public const string CharacterSet = "char_set";
             public const string Count = "count";
 
+            public const string Evaluation = "eval";
+
             public const string Find = "find";
 
-            public const string Evaluation = "eval";
+            public const string Group = "group";
 
             public const string If = "if";
 
@@ -47,6 +49,7 @@ namespace gg.parse.script.parser
             public const string OneOrMore = "one_or_more";
             
             public const string Reference = "ref";
+            public const string Rule = "rule";
 
             public const string Sequence = "sequence";
             public const string StopAfter = "stop_after";
@@ -237,7 +240,7 @@ namespace gg.parse.script.parser
             var ruleBody = OneOf($"{pr}ruleBody", binaryOperators, unaryTerms);
 
             // ( a, b, c )
-            MatchGroup = Sequence($"{pr}group", GroupStartToken!, ruleBody, GroupEndToken!);
+            MatchGroup = Sequence($"{pr}{Names.Group}", GroupStartToken!, ruleBody, GroupEndToken!);
 
             // create all various instances of logs (errors,warnings,infos...)
             MatchLog = CreateMatchLog(ruleBody);
@@ -289,7 +292,7 @@ namespace gg.parse.script.parser
             );
 
             MatchRule = Sequence(
-                "rule",
+                Names.Rule,
                 ruleHeader,
                 OneOf($"{pr}rule_assignment_token", AssignmentToken, MissingAssignmentError),
                 ruleBodyOptions,

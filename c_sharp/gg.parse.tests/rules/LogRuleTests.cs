@@ -3,7 +3,7 @@
 
 using gg.parse.core;
 using gg.parse.rules;
-
+using gg.parse.util;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace gg.parse.tests.rules
