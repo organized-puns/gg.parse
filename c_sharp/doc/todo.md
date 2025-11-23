@@ -16,14 +16,17 @@ kanban
     
     [ Add rule examples ]
     [ Implement properties file ]                         
-        [ properties files - redo rule compiler based on compiler template, implement grammarcompiler ]
+        [ yield error if tokens and grammar share name ]
+        [ when using literals in grammar yield an error ]
         [ properties files - create cli to export token/grammar names and tokens, update names in parser ]
+        [ add file not found in error log when loading a token set / grammar set which can't be found ]
         [ properties files - redo arg parser ]
         [ properties files - allow for ini files/java properties ]
         [ clean up, write doc, update example docs for new parser / parserbuilder ]
         [ write properties main ]
         	
   Done
+    [ properties files - redo rule compiler based on compiler template, implement grammarcompiler ]
     [ properties files - redo calculator based on compiler template ]
     [ properties files - replace parserbuilder with parser where possible, eg examples ]
     [ properties files - improving token/grammar recovery, both fail after just one error and don't recover ]

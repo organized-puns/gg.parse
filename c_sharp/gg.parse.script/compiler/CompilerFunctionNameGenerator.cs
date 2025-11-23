@@ -14,7 +14,7 @@ namespace gg.parse.script.compiler
 
         public static string GenerateUnnamedRuleName(
             this Annotation annotation,
-            ISession session,
+            IParseSession session,
             string parentName, 
             int index)
         {
@@ -84,7 +84,7 @@ namespace gg.parse.script.compiler
                 : $"{UnnamedRulePrefix}{parentName}[{index}]";
         }
 
-        private static string GetReferenceName(Annotation annotation, ISession session)
+        private static string GetReferenceName(Annotation annotation, IParseSession session)
         {
             var text = session.GetText(annotation);
 
@@ -93,18 +93,18 @@ namespace gg.parse.script.compiler
                 : text;
         }
 
-        private static string CreateUnaryName(Annotation annotation, ISession session, string name) =>
+        private static string CreateUnaryName(Annotation annotation, IParseSession session, string name) =>
                 annotation.Children == null || annotation.Children.Count == 0
                         ? $"{UnnamedRulePrefix}{name}()"
                         : $"{UnnamedRulePrefix}{name}("
                             + GenerateUnnamedRuleName(annotation[0]!, session, name, 0)
                             + ")";
 
-        private static string CreateBinaryName(Annotation annotation, ISession session, string name) =>
+        private static string CreateBinaryName(Annotation annotation, IParseSession session, string name) =>
                 $"{UnnamedRulePrefix}{name}("
                     + string.Join(", ", BinaryOperandNames(annotation, session, name))
                     + ")";
-        private static IEnumerable<string> BinaryOperandNames(this Annotation annotation, ISession session, string parentName)
+        private static IEnumerable<string> BinaryOperandNames(this Annotation annotation, IParseSession session, string parentName)
         {
             var idx = 0;
 

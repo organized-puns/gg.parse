@@ -1,10 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
-using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Reflection.Emit;
 
 namespace gg.parse.util
 {

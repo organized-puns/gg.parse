@@ -45,10 +45,16 @@ namespace gg.parse.script.compiler
         {
             if (rule is RuleReference<T> referenceRule)
             {
-                var subject = graph[referenceRule.ReferenceName];
+                if (graph.TryFindRule(referenceRule.ReferenceName, out var subject))
+                {
+                    referenceRule.MutateSubject(subject!);
+                    referenceRule.IsTopLevel = isTopLevel;
+                }
+                else
+                {
+                    throw new CompilationException($"Can't find rule '{referenceRule.ReferenceName}'.");
+                }
 
-                referenceRule.MutateSubject(subject);
-                referenceRule.IsTopLevel = isTopLevel;
             }
             else if (rule is IMetaRule metaRule && metaRule.Subject != null)
             {

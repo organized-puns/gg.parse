@@ -1,0 +1,6 @@
+include "common.tokens";
+
+-r command_line_tokens = *(export_command | validate_command | string | qualified_identifier | -a white_space);
+
+export_command = "export";
+validate_command = "validate";

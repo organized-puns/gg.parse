@@ -87,7 +87,7 @@ namespace gg.parse.script.tests.compiler
                 graph.ResolveReferences();
                 Fail();
             }
-            catch (KeyNotFoundException)
+            catch (CompilationException)
             {
             }
         }

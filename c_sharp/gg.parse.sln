@@ -78,6 +78,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.properties", "exam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.properties.tests", "examples\gg.parse.properties.tests\gg.parse.properties.tests\gg.parse.properties.tests.csproj", "{065968A7-994B-44B0-B050-E70D9DF868EE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. CLI", "4. CLI", "{72DD9043-4F32-45AF-8FD0-E830A0F4DE8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gg.parse.cli", "gg.parse.cli\gg.parse.cli.csproj", "{1062AA21-F165-4D11-99B2-B346F9CE98C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -136,6 +140,10 @@ Global
 		{065968A7-994B-44B0-B050-E70D9DF868EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{065968A7-994B-44B0-B050-E70D9DF868EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{065968A7-994B-44B0-B050-E70D9DF868EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1062AA21-F165-4D11-99B2-B346F9CE98C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1062AA21-F165-4D11-99B2-B346F9CE98C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1062AA21-F165-4D11-99B2-B346F9CE98C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1062AA21-F165-4D11-99B2-B346F9CE98C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -162,6 +170,7 @@ Global
 		{43EF84F0-3645-DA1A-A802-01E2B529E5C9} = {DE4501FD-1917-4F2B-8A4A-CFB95F42E508}
 		{21662C18-2B04-4A43-90D6-4CE2095707ED} = {E4708210-E779-4A91-BA44-386A8D8EF9C3}
 		{065968A7-994B-44B0-B050-E70D9DF868EE} = {E4708210-E779-4A91-BA44-386A8D8EF9C3}
+		{1062AA21-F165-4D11-99B2-B346F9CE98C2} = {72DD9043-4F32-45AF-8FD0-E830A0F4DE8A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E5591AE-041B-4FA3-A767-84575C6450FC}

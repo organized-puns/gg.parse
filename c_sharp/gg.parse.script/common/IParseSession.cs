@@ -7,7 +7,7 @@ using gg.parse.core;
 
 namespace gg.parse.script.common
 {
-    public interface ISession
+    public interface IParseSession
     {
         ImmutableList<Annotation>? Tokens { get; }
 

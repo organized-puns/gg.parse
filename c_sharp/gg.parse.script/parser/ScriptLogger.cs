@@ -30,11 +30,12 @@ namespace gg.parse.script.parser
             bool storeLogs = true, 
             int maxStoredLogs = -1, 
             Action<LogLevel, string>? output = null,
-            bool failOnWarning = false)
+            bool failOnWarning = false,
+            LogCollection? logs = null)
         {
             if (storeLogs)
             {
-                ReceivedLogs = new(maxStoredLogs);
+                ReceivedLogs = logs ?? new(maxStoredLogs);
             }
 
             Out = output;

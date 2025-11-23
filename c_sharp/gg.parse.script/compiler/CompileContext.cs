@@ -1,15 +1,16 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) Pointless pun
 
+using System.Collections.Immutable;
+
 using gg.parse.core;
 using gg.parse.script.common;
 using gg.parse.script.parser;
 using gg.parse.util;
-using System.Collections.Immutable;
 
 namespace gg.parse.script.compiler
 {
-    public class CompileContext : ISession
+    public class CompileContext : IParseSession
     {
         private readonly LogCollection _logCollection;
         private TextPositionMap? _positionMap;
@@ -54,6 +55,7 @@ namespace gg.parse.script.compiler
             SyntaxTree == null
                 ? Text.Substring(annotation.Start, annotation.Length)
                 : Text.Substring(Tokens.CombinedRange(annotation.Range));
+
 
         public void Log(LogLevel level, string message, Annotation annotation, Exception? ex = null)
         {
